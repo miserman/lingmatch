@@ -5,7 +5,7 @@ An all-in-one R package for the assessment of linguistic matching and/or accommo
 
 * Input raw text, a document-term matrix (DTM), or LIWC output.
 * Apply various weighting functions to a DTM.
-* Measure similarity and/or accomodation with various metrics.
+* Measure similarity and/or accommodation with various metrics.
 * Calculate standard forms of Language Style Matching (LSM) and Latent Semantic Similarity (LSS).
 
 ## documentation

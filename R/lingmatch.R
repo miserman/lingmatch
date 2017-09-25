@@ -2,7 +2,7 @@
 #'
 #' Offers a variety of methods to assess linguistic matching or accommodation, where \emph{matching}
 #' is general similarity (sometimes called \emph{homophily}), and \emph{accomodation} is some form
-#' of conditional similarity (accounting for some baserate or precedent; sometimes called
+#' of conditional similarity (accounting for some base rate or precedent; sometimes called
 #' \emph{alignment}).
 #'
 #' There are a great many points of decision in the assessment of linguistic similarity and/or
@@ -279,7 +279,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
   if(!is.null(group)){
     if(!is.null(comp.data) && NROW(comp.data)==1){
       group=NULL
-      warning('group does not appear to be meaningfull for this comparison, so it was ignored')
+      warning('group does not appear to be meaningful for this comparison, so it was ignored')
     }else if(!is.list(group)) group=list(group)
     gl=length(group)
     if(opt$comp=='sequential'){
@@ -657,16 +657,16 @@ lma_weight=function(dtm,weight='count',to.freq=TRUE,freq.complete=TRUE,log.base=
 #' @param path Path to a folder containing spaces. If not included, spaces will be looked for in the
 #'   lingmatch data folder (\code{paste0(path.package('lingmatch'),'/data')}).
 #' @param dim.cutoff If a \code{space} is calculated, this will be used to decide on the number of
-#'   dimentions to be retained: \code{cumsum(d) / sum(d) < dim.cutoff}, where \code{d} is a vector
+#'   dimensions to be retained: \code{cumsum(d) / sum(d) < dim.cutoff}, where \code{d} is a vector
 #'   of singular values of \code{dtm} (i.e., \code{svd(dtm)$d}). The default is \code{.5}; lower
 #'   cutoffs result in fewer dimensions.
 #' @param keep.dim Logical: if \code{TRUE} and a space is being calculated from the input, a matrix
-#'   in the same dimentions as \code{dtm} is returned. Otherwise, a matrix with terms as rows and
-#'   svd dimentions as columns is returned. The default, truncated matrix
+#'   in the same dimensions as \code{dtm} is returned. Otherwise, a matrix with terms as rows and
+#'   svd dimensions as columns is returned. The default, truncated matrix
 #' @note
-#' A general latent semantic space is a selection of right singluar vectors from the singular value
-#' decompositon of a dtm (\code{svd(dtm)$v[,1:k]}, where \code{k} is the selected number of
-#' dimentions, decided here by \code{cutoff}).
+#' A general latent semantic space is a selection of right singular vectors from the singular value
+#' decomposition of a dtm (\code{svd(dtm)$v[,1:k]}, where \code{k} is the selected number of
+#' dimensions, decided here by \code{cutoff}).
 #'
 #' Mapping a new dtm into a latent semantic space consists of multiplying common terms:
 #' \code{dtm[,ct] \%*\% space[ct,]}, where \code{ct = colnames(dtm)[colnames(dtm) \%in\%
@@ -853,7 +853,7 @@ lma_termcat=function(dtm,dict,term.filter=NULL){
 #'
 #' If \code{metric} is a function with compatible first and second position arguments, this can be
 #' entered directly (e.g., \code{metric = energy::dcor}). Otherwise, \code{a} and \code{b} might
-#' have to be reformatted (e.g., \code{metric = function(a,b) entropy::mi.emperical(table(a,b))}).
+#' have to be reformatted (e.g., \code{metric = function(a,b) entropy::mi.empirical(table(a,b))}).
 #'
 #' The function entered as \code{metric} must always return a single numerical value.
 #' @examples

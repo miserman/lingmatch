@@ -2,7 +2,7 @@
 #'
 #' Read in or write Linguistic Inquiry and Word Count dictionary (.dic) files.
 #' @param path Path to a .dic file.
-#' @param cats A character vector of category names to be returned. All catregories are returned by default.
+#' @param cats A character vector of category names to be returned. All categories are returned by default.
 #' @export
 
 read.dic=function(path,cats){
@@ -115,7 +115,7 @@ download.lsspace=function(space='default',type='sqlite'){
 #' \code{as.regex} is set to \code{TRUE}.
 #'
 #' The \code{special} list is always used by both \code{\link{lma_dtm}} and \code{\link{lma_termcat}}. When creating a dtm,
-#' \code{special} is used to clean the original imput (so that, by default, the punctuation involed in ellipses and emojis
+#' \code{special} is used to clean the original imput (so that, by default, the punctuation involved in ellipses and emojis
 #' are treated as different -- as ellipses and emojis rather than as periods and parens and colons and such). When categorizing
 #' a dtm, the input dictionary is passed by the special lists to be sure the terms in the dtm match up with the dictionary
 #' (so, for example, ": (" would be replaced with "FROWN" in both the text and dictionary).

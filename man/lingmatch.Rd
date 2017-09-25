@@ -70,7 +70,7 @@ alighning with the standard calculations of each type:
 \description{
 Offers a variety of methods to assess linguistic matching or accommodation, where \emph{matching}
 is general similarity (sometimes called \emph{homophily}), and \emph{accomodation} is some form
-of conditional similarity (accounting for some baserate or precedent; sometimes called
+of conditional similarity (accounting for some base rate or precedent; sometimes called
 \emph{alignment}).
 }
 \details{

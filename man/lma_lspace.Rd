@@ -21,22 +21,22 @@ than loading and unloading a complete .rda space, and less RAM intensive in all 
 lingmatch data folder (\code{paste0(path.package('lingmatch'),'/data')}).}
 
 \item{dim.cutoff}{If a \code{space} is calculated, this will be used to decide on the number of
-dimentions to be retained: \code{cumsum(d) / sum(d) < dim.cutoff}, where \code{d} is a vector
+dimensions to be retained: \code{cumsum(d) / sum(d) < dim.cutoff}, where \code{d} is a vector
 of singular values of \code{dtm} (i.e., \code{svd(dtm)$d}). The default is \code{.5}; lower
 cutoffs result in fewer dimensions.}
 
 \item{keep.dim}{Logical: if \code{TRUE} and a space is being calculated from the input, a matrix
-in the same dimentions as \code{dtm} is returned. Otherwise, a matrix with terms as rows and
-svd dimentions as columns is returned. The default, truncated matrix}
+in the same dimensions as \code{dtm} is returned. Otherwise, a matrix with terms as rows and
+svd dimensions as columns is returned. The default, truncated matrix}
 }
 \description{
 Calculate and reduce the singular value decomposition of a dtm (i.e., create a latent semantic
 space), or map a dtm onto an existing latent semantic space.
 }
 \note{
-A general latent semantic space is a selection of right singluar vectors from the singular value
-decompositon of a dtm (\code{svd(dtm)$v[,1:k]}, where \code{k} is the selected number of
-dimentions, decided here by \code{cutoff}).
+A general latent semantic space is a selection of right singular vectors from the singular value
+decomposition of a dtm (\code{svd(dtm)$v[,1:k]}, where \code{k} is the selected number of
+dimensions, decided here by \code{cutoff}).
 
 Mapping a new dtm into a latent semantic space consists of multiplying common terms:
 \code{dtm[,ct] \%*\% space[ct,]}, where \code{ct = colnames(dtm)[colnames(dtm) \%in\%

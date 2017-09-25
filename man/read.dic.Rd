@@ -12,7 +12,7 @@ write.dic(x, filename = "custom")
 \arguments{
 \item{path}{Path to a .dic file.}
 
-\item{cats}{A character vector of category names to be returned. All catregories are returned by default.}
+\item{cats}{A character vector of category names to be returned. All categories are returned by default.}
 
 \item{x}{A list object with names of categories and a vector of their words.}
 

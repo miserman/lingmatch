@@ -58,7 +58,7 @@ will be in the second position.
 
 If \code{metric} is a function with compatible first and second position arguments, this can be
 entered directly (e.g., \code{metric = energy::dcor}). Otherwise, \code{a} and \code{b} might
-have to be reformatted (e.g., \code{metric = function(a,b) entropy::mi.emperical(table(a,b))}).
+have to be reformatted (e.g., \code{metric = function(a,b) entropy::mi.empirical(table(a,b))}).
 
 The function entered as \code{metric} must always return a single numerical value.
 }

@@ -46,24 +46,24 @@ lingmatch data folder (<code>paste0(path.package('lingmatch'),'/data')</code>).<
 <tr valign="top"><td><code>dim.cutoff</code></td>
 <td>
 <p>If a <code>space</code> is calculated, this will be used to decide on the number of
-dimentions to be retained: <code>cumsum(d) / sum(d) &lt; dim.cutoff</code>, where <code>d</code> is a vector
+dimensions to be retained: <code>cumsum(d) / sum(d) &lt; dim.cutoff</code>, where <code>d</code> is a vector
 of singular values of <code>dtm</code> (i.e., <code>svd(dtm)$d</code>). The default is <code>.5</code>; lower
 cutoffs result in fewer dimensions.</p>
 </td></tr>
 <tr valign="top"><td><code>keep.dim</code></td>
 <td>
 <p>Logical: if <code>TRUE</code> and a space is being calculated from the input, a matrix
-in the same dimentions as <code>dtm</code> is returned. Otherwise, a matrix with terms as rows and
-svd dimentions as columns is returned. The default, truncated matrix</p>
+in the same dimensions as <code>dtm</code> is returned. Otherwise, a matrix with terms as rows and
+svd dimensions as columns is returned. The default, truncated matrix</p>
 </td></tr>
 </table>
 
 
 <h3>Note</h3>
 
-<p>A general latent semantic space is a selection of right singluar vectors from the singular value
-decompositon of a dtm (<code>svd(dtm)$v[,1:k]</code>, where <code>k</code> is the selected number of
-dimentions, decided here by <code>cutoff</code>).
+<p>A general latent semantic space is a selection of right singular vectors from the singular value
+decomposition of a dtm (<code>svd(dtm)$v[,1:k]</code>, where <code>k</code> is the selected number of
+dimensions, decided here by <code>cutoff</code>).
 </p>
 <p>Mapping a new dtm into a latent semantic space consists of multiplying common terms:
 <code>dtm[,ct] %*% space[ct,]</code>, where <code>ct = colnames(dtm)[colnames(dtm) %in%
