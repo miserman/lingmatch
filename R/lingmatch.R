@@ -368,8 +368,8 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
             ssim=do.call(lma_simets,c(list(ssg[[ssn]]),sal))
             if(ckp || ckq){
               if(ckp){
-                if(length(ssim[[1]])!=1) ssim=vapply(ssim,mean,0)
-              }else if(nrow(ssim)>1) ssim=colMeans(ssim)
+                if(length(ssim[[1]])!=1) ssim=vapply(ssim,mean,0,na.rm=TRUE)
+              }else if(nrow(ssim)>1) ssim=colMeans(ssim,na.rm=TRUE)
               if(lss!=1) ssim=vapply(ssim,rep,numeric(lss),lss)
             }
             csu=gl+mw+(mn*(s-1))
@@ -957,7 +957,7 @@ lma_simets=function(a,b=NULL,metric,metric.arg=list(),group=NULL,agg=TRUE,agg.me
         cu$e=af$s[1]
         r=lapply(list(a=be,b=cu,c=af),function(r){
           r=a[if(((l<-length(r$s))>1 && agg) || l==1) r$s else r$e,,drop=FALSE]
-          if(length(l>1)) if(agg.mean) colMeans(r) else colSums(r) else r
+          if(length(l>1)) if(agg.mean) colMeans(r,na.rm=TRUE) else colSums(r,na.rm=TRUE) else r
         })
         res=rbind(res,vapply(metric,function(met)c(comp(r$a,r$b,met),if(ic)comp(r$b,r$c,met)),if(ic)
           c(0,0) else 0))
