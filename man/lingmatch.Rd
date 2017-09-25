@@ -110,7 +110,9 @@ specific knowledge, so it can't always (readily) be done automatically. Variable
     levels and multiple observations per level). In the case of \code{comp = 'sequential'}, the
     data is assumed to be ordered (or ordered once sorted by \code{order} if specified). Any
     additional grouping variables before the last are treated as splitting groups. At least when
-    treated sequentially, this sets up for probabilistic accommodation metrics.}
+    treated sequentially, this sets up for probabilistic accommodation metrics. At the moment,
+    when sequential comparisons are made within groups, similarity scores between speakers are
+    averaged, resulting in mean matching between speakers within the group.}
 }
 }
 

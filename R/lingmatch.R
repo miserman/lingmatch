@@ -87,7 +87,9 @@
 #'     levels and multiple observations per level). In the case of \code{comp = 'sequential'}, the
 #'     data is assumed to be ordered (or ordered once sorted by \code{order} if specified). Any
 #'     additional grouping variables before the last are treated as splitting groups. At least when
-#'     treated sequentially, this sets up for probabilistic accommodation metrics.}
+#'     treated sequentially, this sets up for probabilistic accommodation metrics. At the moment,
+#'     when sequential comparisons are made within groups, similarity scores between speakers are
+#'     averaged, resulting in mean matching between speakers within the group.}
 #' }
 #' @references
 #' Babcock, M. J., Ta, V. P., & Ickes, W. (2014). Latent semantic similarity and language style
@@ -320,12 +322,12 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
         }else if(ckf) if(sum(su)>1) sal$b=if(opt$comp=='mean') colMeans(x[su,],na.rm=TRUE) else
           apply(na.omit(x[su,]),2,comp) else{sim[su,mets]=1;next}
         if((sum(su)==1 && is.null(sal$b))){sim[su,mets]=1;next}
-        sim[su,mets]=do.call(lma_simets,c(list(x[su,]),sal))
+        sim[su,mets]=do.call(lma_simets,c(list(x[su,,drop=FALSE]),sal))
       }else{
         sal$square=FALSE
         sim=lapply(ug<-unique(group[[1]]),function(g){
           su=group[[1]]==g
-          if(sum(su)!=1) do.call(lma_simets,c(list(x[su,]),sal)) else NA
+          if(sum(su)!=1) do.call(lma_simets,c(list(x[su,,drop=FALSE]),sal)) else NA
         })
         names(sim)=ug
       }
@@ -347,7 +349,15 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
         sg=group[su,,drop=FALSE]
         sx=x[su,,drop=FALSE]
         for(s in sug){
-          ssg=Filter(function(ss)NROW(ss)>1,split(sx,sg[,s]))
+          usg=unique(sg[,s])
+          if(length(usg)==1){
+            ssg=list(sx)
+            names(ssg)=usg
+          }else{
+            ssg=lapply(usg,function(ss)sx[sg[,s]==ss,,drop=FALSE])
+            names(ssg)=usg
+            ssg=Filter(function(ss)nrow(ss)>1,ssg)
+          }
           if(length(ssg)!=0) for(ssn in names(ssg)){
             ssu=su[sg[,s]==ssn]
             lss=length(ssu)
@@ -923,7 +933,7 @@ lma_simets=function(a,b=NULL,metric,metric.arg=list(),group=NULL,agg=TRUE,agg.me
         lapply(m,function(i){i[u]=t(i)[u];i})
       }else lapply(m,function(i)i[lower.tri(i)])
     }else{
-      if(length(group)!=n) stop('length(group) != NROW(a)',call.=FALSE)
+      if(length(group)!=n) stop('length(group) != NROW(a)')
       cblock=function(i=1,d=1){
         f=d>0
         e=if(f) l else 1

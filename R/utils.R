@@ -77,7 +77,7 @@ write.dic=function(x,filename='custom'){
 #' Spaces are slightly altered and reprocessed versions of those available at
 #' \url{http://www.lingexp.uni-tuebingen.de/z2/LSAspaces/}.
 #'
-#' Spaces can be downloaded directly from \url{https://www.myweb.ttu.edu/miserman/lsspaces/}.
+#' Spaces can (sometimes) be downloaded directly from \url{https://www.myweb.ttu.edu/miserman/lsspaces/}.
 #' @param space name of the space you wish to download. Options include \code{'default'} and \code{'tasa'}.
 #' @param type the type of file you wish to download, either \code{'rda'} or \code{'sqlite'}. If you plan on
 #'   loading the space into memory before use, rdas will be fastest, otherwise use sqlites.

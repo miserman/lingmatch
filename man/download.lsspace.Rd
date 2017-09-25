@@ -19,5 +19,5 @@ Downloads the specified semantic space from the to lingmatch github repository t
 Spaces are slightly altered and reprocessed versions of those available at
 \url{http://www.lingexp.uni-tuebingen.de/z2/LSAspaces/}.
 
-Spaces can be downloaded directly from \url{https://www.myweb.ttu.edu/miserman/lsspaces/}.
+Spaces can (sometimes) be downloaded directly from \url{https://www.myweb.ttu.edu/miserman/lsspaces/}.
 }
