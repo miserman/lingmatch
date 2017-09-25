@@ -16,5 +16,5 @@ lma_termcat(dtm, dict, term.filter = NULL)
 \code{'a_DT'}), \code{filter='_.*'} would remove the tag.}
 }
 \description{
-Reduces the dimentions of a document-term matrix by dictionary-based categorization.
+Reduces the dimensions of a document-term matrix by dictionary-based categorization.
 }

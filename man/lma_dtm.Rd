@@ -36,7 +36,7 @@ does something like this with \emph{like}, and LIWC 2007 did something like this
 \item{emojis}{Logical: if \code{TRUE}, attempts to replace emojis (e.g., ":(" would be replaced
 with "FROWN").}
 
-\item{to.lower}{Logical: if \code{FALSE}, words with different capitolization are treated as
+\item{to.lower}{Logical: if \code{FALSE}, words with different capitalization are treated as
 different terms.}
 
 \item{word.break}{A regular expression string determining the way words are split. Default is
@@ -57,7 +57,7 @@ This is a relatively simple way to make a dtm. To calculate the (more or less) s
 LSM and LSS, a somewhat raw dtm should be fine, because both processes essentially use
 dictionaries (obviating stemming) and weighting or categorization (largely obviating 'stop word'
 removal). The exact effect of additional processing will depend on the dictionary/semantic space
-and weighting scheme used (particulalry for LSA). This function also does some processing which
+and weighting scheme used (particularly for LSA). This function also does some processing which
 may matter if you plan on categorizing using categories with look- ahead/behind. Otherwise,
 other methods may be faster, more memory efficient, and/or more featureful.
 }

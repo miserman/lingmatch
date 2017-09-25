@@ -2,7 +2,7 @@
 % Please edit documentation in R/lingmatch.R
 \name{lma_simets}
 \alias{lma_simets}
-\title{Similarity, Distance, and/or Accomodation Metrics}
+\title{Similarity, Distance, and/or Accommodation Metrics}
 \usage{
 lma_simets(a, b = NULL, metric, metric.arg = list(), group = NULL,
   agg = TRUE, agg.mean = TRUE, square = TRUE, ncores = detectCores() -
@@ -35,12 +35,12 @@ function.}
 \item{group}{if \code{b} is missing and \code{a} has multiple rows, this will be used to make
 comparisons between rows of \code{a}, as modified by \code{agg} and \code{add.mean}.}
 
-\item{agg}{logical; if \code{FALSE}, only the boundry rows between groups will be compared, see
+\item{agg}{logical; if \code{FALSE}, only the boundary rows between groups will be compared, see
 example.}
 
 \item{agg.mean}{logical; if \code{FALSE}, consecutive rows of the same group will be summed.}
 
-\item{square}{logical; if \code{FALSE}, only the lower triangle is returned from a pariwise
+\item{square}{logical; if \code{FALSE}, only the lower triangle is returned from a pairwise
 comparison.}
 
 \item{ncores}{sets the number of CPU cores to be used during pairwise comparisons. If not
@@ -48,7 +48,7 @@ specified, multiple cores will only be used if \code{nrow(a)} is greater than 10
 case the number of detected cores - 2 will be used.}
 }
 \description{
-Similarity, Distance, and/or Accomodation Metrics
+Similarity, Distance, and/or Accommodation Metrics
 }
 \details{
 When a function, \code{metric} is called in places of built-in metrics. Two arguments are always
@@ -74,7 +74,7 @@ speaker = c('A','A','B','B')
 # by default, consecutive rows from the same group are averaged:
 lma_simets(dtm, group=speaker)
 
-# with agg = FALSE, only the rows at the boundry between groups (rows 2 and 3 in this case)
+# with agg = FALSE, only the rows at the boundary between groups (rows 2 and 3 in this case)
 # are used:
 lma_simets(dtm, group=speaker, agg=FALSE)
 }

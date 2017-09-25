@@ -9,7 +9,7 @@
 
 <h3>Description</h3>
 
-<p>Offers a variety of methods to assess linguistic matching or accomodation, where <em>matching</em>
+<p>Offers a variety of methods to assess linguistic matching or accommodation, where <em>matching</em>
 is general similarity (sometimes called <em>homophily</em>), and <em>accomodation</em> is some form
 of conditional similarity (accounting for some baserate or precedent; sometimes called
 <em>alignment</em>).
@@ -64,13 +64,13 @@ and the value &quot;prompt&quot; marked the prompts).
 </li>
 <li><p> If a matrix-like object (having multiple rows and columns), this will be treated as a
 sort of dtm, assuming there are common column names between <code>x</code> and <code>comp</code> (e.g.,
-if you had prompt and responce texts that were already processed separately).
+if you had prompt and response texts that were already processed separately).
 </p>
 </li></ul>
 </td></tr>
 <tr valign="top"><td><code>data</code></td>
 <td>
-<p>A matrix-like object as a reference for column names, if varaibles are refered to in
+<p>A matrix-like object as a reference for column names, if variables are refereed to in
 other arguments (e.g., <code>lingmatch(text, data=data)</code> would be the same as
 <code>lingmatch(data$text)</code>.</p>
 </td></tr>
@@ -175,7 +175,7 @@ uniquely identify a comparison. This makes for 'one to many' comparisons with sp
 </dd>
 <dt>Speaker ID</dt><dd><p>If <code>comp</code> matches <code>'sequential'</code>, the last grouping variable
 entered is assumed to identify something like speakers (i.e., a factor with two or more
-evels and multiple observations per level). In the case of <code>comp = 'sequential'</code>, the
+levels and multiple observations per level). In the case of <code>comp = 'sequential'</code>, the
 data is assumed to be ordered (or ordered once sorted by <code>order</code> if specified). Any
 additional grouping variables before the last are treated as splitting groups. At least when
 treated sequentially, this sets up for probabilistic accommodation metrics.</p>

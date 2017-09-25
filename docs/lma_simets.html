@@ -1,15 +1,15 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Similarity, Distance, and/or Accomodation Metrics</title>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Similarity, Distance, and/or Accommodation Metrics</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <link rel="stylesheet" type="text/css" href="R.css" />
 </head><body>
 
 <table width="100%" summary="page for lma_simets"><tr><td>lma_simets</td><td style="text-align: right;">R Documentation</td></tr></table>
 
-<h2>Similarity, Distance, and/or Accomodation Metrics</h2>
+<h2>Similarity, Distance, and/or Accommodation Metrics</h2>
 
 <h3>Description</h3>
 
-<p>Similarity, Distance, and/or Accomodation Metrics
+<p>Similarity, Distance, and/or Accommodation Metrics
 </p>
 
 
@@ -94,7 +94,7 @@ comparisons between rows of <code>a</code>, as modified by <code>agg</code> and 
 </td></tr>
 <tr valign="top"><td><code>agg</code></td>
 <td>
-<p>logical; if <code>FALSE</code>, only the boundry rows between groups will be compared, see
+<p>logical; if <code>FALSE</code>, only the boundary rows between groups will be compared, see
 example.</p>
 </td></tr>
 <tr valign="top"><td><code>agg.mean</code></td>
@@ -103,7 +103,7 @@ example.</p>
 </td></tr>
 <tr valign="top"><td><code>square</code></td>
 <td>
-<p>logical; if <code>FALSE</code>, only the lower triangle is returned from a pariwise
+<p>logical; if <code>FALSE</code>, only the lower triangle is returned from a pairwise
 comparison.</p>
 </td></tr>
 <tr valign="top"><td><code>ncores</code></td>
@@ -144,7 +144,7 @@ speaker = c('A','A','B','B')
 # by default, consecutive rows from the same group are averaged:
 lma_simets(dtm, group=speaker)
 
-# with agg = FALSE, only the rows at the boundry between groups (rows 2 and 3 in this case)
+# with agg = FALSE, only the rows at the boundary between groups (rows 2 and 3 in this case)
 # are used:
 lma_simets(dtm, group=speaker, agg=FALSE)
 </pre>

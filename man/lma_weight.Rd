@@ -10,7 +10,7 @@ lma_weight(dtm, weight = "count", to.freq = TRUE, freq.complete = TRUE,
 \arguments{
 \item{dtm}{a matrix with words as column names.}
 
-\item{weight}{a string refering at least partially to one (or a combination; see note) of the
+\item{weight}{a string referring at least partially to one (or a combination; see note) of the
   available weighting methods:
 
   \strong{Term weights} (applied uniquely to each cell)
@@ -39,7 +39,7 @@ lma_weight(dtm, weight = "count", to.freq = TRUE, freq.complete = TRUE,
     \code{idf} \tab \code{log(nrow(dtm) / colSums(dtm > 0))} \tab inverse document frequency\cr
   }}
 
-\item{to.freq}{logical: if \code{FALSE}, the dtm is not devided by document word count before
+\item{to.freq}{logical: if \code{FALSE}, the dtm is not divided by document word count before
 being weighted.}
 
 \item{freq.complete}{if the dtm was made with \code{\link{lma_dtm}} (has a \code{'WC'}

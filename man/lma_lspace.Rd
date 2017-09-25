@@ -2,9 +2,10 @@
 % Please edit documentation in R/lingmatch.R
 \name{lma_lspace}
 \alias{lma_lspace}
-\title{Latent Semantic Space Opperations}
+\title{Latent Semantic Space Operations}
 \usage{
-lma_lspace(dtm, space, dim.cutoff = 0.5, keep.dim = FALSE)
+lma_lspace(dtm, space, path = paste0(path.package("lingmatch"), "/data"),
+  dim.cutoff = 0.5, keep.dim = FALSE)
 }
 \arguments{
 \item{dtm}{A matrix with terms as column names.}
@@ -12,14 +13,17 @@ lma_lspace(dtm, space, dim.cutoff = 0.5, keep.dim = FALSE)
 \item{space}{A matrix of right singular vectors (a latent semantic space), with terms as
 rownames. If missing, this will be calculated from the \code{dtm}. If a character, a file
 matching the character will be searched for in the lingmatch data folder (e.g.,
-\code{space = 'default'}). If the file has a .sqlite extention, it will be only a subset will
+\code{space = 'default'}). If the file has a .sqlite extension, it will be only a subset will
 be loaded into RAM; this is slightly slower than using a full, preloaded .rda space, but faster
 than loading and unloading a complete .rda space, and less RAM intensive in all cases.}
+
+\item{path}{Path to a folder containing spaces. If not included, spaces will be looked for in the
+lingmatch data folder (\code{paste0(path.package('lingmatch'),'/data')}).}
 
 \item{dim.cutoff}{If a \code{space} is calculated, this will be used to decide on the number of
 dimentions to be retained: \code{cumsum(d) / sum(d) < dim.cutoff}, where \code{d} is a vector
 of singular values of \code{dtm} (i.e., \code{svd(dtm)$d}). The default is \code{.5}; lower
-cutoffs result in fewer dimentions.}
+cutoffs result in fewer dimensions.}
 
 \item{keep.dim}{Logical: if \code{TRUE} and a space is being calculated from the input, a matrix
 in the same dimentions as \code{dtm} is returned. Otherwise, a matrix with terms as rows and
@@ -34,12 +38,13 @@ A general latent semantic space is a selection of right singluar vectors from th
 decompositon of a dtm (\code{svd(dtm)$v[,1:k]}, where \code{k} is the selected number of
 dimentions, decided here by \code{cutoff}).
 
-Mapping a new dtm into a latent sematic space consists of multiplying common terms:
+Mapping a new dtm into a latent semantic space consists of multiplying common terms:
 \code{dtm[,ct] \%*\% space[ct,]}, where \code{ct = colnames(dtm)[colnames(dtm) \%in\%
 rownames(space)]} -- the terms common between the dtm and the space. This results in a matrix
-with documents as rows, and svd dimentions as columns, replacing terms.
+with documents as rows, and svd dimensions as columns, replacing terms.
 }
 \examples{
+
 text = c(
   "Hey, I like kittens. I think all kinds of cats really are just the best pet ever.",
   "Oh year? Well I really like cars. All the wheels and the turbos... I think that's the best
@@ -51,6 +56,9 @@ text = c(
 )
 
 dtm = lma_dtm(text)
+
+#using a space from a file might look something like this:
+# lma_space(dtm,'default.zip','C:/user/name/downloads')
 
 #calculate a latent semantic space from the example text
 lss = lma_lspace(dtm)

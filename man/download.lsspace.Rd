@@ -4,11 +4,10 @@
 \alias{download.lsspace}
 \title{Download Latent Semantic Spaces}
 \usage{
-download.lsspace(space = "default", type = "rda")
+download.lsspace(space = "default", type = "sqlite")
 }
 \arguments{
-\item{space}{name of the space you wish to download. Options include \code{'default'}, \code{'tasa'}, and
-\code{'blog'}.}
+\item{space}{name of the space you wish to download. Options include \code{'default'} and \code{'tasa'}.}
 
 \item{type}{the type of file you wish to download, either \code{'rda'} or \code{'sqlite'}. If you plan on
 loading the space into memory before use, rdas will be fastest, otherwise use sqlites.}
@@ -20,5 +19,5 @@ Downloads the specified semantic space from the to lingmatch github repository t
 Spaces are slightly altered and reprocessed versions of those available at
 \url{http://www.lingexp.uni-tuebingen.de/z2/LSAspaces/}.
 
-Spaces can be downloaded directly from \url{https://github.com/miserman/lingmatch/tree/master/spaces/}.
+Spaces can be downloaded directly from \url{https://www.myweb.ttu.edu/miserman/lsspaces/}.
 }

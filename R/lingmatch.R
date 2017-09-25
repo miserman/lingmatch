@@ -1,6 +1,6 @@
 #' Linguistic Matching and Accommodation
 #'
-#' Offers a variety of methods to assess linguistic matching or accomodation, where \emph{matching}
+#' Offers a variety of methods to assess linguistic matching or accommodation, where \emph{matching}
 #' is general similarity (sometimes called \emph{homophily}), and \emph{accomodation} is some form
 #' of conditional similarity (accounting for some baserate or precedent; sometimes called
 #' \emph{alignment}).
@@ -33,9 +33,9 @@
 #'     and the value "prompt" marked the prompts).
 #'   \item If a matrix-like object (having multiple rows and columns), this will be treated as a
 #'     sort of dtm, assuming there are common column names between \code{x} and \code{comp} (e.g.,
-#'     if you had prompt and responce texts that were already processed separately).
+#'     if you had prompt and response texts that were already processed separately).
 #' }
-#' @param data A matrix-like object as a reference for column names, if varaibles are refered to in
+#' @param data A matrix-like object as a reference for column names, if variables are refereed to in
 #'   other arguments (e.g., \code{lingmatch(text, data=data)} would be the same as
 #'   \code{lingmatch(data$text)}.
 #' @param group A logical or factor-like vector the same length as \code{nrow(x)}, used to defined
@@ -84,7 +84,7 @@
 #'     (as in the case of manipulated prompts or text-based conditions).}
 #'   \item{Speaker ID}{If \code{comp} matches \code{'sequential'}, the last grouping variable
 #'     entered is assumed to identify something like speakers (i.e., a factor with two or more
-#'     evels and multiple observations per level). In the case of \code{comp = 'sequential'}, the
+#'     levels and multiple observations per level). In the case of \code{comp = 'sequential'}, the
 #'     data is assumed to be ordered (or ordered once sorted by \code{order} if specified). Any
 #'     additional grouping variables before the last are treated as splitting groups. At least when
 #'     treated sequentially, this sets up for probabilistic accommodation metrics.}
@@ -395,7 +395,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
 #' @param urls Logical: if \code{FALSE}, attempts to replace all urls with "url".
 #' @param emojis Logical: if \code{TRUE}, attempts to replace emojis (e.g., ":(" would be replaced
 #'   with "FROWN").
-#' @param to.lower Logical: if \code{FALSE}, words with different capitolization are treated as
+#' @param to.lower Logical: if \code{FALSE}, words with different capitalization are treated as
 #'   different terms.
 #' @param word.break A regular expression string determining the way words are split. Default is
 #'   \code{' +'} which breaks words at one or more blank spaces. You may also like to break by
@@ -409,7 +409,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
 #' LSM and LSS, a somewhat raw dtm should be fine, because both processes essentially use
 #' dictionaries (obviating stemming) and weighting or categorization (largely obviating 'stop word'
 #' removal). The exact effect of additional processing will depend on the dictionary/semantic space
-#' and weighting scheme used (particulalry for LSA). This function also does some processing which
+#' and weighting scheme used (particularly for LSA). This function also does some processing which
 #' may matter if you plan on categorizing using categories with look- ahead/behind. Otherwise,
 #' other methods may be faster, more memory efficient, and/or more featureful.
 #' @examples
@@ -511,7 +511,7 @@ lma_dtm=function(text,exclude=NULL,context=NULL,numbers=FALSE,punct=FALSE,urls=T
 #'
 #' Weight a document-term matrix.
 #' @param dtm a matrix with words as column names.
-#' @param weight a string refering at least partially to one (or a combination; see note) of the
+#' @param weight a string referring at least partially to one (or a combination; see note) of the
 #'   available weighting methods:
 #'
 #'   \strong{Term weights} (applied uniquely to each cell)
@@ -540,7 +540,7 @@ lma_dtm=function(text,exclude=NULL,context=NULL,numbers=FALSE,punct=FALSE,urls=T
 #'     \code{idf} \tab \code{log(nrow(dtm) / colSums(dtm > 0))} \tab inverse document frequency\cr
 #'   }
 #'
-#' @param to.freq logical: if \code{FALSE}, the dtm is not devided by document word count before
+#' @param to.freq logical: if \code{FALSE}, the dtm is not divided by document word count before
 #'   being weighted.
 #' @param freq.complete if the dtm was made with \code{\link{lma_dtm}} (has a \code{'WC'}
 #'   attribute), word counts for
@@ -643,7 +643,7 @@ lma_weight=function(dtm,weight='count',to.freq=TRUE,freq.complete=TRUE,log.base=
   dtm
 }
 
-#' Latent Semantic Space Opperations
+#' Latent Semantic Space Operations
 #'
 #' Calculate and reduce the singular value decomposition of a dtm (i.e., create a latent semantic
 #' space), or map a dtm onto an existing latent semantic space.
@@ -651,7 +651,7 @@ lma_weight=function(dtm,weight='count',to.freq=TRUE,freq.complete=TRUE,log.base=
 #' @param space A matrix of right singular vectors (a latent semantic space), with terms as
 #'   rownames. If missing, this will be calculated from the \code{dtm}. If a character, a file
 #'   matching the character will be searched for in the lingmatch data folder (e.g.,
-#'   \code{space = 'default'}). If the file has a .sqlite extention, it will be only a subset will
+#'   \code{space = 'default'}). If the file has a .sqlite extension, it will be only a subset will
 #'   be loaded into RAM; this is slightly slower than using a full, preloaded .rda space, but faster
 #'   than loading and unloading a complete .rda space, and less RAM intensive in all cases.
 #' @param path Path to a folder containing spaces. If not included, spaces will be looked for in the
@@ -659,7 +659,7 @@ lma_weight=function(dtm,weight='count',to.freq=TRUE,freq.complete=TRUE,log.base=
 #' @param dim.cutoff If a \code{space} is calculated, this will be used to decide on the number of
 #'   dimentions to be retained: \code{cumsum(d) / sum(d) < dim.cutoff}, where \code{d} is a vector
 #'   of singular values of \code{dtm} (i.e., \code{svd(dtm)$d}). The default is \code{.5}; lower
-#'   cutoffs result in fewer dimentions.
+#'   cutoffs result in fewer dimensions.
 #' @param keep.dim Logical: if \code{TRUE} and a space is being calculated from the input, a matrix
 #'   in the same dimentions as \code{dtm} is returned. Otherwise, a matrix with terms as rows and
 #'   svd dimentions as columns is returned. The default, truncated matrix
@@ -668,10 +668,10 @@ lma_weight=function(dtm,weight='count',to.freq=TRUE,freq.complete=TRUE,log.base=
 #' decompositon of a dtm (\code{svd(dtm)$v[,1:k]}, where \code{k} is the selected number of
 #' dimentions, decided here by \code{cutoff}).
 #'
-#' Mapping a new dtm into a latent sematic space consists of multiplying common terms:
+#' Mapping a new dtm into a latent semantic space consists of multiplying common terms:
 #' \code{dtm[,ct] \%*\% space[ct,]}, where \code{ct = colnames(dtm)[colnames(dtm) \%in\%
 #' rownames(space)]} -- the terms common between the dtm and the space. This results in a matrix
-#' with documents as rows, and svd dimentions as columns, replacing terms.
+#' with documents as rows, and svd dimensions as columns, replacing terms.
 #' @examples
 #'
 #' text = c(
@@ -770,7 +770,7 @@ lma_lspace=function(dtm,space,path=paste0(path.package('lingmatch'),'/data'),
 
 #' Document-Term Matrix Categorization
 #'
-#' Reduces the dimentions of a document-term matrix by dictionary-based categorization.
+#' Reduces the dimensions of a document-term matrix by dictionary-based categorization.
 #' @param dtm A matrix with words as column names.
 #' @param dict A \code{list} object with named character vectors as word lists.
 #' @param term.filter A regular expression string used to format the text of each term (passed to
@@ -814,7 +814,7 @@ lma_termcat=function(dtm,dict,term.filter=NULL){
   op
 }
 
-#' Similarity, Distance, and/or Accomodation Metrics
+#' Similarity, Distance, and/or Accommodation Metrics
 #'
 #' @param a vector or matrix. If a vector, \code{b} must also be provided. If a matrix and \code{b}
 #'   is missing, each row will be compared. If a matrix and \code{b} is not missing, each row will
@@ -837,10 +837,10 @@ lma_termcat=function(dtm,dict,term.filter=NULL){
 #'   function.
 #' @param group if \code{b} is missing and \code{a} has multiple rows, this will be used to make
 #'   comparisons between rows of \code{a}, as modified by \code{agg} and \code{add.mean}.
-#' @param agg logical; if \code{FALSE}, only the boundry rows between groups will be compared, see
+#' @param agg logical; if \code{FALSE}, only the boundary rows between groups will be compared, see
 #'   example.
 #' @param agg.mean logical; if \code{FALSE}, consecutive rows of the same group will be summed.
-#' @param square logical; if \code{FALSE}, only the lower triangle is returned from a pariwise
+#' @param square logical; if \code{FALSE}, only the lower triangle is returned from a pairwise
 #'   comparison.
 #' @param ncores sets the number of CPU cores to be used during pairwise comparisons. If not
 #'   specified, multiple cores will only be used if \code{nrow(a)} is greater than 1000, in which
@@ -868,7 +868,7 @@ lma_termcat=function(dtm,dict,term.filter=NULL){
 #' # by default, consecutive rows from the same group are averaged:
 #' lma_simets(dtm, group=speaker)
 #'
-#' # with agg = FALSE, only the rows at the boundry between groups (rows 2 and 3 in this case)
+#' # with agg = FALSE, only the rows at the boundary between groups (rows 2 and 3 in this case)
 #' # are used:
 #' lma_simets(dtm, group=speaker, agg=FALSE)
 #' @export

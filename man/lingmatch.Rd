@@ -31,10 +31,10 @@ or path to a file (.txt or .csv, with texts separated by one or more lines/rows)
     and the value "prompt" marked the prompts).
   \item If a matrix-like object (having multiple rows and columns), this will be treated as a
     sort of dtm, assuming there are common column names between \code{x} and \code{comp} (e.g.,
-    if you had prompt and responce texts that were already processed separately).
+    if you had prompt and response texts that were already processed separately).
 }}
 
-\item{data}{A matrix-like object as a reference for column names, if varaibles are refered to in
+\item{data}{A matrix-like object as a reference for column names, if variables are refereed to in
 other arguments (e.g., \code{lingmatch(text, data=data)} would be the same as
 \code{lingmatch(data$text)}.}
 
@@ -68,7 +68,7 @@ alighning with the standard calculations of each type:
 }}
 }
 \description{
-Offers a variety of methods to assess linguistic matching or accomodation, where \emph{matching}
+Offers a variety of methods to assess linguistic matching or accommodation, where \emph{matching}
 is general similarity (sometimes called \emph{homophily}), and \emph{accomodation} is some form
 of conditional similarity (accounting for some baserate or precedent; sometimes called
 \emph{alignment}).
@@ -107,7 +107,7 @@ specific knowledge, so it can't always (readily) be done automatically. Variable
     (as in the case of manipulated prompts or text-based conditions).}
   \item{Speaker ID}{If \code{comp} matches \code{'sequential'}, the last grouping variable
     entered is assumed to identify something like speakers (i.e., a factor with two or more
-    evels and multiple observations per level). In the case of \code{comp = 'sequential'}, the
+    levels and multiple observations per level). In the case of \code{comp = 'sequential'}, the
     data is assumed to be ordered (or ordered once sorted by \code{order} if specified). Any
     additional grouping variables before the last are treated as splitting groups. At least when
     treated sequentially, this sets up for probabilistic accommodation metrics.}
