@@ -1,0 +1,68 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="icon" href="https://github.com/fluidicon.png">
+<title>lingmatch</title>
+<style type="text/css">
+*{margin:0;padding:0;font-family:"Lucida Sans Unicode","Lucida Grande",Sans-serif;color:#505050}
+iframe{border:none;position:relative;height:100%;width:100%;margin:0 0 -10px 0;top:0}
+a:link,a:visited{text-decoration:none}
+#menu a{display:block;padding:15px 10px;background:#adadad;color:#f3f3f3}
+#menu a:hover{background:#505050}
+#menu{position:fixed;left:0;top:0;bottom:0;width:205px;border-right:1px solid #505050;background:#fff;
+  -webkit-user-select:none;-khtml-user-select:none;-moz-user-select:none;-ms-user-select:none;
+  user-select:none}
+#wrap{position:fixed;top:0;bottom:0;right:0;left:0;margin:0 0 0 229px;overflow:auto;
+  -webkit-overflow-scrolling:touch}
+#menu a.sel{background:#505050}
+.foot{left:0;bottom:0;width:205px;position:fixed;text-align:center}
+@media only screen and (max-height: 45em){h1,h2{display:none}}
+@media only screen and (max-height: 35em){#menu a{padding:5px 10px}}
+</style>
+</head>
+<body>
+<div id="menu">
+<h1 style="padding:5px 0 5px 10px">lingmatch</h1>
+<a href="https://miserman.github.io/lingmatch/lingmatch.html" target="window" onclick="setup(this)">core function</a>
+<a href="https://miserman.github.io/lingmatch/lma_simets.html" target="window" onclick="setup(this)">similarity metrics</a>
+<h2 style="padding:20px 0 5px 10px">Pre-Processing</h2>
+<a href="https://miserman.github.io/lingmatch/lma_dtm.html" target="window" onclick="setup(this)">document-term matrix</a>
+<a href="https://miserman.github.io/lingmatch/lma_weight.html" target="window" onclick="setup(this)">weighting</a>
+<a href="https://miserman.github.io/lingmatch/lma_lspace.html" target="window" onclick="setup(this)">semantic mapping</a>
+<a href="https://miserman.github.io/lingmatch/lma_termcat.html" target="window" onclick="setup(this)">categorization</a>
+<h2 style="padding:20px 0 5px 10px">Utilities</h2>
+<a href="https://miserman.github.io/lingmatch/lma_dict.html" target="window" onclick="setup(this)">function word lists</a>
+<a href="https://miserman.github.io/lingmatch/download.lsspace.html" target="window" onclick="setup(this)">semantic spaces</a>
+<a href="https://miserman.github.io/lingmatch/read.dic.html" target="window" onclick="setup(this)">read/write .dic</a>
+</div>
+<div id="wrap">
+<iframe id="window" name="window" src="lingmatch.html"></iframe>
+</div>
+<a href="https://github.com/miserman/lingmatch" class="foot">repository</a>
+</body>
+<script type="text/javascript">
+var windowFrame=document.getElementById("window")
+var menuItems=document.getElementById("menu").getElementsByTagName("a")
+var menuLength=menuItems.length
+setup()
+function setup(r){
+	for(var i=menuLength;i--;) menuItems[i].className=""
+	if("object"===typeof(r)){
+		r.className="sel"
+		windowFrame.src=r.href
+		window.location.replace
+		  ? window.location.replace("#"+r.innerHTML.toLowerCase().replace(/ /g,'_'))
+		  : window.history.replaceState(void 0,void 0,"#"+r.innerHTML.toLowerCase().replace(/ /g,'_'))
+		return
+	}
+	var tag=window.location.hash
+	if(tag==="") menuItems[0].className="sel"
+	else for(i=menuLength;i--;) if(tag.match(menuItems[i].innerHTML.toLowerCase().replace(/ /g,'_'))){
+	  menuItems[i].className="sel"
+	  windowFrame.src=menuItems[i].href
+	  return
+	}
+}
+</script>
+</html>

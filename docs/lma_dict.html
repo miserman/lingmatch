@@ -1,0 +1,69 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: English function word category lists</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for lma_dict"><tr><td>lma_dict</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>English function word category lists</h2>
+
+<h3>Description</h3>
+
+<p>Returns a list of function words based on the Linguistic Inquiry and Word Count 2015 dictionary.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+lma_dict(..., as.regex = TRUE)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>...</code></td>
+<td>
+<p>Numbers or letters corresponding to category names: ppron, ipron, article,
+adverb, conj, prep, auxverb, negate, quant, interrog, number, or special.</p>
+</td></tr>
+<tr valign="top"><td><code>as.regex</code></td>
+<td>
+<p>Logical: if <code>FALSE</code>, lists are returned without regular expression.</p>
+</td></tr>
+</table>
+
+
+<h3>Note</h3>
+
+<p>The <code>special</code> category is not returned unless specifically requested. It is a list of regular expression
+strings attempting to capture special things like ellipses and emojis. If <code>special</code> is part of the returned list,
+<code>as.regex</code> is set to <code>TRUE</code>.
+</p>
+<p>The <code>special</code> list is always used by both <code>lma_dtm</code> and <code>lma_termcat</code>. When creating a dtm,
+<code>special</code> is used to clean the original imput (so that, by default, the punctuation involed in ellipses and emojis
+are treated as different &ndash; as ellipses and emojis rather than as periods and parens and colons and such). When categorizing
+a dtm, the input dictionary is passed by the special lists to be sure the terms in the dtm match up with the dictionary
+(so, for example, &quot;: (&quot; would be replaced with &quot;FROWN&quot; in both the text and dictionary).
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+#return the full dictionary (excluding special)
+lma_dict()
+
+#return the standard 7 category lsm categories
+lma_dict(1:7)
+
+#return just a few categories without regular expression
+lma_dict(neg, int, aux, as.regex=FALSE)
+
+#return special specifically
+lma_dict(special)
+</pre>
+
+
+</body></html>

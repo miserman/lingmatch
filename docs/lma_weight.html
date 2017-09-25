@@ -1,0 +1,183 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Document-Term Matrix Weighting</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for lma_weight"><tr><td>lma_weight</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Document-Term Matrix Weighting</h2>
+
+<h3>Description</h3>
+
+<p>Weight a document-term matrix.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+lma_weight(dtm, weight = "count", to.freq = TRUE, freq.complete = TRUE,
+  log.base = 10, doc.only = FALSE)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>dtm</code></td>
+<td>
+<p>a matrix with words as column names.</p>
+</td></tr>
+<tr valign="top"><td><code>weight</code></td>
+<td>
+<p>a string refering at least partially to one (or a combination; see note) of the
+available weighting methods:
+</p>
+<p><strong>Term weights</strong> (applied uniquely to each cell)
+</p>
+
+<table summary="Rd table">
+<tr>
+ <td style="text-align: left;">
+    <code>binary</code> </td><td style="text-align: left;"> <code>(dtm &gt; 0) * 1</code> </td><td style="text-align: left;"> convert frequencies to 1s and 0s; remove
+      differences in frequencies</td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+    <code>log</code> </td><td style="text-align: left;"> <code>log(dtm + 1)</code> </td><td style="text-align: left;"> logarithm of frequencies</td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+    <code>sqrt</code> </td><td style="text-align: left;"> <code>dtm^.5</code> </td><td style="text-align: left;"> square root of frequencies</td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+    <code>count</code> </td><td style="text-align: left;"> <code>dtm</code> </td><td style="text-align: left;"> unaltered; sometimes called term frequencies (tf)</td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+    <code>amplify</code> </td><td style="text-align: left;"> <code>dtm^1.1</code> </td><td style="text-align: left;"> amplify difference in frequencies</td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+  </td>
+</tr>
+
+</table>
+
+<p><strong>Document weights</strong> (applied by column)
+</p>
+
+<table summary="Rd table">
+<tr>
+ <td style="text-align: left;">
+    <code>entropy</code> </td><td style="text-align: left;"> <code>1 - rowSums(x * log(x) / log(ncol(x)))</code> </td><td style="text-align: left;"> where
+      <code>x = t(dtm) / colSums(dtm &gt; 0)</code>;
+      entropy of term-conditional document distribution; gives common words more weight</td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+    <code>dfmax</code> </td><td style="text-align: left;"> <code>log(apply(dtm, 2, max))</code> </td><td style="text-align: left;"> logarithm of maximum document
+      frequency</td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+    <code>df</code> </td><td style="text-align: left;"> <code>log(colSums(dtm &gt; 0))</code> </td><td style="text-align: left;"> logarithm of binary document sum</td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+    <code>poisson</code> </td><td style="text-align: left;"> <code>1 - dpois(0, colSums(dtm) / nrow(dtm))</code> </td><td style="text-align: left;"> Poisson-predicted
+      erm distribution</td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+    <code>ridf</code> </td><td style="text-align: left;"> <code>idf - log(poisson)</code> </td><td style="text-align: left;"> residual inverse document frequency;
+      gives uncommon words more weight</td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+    <code>normal</code> </td><td style="text-align: left;"> <code>1 / colSums(dtm^2)^.5</code> </td><td style="text-align: left;"> normalized document frequency</td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+    <code>idf</code> </td><td style="text-align: left;"> <code>log(nrow(dtm) / colSums(dtm &gt; 0))</code> </td><td style="text-align: left;"> inverse document frequency</td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+  </td>
+</tr>
+
+</table>
+</td></tr>
+<tr valign="top"><td><code>to.freq</code></td>
+<td>
+<p>logical: if <code>FALSE</code>, the dtm is not devided by document word count before
+being weighted.</p>
+</td></tr>
+<tr valign="top"><td><code>freq.complete</code></td>
+<td>
+<p>if the dtm was made with <code>lma_dtm</code> (has a <code>'WC'</code>
+attribute), word counts for
+frequencies can be based on the raw count (default; <code>freq.complete = TRUE</code>). If
+<code>freq.complete = FALSE</code>, or the dtm does not have a <code>'WC'</code> attribute,
+<code>rowSums(dtm)</code> is used as word count.</p>
+</td></tr>
+<tr valign="top"><td><code>log.base</code></td>
+<td>
+<p>the base of logarithms, applied to any weight using <code>log</code>.
+Default is 10.</p>
+</td></tr>
+<tr valign="top"><td><code>doc.only</code></td>
+<td>
+<p>logical: if <code>TRUE</code>, only document weights are returned (a single value for
+each term).</p>
+</td></tr>
+</table>
+
+
+<h3>Note</h3>
+
+<p>Term weights works to dampen differences in word count, with differences meaning increasingly less
+from <code>amplify</code> to <code>count</code> to <code>sqrt</code> to <code>log</code> to <code>binary</code>.
+</p>
+<p>Document weights work to treat words differently based on their frequency. <code>entropy</code>,
+<code>dfmax</code>, <code>df</code>, and <code>poisson</code> (most to least intense over document frequencies of ~15)
+give more frequent words more weight, whereas <code>ridf</code>, <code>normal</code>, and <code>idf</code>, give less
+frequent words more weight.
+</p>
+<p><code>weight</code> can either be a vector with two characters, corresponding to term weight and
+document weight (e.g., <code>weight = c('count','idf')</code>), or it can be a string with term and
+document weights separated by any of <code>*-_, :;/\\</code> (e.g., <code>weight = 'count * idf'</code>).
+<code>'tf'</code> is also acceptable for <code>'count'</code>, and <code>'tfidf'</code> will be parsed as
+<code>c('count','idf')</code>, though this is a special case.
+</p>
+<p>For <code>weight</code>, term or document weights can be entered individually; term weights alone will
+not apply any document weight, and document weights alone will apply a <code>'count'</code> term weight
+(unless <code>doc.only = TRUE</code>, in which case a term-named vector of document weights is returned
+instead of a weighted dtm).
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+# visualize term and document weights
+document_frequency = seq_len(20)
+op = list(y='term_frequency~document_frequency',line='connected',leg='outside')
+
+# term weights
+term_weights = c('binary','log','sqrt','count','amplify')
+term_frequency = sapply(term_weights,function(w)lma_weight(matrix(document_frequency,1),w,FALSE))
+if(require(splot)) splot(myl=c(0,25),options=op)
+
+# document weights
+doc_weights = c('df','dfmax','idf','normal','poisson','ridf','entropy')
+term_frequency = sapply(doc_weights,function(w)
+  lma_weight(sapply(document_frequency,function(i)sample(0:i,5000,TRUE)),w,FALSE,doc.only=TRUE)
+)
+if(require(splot)) splot(myl=c(-3,3),mv.scale=TRUE,options=op)
+
+</pre>
+
+
+</body></html>

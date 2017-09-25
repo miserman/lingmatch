@@ -1,0 +1,153 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Similarity, Distance, and/or Accomodation Metrics</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for lma_simets"><tr><td>lma_simets</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Similarity, Distance, and/or Accomodation Metrics</h2>
+
+<h3>Description</h3>
+
+<p>Similarity, Distance, and/or Accomodation Metrics
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+lma_simets(a, b = NULL, metric, metric.arg = list(), group = NULL,
+  agg = TRUE, agg.mean = TRUE, square = TRUE, ncores = detectCores() -
+  2)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>a</code></td>
+<td>
+<p>vector or matrix. If a vector, <code>b</code> must also be provided. If a matrix and <code>b</code>
+is missing, each row will be compared. If a matrix and <code>b</code> is not missing, each row will
+be compared with <code>b</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>b</code></td>
+<td>
+<p>vector to be compared with <code>a</code> or rows of <code>a</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>metric</code></td>
+<td>
+<p>a function (see details), or a character at least partially matching one of the
+available metrics:
+</p>
+
+<table summary="Rd table">
+<tr>
+ <td style="text-align: left;">
+  <code>euclidean</code> </td><td style="text-align: left;"> <code>1 / (1 + sum((a - b)^2)^.5)</code> </td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+  <code>canberra</code> </td><td style="text-align: left;"> <code>sum(1 - abs(a - b) / (a + b + .0001)) / length(a)</code> </td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+  <code>cosine</code> </td><td style="text-align: left;"> <code>sum(a * b) / sum(a^2 * sum(b^2))^.5</code> </td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+  <code>pearson</code> </td><td style="text-align: left;"> <code>cor(a, b, method='pearson')</code> </td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+  <code>kendall</code> </td><td style="text-align: left;"> <code>cor(a, b, method='kendall')</code> </td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+  <code>spearman</code> </td><td style="text-align: left;"> <code>cor(a, b, method='spearman')</code> </td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+  <code>jaccard</code> </td><td style="text-align: left;"> <code>sum(a &amp; b) / sum(a | b)</code> </td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+  <code>kld</code> </td><td style="text-align: left;"> <code>p = (p&lt;-table(a,b)/100)/sum(p); q = rowSums(p) %*% matrix(colSums(p),1);
+    sum(p*log(p/q))</code></td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+</td>
+</tr>
+
+</table>
+</td></tr>
+<tr valign="top"><td><code>metric.arg</code></td>
+<td>
+<p>a list of arguments to be passed to <code>metric</code> if <code>metric</code> is a
+function.</p>
+</td></tr>
+<tr valign="top"><td><code>group</code></td>
+<td>
+<p>if <code>b</code> is missing and <code>a</code> has multiple rows, this will be used to make
+comparisons between rows of <code>a</code>, as modified by <code>agg</code> and <code>add.mean</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>agg</code></td>
+<td>
+<p>logical; if <code>FALSE</code>, only the boundry rows between groups will be compared, see
+example.</p>
+</td></tr>
+<tr valign="top"><td><code>agg.mean</code></td>
+<td>
+<p>logical; if <code>FALSE</code>, consecutive rows of the same group will be summed.</p>
+</td></tr>
+<tr valign="top"><td><code>square</code></td>
+<td>
+<p>logical; if <code>FALSE</code>, only the lower triangle is returned from a pariwise
+comparison.</p>
+</td></tr>
+<tr valign="top"><td><code>ncores</code></td>
+<td>
+<p>sets the number of CPU cores to be used during pairwise comparisons. If not
+specified, multiple cores will only be used if <code>nrow(a)</code> is greater than 1000, in which
+case the number of detected cores - 2 will be used.</p>
+</td></tr>
+</table>
+
+
+<h3>Details</h3>
+
+<p>When a function, <code>metric</code> is called in places of built-in metrics. Two arguments are always
+passed to it, generally corresponding to rows of <code>a</code> in the first position, and <code>b</code> in
+the second. If <code>b</code> is missing and <code>a</code> has more than one row, other rows of <code>a</code>
+will be in the second position.
+</p>
+<p>If <code>metric</code> is a function with compatible first and second position arguments, this can be
+entered directly (e.g., <code>metric = energy::dcor</code>). Otherwise, <code>a</code> and <code>b</code> might
+have to be reformatted (e.g., <code>metric = function(a,b) entropy::mi.emperical(table(a,b))</code>).
+</p>
+<p>The function entered as <code>metric</code> must always return a single numerical value.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+text = c(
+  'words of speaker A','more words from speaker A',
+  'words from speaker B','more words from speaker B'
+)
+speaker = c('A','A','B','B')
+
+(dtm = lma_dtm(text))
+
+# by default, consecutive rows from the same group are averaged:
+lma_simets(dtm, group=speaker)
+
+# with agg = FALSE, only the rows at the boundry between groups (rows 2 and 3 in this case)
+# are used:
+lma_simets(dtm, group=speaker, agg=FALSE)
+</pre>
+
+
+</body></html>

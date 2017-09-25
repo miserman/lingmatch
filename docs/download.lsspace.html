@@ -1,0 +1,48 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Download Latent Semantic Spaces</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for download.lsspace"><tr><td>download.lsspace</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Download Latent Semantic Spaces</h2>
+
+<h3>Description</h3>
+
+<p>Downloads the specified semantic space from the to lingmatch github repository to the lingmatch data folder.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+download.lsspace(space = "default", type = "rda")
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>space</code></td>
+<td>
+<p>name of the space you wish to download. Options include <code>'default'</code>, <code>'tasa'</code>, and
+<code>'blog'</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>type</code></td>
+<td>
+<p>the type of file you wish to download, either <code>'rda'</code> or <code>'sqlite'</code>. If you plan on
+loading the space into memory before use, rdas will be fastest, otherwise use sqlites.</p>
+</td></tr>
+</table>
+
+
+<h3>Details</h3>
+
+<p>Spaces are slightly altered and reprocessed versions of those available at
+<a href="http://www.lingexp.uni-tuebingen.de/z2/LSAspaces/">http://www.lingexp.uni-tuebingen.de/z2/LSAspaces/</a>.
+</p>
+<p>Spaces can be downloaded directly from <a href="https://github.com/miserman/lingmatch/tree/master/spaces/">https://github.com/miserman/lingmatch/tree/master/spaces/</a>.
+</p>
+
+
+</body></html>

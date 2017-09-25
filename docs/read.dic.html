@@ -1,0 +1,66 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Read/write LIWC dictionary files</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for read.dic"><tr><td>read.dic</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Read/write LIWC dictionary files</h2>
+
+<h3>Description</h3>
+
+<p>Read in or write Linguistic Inquiry and Word Count dictionary (.dic) files.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+read.dic(path, cats)
+
+write.dic(x, filename = "custom")
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>path</code></td>
+<td>
+<p>Path to a .dic file.</p>
+</td></tr>
+<tr valign="top"><td><code>cats</code></td>
+<td>
+<p>A character vector of category names to be returned. All catregories are returned by default.</p>
+</td></tr>
+<tr valign="top"><td><code>x</code></td>
+<td>
+<p>A list object with names of categories and a vector of their words.</p>
+</td></tr>
+<tr valign="top"><td><code>filename</code></td>
+<td>
+<p>The name of the file to be saved.</p>
+</td></tr>
+</table>
+
+
+<h3>Examples</h3>
+
+<pre>
+# make a small murder related dictionary
+dict = list(
+  kill = c('kill*', 'murd*', 'wound*', 'die*'),
+  death = c('death*', 'dying', 'die*', 'kill*')
+)
+
+# save it as a .dic file: write.dic(dict,'murder')
+# read it back in as a list: read.dic('murder.dic')
+
+# read in the Moral Foundations or LUSI dictionaries from urls
+moral_dict = read.dic('http://bit.ly/MoralFoundations')
+lusi_dict = read.dic('http://bit.ly/lusi_dict')
+
+</pre>
+
+
+</body></html>

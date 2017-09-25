@@ -1,0 +1,119 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Document-Term Matrix Creation</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for lma_dtm"><tr><td>lma_dtm</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Document-Term Matrix Creation</h2>
+
+<h3>Description</h3>
+
+<p>Creates a document-term matrix (dtm) from a set of texts.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+lma_dtm(text, exclude = NULL, context = NULL, numbers = FALSE,
+  punct = FALSE, urls = TRUE, emojis = FALSE, to.lower = TRUE,
+  word.break = " +", dc.min = 0, dc.max = Inf)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>text</code></td>
+<td>
+<p>Texts to be processed. This can be a vector (such as a column in a data frame)
+or list.</p>
+</td></tr>
+<tr valign="top"><td><code>exclude</code></td>
+<td>
+<p>A character vector of words to be excluded. If <code>exclude</code> is a single string
+matching <code>'function'</code>, <code>lma_dict()</code> will be used.</p>
+</td></tr>
+<tr valign="top"><td><code>context</code></td>
+<td>
+<p>A character vector used to reformat text based on look- ahead/behind. For example,
+you might (hopelessly) attempt to disambiguate <em>like</em> by reformatting certain <em>like</em>s
+(e.g., <code>context=c('(i) like*','(you) like*','(do) like')</code>, where words in parentheses are
+the
+context for the target word, and asterisks denote partial matching). This would be converted
+to regular expression (i.e., <code>'(?=i) like[ .,?!:;/]'</code>) which, if matched, would be
+replaced with a coded version of the word (e.g., <code>"Hey, i like that!"</code> would become
+<code>"Hey, i i-like- that!"</code>). This would probably only be useful for categorization, where a
+dictionary would only include one or another version of a word (e.g., the LIWC 2015 dictionary
+does something like this with <em>like</em>, and LIWC 2007 did something like this with
+<em>kind (of)</em>, both to try and clean up the posemo category).</p>
+</td></tr>
+<tr valign="top"><td><code>numbers</code></td>
+<td>
+<p>Logical: if <code>TRUE</code>, numbers are preserved.</p>
+</td></tr>
+<tr valign="top"><td><code>punct</code></td>
+<td>
+<p>Logical: if <code>TRUE</code>, punctuation is preserved.</p>
+</td></tr>
+<tr valign="top"><td><code>urls</code></td>
+<td>
+<p>Logical: if <code>FALSE</code>, attempts to replace all urls with &quot;url&quot;.</p>
+</td></tr>
+<tr valign="top"><td><code>emojis</code></td>
+<td>
+<p>Logical: if <code>TRUE</code>, attempts to replace emojis (e.g., &quot;:(&quot; would be replaced
+with &quot;FROWN&quot;).</p>
+</td></tr>
+<tr valign="top"><td><code>to.lower</code></td>
+<td>
+<p>Logical: if <code>FALSE</code>, words with different capitolization are treated as
+different terms.</p>
+</td></tr>
+<tr valign="top"><td><code>word.break</code></td>
+<td>
+<p>A regular expression string determining the way words are split. Default is
+<code>' +'</code> which breaks words at one or more blank spaces. You may also like to break by
+dashes or slashes (<code>' +|/|-'</code>), depending on the text.</p>
+</td></tr>
+<tr valign="top"><td><code>dc.min</code></td>
+<td>
+<p>Numeric: excludes terms appearing in fewer than the set number of documents.
+Default is 0 (no limit).</p>
+</td></tr>
+<tr valign="top"><td><code>dc.max</code></td>
+<td>
+<p>Numeric: excludes terms appearing in more than the set number of documents. Default
+is Inf (no limit).</p>
+</td></tr>
+</table>
+
+
+<h3>Note</h3>
+
+<p>This is a relatively simple way to make a dtm. To calculate the (more or less) standard forms of
+LSM and LSS, a somewhat raw dtm should be fine, because both processes essentially use
+dictionaries (obviating stemming) and weighting or categorization (largely obviating 'stop word'
+removal). The exact effect of additional processing will depend on the dictionary/semantic space
+and weighting scheme used (particulalry for LSA). This function also does some processing which
+may matter if you plan on categorizing using categories with look- ahead/behind. Otherwise,
+other methods may be faster, more memory efficient, and/or more featureful.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+text = c(
+  "Why, hello there! How are you this evening?",
+  "I am well, thank you for your inquiry!",
+  "You are a most good at social interactions person!",
+  "Why, thank you! You're not all bad yourself!"
+)
+
+lma_dtm(text)
+</pre>
+
+
+</body></html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Document-Term Matrix Categorization</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for lma_termcat"><tr><td>lma_termcat</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Document-Term Matrix Categorization</h2>
+
+<h3>Description</h3>
+
+<p>Reduces the dimentions of a document-term matrix by dictionary-based categorization.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+lma_termcat(dtm, dict, term.filter = NULL)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>dtm</code></td>
+<td>
+<p>A matrix with words as column names.</p>
+</td></tr>
+<tr valign="top"><td><code>dict</code></td>
+<td>
+<p>A <code>list</code> object with named character vectors as word lists.</p>
+</td></tr>
+<tr valign="top"><td><code>term.filter</code></td>
+<td>
+<p>A regular expression string used to format the text of each term (passed to
+<code>gsub</code>). For example, if terms are part-of-speech tagged (e.g.,
+<code>'a_DT'</code>), <code>filter='_.*'</code> would remove the tag.</p>
+</td></tr>
+</table>
+
+
+</body></html>

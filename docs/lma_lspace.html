@@ -1,0 +1,97 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Latent Semantic Space Opperations</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for lma_lspace"><tr><td>lma_lspace</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Latent Semantic Space Opperations</h2>
+
+<h3>Description</h3>
+
+<p>Calculate and reduce the singular value decomposition of a dtm (i.e., create a latent semantic
+space), or map a dtm onto an existing latent semantic space.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+lma_lspace(dtm, space, dim.cutoff = 0.5, keep.dim = FALSE)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>dtm</code></td>
+<td>
+<p>A matrix with terms as column names.</p>
+</td></tr>
+<tr valign="top"><td><code>space</code></td>
+<td>
+<p>A matrix of right singular vectors (a latent semantic space), with terms as
+rownames. If missing, this will be calculated from the <code>dtm</code>. If a character, a file
+matching the character will be searched for in the lingmatch data folder (e.g.,
+<code>space = 'default'</code>). If the file has a .sqlite extention, it will be only a subset will
+be loaded into RAM; this is slightly slower than using a full, preloaded .rda space, but faster
+than loading and unloading a complete .rda space, and less RAM intensive in all cases.</p>
+</td></tr>
+<tr valign="top"><td><code>dim.cutoff</code></td>
+<td>
+<p>If a <code>space</code> is calculated, this will be used to decide on the number of
+dimentions to be retained: <code>cumsum(d) / sum(d) &lt; dim.cutoff</code>, where <code>d</code> is a vector
+of singular values of <code>dtm</code> (i.e., <code>svd(dtm)$d</code>). The default is <code>.5</code>; lower
+cutoffs result in fewer dimentions.</p>
+</td></tr>
+<tr valign="top"><td><code>keep.dim</code></td>
+<td>
+<p>Logical: if <code>TRUE</code> and a space is being calculated from the input, a matrix
+in the same dimentions as <code>dtm</code> is returned. Otherwise, a matrix with terms as rows and
+svd dimentions as columns is returned. The default, truncated matrix</p>
+</td></tr>
+</table>
+
+
+<h3>Note</h3>
+
+<p>A general latent semantic space is a selection of right singluar vectors from the singular value
+decompositon of a dtm (<code>svd(dtm)$v[,1:k]</code>, where <code>k</code> is the selected number of
+dimentions, decided here by <code>cutoff</code>).
+</p>
+<p>Mapping a new dtm into a latent sematic space consists of multiplying common terms:
+<code>dtm[,ct] %*% space[ct,]</code>, where <code>ct = colnames(dtm)[colnames(dtm) %in%
+rownames(space)]</code> &ndash; the terms common between the dtm and the space. This results in a matrix
+with documents as rows, and svd dimentions as columns, replacing terms.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+text = c(
+  "Hey, I like kittens. I think all kinds of cats really are just the best pet ever.",
+  "Oh year? Well I really like cars. All the wheels and the turbos... I think that's the best
+    ever.",
+  "You know what? Poo on you. Cats, dogs, rabbits -- you know, living creatures... to think
+     you'd care about anything else!",
+  "You can stick to your opinion. You can be wrong if you want. You know what life's about?
+    Supercharging, diesel guzzling, exhaust spewing, piston moving ignitions."
+)
+
+dtm = lma_dtm(text)
+
+#calculate a latent semantic space from the example text
+lss = lma_lspace(dtm)
+
+#show that document similarities between the truncated and full space are the same
+spaces = list(
+  full = lma_lspace(dtm,keep.dim=TRUE),
+  truncated = lma_lspace(dtm,lss)
+)
+sapply(spaces,lma_simets,metric='cosine')
+
+</pre>
+
+
+</body></html>
