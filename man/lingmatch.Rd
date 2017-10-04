@@ -20,7 +20,9 @@ or path to a file (.txt or .csv, with texts separated by one or more lines/rows)
   \item If a character with a length of 1 and no spaces, if it partially matches one of
     \code{lsm_profiles}'s rownames, that row will be used as the comparison; if it partially
     matches \code{'auto'}, the highest correlating \code{lsm_profiles} row will be used; if it
-    partially matches \code{'pairwise'}, each text will be compared to one another.
+    partially matches \code{'pairwise'}, each text will be compared to one another; if it
+    partially matches \code{'sequential'}, the last variable in \code{group} will be treated as
+    a speaker ID (see the grouping and comparisons section).
   \item If a character vector, this will be processed in the same way as \code{x}.
   \item If a vector, either of the same length as \code{x} has rows and logical or factor-like
     (having  n levels < length), or a numeric range or logical of length less than \code{nrow(x)}
@@ -98,7 +100,7 @@ specific knowledge, so it can't always (readily) be done automatically. Variable
     \code{all.levels = FALSE}). This makes for 'one to many' comparisons with either calculated
     or preexisting standards (i.e., the profile of the current data, or a precalculated profile,
     respectively).}
-  \item{Comparison ID}{When a comparison data is identified in \code{comp}, groups are assumed
+  \item{Comparison ID}{When comparison data is identified in \code{comp}, groups are assumed
     to apply to both \code{x} and \code{comp} (either both in \code{data}, or separately
     between \code{data} and \code{comp.data}, in which case \code{comp.group} may be needed if
     the same grouping variable have different names between \code{data} and \code{comp.data}).
@@ -107,12 +109,12 @@ specific knowledge, so it can't always (readily) be done automatically. Variable
     (as in the case of manipulated prompts or text-based conditions).}
   \item{Speaker ID}{If \code{comp} matches \code{'sequential'}, the last grouping variable
     entered is assumed to identify something like speakers (i.e., a factor with two or more
-    levels and multiple observations per level). In the case of \code{comp = 'sequential'}, the
-    data is assumed to be ordered (or ordered once sorted by \code{order} if specified). Any
-    additional grouping variables before the last are treated as splitting groups. At least when
-    treated sequentially, this sets up for probabilistic accommodation metrics. At the moment,
-    when sequential comparisons are made within groups, similarity scores between speakers are
-    averaged, resulting in mean matching between speakers within the group.}
+    levels and multiple observations per level). In this case the data is assumed to be ordered
+    (or ordered once sorted by \code{order} if specified). Any additional grouping variables
+    before the last are treated as splitting groups. This can set up for probabilistic
+    accommodation metrics. At the moment, when sequential comparisons are made within groups,
+    similarity scores between speakers are averaged, resulting in mean matching between speakers
+    within the group.}
 }
 }
 

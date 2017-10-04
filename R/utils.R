@@ -72,7 +72,7 @@ write.dic=function(x,filename='custom'){
 
 #' Download Latent Semantic Spaces
 #'
-#' Downloads the specified semantic space from the to lingmatch github repository to the lingmatch data folder.
+#' Downloads the specified semantic space.
 #'
 #' Spaces are slightly altered and reprocessed versions of those available at
 #' \url{http://www.lingexp.uni-tuebingen.de/z2/LSAspaces/}.
@@ -98,7 +98,9 @@ download.lsspace=function(space='default',type='sqlite'){
       return(message(file,' uncompressed as ',uzf,' to ',pl))
     }else stop(file,' already exists in ',pl)
   }
-  download.file(paste0('https://www.myweb.ttu.edu/miserman/lsspaces/',file),pl)
+  td=try(download.file(url<-paste0('https://www.myweb.ttu.edu/miserman/lsspaces/',file),pl),TRUE)
+  if(inherits(td,'try-error')) stop(if(grepl('Permission',td)) 'R does not have permission to save the file;' else
+    sub('^.* : ','',td),'\ndownload it directly from ',url,call.=FALSE)
   if(z) unzip(paste0(pl,'/',file),exdir=pl)
   message(file,' downloaded to ',pl)
 }

@@ -22,7 +22,9 @@
 #'   \item If a character with a length of 1 and no spaces, if it partially matches one of
 #'     \code{lsm_profiles}'s rownames, that row will be used as the comparison; if it partially
 #'     matches \code{'auto'}, the highest correlating \code{lsm_profiles} row will be used; if it
-#'     partially matches \code{'pairwise'}, each text will be compared to one another.
+#'     partially matches \code{'pairwise'}, each text will be compared to one another; if it
+#'     partially matches \code{'sequential'}, the last variable in \code{group} will be treated as
+#'     a speaker ID (see the grouping and comparisons section).
 #'   \item If a character vector, this will be processed in the same way as \code{x}.
 #'   \item If a vector, either of the same length as \code{x} has rows and logical or factor-like
 #'     (having  n levels < length), or a numeric range or logical of length less than \code{nrow(x)}
@@ -75,7 +77,7 @@
 #'     \code{all.levels = FALSE}). This makes for 'one to many' comparisons with either calculated
 #'     or preexisting standards (i.e., the profile of the current data, or a precalculated profile,
 #'     respectively).}
-#'   \item{Comparison ID}{When a comparison data is identified in \code{comp}, groups are assumed
+#'   \item{Comparison ID}{When comparison data is identified in \code{comp}, groups are assumed
 #'     to apply to both \code{x} and \code{comp} (either both in \code{data}, or separately
 #'     between \code{data} and \code{comp.data}, in which case \code{comp.group} may be needed if
 #'     the same grouping variable have different names between \code{data} and \code{comp.data}).
@@ -84,12 +86,12 @@
 #'     (as in the case of manipulated prompts or text-based conditions).}
 #'   \item{Speaker ID}{If \code{comp} matches \code{'sequential'}, the last grouping variable
 #'     entered is assumed to identify something like speakers (i.e., a factor with two or more
-#'     levels and multiple observations per level). In the case of \code{comp = 'sequential'}, the
-#'     data is assumed to be ordered (or ordered once sorted by \code{order} if specified). Any
-#'     additional grouping variables before the last are treated as splitting groups. At least when
-#'     treated sequentially, this sets up for probabilistic accommodation metrics. At the moment,
-#'     when sequential comparisons are made within groups, similarity scores between speakers are
-#'     averaged, resulting in mean matching between speakers within the group.}
+#'     levels and multiple observations per level). In this case the data is assumed to be ordered
+#'     (or ordered once sorted by \code{order} if specified). Any additional grouping variables
+#'     before the last are treated as splitting groups. This can set up for probabilistic
+#'     accommodation metrics. At the moment, when sequential comparisons are made within groups,
+#'     similarity scores between speakers are averaged, resulting in mean matching between speakers
+#'     within the group.}
 #' }
 #' @references
 #' Babcock, M. J., Ta, V. P., & Ickes, W. (2014). Latent semantic similarity and language style
@@ -135,13 +137,14 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
     inp[a[a%in%names(inp)]]
   })
   names(dsp)=c('p','w','m','c','s')
-  # fetches input from data or global environment
+  # fetches input from data or environment
   gv=function(a,data=NULL){
     ta=a
     if(is.character(ta) && (length(ta)==1 || !any(grepl(' ',ta,fixed=TRUE)))) ta=parse(text=a)
-    a=tryCatch(eval(ta,envir=data,globalenv()),error=function(e)NULL)
-    if(is.null(a)) stop('could not find ',deparse(ta),call.=FALSE)
-    a
+    ta=tryCatch(eval(ta,data,parent.frame(2)),error=function(e)NULL)
+    if(is.null(ta)) ta=tryCatch(eval(ta,data),error=function(e)NULL)
+    if(is.null(ta)) stop('could not find ',a,call.=FALSE)
+    ta
   }
   gd=function(a,data=NULL){
     r=if(is.character(a) && length(a)==1 && grepl('\\.txt$|\\.csv$',a,TRUE)){
@@ -210,7 +213,15 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
       stop('data and comp.data mismatch',call.=FALSE)
     comp.group=do.call(paste,cg)
     if(!is.null(comp.data)) rownames(comp.data)=comp.group
-    if(length(group)>1) group=do.call(paste,group)
+    if(length(group)>1){
+      group=do.call(paste,group)
+      if(!is.null(comp.data) && any(ck<-!(ckg<-unique(group))%in%unique(comp.group))) if(all(ck))
+        stop('group and comp.group had no levels in common') else{
+          warning('levels not found in comp.group: ',paste(ckg[ck],collapse=', '),call.=FALSE)
+          group=group[ck<-group%in%ckg[!ck]]
+          x=x[ck,,drop=FALSE]
+        }
+    }
   }
   if(!missing(order)){
     order=as.character(gv(opt$order,data))
@@ -276,6 +287,8 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
       x=x[,cns]
     }
     comp.data=comp.data[,cns]
+  }else if(is.function(comp)){
+
   }
   sim=speaker=NULL
   if(!is.null(group)){
@@ -302,23 +315,25 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
   }
   #making comparisons
   sal=dsp$s
+  ckf=is.function(comp)
   if(is.null(group)){
     if(!is.null(speaker)) sal$group=speaker
-    if(!is.null(comp.data)) if(NROW(comp.data)==1) sal$b=comp.data else
-      warning('a group must be specified when comp has more than one row')
+    if(!is.null(comp.data)){
+      if(NROW(comp.data)==1) sal$b=comp.data else
+        warning('a group must be specified when comp has more than one row')
+    }else if(ckf) sal$b=comp.data=if(opt$comp=='mean') colMeans(x,na.rm=TRUE) else apply(na.omit(x),2,comp)
     sim=do.call(lma_simets,c(list(x),sal))
   }else{
     cks=!is.null(speaker)
     ckc=!is.null(comp.data)
     ckp=cc==2 && opt$comp=='pairwise'
     ckq=cc==2 && opt$comp=='sequential'
-    ckf=is.function(comp)
     if(gl==1){
       if(opt$comp!='pairwise') for(g in unique(sim[,1])){
         su=sim[,1]==g
         if(cks) sal$group=speaker[su] else if(ckc){
           if(nrow(cc<-comp.data[if(!is.null(comp.group)) comp.group==g else g,,drop=FALSE])==1)
-            sal$b=cc else warning('comp.data has too many rows in group ',g)
+            sal$b=cc else warning('comp.data has too few/many rows in group ',g)
         }else if(ckf) if(sum(su)>1) sal$b=if(opt$comp=='mean') colMeans(x[su,],na.rm=TRUE) else
           apply(na.omit(x[su,]),2,comp) else{sim[su,mets]=1;next}
         if((sum(su)==1 && is.null(sal$b))){sim[su,mets]=1;next}
@@ -344,8 +359,9 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
         comp.group=vapply(sug,function(g)do.call(paste,comp.group[seq_len(g)]),
           character(nrow(comp)))
       sal$square=FALSE
+      ssl=if(is.null(speaker)) TRUE else is.na(speaker)
       for(g in unique(sim[,1])){
-        su=which(sim[,1]==g)
+        su=which(sim[,1]==g & ssl)
         sg=group[su,,drop=FALSE]
         sx=x[su,,drop=FALSE]
         for(s in sug){
@@ -361,6 +377,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
           if(length(ssg)!=0) for(ssn in names(ssg)){
             ssu=su[sg[,s]==ssn]
             lss=length(ssu)
+            if(lss<2) next
             if(cks) sal$group=speaker[ssu] else if(ckf)
               sal$b=if(opt$comp=='mean') colMeans(ssg[[ssn]],na.rm=TRUE) else
                 apply(na.omit(ssg[[ssn]]),2,comp)
@@ -834,7 +851,7 @@ lma_termcat=function(dtm,dict,term.filter=NULL){
 #'   available metrics:
 #'   \tabular{ll}{
 #'     \code{euclidean} \tab \code{1 / (1 + sum((a - b)^2)^.5)} \cr
-#'     \code{canberra} \tab \code{sum(1 - abs(a - b) / (a + b + .0001)) / length(a)} \cr
+#'     \code{canberra} \tab \code{mean(as.numeric(1 - abs(a - b) / (a + b + .0001)))} \cr
 #'     \code{cosine} \tab \code{sum(a * b) / sum(a^2 * sum(b^2))^.5} \cr
 #'     \code{pearson} \tab \code{cor(a, b, method='pearson')} \cr
 #'     \code{kendall} \tab \code{cor(a, b, method='kendall')} \cr
@@ -891,7 +908,7 @@ lma_simets=function(a,b=NULL,metric,metric.arg=list(),group=NULL,agg=TRUE,agg.me
   cf=NULL
   comp=function(a,b,metric) switch(metric,
     euclidean=1/(1+sum((a-b)^2)^.5),
-    canberra=sum(1-abs(a-b)/(a+b+.0001))/length(a),
+    canberra=mean(as.numeric(1-abs(a-b)/(a+b+.0001))),
     cosine=sum(a*b)/sum(a^2*sum(b^2))^.5,
     pearson=cor(a,b,method='pearson'),
     kendall=cor(a,b,method='kendall'),

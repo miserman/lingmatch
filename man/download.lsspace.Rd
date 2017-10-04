@@ -13,7 +13,7 @@ download.lsspace(space = "default", type = "sqlite")
 loading the space into memory before use, rdas will be fastest, otherwise use sqlites.}
 }
 \description{
-Downloads the specified semantic space from the to lingmatch github repository to the lingmatch data folder.
+Downloads the specified semantic space.
 }
 \details{
 Spaces are slightly altered and reprocessed versions of those available at

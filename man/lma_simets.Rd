@@ -19,7 +19,7 @@ be compared with \code{b}.}
 available metrics:
 \tabular{ll}{
   \code{euclidean} \tab \code{1 / (1 + sum((a - b)^2)^.5)} \cr
-  \code{canberra} \tab \code{sum(1 - abs(a - b) / (a + b + .0001)) / length(a)} \cr
+  \code{canberra} \tab \code{mean(as.numeric(1 - abs(a - b) / (a + b + .0001)))} \cr
   \code{cosine} \tab \code{sum(a * b) / sum(a^2 * sum(b^2))^.5} \cr
   \code{pearson} \tab \code{cor(a, b, method='pearson')} \cr
   \code{kendall} \tab \code{cor(a, b, method='kendall')} \cr
