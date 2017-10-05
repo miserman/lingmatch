@@ -354,7 +354,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
       mn=length(inp$metric)
       mw=seq_len(mn)
       colnames(sim)[-sug]=paste0(rep(vapply(seq_along(cn),function(e)
-        paste0(cn[seq_len(e)],collapse='+'),''),each=mn),'_',inp$metric)
+        paste0(cn[seq_len(e)],collapse='_'),''),each=mn),'_',inp$metric)
       group=vapply(sug,function(g)do.call(paste,group[seq_len(g)]),character(nrow(sim)))
       if(!is.null(comp.group) && NCOL(comp.group)==gl)
         comp.group=vapply(sug,function(g)do.call(paste,comp.group[seq_len(g)]),
