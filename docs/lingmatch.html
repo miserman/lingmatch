@@ -47,7 +47,9 @@ the mean profile of its group.)
 <li><p> If a character with a length of 1 and no spaces, if it partially matches one of
 <code>lsm_profiles</code>'s rownames, that row will be used as the comparison; if it partially
 matches <code>'auto'</code>, the highest correlating <code>lsm_profiles</code> row will be used; if it
-partially matches <code>'pairwise'</code>, each text will be compared to one another.
+partially matches <code>'pairwise'</code>, each text will be compared to one another; if it
+partially matches <code>'sequential'</code>, the last variable in <code>group</code> will be treated as
+a speaker ID (see the grouping and comparisons section).
 </p>
 </li>
 <li><p> If a character vector, this will be processed in the same way as <code>x</code>.
@@ -165,7 +167,7 @@ sequence so that groups become smaller and smaller), or once after all splits ar
 or preexisting standards (i.e., the profile of the current data, or a precalculated profile,
 respectively).</p>
 </dd>
-<dt>Comparison ID</dt><dd><p>When a comparison data is identified in <code>comp</code>, groups are assumed
+<dt>Comparison ID</dt><dd><p>When comparison data is identified in <code>comp</code>, groups are assumed
 to apply to both <code>x</code> and <code>comp</code> (either both in <code>data</code>, or separately
 between <code>data</code> and <code>comp.data</code>, in which case <code>comp.group</code> may be needed if
 the same grouping variable have different names between <code>data</code> and <code>comp.data</code>).
@@ -175,12 +177,12 @@ uniquely identify a comparison. This makes for 'one to many' comparisons with sp
 </dd>
 <dt>Speaker ID</dt><dd><p>If <code>comp</code> matches <code>'sequential'</code>, the last grouping variable
 entered is assumed to identify something like speakers (i.e., a factor with two or more
-levels and multiple observations per level). In the case of <code>comp = 'sequential'</code>, the
-data is assumed to be ordered (or ordered once sorted by <code>order</code> if specified). Any
-additional grouping variables before the last are treated as splitting groups. At least when
-treated sequentially, this sets up for probabilistic accommodation metrics. At the moment,
-when sequential comparisons are made within groups, similarity scores between speakers are
-averaged, resulting in mean matching between speakers within the group.</p>
+levels and multiple observations per level). In this case the data is assumed to be ordered
+(or ordered once sorted by <code>order</code> if specified). Any additional grouping variables
+before the last are treated as splitting groups. This can set up for probabilistic
+accommodation metrics. At the moment, when sequential comparisons are made within groups,
+similarity scores between speakers are averaged, resulting in mean matching between speakers
+within the group.</p>
 </dd>
 </dl>
 

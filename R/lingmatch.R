@@ -331,7 +331,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
     if(gl==1){
       if(opt$comp!='pairwise') for(g in unique(sim[,1])){
         su=sim[,1]==g
-        if(cks) sal$group=speaker[su] else if(ckc){
+        if(cks){sal$group=speaker[su];sal$mean=TRUE}else if(ckc){
           if(nrow(cc<-comp.data[if(!is.null(comp.group)) comp.group==g else g,,drop=FALSE])==1)
             sal$b=cc else warning('comp.data has too few/many rows in group ',g)
         }else if(ckf) if(sum(su)>1) sal$b=if(opt$comp=='mean') colMeans(x[su,],na.rm=TRUE) else
@@ -340,6 +340,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
         sim[su,mets]=do.call(lma_simets,c(list(x[su,,drop=FALSE]),sal))
       }else{
         sal$square=FALSE
+        sal$mean=TRUE
         sim=lapply(ug<-unique(group[[1]]),function(g){
           su=group[[1]]==g
           if(sum(su)!=1) do.call(lma_simets,c(list(x[su,,drop=FALSE]),sal)) else NA
@@ -359,7 +360,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
         comp.group=vapply(sug,function(g)do.call(paste,comp.group[seq_len(g)]),
           character(nrow(comp)))
       sal$square=FALSE
-      ssl=if(is.null(speaker)) TRUE else is.na(speaker)
+      ssl=if(is.null(speaker)) TRUE else !is.na(speaker)
       for(g in unique(sim[,1])){
         su=which(sim[,1]==g & ssl)
         sg=group[su,,drop=FALSE]
@@ -869,6 +870,7 @@ lma_termcat=function(dtm,dict,term.filter=NULL){
 #' @param agg.mean logical; if \code{FALSE}, consecutive rows of the same group will be summed.
 #' @param square logical; if \code{FALSE}, only the lower triangle is returned from a pairwise
 #'   comparison.
+#' @param mean logical; if \code{TRUE}, a single mean for each metric is returned.
 #' @param ncores sets the number of CPU cores to be used during pairwise comparisons. If not
 #'   specified, multiple cores will only be used if \code{nrow(a)} is greater than 1000, in which
 #'   case the number of detected cores - 2 will be used.
@@ -895,8 +897,8 @@ lma_termcat=function(dtm,dict,term.filter=NULL){
 #' # by default, consecutive rows from the same group are averaged:
 #' lma_simets(dtm, group=speaker)
 #'
-#' # with agg = FALSE, only the rows at the boundary between groups (rows 2 and 3 in this case)
-#' # are used:
+#' # with agg = FALSE, only the rows at the boundary between
+#' # groups (rows 2 and 3 in this case) are used:
 #' lma_simets(dtm, group=speaker, agg=FALSE)
 #' @export
 #' @importFrom parallel detectCores makeCluster stopCluster
@@ -904,7 +906,7 @@ lma_termcat=function(dtm,dict,term.filter=NULL){
 #' @importFrom foreach foreach %dopar% registerDoSEQ
 
 lma_simets=function(a,b=NULL,metric,metric.arg=list(),group=NULL,agg=TRUE,agg.mean=TRUE,square=TRUE,
-  ncores=detectCores()-2){
+  mean=FALSE,ncores=detectCores()-2){
   cf=NULL
   comp=function(a,b,metric) switch(metric,
     euclidean=1/(1+sum((a-b)^2)^.5),
@@ -945,7 +947,7 @@ lma_simets=function(a,b=NULL,metric,metric.arg=list(),group=NULL,agg=TRUE,agg.me
       for(met in metric) m[[met]][su]=foreach(i=seq_len(n),.combine=c) %dopar%
         vapply(seq_len(n-i)+i,function(r)comp(a[i,],a[r,],met),0)
       if(p) stopCluster(clust)
-      res=if(square){
+      res=if(square && !mean){
         u=upper.tri(m[[1]])
         lapply(m,function(i){i[u]=t(i)[u];i})
       }else lapply(m,function(i)i[lower.tri(i)])
@@ -997,6 +999,7 @@ lma_simets=function(a,b=NULL,metric,metric.arg=list(),group=NULL,agg=TRUE,agg.me
       vapply(metric,function(m)vapply(seq_len(n),function(r)comp(a[r,],b,m),0),numeric(n))
     }else vapply(metric,function(m)comp(a,b,m),0)
   }
+  if(mean) res=if(is.list(res)) lapply(res,mean,na.rm=TRUE) else colMeans(res,na.rm=TRUE)
   attr(res,'time')=c(simets=unname(proc.time()[3]-st))
   res
 }

@@ -5,8 +5,8 @@
 \title{Similarity, Distance, and/or Accommodation Metrics}
 \usage{
 lma_simets(a, b = NULL, metric, metric.arg = list(), group = NULL,
-  agg = TRUE, agg.mean = TRUE, square = TRUE, ncores = detectCores() -
-  2)
+  agg = TRUE, agg.mean = TRUE, square = TRUE, mean = FALSE,
+  ncores = detectCores() - 2)
 }
 \arguments{
 \item{a}{vector or matrix. If a vector, \code{b} must also be provided. If a matrix and \code{b}
@@ -43,6 +43,8 @@ example.}
 \item{square}{logical; if \code{FALSE}, only the lower triangle is returned from a pairwise
 comparison.}
 
+\item{mean}{logical; if \code{TRUE},}
+
 \item{ncores}{sets the number of CPU cores to be used during pairwise comparisons. If not
 specified, multiple cores will only be used if \code{nrow(a)} is greater than 1000, in which
 case the number of detected cores - 2 will be used.}
@@ -74,7 +76,7 @@ speaker = c('A','A','B','B')
 # by default, consecutive rows from the same group are averaged:
 lma_simets(dtm, group=speaker)
 
-# with agg = FALSE, only the rows at the boundary between groups (rows 2 and 3 in this case)
-# are used:
+# with agg = FALSE, only the rows at the boundary between
+# groups (rows 2 and 3 in this case) are used:
 lma_simets(dtm, group=speaker, agg=FALSE)
 }
