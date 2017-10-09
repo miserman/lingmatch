@@ -522,7 +522,7 @@ lma_dtm=function(text,exclude=NULL,context=NULL,numbers=FALSE,punct=FALSE,urls=T
     wm=cseq(wm)
     m[t,wm$value]=wm$count
   }
-  su=colSums(m>0)
+  su=colSums(m>0,na.rm=TRUE)
   su=su>dc.min & su<dc.max
   m=if(any(!su)) m[,su] else m
   attr(m,'WC')=unlist(wc,use.names=FALSE)
@@ -627,7 +627,7 @@ lma_weight=function(dtm,weight='count',to.freq=TRUE,freq.complete=TRUE,log.base=
   dtm=as.matrix(dtm)
   if(to.freq){
     wc=attr(dtm,'WC')
-    if(is.null(wc)) wc=rowSums(dtm)
+    if(is.null(wc)) wc=rowSums(dtm,na.rm=TRUE)
     dtm=dtm/wc*100
   }
   term=function(x,type) switch(type,
@@ -638,13 +638,13 @@ lma_weight=function(dtm,weight='count',to.freq=TRUE,freq.complete=TRUE,log.base=
     amplify=x^1.1
   )
   doc=function(x,type) switch(type,
-    df=log(colSums(x>0),base=log.base),
+    df=log(colSums(x>0,na.rm=TRUE),base=log.base),
     dfmax=log(apply(x,2,max),base=log.base),
-    idf=log(nrow(x)/colSums(x>0),base=log.base),
-    normal=1/colSums(x^2)^.5,
-    poisson=1-dpois(0,colSums(x)/nrow(x)),
+    idf=log(nrow(x)/colSums(x>0,na.rm=TRUE),base=log.base),
+    normal=1/colSums(x^2,na.rm=TRUE)^.5,
+    poisson=1-dpois(0,colSums(x,na.rm=TRUE)/nrow(x)),
     ridf=doc(x,'idf')-log(doc(x,'poisson'),base=log.base),
-    entropy={x=t(x)/colSums(x>0);1-rowSums(x*log(x,base=log.base)/log(ncol(x),base=log.base),
+    entropy={x=t(x)/colSums(x>0,na.rm=TRUE);1-rowSums(x*log(x,base=log.base)/log(ncol(x),base=log.base),
       na.rm=TRUE)}
   )
   if(length(weight)==1){
@@ -833,9 +833,9 @@ lma_termcat=function(dtm,dict,term.filter=NULL){
   ats=ats[!vapply(ats,is.null,logical(1))]
   atsn=names(ats)
   if('opts'%in%atsn && !ats$opts['to.lower']) ws=tolower(ws)
-  op=vapply(names(dict),function(c)rowSums(dtm[,grep(dict[[c]],ws,perl=TRUE),drop=FALSE]),
+  op=vapply(names(dict),function(c)rowSums(dtm[,grep(dict[[c]],ws,perl=TRUE),drop=FALSE],na.rm=TRUE),
     numeric(nrow(dtm)))
-  attr(op,'WC')=if('WC'%in%atsn) ats$WC else rowSums(dtm)
+  attr(op,'WC')=if('WC'%in%atsn) ats$WC else rowSums(dtm,na.rm=TRUE)
   attr(op,'time')=c(attr(dtm,'time'),termcat=unname(proc.time()[3]-st))
   if('orientation'%in%atsn) attr(op,'orientation')=ats$orientation
   if('type'%in%atsn) attr(op,'type')=ats$type
@@ -916,7 +916,8 @@ lma_simets=function(a,b=NULL,metric,metric.arg=list(),group=NULL,agg=TRUE,agg.me
     kendall=cor(a,b,method='kendall'),
     spearman=cor(a,b,method='spearman'),
     jaccard=sum(a&b)/sum(a|b),
-    kld={p=(p<-table(a,b)/100)/sum(p);q=rowSums(p)%*%matrix(colSums(p),1);sum(p*log(p/q+.0001))},
+    kld={p=(p<-table(a,b)/100)/sum(p);q=rowSums(p,na.rm=TRUE)%*%matrix(colSums(p,na.rm=TRUE),1);
+      sum(p*log(p/q+.0001))},
     custom=do.call(cf,c(list(a,b),metric.arg))
   )
   mets=c('euclidean','canberra','cosine','pearson','spearman','kendall','jaccard','kld')
