@@ -624,12 +624,12 @@ lma_weight=function(dtm,weight='count',to.freq=TRUE,freq.complete=TRUE,log.base=
       '), so it will not be altered')
     return(dtm)
   }
-  dtm=as.matrix(dtm)
-  if(to.freq){
+  dtm=if(to.freq){
     wc=attr(dtm,'WC')
-    if(is.null(wc)) wc=rowSums(dtm,na.rm=TRUE)
-    dtm=dtm/wc*100
-  }
+    dtm=as.matrix(dtm)
+    if(is.null(wc) || !freq.complete) wc=rowSums(dtm,na.rm=TRUE)
+    dtm/wc*100
+  }else as.matrix(dtm)
   term=function(x,type) switch(type,
     binary=(x>0)*1,
     log=log(x+1,base=log.base),
