@@ -628,7 +628,12 @@ lma_weight=function(dtm,weight='count',to.freq=TRUE,freq.complete=TRUE,log.base=
     wc=attr(dtm,'WC')
     dtm=as.matrix(dtm)
     if(is.null(wc) || !freq.complete) wc=rowSums(dtm,na.rm=TRUE)
-    dtm/wc*100
+    su=dtm!=0 & !is.na(dtm)
+    dtm=tt=vapply(seq_along(wc),function(r){
+      d=dtm[r,]
+      if(any(su<-(!is.na(d) & d!=0))) d[su]=d[su]/wc[r]
+      d
+    },numeric(ncol(dtm)))
   }else as.matrix(dtm)
   term=function(x,type) switch(type,
     binary=(x>0)*1,
