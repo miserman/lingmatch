@@ -629,11 +629,11 @@ lma_weight=function(dtm,weight='count',to.freq=TRUE,freq.complete=TRUE,log.base=
     dtm=as.matrix(dtm)
     if(is.null(wc) || !freq.complete) wc=rowSums(dtm,na.rm=TRUE)
     su=dtm!=0 & !is.na(dtm)
-    dtm=tt=vapply(seq_along(wc),function(r){
+    dtm=t(vapply(seq_along(wc),function(r){
       d=dtm[r,]
       if(any(su<-(!is.na(d) & d!=0))) d[su]=d[su]/wc[r]
       d
-    },numeric(ncol(dtm)))
+    },numeric(ncol(dtm))))
   }else as.matrix(dtm)
   term=function(x,type) switch(type,
     binary=(x>0)*1,
@@ -765,13 +765,17 @@ lma_lspace=function(dtm,space,path=paste0(path.package('lingmatch'),'/data'),
       if(length(file)>1) file=if(any(ck<-grepl('sqlite|zip',fls))) file[ck][1] else file[1]
       ck=grepl('.rda',file,fixed=TRUE)
       if(!ck && ((nck<-is.na(file)) || grepl('.zip',file,fixed=TRUE))){
-        if(nck) if(!(file<-sub('\\..*','.zip',space))%in%fls)
-          stop('could not find ',space,' in ',path)
-        unzip(paste0(path,'/',file),exdir=path)
-        file=sub('.zip','.sqlite',file,fixed=TRUE)
+        if(any(fck<-grepl(sub('\\..*','.sqlite',file),fls,fixed=TRUE))){
+          file=fls[fck]
+        }else{
+          if(nck) if(!(file<-sub('\\..*','.zip',space))%in%fls)
+            stop('could not find ',space,' in ',path)
+          unzip(paste0(path,'/',file),exdir=path)
+          file=sub('.zip','.sqlite',file,fixed=TRUE)
+        }
       }
       space=load(paste0(path,'/',if(ck) file else sub('.sqlite','_dict.rda',file,fixed=TRUE)))
-      space=eval(parse(text=space))
+      lss_dict=eval(parse(text=space))
       if(is.data.frame(space)) lss_dict=rownames(space)
       ts=fmatch(colnames(dtm),lss_dict,nomatch='')
       ts=ts[!is.na(ts)]
