@@ -359,39 +359,60 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
       if(!is.null(comp.group) && NCOL(comp.group)==gl)
         comp.group=vapply(sug,function(g)do.call(paste,comp.group[seq_len(g)]),
           character(nrow(comp)))
-      sal$square=FALSE
-      ssl=if(is.null(speaker)) TRUE else !is.na(speaker)
-      for(g in unique(sim[,1])){
-        su=which(sim[,1]==g & ssl)
-        sg=group[su,,drop=FALSE]
-        sx=x[su,,drop=FALSE]
-        for(s in sug){
-          usg=unique(sg[,s])
-          if(length(usg)==1){
-            ssg=list(sx)
-            names(ssg)=usg
-          }else{
-            ssg=lapply(usg,function(ss)sx[sg[,s]==ss,,drop=FALSE])
-            names(ssg)=usg
-            ssg=Filter(function(ss)nrow(ss)>1,ssg)
-          }
-          if(length(ssg)!=0) for(ssn in names(ssg)){
-            ssu=su[sg[,s]==ssn]
-            lss=length(ssu)
-            if(lss<2) next
-            if(cks) sal$group=speaker[ssu] else if(ckf)
-              sal$b=if(opt$comp=='mean') colMeans(ssg[[ssn]],na.rm=TRUE) else
-                apply(na.omit(ssg[[ssn]]),2,comp)
-            if(!is.null(sal$b) && identical(sal$b,ssg[[ssn]])){sim[ssu,gl+mw+(mn*(s-1))]=1;next}
-            ssim=do.call(lma_simets,c(list(ssg[[ssn]]),sal))
-            if(ckp || ckq){
-              if(ckp){
-                if(length(ssim[[1]])!=1) ssim=vapply(ssim,mean,0,na.rm=TRUE)
-              }else if(nrow(ssim)>1) ssim=colMeans(ssim,na.rm=TRUE)
-              if(lss!=1) ssim=vapply(ssim,rep,numeric(lss),lss)
+      if(!is.null(dsp$s$mean) && !dsp$s$mean){
+        sal$square=TRUE
+        sim=lapply(ug<-unique(sim[,1]),function(g){
+          su=sim[,1]==g
+          gsm=do.call(lma_simets,c(list(x[su,]),sal))
+          gn=group[su,ncol(group)]
+          for(m in names(gsm)) dimnames(gsm[[m]])=list(gn,gn)
+          gsm
+        })
+        if(!is.null(dsp$s$square) && !dsp$s$square){
+          sim=do.call(rbind,lapply(sim,function(ll){
+            m=ll[[1]]
+            su=lower.tri(m)
+            data.frame(
+              comp=outer(n<-colnames(m),n,function(a,b)paste0(a,' <-> ',b))[su],
+              lapply(ll,function(m)m[su])
+            )
+          }))
+        }else names(sim)=ug
+      }else{
+        sal$square=FALSE
+        ssl=if(is.null(speaker)) TRUE else !is.na(speaker)
+        for(g in unique(sim[,1])){
+          su=which(sim[,1]==g & ssl)
+          sg=group[su,,drop=FALSE]
+          sx=x[su,,drop=FALSE]
+          for(s in sug){
+            usg=unique(sg[,s])
+            if(length(usg)==1){
+              ssg=list(sx)
+              names(ssg)=usg
+            }else{
+              ssg=lapply(usg,function(ss)sx[sg[,s]==ss,,drop=FALSE])
+              names(ssg)=usg
+              ssg=Filter(function(ss)nrow(ss)>1,ssg)
             }
-            csu=gl+mw+(mn*(s-1))
-            if(all(dim(ssim)==c(lss,length(csu)))) sim[ssu,csu]=ssim else warning(g,s)
+            if(length(ssg)!=0) for(ssn in names(ssg)){
+              ssu=su[sg[,s]==ssn]
+              lss=length(ssu)
+              if(lss<2) next
+              if(cks) sal$group=speaker[ssu] else if(ckf)
+                sal$b=if(opt$comp=='mean') colMeans(ssg[[ssn]],na.rm=TRUE) else
+                  apply(na.omit(ssg[[ssn]]),2,comp)
+              if(!is.null(sal$b) && identical(sal$b,ssg[[ssn]])){sim[ssu,gl+mw+(mn*(s-1))]=1;next}
+              ssim=do.call(lma_simets,c(list(ssg[[ssn]]),sal))
+              if(ckp || ckq){
+                if(ckp){
+                  if(length(ssim[[1]])!=1) ssim=vapply(ssim,mean,0,na.rm=TRUE)
+                }else if(nrow(ssim)>1) ssim=colMeans(ssim,na.rm=TRUE)
+                if(lss!=1) ssim=vapply(ssim,rep,numeric(lss),lss)
+              }
+              csu=gl+mw+(mn*(s-1))
+              if(all(dim(ssim)==c(lss,length(csu)))) sim[ssu,csu]=ssim else warning(g,s)
+            }
           }
         }
       }
