@@ -43,7 +43,7 @@ example.}
 \item{square}{logical; if \code{FALSE}, only the lower triangle is returned from a pairwise
 comparison.}
 
-\item{mean}{logical; if \code{TRUE},}
+\item{mean}{logical; if \code{TRUE}, a single mean for each metric is returned.}
 
 \item{ncores}{sets the number of CPU cores to be used during pairwise comparisons. If not
 specified, multiple cores will only be used if \code{nrow(a)} is greater than 1000, in which
