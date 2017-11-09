@@ -66,7 +66,7 @@ write.dic=function(x,filename='custom'){
   m[,1]=c('%',seq_len(lx),'%',fl)
   m[seq_len(lx)+1,2]=if(is.null(names(x))) seq_len(lx) else names(x)
   for(l in seq_along(x)) m[which(m[-seq_len(lx+2),1]%in%x[[l]])+lx+2,l+1]=l
-  write(paste0(apply(m,1,function(r)paste(r,collapse='\t')),collapse='\n'),filename)
+  write(paste0(sub('\t+$','',apply(m,1,function(r)paste(r,collapse='\t'))),collapse='\n'),filename)
   message('dictionary saved to ',filename)
 }
 
