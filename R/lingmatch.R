@@ -117,7 +117,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
   drop=TRUE,all.levels=TRUE,type='lsm'){
   inp=as.list(substitute(list(...)))[-1]
   #setting up a default type if specified
-  if(!missing(type)){
+  if(!missing(type) && !is.null(type)){
     type=if(grepl('lsm|lang|ling|style|match',type,TRUE)) 'lsm' else 'lsa'
     ni=names(inp)
     if(type=='lsm' && !'dict'%in%ni) inp$dict=lma_dict(1:9)
@@ -653,7 +653,7 @@ lma_weight=function(dtm,weight='count',to.freq=TRUE,freq.complete=TRUE,log.base=
     su=dtm!=0 & !is.na(dtm)
     dtm=t(vapply(seq_along(wc),function(r){
       d=dtm[r,]
-      if(any(su<-(!is.na(d) & d!=0))) d[su]=d[su]/wc[r]*100
+      if(any(su<-(!is.na(d) & d!=0))) d[su]=d[su]/wc[r]*if(percent) 100 else 1
       d
     },numeric(ncol(dtm))))
   }else as.matrix(dtm)
