@@ -121,7 +121,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
     type=if(grepl('lsm|lang|ling|style|match',type,TRUE)) 'lsm' else 'lsa'
     ni=names(inp)
     if(type=='lsm' && !'dict'%in%ni) inp$dict=lma_dict(1:9)
-    if(!'weight'%in%ni) inp$weight=if(type=='lsm') 'count' else c('count','idf')
+    if(!'weight'%in%ni) inp$weight=if(type=='lsm'){inp$percent=TRUE;'count'}else c('count','idf')
     if(!'metric'%in%ni) inp$metric=if(type=='lsm') 'canberra' else 'cosine'
     if(type=='lsa' && !'space'%in%ni) inp$space='default'
   }
@@ -600,6 +600,7 @@ lma_dtm=function(text,exclude=NULL,context=NULL,numbers=FALSE,punct=FALSE,urls=T
 #'   Default is 10.
 #' @param doc.only logical: if \code{TRUE}, only document weights are returned (a single value for
 #'   each term).
+#' @param percent logical; if \code{TRUE}, frequencies are multiplied by 100.
 #' @note
 #' Term weights works to dampen differences in word count, with differences meaning increasingly less
 #' from \code{amplify} to \code{count} to \code{sqrt} to \code{log} to \code{binary}.
@@ -638,7 +639,7 @@ lma_dtm=function(text,exclude=NULL,context=NULL,numbers=FALSE,punct=FALSE,urls=T
 #'
 #' @export
 
-lma_weight=function(dtm,weight='count',to.freq=TRUE,freq.complete=TRUE,log.base=10,doc.only=FALSE){
+lma_weight=function(dtm,weight='count',to.freq=TRUE,freq.complete=TRUE,log.base=10,doc.only=FALSE,percent=FALSE){
   ck=attr(dtm,'type')
   if(!is.null(ck) && length(ck)==3 && (ck[1]=='TRUE' || ck[2]!='count' || ck[3]!='NA')){
     message('the entered dtm appears to already be weighted (',paste(ck[2:3],collapse='*'),
@@ -652,7 +653,7 @@ lma_weight=function(dtm,weight='count',to.freq=TRUE,freq.complete=TRUE,log.base=
     su=dtm!=0 & !is.na(dtm)
     dtm=t(vapply(seq_along(wc),function(r){
       d=dtm[r,]
-      if(any(su<-(!is.na(d) & d!=0))) d[su]=d[su]/wc[r]
+      if(any(su<-(!is.na(d) & d!=0))) d[su]=d[su]/wc[r]*100
       d
     },numeric(ncol(dtm))))
   }else as.matrix(dtm)

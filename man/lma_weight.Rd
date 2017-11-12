@@ -5,7 +5,7 @@
 \title{Document-Term Matrix Weighting}
 \usage{
 lma_weight(dtm, weight = "count", to.freq = TRUE, freq.complete = TRUE,
-  log.base = 10, doc.only = FALSE)
+  log.base = 10, doc.only = FALSE, percent = FALSE)
 }
 \arguments{
 \item{dtm}{a matrix with words as column names.}
@@ -53,6 +53,8 @@ Default is 10.}
 
 \item{doc.only}{logical: if \code{TRUE}, only document weights are returned (a single value for
 each term).}
+
+\item{percent}{logical; if \code{TRUE}, frequencies are multiplied by 100.}
 }
 \description{
 Weight a document-term matrix.
