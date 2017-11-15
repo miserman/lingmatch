@@ -39,6 +39,7 @@ The first step can be to convert all of the characters to lower case:
 ```{r}
 # we'll call the processed text words since it will eventually be single words
 words = tolower(text)
+words[1]
 ```
 
 Just to simplify things, we can also just remove punctuation, which will involve some regular expression.
@@ -55,9 +56,10 @@ We can use the gsub function to replace all of the characters we specify with no
 gsub(' ','*','a b')
 
 # []s define a set of single characters, and the + will match any repeats,
-# so one or more of the characters inside the brakets will be replaced with nothing.
+# so one or more of the characters inside the brackets will be replaced with nothing.
 # entering a vector into the third position will apply the replacement to each element
 words = gsub('[,.?!\n-]+','',words)
+words[1]
 ```
 
 The strsplit function splits one string into many based on a regular expression string.
@@ -86,15 +88,16 @@ unique_words = sort(unique(unlist(words)))
 
 # then we can make a matrix of 0s, and put the unique words in as column names
 dtm = matrix(0,length(text),length(unique_words),dimnames=list(c(),unique_words))
-dtm[,1:12]
+dtm[,1:10]
 ```
 
 Now we can fill the matrix with counts for each word for each text.
 We can count up all of the words at once, so we only have to loop through texts:
 ```{r}
-# this will perform what is inside the curly brakets 4 times
-# here i keeps track of the loop number, which also lines up with our word list and dtm rows
-for(i in 1:4){
+# this will perform whats inside the curly brackets as many times as there are texts
+# i will be set to each number in the sequence, so i will equal 1 on the first run, and so on
+# the words and dtm objects all line up, so words[[1]] corresponds to dtm[1,]
+for(i in seq_along(words)){
   
   # we can use the table function to count the words in a text
   counts = table(words[[i]])
@@ -106,7 +109,7 @@ for(i in 1:4){
 }
 
 # now dtm is filled in with counts for each text
-dtm[,1:12]
+dtm[,1:10]
 ```
 
 ## Processing with lingmatch
@@ -118,7 +121,7 @@ we just walked through.
 library(lingmatch)
 
 dtm = lma_dtm(text)
-dtm[,1:12]
+dtm[,1:10]
 ```
 
 With even this simple level of processing, we can get some fun information:
@@ -196,7 +199,7 @@ For now, we'll just apply standard word count (frequency) weighting
 wdtm = lma_weight(dtm)
 ```
 
-# Dimention Reduction
+# Dimension Reduction
 
 A more thorough way to change the dtm space is by reducing its dimensions.
 This is effectively what LIWC (or any dictionary-based approach) does --
