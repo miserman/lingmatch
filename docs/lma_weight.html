@@ -17,7 +17,7 @@
 
 <pre>
 lma_weight(dtm, weight = "count", to.freq = TRUE, freq.complete = TRUE,
-  log.base = 10, doc.only = FALSE)
+  log.base = 10, doc.only = FALSE, percent = FALSE)
 </pre>
 
 
@@ -131,6 +131,10 @@ Default is 10.</p>
 <td>
 <p>logical: if <code>TRUE</code>, only document weights are returned (a single value for
 each term).</p>
+</td></tr>
+<tr valign="top"><td><code>percent</code></td>
+<td>
+<p>logical; if <code>TRUE</code>, frequencies are multiplied by 100.</p>
 </td></tr>
 </table>
 

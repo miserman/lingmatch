@@ -15,7 +15,7 @@ on
 `r format(Sys.time(),'%B %d %Y')`*
 
 ***
-# Introduction
+# Setup
 
 First, we need some text -- anything that results in a vector of text will do.
 ```{r}
@@ -30,31 +30,109 @@ text = c(
 )
 ```
 
-Even before processing, we can do some fun things.
-The grepl function, for example, allows you to turn string searches into logical vectors;
-you can use this to dummy code based on word use/pattern appearance.
+## Manual Processing
+
+We'll be taking a 'bag of words' approach to this text, meaning we don't care about sentence structure or the like,
+so we'll want to standardize the texts and split them into words.
+
+The first step can be to convert all of the characters to lower case:
 ```{r}
-grepl(' I | me | my ',text)
+# we'll call the processed text words since it will eventually be single words
+words = tolower(text)
 ```
 
-For more thorough processing, we can break these strings into words, then count them.
-This is what the lma_dtm function from the lingmatch package does:
+Just to simplify things, we can also just remove punctuation, which will involve some regular expression.
+
+[Regular expression](https://en.wikipedia.org/wiki/Regular_expression) is a way to parse strings of characters
+in a refined way. Forms of regular expression are implemented in most programming languages. It can be tricky to
+think with, but offers a great deal of control when it comes to parsing text.
+
+We can use the gsub function to replace all of the characters we specify with nothing.
+```{r}
+# you can get a feel for the way gsub works by entering an example string;
+# the first argument is the expression to match, the second is what to replace it with,
+# and the third is the text, so this will replace the blank space with an asterisk
+gsub(' ','*','a b')
+
+# []s define a set of single characters, and the + will match any repeats,
+# so one or more of the characters inside the brakets will be replaced with nothing.
+# entering a vector into the third position will apply the replacement to each element
+words = gsub('[,.?!\n-]+','',words)
+```
+
+The strsplit function splits one string into many based on a regular expression string.
+```{r}
+# this applies to each element of the vector, and returns a list of vectors
+words = strsplit(words,' +')
+```
+
+Now we have a list of tokens (the `words` object) which corresponds to our original text:
+```{r}
+# the first text
+text[1]
+
+# the tokenized version of that text
+words[[1]]
+```
+
+Now that we have all of our words separated, we can translate the original texts into numerical vectors,
+resulting in a document-term matrix (DTM).
+
+The first step can be to set up an empty matrix, with a row for each text, and a column for each unique word:
+```{r}
+# since our words are in a list, we need to unlist them, then get only the unique ones
+# you don't need to sort the words, but it can make it easier to look through
+unique_words = sort(unique(unlist(words)))
+
+# then we can make a matrix of 0s, and put the unique words in as column names
+dtm = matrix(0,length(text),length(unique_words),dimnames=list(c(),unique_words))
+dtm[,1:12]
+```
+
+Now we can fill the matrix with counts for each word for each text.
+We can count up all of the words at once, so we only have to loop through texts:
+```{r}
+# this will perform what is inside the curly brakets 4 times
+# here i keeps track of the loop number, which also lines up with our word list and dtm rows
+for(i in 1:4){
+  
+  # we can use the table function to count the words in a text
+  counts = table(words[[i]])
+  
+  # now the counts object has words associated with their count for the ith text
+  # to get this into the dtm, we can use i to select the row, and counts' names to select the columns
+  dtm[i,names(counts)] = counts
+  
+}
+
+# now dtm is filled in with counts for each text
+dtm[,1:12]
+```
+
+## Processing with lingmatch
+
+The lma_dtm function from the lingmatch package will do the same sort of processing
+we just walked through.
 ```{r}
 # load in the lingmatch package
 library(lingmatch)
 
 dtm = lma_dtm(text)
-dtm[,1:10]
+dtm[,1:12]
 ```
 
 With even this simple level of processing, we can get some fun information:
 ```{r}
-# a count of words across documents
+# a count of words across documents, or document count
 colSums(dtm)[1:5]
-# a count of words in each document
+
+# a count of words in each document, or word count
 rowSums(dtm)
+
 # correlation between words
 cor(dtm)[1:5,1:5]
+
+# correlation between texts
 cor(t(dtm))
 ```
 
@@ -71,7 +149,7 @@ Often, we're more interested in less common words, as those tend to be more mean
 relevant texts to a search).
 
 The most simple, straightforward way to adjust the weight of words is to weight them
-(adjust their values).
+(transform their values).
 
 Weighting can take place on either or both axes of the dtm; term weighting adjusts the
 effect of term frequency, and document weighting adjusts the effect of term commonness.
@@ -113,7 +191,7 @@ cor(t(lma_weight(dtm,'idf')))
 cor(t(lma_weight(dtm,'entropy')))
 ```
 
-For now, we'll just apply standard word term count (frequency) weighting
+For now, we'll just apply standard word count (frequency) weighting
 ```{r}
 wdtm = lma_weight(dtm)
 ```
@@ -125,7 +203,7 @@ This is effectively what LIWC (or any dictionary-based approach) does --
 reducing the number of terms by throwing them into categories:
 ```{r}
 cwdtm = lma_termcat(wdtm)
-cwdtm[,1:7]
+cwdtm[,1:6]
 ```
 
 # Language Style Matching
@@ -136,7 +214,7 @@ lma_simets(cwdtm,metric='canberra')
 ```
 
 What makes language style matching language style matching is our choice of weighting,
-dimention reduction, and similarity metric.
+dimension reduction, and similarity metric.
 
 ***
 <div style='text-align:center'>
