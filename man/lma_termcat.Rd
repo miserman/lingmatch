@@ -12,7 +12,7 @@ lma_termcat(dtm, dict, term.filter = NULL)
 \item{dict}{A \code{list} object with named character vectors as word lists.}
 
 \item{term.filter}{A regular expression string used to format the text of each term (passed to
-\code{\link[base]{gsub}}). For example, if terms are part-of-speech tagged (e.g.,
+\code{gsub}). For example, if terms are part-of-speech tagged (e.g.,
 \code{'a_DT'}), \code{filter='_.*'} would remove the tag.}
 }
 \description{

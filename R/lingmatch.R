@@ -319,7 +319,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
   if(is.null(group)){
     if(!is.null(speaker)) sal$group=speaker
     if(!is.null(comp.data)){
-      if(NROW(comp.data)==1) sal$b=comp.data else
+      if(!is.null(nrow(comp.data)) && nrow(comp.data)==1) sal$b=comp.data else
         warning('a group must be specified when comp has more than one row')
     }else if(ckf) sal$b=comp.data=if(opt$comp=='mean') colMeans(x,na.rm=TRUE) else apply(na.omit(x),2,comp)
     sim=do.call(lma_simets,c(list(x),sal))
@@ -833,7 +833,7 @@ lma_lspace=function(dtm,space,path=paste0(path.package('lingmatch'),'/data'),
 #' @param dtm A matrix with words as column names.
 #' @param dict A \code{list} object with named character vectors as word lists.
 #' @param term.filter A regular expression string used to format the text of each term (passed to
-#'   \code{\link[base]{gsub}}). For example, if terms are part-of-speech tagged (e.g.,
+#'   \code{gsub}). For example, if terms are part-of-speech tagged (e.g.,
 #'   \code{'a_DT'}), \code{filter='_.*'} would remove the tag.
 #' @export
 

@@ -70,6 +70,71 @@ write.dic=function(x,filename='custom'){
   message('dictionary saved to ',filename)
 }
 
+#' Process texts in a folder
+#'
+#' Read in and optionaly segment all texts within a folder.
+#'
+#' @param path Path to a folder containing files, or a vector of paths to files.
+#' @param segment Specifies how the text of each file should be segmented. If a number, texts will be broken into
+#'   that many segments, each with a roughly equal number of words. If a character, texts will be broken at that character;
+#'   for example, a string matching \code{join} will split texts on returns.
+#' @param subdir If \code{TRUE} files in folders in \code{path} will also be included.
+#' @param ext The extention of the files you want to read in. '.txt' by default.
+#' @param fixed If \code{FALSE}, and \code{segment} is a character, \code{segment} will be treated as a regular expression.
+#' @param segment.size If specified, \code{segment} will be ignored, and texts will be broken into segments countaining roughtly
+#'   \code{segment.size} number of words.
+#' @param bysentence If \code{TRUE}, and \code{segment} is a number or \code{wordcount} is specified, sentences will be kept
+#'   together, rather than being broken across segments.
+#' @param reader The function used to read files. File paths are always passed as the first argument.
+#'   \code{\link[base]{readLines}} by default.
+#' @param readarg A list of additional arguments to pass to \code{reader}, starting in the second position.
+#'
+#' @export
+
+read.folder=function(path=NULL,segment=NULL,subdir=FALSE,ext='.txt',fixed=TRUE,
+  segment.size=NULL,bysentence=FALSE,reader=readLines,readarg=list(warn=FALSE)){
+  if(missing(path)){
+    path=choose.dir()
+    if(is.na(path)) return()
+  }
+  fs=if(length(path)==1 && dir.exists(path)) fs=list.files(path,ext,recursive=subdir,full.names=TRUE) else path
+  fs=data.frame(rbind(fs,gsub('^.*[\\/]+','',fs)),stringsAsFactors=FALSE)
+  if(!missing(segment.size)) segment=NULL
+  d=do.call(rbind,lapply(fs[1:5],function(f){
+    txt=tryCatch(do.call(reader,c(f[1],readarg)),error=function(e)NULL)
+    if(!is.null(txt)){
+      txt=paste(txt,collapse='\r\n')
+      if(is.character(segment)){
+        txt=strsplit(txt,segment,fixed=fixed)[[1]]
+      }else if(is.numeric(segment) || !is.null(segment.size)){
+        if(bysentence){
+          txt=gsub('(?<=st|rd|ft|feat|dr|drs|mr|ms|mrs|messrs|jr|prof)\\.','__PERIOD__',txt,TRUE,TRUE)
+          txt=strsplit(gsub('(?<=[.?!][ ")}\\]])','__BREAK__',txt,perl=TRUE),'__BREAK__',fixed=TRUE)[[1]]
+          txt=gsub('__PERIOD__','.',txt,fixed=TRUE)
+        }
+        txt=strsplit(txt,' [^A-z0-9]+ | +|\r\n',perl=TRUE)[[1]]
+        ns=length(txt)
+        sls=vapply(txt,function(s)sum(s!=''),0)
+        wc=sum(sls)
+        segment=if(is.null(segment.size)) round(wc/segment+.5) else segment.size
+        op=c()
+        cl=s=0
+        ind=1
+        for(i in seq_len(ns)) if(i<ns && cl+sls[i]<segment) cl=cl+sls[i] else{
+          cl=0
+          op[ind]=paste(unlist(txt[(s+1):i]),collapse=' ')
+          s=i
+          ind=ind+1
+        }
+        txt=op[!grepl('^[ ]*$',op)]
+      }
+      data.frame(file=f[2],segment=seq_along(txt),text=txt)
+    }
+  }))
+  rownames(d)=seq_len(nrow(d))
+  d
+}
+
 #' Download Latent Semantic Spaces
 #'
 #' Downloads the specified semantic space.
@@ -98,7 +163,7 @@ download.lsspace=function(space='default',type='sqlite'){
       return(message(file,' uncompressed as ',uzf,' to ',pl))
     }else stop(file,' already exists in ',pl)
   }
-  td=try(download.file(url<-paste0('https://www.myweb.ttu.edu/miserman/lsspaces/',file),pl),TRUE)
+  td=try(download.file(url<-paste0('https://www.myweb.ttu.edu/miserman/lsspaces/',file),paste0(pl,'/',file)),TRUE)
   if(inherits(td,'try-error')) stop(if(grepl('Permission',td)) 'R does not have permission to save the file;' else
     sub('^.* : ','',td),'\ndownload it directly from ',url,call.=FALSE)
   if(z) unzip(paste0(pl,'/',file),exdir=pl)

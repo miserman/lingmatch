@@ -1,0 +1,72 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Process texts in a folder</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for read.folder"><tr><td>read.folder</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Process texts in a folder</h2>
+
+<h3>Description</h3>
+
+<p>Read in and optionaly segment all texts within a folder.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+read.folder(path = NULL, segment = NULL, subdir = FALSE, ext = ".txt",
+  fixed = TRUE, segment.size = NULL, bysentence = FALSE,
+  reader = readLines, readarg = list(warn = FALSE))
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>path</code></td>
+<td>
+<p>Path to a folder containing files, or a vector of paths to files.</p>
+</td></tr>
+<tr valign="top"><td><code>segment</code></td>
+<td>
+<p>Specifies how the text of each file should be segmented. If a number, texts will be broken into
+that many segments, each with a roughly equal number of words. If a character, texts will be broken at that character;
+for example, a string matching <code>join</code> will split texts on returns.</p>
+</td></tr>
+<tr valign="top"><td><code>subdir</code></td>
+<td>
+<p>If <code>TRUE</code> files in folders in <code>path</code> will also be included.</p>
+</td></tr>
+<tr valign="top"><td><code>ext</code></td>
+<td>
+<p>The extention of the files you want to read in. '.txt' by default.</p>
+</td></tr>
+<tr valign="top"><td><code>fixed</code></td>
+<td>
+<p>If <code>FALSE</code>, and <code>segment</code> is a character, <code>segment</code> will be treated as a regular expression.</p>
+</td></tr>
+<tr valign="top"><td><code>segment.size</code></td>
+<td>
+<p>If specified, <code>segment</code> will be ignored, and texts will be broken into segments countaining roughtly
+<code>segment.size</code> number of words.</p>
+</td></tr>
+<tr valign="top"><td><code>bysentence</code></td>
+<td>
+<p>If <code>TRUE</code>, and <code>segment</code> is a number or <code>wordcount</code> is specified, sentences will be kept
+together, rather than being broken across segments.</p>
+</td></tr>
+<tr valign="top"><td><code>reader</code></td>
+<td>
+<p>The function used to read files. File paths are always passed as the first argument.
+<code>readLines</code> by default.</p>
+</td></tr>
+<tr valign="top"><td><code>readarg</code></td>
+<td>
+<p>A list of additional arguments to pass to <code>reader</code>, starting in the second position.</p>
+</td></tr>
+</table>
+
+
+</body></html>
