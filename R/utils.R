@@ -100,23 +100,22 @@ read.folder=function(path=NULL,segment=NULL,subdir=FALSE,ext='.txt',fixed=TRUE,
   fs=if(length(path)==1 && dir.exists(path)) fs=list.files(path,ext,recursive=subdir,full.names=TRUE) else path
   fs=data.frame(rbind(fs,gsub('^.*[\\/]+','',fs)),stringsAsFactors=FALSE)
   if(!missing(segment.size)) segment=NULL
-  d=do.call(rbind,lapply(fs[1:5],function(f){
+  d=do.call(rbind,lapply(fs,function(f){
     txt=tryCatch(do.call(reader,c(f[1],readarg)),error=function(e)NULL)
     if(!is.null(txt)){
       txt=paste(txt,collapse='\r\n')
       if(is.character(segment)){
         txt=strsplit(txt,segment,fixed=fixed)[[1]]
       }else if(is.numeric(segment) || !is.null(segment.size)){
-        if(bysentence){
+        txt=if(bysentence){
           txt=gsub('(?<=st|rd|ft|feat|dr|drs|mr|ms|mrs|messrs|jr|prof)\\.','__PERIOD__',txt,TRUE,TRUE)
           txt=strsplit(gsub('(?<=[.?!][ ")}\\]])','__BREAK__',txt,perl=TRUE),'__BREAK__',fixed=TRUE)[[1]]
-          txt=gsub('__PERIOD__','.',txt,fixed=TRUE)
-        }
-        txt=strsplit(txt,' [^A-z0-9]+ | +|\r\n',perl=TRUE)[[1]]
+          lapply(txt,function(t)strsplit(sub('__PERIOD__','.',t,fixed=TRUE),' [^A-z0-9]+ | +|\r\n',perl=TRUE)[[1]])
+        }else strsplit(txt,' [^A-z0-9]+ | +|\r\n',perl=TRUE)[[1]]
         ns=length(txt)
         sls=vapply(txt,function(s)sum(s!=''),0)
         wc=sum(sls)
-        segment=if(is.null(segment.size)) round(wc/segment+.5) else segment.size
+        segment=if(is.null(segment.size)) round(wc/segment+.49) else segment.size
         op=c()
         cl=s=0
         ind=1
