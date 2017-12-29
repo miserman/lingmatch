@@ -143,30 +143,26 @@ read.folder=function(path=NULL,segment=NULL,subdir=FALSE,ext='.txt',fixed=TRUE,
 #'
 #' Spaces can (sometimes) be downloaded directly from \url{https://www.myweb.ttu.edu/miserman/lsspaces/}.
 #' @param space name of the space you wish to download. Options include \code{'default'} and \code{'tasa'}.
-#' @param type the type of file you wish to download, either \code{'rda'} or \code{'sqlite'}. If you plan on
-#'   loading the space into memory before use, rdas will be fastest, otherwise use sqlites.
+#' @param dir desired path to the downloaded space; default is '~/Documents/Latent Semantic Spaces'.
 #' @export
 #' @importFrom utils download.file unzip
 
-download.lsspace=function(space='default',type='sqlite'){
-  file=paste0(
-    match.arg(tolower(space),c('default','tasa')),
-    if(z<-grepl('^l|^s|^z',type,TRUE)) '.zip' else '.rda'
-  )
-  ll=path.package('lingmatch')
-  if(!(pl<-paste0(ll,'/data'))%in%list.dirs(ll)){
-    dir.create(pl)
-  }else if(file%in%list.files(pl)){
-    if(z && !(uzf<-sub('.zip','.sqlite',file,fixed=TRUE))%in%list.files(pl)){
-      unzip(paste0(pl,'/',file),exdir=pl)
-      return(message(file,' uncompressed as ',uzf,' to ',pl))
-    }else stop(file,' already exists in ',pl)
+download.lsspace=function(space='default',dir='~/Documents/Latent Semantic Spaces'){
+  z=grepl('^l|^s|^z',space,TRUE)
+  if(!grepl('.',space,fixed=TRUE)) space=paste0(space,'.zip') else if(grepl('.sqlite',space,fixed=TRUE))
+    space=sub('.sqlite','.zip',space,fixed=TRUE)
+  space=match.arg(space,c('default.zip','tasa.zip'))
+  if(!dir.exists(dir)) dir.create(dir) else if(space%in%list.files(dir)){
+    if(z && !(uzf<-sub('.zip','.sqlite',space,fixed=TRUE))%in%list.files(dir)){
+      unzip(paste0(dir,'/',space),exdir=dir)
+      return(message(space,' uncompressed as ',uzf,' to ',dir))
+    }else stop(space,' already exists in ',dir)
   }
-  td=try(download.file(url<-paste0('https://www.myweb.ttu.edu/miserman/lsspaces/',file),paste0(pl,'/',file)),TRUE)
+  td=try(download.file(url<-paste0('https://www.myweb.ttu.edu/miserman/lsspaces/',space),paste0(dir,'/',space)),TRUE)
   if(inherits(td,'try-error')) stop(if(grepl('Permission',td)) 'R does not have permission to save the file;' else
     sub('^.* : ','',td),'\ndownload it directly from ',url,call.=FALSE)
-  if(z) unzip(paste0(pl,'/',file),exdir=pl)
-  message(file,' downloaded to ',pl)
+  if(z) unzip(paste0(dir,'/',space),exdir=dir)
+  message(space,' downloaded to ',dir)
 }
 
 #' English function word category lists

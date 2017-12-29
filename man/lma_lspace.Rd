@@ -4,7 +4,7 @@
 \alias{lma_lspace}
 \title{Latent Semantic Space Operations}
 \usage{
-lma_lspace(dtm, space, path = paste0(path.package("lingmatch"), "/data"),
+lma_lspace(dtm, space, path = "~/Documents/Latent Semantic Spaces",
   dim.cutoff = 0.5, keep.dim = FALSE)
 }
 \arguments{
@@ -12,13 +12,12 @@ lma_lspace(dtm, space, path = paste0(path.package("lingmatch"), "/data"),
 
 \item{space}{A matrix of right singular vectors (a latent semantic space), with terms as
 rownames. If missing, this will be calculated from the \code{dtm}. If a character, a file
-matching the character will be searched for in the lingmatch data folder (e.g.,
-\code{space = 'default'}). If the file has a .sqlite extension, it will be only a subset will
-be loaded into RAM; this is slightly slower than using a full, preloaded .rda space, but faster
-than loading and unloading a complete .rda space, and less RAM intensive in all cases.}
+matching the character will be searched for in \code{path} (e.g., \code{space = 'default'}).
+If the file has a .sqlite extension, only a subset will be loaded into RAM; this is slightly
+slower than using a full, preloaded .rda space, but faster than loading and unloading a complete
+.rda space, and less RAM intensive in all cases.}
 
-\item{path}{Path to a folder containing spaces. If not included, spaces will be looked for in the
-lingmatch data folder (\code{paste0(path.package('lingmatch'),'/data')}).}
+\item{path}{Path to a folder containing spaces. Default is '~/Documents/Latent Semantic Spaces'.}
 
 \item{dim.cutoff}{If a \code{space} is calculated, this will be used to decide on the number of
 dimensions to be retained: \code{cumsum(d) / sum(d) < dim.cutoff}, where \code{d} is a vector

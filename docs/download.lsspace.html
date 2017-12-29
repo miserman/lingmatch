@@ -16,7 +16,8 @@
 <h3>Usage</h3>
 
 <pre>
-download.lsspace(space = "default", type = "sqlite")
+download.lsspace(space = "default",
+  dir = "~/Documents/Latent Semantic Spaces")
 </pre>
 
 
@@ -27,10 +28,9 @@ download.lsspace(space = "default", type = "sqlite")
 <td>
 <p>name of the space you wish to download. Options include <code>'default'</code> and <code>'tasa'</code>.</p>
 </td></tr>
-<tr valign="top"><td><code>type</code></td>
+<tr valign="top"><td><code>dir</code></td>
 <td>
-<p>the type of file you wish to download, either <code>'rda'</code> or <code>'sqlite'</code>. If you plan on
-loading the space into memory before use, rdas will be fastest, otherwise use sqlites.</p>
+<p>desired path to the downloaded space; default is '~/Documents/Latent Semantic Spaces'.</p>
 </td></tr>
 </table>
 

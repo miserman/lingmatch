@@ -705,12 +705,11 @@ lma_weight=function(dtm,weight='count',to.freq=TRUE,freq.complete=TRUE,log.base=
 #' @param dtm A matrix with terms as column names.
 #' @param space A matrix of right singular vectors (a latent semantic space), with terms as
 #'   rownames. If missing, this will be calculated from the \code{dtm}. If a character, a file
-#'   matching the character will be searched for in the lingmatch data folder (e.g.,
-#'   \code{space = 'default'}). If the file has a .sqlite extension, it will be only a subset will
-#'   be loaded into RAM; this is slightly slower than using a full, preloaded .rda space, but faster
-#'   than loading and unloading a complete .rda space, and less RAM intensive in all cases.
-#' @param path Path to a folder containing spaces. If not included, spaces will be looked for in the
-#'   lingmatch data folder (\code{paste0(path.package('lingmatch'),'/data')}).
+#'   matching the character will be searched for in \code{path} (e.g., \code{space = 'default'}).
+#'   If the file has a .sqlite extension, only a subset will be loaded into RAM; this is slightly
+#'   slower than using a full, preloaded .rda space, but faster than loading and unloading a complete
+#'   .rda space, and less RAM intensive in all cases.
+#' @param path Path to a folder containing spaces. Default is '~/Documents/Latent Semantic Spaces'.
 #' @param dim.cutoff If a \code{space} is calculated, this will be used to decide on the number of
 #'   dimensions to be retained: \code{cumsum(d) / sum(d) < dim.cutoff}, where \code{d} is a vector
 #'   of singular values of \code{dtm} (i.e., \code{svd(dtm)$d}). The default is \code{.5}; lower
@@ -758,7 +757,7 @@ lma_weight=function(dtm,weight='count',to.freq=TRUE,freq.complete=TRUE,log.base=
 #' @importFrom RSQLite SQLite
 #' @importFrom DBI dbConnect dbGetQuery dbDisconnect
 
-lma_lspace=function(dtm,space,path=paste0(path.package('lingmatch'),'/data'),
+lma_lspace=function(dtm,space,path='~/Documents/Latent Semantic Spaces',
   dim.cutoff=.5,keep.dim=FALSE){
   if(missing(space)){
     nr=nrow(dtm)
@@ -776,10 +775,12 @@ lma_lspace=function(dtm,space,path=paste0(path.package('lingmatch'),'/data'),
   }else{
     if(is.character(space)){
       if(!missing(path)) path=sub('/$','',path)
-      if(length(fls<-list.files(path))==0){
-        message('no spaces found in ',path)
-        if(grepl('^y',readline('would you like to download the default space? (y/n): '),TRUE))
-          download.lsspace() else stop('no spaces available; load and specify a space,
+      if(length(fls<-list.files(path))==0 || !any(grepl(space,fls))){
+        message('spaces not found in ',path)
+        if(grepl('^y',readline('would you like to download the space? (y/n): '),TRUE)){
+          download.lsspace(space,dir=path)
+          fls=list.files(path)
+        }else stop('no spaces available; load and specify a space,
             or download one with download.lsspace()',call.=FALSE)
       }
       file=grep(space,fls,value=TRUE)

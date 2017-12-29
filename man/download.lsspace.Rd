@@ -4,13 +4,13 @@
 \alias{download.lsspace}
 \title{Download Latent Semantic Spaces}
 \usage{
-download.lsspace(space = "default", type = "sqlite")
+download.lsspace(space = "default",
+  dir = "~/Documents/Latent Semantic Spaces")
 }
 \arguments{
 \item{space}{name of the space you wish to download. Options include \code{'default'} and \code{'tasa'}.}
 
-\item{type}{the type of file you wish to download, either \code{'rda'} or \code{'sqlite'}. If you plan on
-loading the space into memory before use, rdas will be fastest, otherwise use sqlites.}
+\item{dir}{desired path to the downloaded space; default is '~/Documents/Latent Semantic Spaces'.}
 }
 \description{
 Downloads the specified semantic space.

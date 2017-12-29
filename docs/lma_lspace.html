@@ -17,7 +17,7 @@ space), or map a dtm onto an existing latent semantic space.
 <h3>Usage</h3>
 
 <pre>
-lma_lspace(dtm, space, path = paste0(path.package("lingmatch"), "/data"),
+lma_lspace(dtm, space, path = "~/Documents/Latent Semantic Spaces",
   dim.cutoff = 0.5, keep.dim = FALSE)
 </pre>
 
@@ -33,15 +33,14 @@ lma_lspace(dtm, space, path = paste0(path.package("lingmatch"), "/data"),
 <td>
 <p>A matrix of right singular vectors (a latent semantic space), with terms as
 rownames. If missing, this will be calculated from the <code>dtm</code>. If a character, a file
-matching the character will be searched for in the lingmatch data folder (e.g.,
-<code>space = 'default'</code>). If the file has a .sqlite extension, it will be only a subset will
-be loaded into RAM; this is slightly slower than using a full, preloaded .rda space, but faster
-than loading and unloading a complete .rda space, and less RAM intensive in all cases.</p>
+matching the character will be searched for in <code>path</code> (e.g., <code>space = 'default'</code>).
+If the file has a .sqlite extension, only a subset will be loaded into RAM; this is slightly
+slower than using a full, preloaded .rda space, but faster than loading and unloading a complete
+.rda space, and less RAM intensive in all cases.</p>
 </td></tr>
 <tr valign="top"><td><code>path</code></td>
 <td>
-<p>Path to a folder containing spaces. If not included, spaces will be looked for in the
-lingmatch data folder (<code>paste0(path.package('lingmatch'),'/data')</code>).</p>
+<p>Path to a folder containing spaces. Default is '~/Documents/Latent Semantic Spaces'.</p>
 </td></tr>
 <tr valign="top"><td><code>dim.cutoff</code></td>
 <td>
