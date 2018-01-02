@@ -806,10 +806,10 @@ lma_lspace=function(dtm,space,path='~/Documents/Latent Semantic Spaces',
       if(!ck){
         tryCatch({
           db=dbConnect(SQLite(),dbname=paste0(path,'/',file))
+          on.exit(dbDisconnect(db))
           space=dbGetQuery(db,paste0('SELECT * FROM en where _INDEX IN (',
             paste(ts,collapse=','),')'))
-          dbDisconnect(db)
-        },error=function(e){dbDisconnect(db);stop('failed to query space: ',e$message,call.=FALSE)})
+        },error=function(e)stop('failed to query space: ',e$message,call.=FALSE))
         space=as.matrix(space[,-1])
         rownames(space)=lss_dict[ts]
       }else space=as.matrix(space[ts,-1])
@@ -833,40 +833,99 @@ lma_lspace=function(dtm,space,path='~/Documents/Latent Semantic Spaces',
 #' Reduces the dimensions of a document-term matrix by dictionary-based categorization.
 #' @param dtm A matrix with words as column names.
 #' @param dict A \code{list} object with named character vectors as word lists.
+#' @param term.weights A \code{list} object with named numeric vectors lining up with the character vectors
+#'   in \code{dict}, used to weight the terms in each \code{dict} vector. If a category in \code{dict}
+#'   is not specified in \code{term.weights}, or the \code{dict} and \code{term.weights} vectors aren't the same
+#'   length, the weight for that category will be 1.
+#' @param bias A list or named vector specifying a constant to add to the named category. If an '_intercept' is
+#'   included in a category, if will be removed from the category, and the associated \code{weight} will be used
+#'   as the \code{bias} for that category.
+#' @param escape Logical indicating whether the terms in \code{dict} should not be treated as plain text
+#'   (including asterisk wild cards). If \code{TRUE}, regular expression related characters are escaped. Set to
+#'   \code{TRUE} if you get PCRE compilation errors.
 #' @param term.filter A regular expression string used to format the text of each term (passed to
 #'   \code{gsub}). For example, if terms are part-of-speech tagged (e.g.,
 #'   \code{'a_DT'}), \code{filter='_.*'} would remove the tag.
+#' @param term.break A limit used to break up longer categories. Increase from 3900 if you get a PCRE compilation
+#'   error.
 #' @export
 
-lma_termcat=function(dtm,dict,term.filter=NULL){
+lma_termcat=function(dtm,dict,term.weights=list(),bias=NULL,escape=FALSE,term.filter=NULL,term.break=3900){
   st=proc.time()[3]
   if(missing(dict)) dict=lma_dict(1:9)
-  lab=lapply(dict,function(l)grep('(',l,fixed=TRUE))
-  lab=lab[vapply(lab,length,numeric(1))!=0]
-  if(length(lab)!=0){
-    special=lma_dict(special)[[1]][c('SMILE','FROWN')]
-    for(l in names(lab)){
-      for(en in c('SMILE','FROWN')) dict[[l]][lab[[l]]]=gsub(special[[en]],en,dict[[l]][lab[[l]]])
-      sul=grep('(',dict[[l]],fixed=TRUE)
-      dict[[l]][sul]=gsub("'|^-+|-(?=-)|\\*-+",'',
-        gsub('$','-',gsub('[^A-z0-9*\']','-',dict[[l]][sul])),perl=TRUE)
-      dict[[l]]=dict[[l]][!grepl('[(/:;]|\\)',dict[[l]])]
+  if(!is.list(dict)){
+    if(!missing(term.weights) && !is.list(term.weights)) term.weights=list(cat=term.weights) else{
+      if(length(term.weights)==1) names(term.weights)='cat' else{
+        if(any(l<-lapply(term.weights,length)==length(dict))){
+          term.weights=term.weights[l][1]
+          names(term.weights)='cat'
+        }else{
+          if(!missing(term.weights)) warning('no weights line up with the dict category, so they will be ignored')
+          term.weights=list(cat=rep(1,length(dict)))
+        }
+      }
+    }
+    dict=list(cat=dict)
+  }
+  for(n in names(dict)) if(!n%in%names(bias) && any(ii<-dict[[n]]=='_intercept')){
+    dict[[n]]=dict[[n]][!ii]
+    bias[n]=weight[[n]][ii]
+    weight[[n]]=weight[[n]][!ii]
+  }
+  dict=lapply(dict,as.character)
+  ats=attributes(dtm)[c('opts','WC','orientation','type')]
+  ats=ats[!vapply(ats,is.null,TRUE)]
+  atsn=names(ats)
+  if(any((l<-vapply(dict,length,0))>term.break)){
+    br=function(l,e=term.break){
+      l=length(l)
+      o=list(seq_len(e))
+      s=e+1
+      while(s<l){e=min(s+e,l);o=c(o,list(s:e));s=e+1}
+      o
+    }
+    op=vapply(names(dict),function(n){
+      if(l[n]>term.break) Reduce('+',lapply(br(dict[[n]]),function(s)
+        lma_termcat(dtm,dict[[n]][s],term.weights[[n]][s],bias,escape,term.filter,term.break))) else
+        lma_termcat(dtm,dict[cat],term.weights[cat],bias,escape,term.filter,term.break)
+    },numeric(nrow(dtm)))
+  }else{
+    ord=dict
+    lab=lapply(dict,function(l)grep('(',l,fixed=TRUE))
+    lab=lab[vapply(lab,length,0)!=0]
+    if(length(lab)!=0){
+      special=lma_dict(special)[[1]][c('SMILE','FROWN')]
+      for(l in names(lab)){
+        for(en in c('SMILE','FROWN')) dict[[l]][lab[[l]]]=gsub(special[[en]],en,dict[[l]][lab[[l]]])
+        sul=grep('(',dict[[l]],fixed=TRUE)
+        dict[[l]][sul]=gsub("'|^-+|-(?=-)|\\*-+",'',
+          gsub('$','-',gsub('[^A-z0-9*\']','-',dict[[l]][sul])),perl=TRUE)
+        dict[[l]]=dict[[l]][!grepl('[(/:;]|\\)',dict[[l]])]
+      }
+    }
+    dict=if(!escape) lapply(ord,paste,collapse='|') else lapply(dict,function(l) if(length(l)!=1)
+      gsub('\\*\\$','',paste(paste0('^',gsub('(?=[*.^$({[\\]})+?-])','\\\\',l,perl=TRUE),'$',collapse='|'))) else l)
+    ws=if(is.null(term.filter)) colnames(dtm) else gsub(term.filter,'',colnames(dtm),perl=TRUE)
+    if('opts'%in%atsn && !ats$opts['to.lower']) ws=tolower(ws)
+    op=if(!missing(term.weights)){
+      ord=lapply(ord,function(cat)gsub('\\^|\\$','',cat))
+      for(n in names(dict)){
+        l=length(ord[[n]])
+        if(!n%in%names(term.weights)) term.weights[[n]]=rep(1,l) else if(length(term.weights[[n]])!=l){
+          warning('weights do not line up with terms for the ',n,' category, so they were ignored',call.=FALSE)
+          term.weights[[n]]=rep(1,l)
+        }
+        names(term.weights[[n]])=ord[[n]]
+      }
+      vapply(names(dict),function(c){
+        su=dtm[,grep(dict[[c]],ws,perl=TRUE),drop=FALSE]
+        colSums(t(su)*term.weights[[c]][colnames(su)],na.rm=TRUE)
+      },numeric(nrow(dtm)))
+    }else{
+      vapply(names(dict),function(c)rowSums(dtm[,grep(dict[[c]],ws,perl=TRUE),drop=FALSE],na.rm=TRUE),numeric(nrow(dtm)))
     }
   }
-  if(!any(vapply(dict,function(l)any(grepl('\\^|\\$',l)),logical(1)))){
-    dict=lapply(dict,function(l){
-      l=gsub('(?=[)(}\\][{><?!^:])','\\\\',l,perl=TRUE)
-      l=paste(paste0('^',l,'$'),collapse='|')
-      gsub('\\*\\$','',l)
-    })
-  }else dict=lapply(dict,function(l)paste(l,collapse='|'))
-  ws=if(is.null(term.filter)) colnames(dtm) else gsub(term.filter,'',colnames(dtm),perl=TRUE)
-  ats=attributes(dtm)[c('opts','WC','orientation','type')]
-  ats=ats[!vapply(ats,is.null,logical(1))]
-  atsn=names(ats)
-  if('opts'%in%atsn && !ats$opts['to.lower']) ws=tolower(ws)
-  op=vapply(names(dict),function(c)rowSums(dtm[,grep(dict[[c]],ws,perl=TRUE),drop=FALSE],na.rm=TRUE),
-    numeric(nrow(dtm)))
+  if(!is.null(bias)) for(n in names(bias)) if(n%in%names(op)) op[,n]=op[,n]+bias[[n]]
   attr(op,'WC')=if('WC'%in%atsn) ats$WC else rowSums(dtm,na.rm=TRUE)
   attr(op,'time')=c(attr(dtm,'time'),termcat=unname(proc.time()[3]-st))
   if('orientation'%in%atsn) attr(op,'orientation')=ats$orientation

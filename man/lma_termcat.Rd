@@ -4,16 +4,33 @@
 \alias{lma_termcat}
 \title{Document-Term Matrix Categorization}
 \usage{
-lma_termcat(dtm, dict, term.filter = NULL)
+lma_termcat(dtm, dict, term.weights = list(), bias = NULL, escape = FALSE,
+  term.filter = NULL, term.break = 3900)
 }
 \arguments{
 \item{dtm}{A matrix with words as column names.}
 
 \item{dict}{A \code{list} object with named character vectors as word lists.}
 
+\item{term.weights}{A \code{list} object with named numeric vectors lining up with the character vectors
+in \code{dict}, used to weight the terms in each \code{dict} vector. If a category in \code{dict}
+is not specified in \code{term.weights}, or the \code{dict} and \code{term.weights} vectors aren't the same
+length, the weight for that category will be 1.}
+
+\item{bias}{A list or named vector specifying a constant to add to the named category. If an '_intercept' is
+included in a category, if will be removed from the category, and the associated \code{weight} will be used
+as the \code{bias} for that category.}
+
+\item{escape}{Logical indicating whether the terms in \code{dict} should not be treated as plain text
+(including asterisk wild cards). If \code{TRUE}, regular expression related characters are escaped. Set to
+\code{TRUE} if you get PCRE compilation errors.}
+
 \item{term.filter}{A regular expression string used to format the text of each term (passed to
 \code{gsub}). For example, if terms are part-of-speech tagged (e.g.,
 \code{'a_DT'}), \code{filter='_.*'} would remove the tag.}
+
+\item{term.break}{A limit used to break up longer categories. Increase from 3900 if you get a PCRE compilation
+error.}
 }
 \description{
 Reduces the dimensions of a document-term matrix by dictionary-based categorization.

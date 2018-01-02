@@ -16,7 +16,8 @@
 <h3>Usage</h3>
 
 <pre>
-lma_termcat(dtm, dict, term.filter = NULL)
+lma_termcat(dtm, dict, term.weights = list(), bias = NULL, escape = FALSE,
+  term.filter = NULL, term.break = 3900)
 </pre>
 
 
@@ -31,11 +32,35 @@ lma_termcat(dtm, dict, term.filter = NULL)
 <td>
 <p>A <code>list</code> object with named character vectors as word lists.</p>
 </td></tr>
+<tr valign="top"><td><code>term.weights</code></td>
+<td>
+<p>A <code>list</code> object with named numeric vectors lining up with the character vectors
+in <code>dict</code>, used to weight the terms in each <code>dict</code> vector. If a category in <code>dict</code>
+is not specified in <code>term.weights</code>, or the <code>dict</code> and <code>term.weights</code> vectors aren't the same
+length, the weight for that category will be 1.</p>
+</td></tr>
+<tr valign="top"><td><code>bias</code></td>
+<td>
+<p>A list or named vector specifying a constant to add to the named category. If an '_intercept' is
+included in a category, if will be removed from the category, and the associated <code>weight</code> will be used
+as the <code>bias</code> for that category.</p>
+</td></tr>
+<tr valign="top"><td><code>escape</code></td>
+<td>
+<p>Logical indicating whether the terms in <code>dict</code> should not be treated as plain text
+(including asterisk wild cards). If <code>TRUE</code>, regular expression related characters are escaped. Set to
+<code>TRUE</code> if you get PCRE compilation errors.</p>
+</td></tr>
 <tr valign="top"><td><code>term.filter</code></td>
 <td>
 <p>A regular expression string used to format the text of each term (passed to
 <code>gsub</code>). For example, if terms are part-of-speech tagged (e.g.,
 <code>'a_DT'</code>), <code>filter='_.*'</code> would remove the tag.</p>
+</td></tr>
+<tr valign="top"><td><code>term.break</code></td>
+<td>
+<p>A limit used to break up longer categories. Increase from 3900 if you get a PCRE compilation
+error.</p>
 </td></tr>
 </table>
 
