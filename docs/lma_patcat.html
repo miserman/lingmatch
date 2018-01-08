@@ -1,0 +1,87 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Categorize raw texts using a pattern-based dictionary</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for lma_patcat"><tr><td>lma_patcat</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Categorize raw texts using a pattern-based dictionary</h2>
+
+<h3>Description</h3>
+
+<p>Categorize raw texts using a pattern-based dictionary
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+lma_patcat(text, dict, term = "term", category = "category",
+  weight = "weight", to.lower = TRUE, to.percent = TRUE, bias = NULL,
+  intname = "_intercept", dtm = FALSE)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>text</code></td>
+<td>
+<p>A vector of raw text to be categorized.</p>
+</td></tr>
+<tr valign="top"><td><code>dict</code></td>
+<td>
+<p>At least a vector of terms (patterns), usually a matrix-like object with columns for terms,
+categories, and weights.</p>
+</td></tr>
+<tr valign="top"><td><code>term, category, weight</code></td>
+<td>
+<p>Strings specifying the relevant column names in <code>dict</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>to.lower</code></td>
+<td>
+<p>Logical indicating whether <code>text</code> should be convered to lower case.</p>
+</td></tr>
+<tr valign="top"><td><code>to.percent</code></td>
+<td>
+<p>Logical indicating whether term-counts should be devided by document-counts before
+being weighted.</p>
+</td></tr>
+<tr valign="top"><td><code>bias</code></td>
+<td>
+<p>A constant to add to each category after weighting and summing. Can be a vector with names
+corresponding to the unique values in <code>dict[,category]</code>, but is usually extracted from dict based
+on the intercept included in each category (defined by <code>intname</code>).</p>
+</td></tr>
+<tr valign="top"><td><code>intname</code></td>
+<td>
+<p>The term representing the intercept (bias) of a category, to be extracted from <code>dict</code>
+and used as <code>bias</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>dtm</code></td>
+<td>
+<p>Logical; if <code>TRUE</code>, only a document-term matrix will be returned, rather than the
+weighted, summed, and adjusted category value.</p>
+</td></tr>
+</table>
+
+
+<h3>Examples</h3>
+
+<pre>
+# example text
+text = c(
+  "Oh what youth was! What I had and gave away. What I took and spent and saw. What I lost. And now? Ruin.",
+  "God, are you so bored?! You just want what's gone from us all? I miss the you that was too. I love that you.",
+  "Tomorrow! Tomorrow--nay, even tonight--you wait, I am about to change. Soon I will off to revert. Please wait."
+)
+
+# read in the temporal orientation lexicon from the World Well-Being Project
+tempori = read.csv('https://wwbp.org/downloads/public_data/temporalOrientationLexicon.csv')
+
+lma_patcat(text,tempori)
+
+</pre>
+
+
+</body></html>

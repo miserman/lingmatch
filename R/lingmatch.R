@@ -183,10 +183,16 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
       do.wmc=FALSE
       if(!missing(comp)){
         if(class(comp)%in%c('matrix','data.frame')){
-          if(missing(comp.data)) comp.data=comp
-          if(all(dn%in%colnames(comp))) comp=comp[,dn]
+          if(missing(group) && missing(comp.group)){
+            comp.data=comp
+            comp=mean
+            opt[c('comp','comp.data')]=c('mean',opt$comp)
+          }else{
+            if(missing(comp.data)) comp.data=comp
+            if(all(dn%in%colnames(comp))) comp=comp[,dn]
+          }
         }else{
-          if(is.character(comp) && (length(comp)>1 ||  grepl(' ',comp,fixed=TRUE)))
+          if(is.character(comp) && (length(comp)>1 || grepl(' ',comp,fixed=TRUE)))
             comp=wmc(do.call(lma_dtm,c(list(comp),dsp$p)))
         }
       }
@@ -207,20 +213,22 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
     lapply(opt$group[-1],gv,data) else list(as.character(gv(opt$group,data)))
   if(!missing(comp.group) || !missing(comp.data)){
     cg=opt[[if(missing(comp.group)) 'group' else 'comp.group']]
-    cg=if(length(cg)>1 && !grepl('\\$|\\[',as.character(cg[1]))) lapply(as.character(cg[-1]),gv,
-      comp.data) else list(gv(cg,comp.data))
-    if(cc!=1) if(NROW(comp)!=length(cg[[1]]) || NROW(x)!=length(group[[1]]))
-      stop('data and comp.data mismatch',call.=FALSE)
-    comp.group=do.call(paste,cg)
-    if(!is.null(comp.data)) rownames(comp.data)=comp.group
-    if(length(group)>1){
-      group=do.call(paste,group)
-      if(!is.null(comp.data) && any(ck<-!(ckg<-unique(group))%in%unique(comp.group))) if(all(ck))
-        stop('group and comp.group had no levels in common') else{
-          warning('levels not found in comp.group: ',paste(ckg[ck],collapse=', '),call.=FALSE)
-          group=group[ck<-group%in%ckg[!ck]]
-          x=x[ck,,drop=FALSE]
-        }
+    if(!is.null(cg)){
+      cg=if(length(cg)>1 && !grepl('\\$|\\[',as.character(cg[1]))) lapply(as.character(cg[-1]),gv,
+        comp.data) else list(gv(cg,comp.data))
+      if(cc!=1) if(NROW(comp)!=length(cg[[1]]) || NROW(x)!=length(group[[1]]))
+        stop('data and comp.data mismatch',call.=FALSE)
+      comp.group=do.call(paste,cg)
+      if(!is.null(comp.data)) rownames(comp.data)=comp.group
+      if(length(group)>1){
+        group=do.call(paste,group)
+        if(!is.null(comp.data) && any(ck<-!(ckg<-unique(group))%in%unique(comp.group))) if(all(ck))
+          stop('group and comp.group had no levels in common') else{
+            warning('levels not found in comp.group: ',paste(ckg[ck],collapse=', '),call.=FALSE)
+            group=group[ck<-group%in%ckg[!ck]]
+            x=x[ck,,drop=FALSE]
+          }
+      }
     }
   }
   if(!missing(order)){
@@ -287,8 +295,6 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
       x=x[,cns]
     }
     comp.data=comp.data[,cns]
-  }else if(is.function(comp)){
-
   }
   sim=speaker=NULL
   if(!is.null(group)){
@@ -319,7 +325,10 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
   if(is.null(group)){
     if(!is.null(speaker)) sal$group=speaker
     if(!is.null(comp.data)){
-      if(!is.null(nrow(comp.data)) && nrow(comp.data)==1) sal$b=comp.data else
+      if(ckf){
+        opt$comp=paste(opt$comp.data,opt$comp)
+        sal$b=comp.data=if(opt$comp=='mean') colMeans(comp.data,na.rm=TRUE) else apply(na.omit(comp.data),2,comp)
+      }else if(!is.null(nrow(comp.data)) && nrow(comp.data)==1) sal$b=comp.data else
         warning('a group must be specified when comp has more than one row')
     }else if(ckf) sal$b=comp.data=if(opt$comp=='mean') colMeans(x,na.rm=TRUE) else apply(na.omit(x),2,comp)
     sim=do.call(lma_simets,c(list(x),sal))
@@ -329,25 +338,37 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
     ckp=cc==2 && opt$comp=='pairwise'
     ckq=cc==2 && opt$comp=='sequential'
     if(gl==1){
-      if(opt$comp!='pairwise') for(g in unique(sim[,1])){
-        su=sim[,1]==g
-        if(cks){sal$group=speaker[su];sal$mean=TRUE}else if(ckc){
-          if(nrow(cc<-comp.data[if(!is.null(comp.group)) comp.group==g else g,,drop=FALSE])==1)
-            sal$b=cc else warning('comp.data has too few/many rows in group ',g)
-        }else if(ckf) if(sum(su)>1) sal$b=if(opt$comp=='mean') colMeans(x[su,],na.rm=TRUE) else
-          apply(na.omit(x[su,]),2,comp) else{sim[su,mets]=1;next}
-        if((sum(su)==1 && is.null(sal$b))){sim[su,mets]=1;next}
-        sim[su,mets]=do.call(lma_simets,c(list(x[su,,drop=FALSE]),sal))
+      if(opt$comp!='pairwise'){
+        ckmc=FALSE
+        gs=unique(sim[,1])
+        if(is.null(comp.data) && ckf){
+          ckmc=TRUE
+          opt$comp=paste(opt$group,'group',opt$comp)
+          comp.data=data.frame(matrix(NA,length(gs),nc,dimnames=list(gs,colnames(x))))
+        }
+        for(g in gs){
+          su=sim[,1]==g
+          if(cks){sal$group=speaker[su];sal$mean=TRUE}else if(ckc){
+            if(nrow(cc<-comp.data[if(!is.null(comp.group)) comp.group==g else g,,drop=FALSE])==1)
+              sal$b=cc else warning('comp.data has too few/many rows in group ',g)
+          }else if(ckf) if(sum(su)>1) sal$b=if(opt$comp=='mean') colMeans(x[su,],na.rm=TRUE) else
+            apply(na.omit(x[su,]),2,comp) else{sim[su,mets]=1;next}
+          if(!is.null(sal$b) && ckmc) comp.data[g,]=sal$b
+          if((sum(su)==1 && is.null(sal$b))){sim[su,mets]=1;next}
+          sim[su,mets]=do.call(lma_simets,c(list(x[su,,drop=FALSE]),sal))
+        }
       }else{
         sal$square=FALSE
         sal$mean=TRUE
-        sim=lapply(ug<-unique(group[[1]]),function(g){
+        sim=vapply(ug<-unique(group[[1]]),function(g){
           su=group[[1]]==g
-          if(sum(su)!=1) do.call(lma_simets,c(list(x[su,,drop=FALSE]),sal)) else NA
-        })
-        names(sim)=ug
+          if(sum(su)!=1) unlist(do.call(lma_simets,c(list(x[su,,drop=FALSE]),sal))) else NA
+        },numeric(length(sal$metric)),USE.NAMES=FALSE)
+        if(is.matrix(sim)) sim=t(sim)
+        sim=data.frame(ug,sim)
+        colnames(sim)=c(opt$group,sal$metric)
       }
-    }else{
+    }else if(gl>1){
       for(i in seq_len(gl-1)) sim=cbind(sim,sim[,mets])
       sug=seq_len(gl)
       cn=paste0('g',sug)
