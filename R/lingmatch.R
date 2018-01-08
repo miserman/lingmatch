@@ -879,15 +879,17 @@ lma_termcat=function(dtm,dict,term.weights=list(),bias=NULL,escape=FALSE,term.fi
   if(any((l<-vapply(dict,length,0))>term.break)){
     br=function(l,e=term.break){
       l=length(l)
-      o=list(seq_len(e))
-      s=e+1
-      while(s<l){e=min(s+e,l);o=c(o,list(s:e));s=e+1}
+      f=round(l/e+.49)
+      o=lapply(seq_len(f),function(i)seq_len(e)+e*(i-1))
+      o[[f]]=o[[f]][o[[f]]<=l]
       o
     }
+    ag=list(dtm,bias=bias,escape=escape,term.filter=term.filter,term.break=term.break)
+    if(!missing(term.weights)) ag$term.weights=term.weights
     op=vapply(names(dict),function(n){
-      if(l[n]>term.break) Reduce('+',lapply(br(dict[[n]]),function(s)
-        lma_termcat(dtm,dict[[n]][s],term.weights[[n]][s],bias,escape,term.filter,term.break))) else
-        lma_termcat(dtm,dict[cat],term.weights[cat],bias,escape,term.filter,term.break)
+      if(l[n]>term.break) Reduce('+',lapply(br(dict[[n]]),function(s) do.call(lma_termcat,
+        c(ag,dict=dict[[n]][s],if(missing(term.weights)) term.weights=term.weights[[n]][s])
+      ))) else do.call(lma_termcat,c(ag,dict=dict[cat],if(missing(term.weights)) term.weights=term.weights[cat]))
     },numeric(nrow(dtm)))
   }else{
     ord=dict

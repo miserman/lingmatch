@@ -165,6 +165,76 @@ download.lsspace=function(space='default',dir='~/Documents/Latent Semantic Space
   message(space,' downloaded to ',dir)
 }
 
+#' Categorize raw texts using a pattern-based dictionary
+#'
+#' @param text A vector of raw text to be categorized.
+#' @param dict At least a vector of terms (patterns), usually a matrix-like object with columns for terms,
+#'   categories, and weights.
+#' @param term,category,weight Strings specifying the relevant column names in \code{dict}.
+#' @param to.lower Logical indicating whether \code{text} should be convered to lower case.
+#' @param to.percent Logical indicating whether term-counts should be devided by document-counts before
+#'   being weighted.
+#' @param bias A constant to add to each category after weighting and summing. Can be a vector with names
+#'   corresponding to the unique values in \code{dict[,category]}, but is usually extracted from dict based
+#'   on the intercept included in each category (defined by \code{intname}).
+#' @param intname The term representing the intercept (bias) of a category, to be extracted from \code{dict}
+#'   and used as \code{bias}.
+#' @param dtm Logical; if \code{TRUE}, only a document-term matrix will be returned, rather than the
+#'   weighted, summed, and adjusted category value.
+#' @examples
+#' # example text
+#' text = c(
+#'   "Oh, what youth was! What I had and gave away. What I took and spent and saw. What I lost. And now? Ruin.",
+#'   "God, are you so bored?! You just want what's gone from us all? I miss the you that was too. I love that you.",
+#'   "Tomorrow! Tomorrow--nay, even tonight--you wait, as I am about to change. Soon I will off to revert. Please wait."
+#' )
+#'
+#' # read in the temporal orientation lexicon from the World Well-Being Project
+#' tempori = read.csv('https://wwbp.org/downloads/public_data/temporalOrientationLexicon.csv')
+#'
+#' lma_patcat(text,tempori)
+#'
+#' @export
+
+lma_patcat=function(text,dict,term='term',category='category',weight='weight',
+  to.lower=TRUE,to.percent=TRUE,bias=NULL,intname='_intercept',dtm=FALSE){
+  text=as.character(text)
+  if(to.lower) text=tolower(text)
+  if(is.null(colnames(dict))){
+    if(is.list(dict)) dict=data.frame(
+      term=unlist(dict,use.names=FALSE),
+      category=unlist(lapply(names(dict),function(n)rep(n,length(dict[[n]]))))
+    ) else dict=data.frame(term=dict)
+    term='term'
+    category='category'
+  }
+  if(!weight%in%names(dict)) dict[,weight]=1
+  if(any(bs<-dict[,term]==intname)){
+    bias=dict[bs,,drop=FALSE]
+    bias=if(sum(bs)!=1 && category%in%names(bias)){
+      rownames(bias)=bias[,category]
+      t(bias[,weight,drop=FALSE])[1,]
+    }else bias[1,weight]
+    dict=dict[!bs,]
+  }
+  r=vapply(as.character(dict[,term]),function(p)
+    vapply(strsplit(text,p,fixed=TRUE),length,0)-1,numeric(length(text)))
+  if(to.percent){
+    rs=rowSums(r)
+    if(any(rs!=0)) r[rs>0,]=r[rs>0,]/rs[rs>0]
+  }
+  r=t(r)
+  if(dtm) return(r)
+  r=r*dict[,weight]
+  r=if(category%in%names(dict))
+    do.call(rbind,lapply(split(as.data.frame(r),dict[,category]),colSums)) else colSums(r)
+  if(!is.null(bias)) if(length(bias)==1) r=r+bias else if(!is.null(rownames(r))){
+    r[names(bias),]=r[names(bias),]+bias
+    r=t(r)
+  }
+  r
+}
+
 #' English function word category lists
 #'
 #' Returns a list of function words based on the Linguistic Inquiry and Word Count 2015 dictionary.
@@ -198,13 +268,13 @@ download.lsspace=function(space='default',dir='~/Documents/Latent Semantic Space
 lma_dict=function(...,as.regex=TRUE){
   cats=as.character(substitute(list(...)))[-1]
   dict=list(
-    ppron=c("^he$","^he'd$","^he's$","^her$","^hers$","^herself$","^hes$","^him$","^himself$","^his$","^hissel","^i$","^i'd$","^i'd've$",
-      "^i'll$","^i'm$","^i've$","^id$","^idc$","^idgaf$","^idk$","^idontknow$","^idve$","^ikr$","^ily","^im$","^ima$","^imean$","^imma$",
-      "^ive$","^let's$","^lets$","^me$","^methinks$","^mine$","^my$","^myself$","^oneself$","^our$","^ours$","^ourselves$","^she$","^she'd$",
-      "^she'll$","^she's$","^shes$","^thee$","^their","^them$","^themself$","^themselves$","^they$","^they'd$","^they'll$","^they've$",
-      "^theyd$","^theyll$","^theyve$","^thine$","^thou$","^thoust$","^thy$","^thyself$","^u$","^ur$","^us$","^we$","^we'd$","^we'll$",
-      "^we're$","^we've$","^weve$","^y'all$","^y'all's$","^ya$","^ya'll","^yall$","^yalls$","^ye$","^yinz","^you$","^you'd$","^you'll$",
-      "^you're$","^you've$","^youd$","^youll$","^your$","^youre$","^yours$","^yourself$","^yourselves$","^youve$"),
+    ppron=c("^he$","^he'd$","^he's$","^her$","^hers$","^herself$","^hes$","^him$","^himself$","^his$","^hissel","^i$","^ic$","^i'd$",
+      "^i'd've$","^i'll$","^i'm$","^i've$","^id$","^idc$","^idgaf$","^idk$","^idontknow$","^idve$","^iirc$","^ikr$","^ily","^im$","^ima$",
+      "^imean$","^imma$","^ive$","^let's$","^lets$","^me$","^methinks$","^mine$","^my$","^myself$","^oic$","^oneself$","^our$","^ours$",
+      "^ourselves$","^she$","^she'd$","^she'll$","^she's$","^shes$","^thee$","^their","^them$","^themself$","^themselves$","^they$",
+      "^they'd$","^they'll$","^they've$","^theyd$","^theyll$","^theyve$","^thine$","^thou$","^thoust$","^thy$","^thyself$","^u$","^ur$",
+      "^us$","^we$","^we'd$","^we'll$","^we're$","^we've$","^weve$","^y'all$","^y'all's$","^ya$","^ya'll","^yall$","^yalls$","^ye$","^yinz",
+      "^you$","^you'd$","^you'll$","^you're$","^you've$","^youd$","^youll$","^your$","^youre$","^yours$","^yourself$","^yourselves$","^youve$"),
     ipron=c("^another$","^anybod","^anymore$","^anyone","^anything$","^deez$","^everybod","^everyday$","^everyone",
       "^everything","^it$","^it'd$","^it'll$","^it's$","^itd$","^itll$","^its$","^itself$","^nobod","^other$","^others$","^somebod",
       "^someone","^something","^stuff$","^that$","^that'd$","^that'll$","^that's$","^thatd$","^thatll$","^thats$","^these$",
