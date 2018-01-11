@@ -180,6 +180,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
     if(any(!(ck<-dn%in%cn))){
       if('preps'%in%cn) colnames(x)=sub('preps','prep',cn,fixed=TRUE)
       if('articles'%in%cn) colnames(x)=sub('articles','article',cn,fixed=TRUE)
+      ck=dn%in%colnames(x)
     }
     if(sum(ck)>6 && any(x[1,dn[ck]]!=as.integer(x[1,dn[ck]]))){
       if(missing(data)) data=x
