@@ -176,7 +176,12 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
   if(class(x)%in%c('matrix','data.frame') && is.null(attr(x,'Type'))){
     dn=if('dict'%in%names(inp)) eval(inp$dict) else names(lma_dict(1:9))
     if(is.list(dn)) dn=names(dn)
-    if(sum(ck<-dn%in%colnames(x))>6 && any(x[1,dn]!=as.integer(x[1,dn]))){
+    cn=colnames(x)
+    if(any(!(ck<-dn%in%cn))){
+      if('preps'%in%cn) colnames(x)=sub('preps','prep',cn,fixed=TRUE)
+      if('articles'%in%cn) colnames(x)=sub('articles','article',cn,fixed=TRUE)
+    }
+    if(sum(ck)>6 && any(x[1,dn[ck]]!=as.integer(x[1,dn[ck]]))){
       if(missing(data)) data=x
       if(any(!ck)) dn=dn[ck]
       x=x[,dn]
