@@ -364,15 +364,33 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
           sim[su,mets]=do.call(lma_simets,c(list(x[su,,drop=FALSE]),sal))
         }
       }else{
-        sal$square=FALSE
-        sal$mean=TRUE
-        sim=vapply(ug<-unique(group[[1]]),function(g){
-          su=group[[1]]==g
-          if(sum(su)!=1) unlist(do.call(lma_simets,c(list(x[su,,drop=FALSE]),sal))) else NA
-        },numeric(length(sal$metric)),USE.NAMES=FALSE)
-        if(is.matrix(sim)) sim=t(sim)
-        sim=data.frame(ug,sim)
-        colnames(sim)=c(opt$group,sal$metric)
+        sal$square=if('square'%in%names(dsp$s)) dsp$s$square else TRUE
+        sal$mean=if('mean'%in%names(dsp$s)) dsp$s$mean else TRUE
+        if(sal$square && sal$mean){
+          sim=vapply(seq_along(group[[1]]),function(i){
+            su=group[[1]]==group[[1]][i]
+            su[i]=FALSE
+            sal$b=x[i,]
+            r=if(sum(su)!=0) do.call(lma_simets,c(list(x[su,,drop=FALSE]),sal)) else
+              vapply(sal$metric,function(m)NA,0)
+            if(is.null(nrow(r)) || nrow(r)==1) r else if(ncol(r)!=1) colMeans(r) else mean(r)
+          },numeric(length(sal$metric)))
+          sim=data.frame(group[[1]],if(is.matrix(sim)) t(sim) else sim)
+          colnames(sim)=c(opt$group,sal$metric)
+        }else{
+          sim=lapply(ug<-unique(group[[1]]),function(g){
+            su=group[[1]]==g
+            if(sum(su)!=1) do.call(lma_simets,c(list(x[su,,drop=FALSE]),sal)) else
+              vapply(sal$metric,function(m)NA,0)
+          })
+          if(!sal$square){
+            sim=data.frame(
+              if(sal$mean) ug else rep(ug,vapply(sim,function(gs)length(gs[[1]]),0)),
+              do.call(rbind,if(sal$mean) sim else lapply(sim,as.data.frame))
+            )
+            colnames(sim)=c(opt$group,sal$metric)
+          }else names(sim)=ug
+        }
       }
     }else if(gl>1){
       for(i in seq_len(gl-1)) sim=cbind(sim,sim[,mets])
@@ -1068,9 +1086,10 @@ lma_simets=function(a,b=NULL,metric,metric.arg=list(),group=NULL,agg=TRUE,agg.me
       for(met in metric) m[[met]][su]=foreach(i=seq_len(n),.combine=c) %dopar%
         vapply(seq_len(n-i)+i,function(r)comp(a[i,],a[r,],met),0)
       if(p) stopCluster(clust)
-      res=if(square && !mean){
+      res=if(square){
         u=upper.tri(m[[1]])
-        lapply(m,function(i){i[u]=t(i)[u];i})
+        res=lapply(m,function(i){i[u]=t(i)[u];i})
+        if(mean) lapply(res,function(i)(colSums(i)-1)/(ncol(i)-1)) else res
       }else lapply(m,function(i)i[lower.tri(i)])
     }else{
       if(length(group)!=n) stop('length(group) != NROW(a)')
@@ -1120,7 +1139,7 @@ lma_simets=function(a,b=NULL,metric,metric.arg=list(),group=NULL,agg=TRUE,agg.me
       vapply(metric,function(m)vapply(seq_len(n),function(r)comp(a[r,],b,m),0),numeric(n))
     }else vapply(metric,function(m)comp(a,b,m),0)
   }
-  if(mean) res=if(is.list(res)) lapply(res,mean,na.rm=TRUE) else colMeans(res,na.rm=TRUE)
+  if(mean && !square) res=if(is.list(res)) lapply(res,mean,na.rm=TRUE) else colMeans(res,na.rm=TRUE)
   attr(res,'time')=c(simets=unname(proc.time()[3]-st))
   res
 }
