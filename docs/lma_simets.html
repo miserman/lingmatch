@@ -18,7 +18,7 @@
 <pre>
 lma_simets(a, b = NULL, metric, metric.arg = list(), group = NULL,
   agg = TRUE, agg.mean = TRUE, square = TRUE, mean = FALSE,
-  ncores = detectCores() - 2)
+  sample = 200, ncores = detectCores() - 2)
 </pre>
 
 
@@ -109,6 +109,13 @@ comparison.</p>
 <tr valign="top"><td><code>mean</code></td>
 <td>
 <p>logical; if <code>TRUE</code>, a single mean for each metric is returned.</p>
+</td></tr>
+<tr valign="top"><td><code>sample</code></td>
+<td>
+<p>If <code>a</code> is a matrix and <code>b</code> is not specified (a pariwise comparison is to
+be made), this determines whether every comparison or a sample should be calculated. If
+<code>sample</code> is a number smaller than <code>nrow(a)</code>, each row will be compared against a
+random sample of other rows, not including the given row.</p>
 </td></tr>
 <tr valign="top"><td><code>ncores</code></td>
 <td>

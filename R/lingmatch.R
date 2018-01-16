@@ -1009,6 +1009,10 @@ lma_termcat=function(dtm,dict,term.weights=list(),bias=NULL,escape=FALSE,term.fi
 #' @param square logical; if \code{FALSE}, only the lower triangle is returned from a pairwise
 #'   comparison.
 #' @param mean logical; if \code{TRUE}, a single mean for each metric is returned.
+#' @param sample If \code{a} is a matrix and \code{b} is not specified (a pariwise comparison is to
+#'   be made), this determines whether every comparison or a sample should be calculated. If
+#'   \code{sample} is a number smaller than \code{nrow(a)}, each row will be compared against a
+#'   random sample of other rows, not including the given row.
 #' @param ncores sets the number of CPU cores to be used during pairwise comparisons. If not
 #'   specified, multiple cores will only be used if \code{nrow(a)} is greater than 1000, in which
 #'   case the number of detected cores - 2 will be used.
@@ -1044,7 +1048,7 @@ lma_termcat=function(dtm,dict,term.weights=list(),bias=NULL,escape=FALSE,term.fi
 #' @importFrom foreach foreach %dopar% registerDoSEQ
 
 lma_simets=function(a,b=NULL,metric,metric.arg=list(),group=NULL,agg=TRUE,agg.mean=TRUE,square=TRUE,
-  mean=FALSE,ncores=detectCores()-2){
+  mean=FALSE,sample=200,ncores=detectCores()-2){
   cf=NULL
   comp=function(a,b,metric) switch(metric,
     euclidean=1/(1+sum((a-b)^2)^.5),
@@ -1075,22 +1079,33 @@ lma_simets=function(a,b=NULL,metric,metric.arg=list(),group=NULL,agg=TRUE,agg.me
     n=NROW(a)
     if(n<2) stop('a must have more than 1 row when b is not provided',call.=FALSE)
     if(is.null(group)){
-      su=diag(n)
-      m=vapply(metric,function(met)list(met=su),list(0))
-      su=lower.tri(su)
-      p=ncores>1 && (!missing(ncores) || n>1000)
-      if(p){
-        clust=makeCluster(ncores)
-        registerDoParallel(clust)
-      }else registerDoSEQ()
-      for(met in metric) m[[met]][su]=foreach(i=seq_len(n),.combine=c) %dopar%
-        vapply(seq_len(n-i)+i,function(r)comp(a[i,],a[r,],met),0)
-      if(p) stopCluster(clust)
-      res=if(square){
-        u=upper.tri(m[[1]])
-        res=lapply(m,function(i){i[u]=t(i)[u];i})
-        if(mean) lapply(res,function(i)(colSums(i)-1)/(ncol(i)-1)) else res
-      }else lapply(m,function(i)i[lower.tri(i)])
+      rand=is.numeric(sample) && n>sample
+      res=if(rand){
+        if(missing(mean)) mean=TRUE
+        vapply(metric,function(m){
+          res=vapply(seq_len(n),function(i)vapply(sample(seq_len(n)[-i],sample),function(b)
+            comp(a[i,],a[b,],m),0),numeric(sample))
+          if(mean) colMeans(res) else res
+        },numeric(if(mean) n else n*sample))
+      }else{
+        if(missing(mean) && !missing(square) && !square) mean=TRUE
+        su=diag(n)
+        m=vapply(metric,function(met)list(met=su),list(0))
+        su=lower.tri(su)
+        p=ncores>1 && (!missing(ncores) || n>1000)
+        if(p){
+          clust=makeCluster(ncores)
+          registerDoParallel(clust)
+        }else registerDoSEQ()
+        for(met in metric) m[[met]][su]=foreach(i=seq_len(n),.combine=c) %dopar%
+          vapply(seq_len(n-i)+i,function(r)comp(a[i,],a[r,],met),0)
+        if(p) stopCluster(clust)
+        if(square){
+          u=upper.tri(m[[1]])
+          res=lapply(m,function(i){i[u]=t(i)[u];i})
+          if(mean) vapply(res,function(i)(colSums(i)-1)/(ncol(i)-1),numeric(n)) else res
+        }else vapply(m,function(i)i[su],numeric((n-1)*n/2))
+      }
     }else{
       if(length(group)!=n) stop('length(group) != NROW(a)')
       cblock=function(i=1,d=1){

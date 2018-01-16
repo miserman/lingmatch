@@ -6,7 +6,7 @@
 \usage{
 lma_simets(a, b = NULL, metric, metric.arg = list(), group = NULL,
   agg = TRUE, agg.mean = TRUE, square = TRUE, mean = FALSE,
-  ncores = detectCores() - 2)
+  sample = 200, ncores = detectCores() - 2)
 }
 \arguments{
 \item{a}{vector or matrix. If a vector, \code{b} must also be provided. If a matrix and \code{b}
@@ -44,6 +44,11 @@ example.}
 comparison.}
 
 \item{mean}{logical; if \code{TRUE}, a single mean for each metric is returned.}
+
+\item{sample}{If \code{a} is a matrix and \code{b} is not specified (a pariwise comparison is to
+be made), this determines whether every comparison or a sample should be calculated. If
+\code{sample} is a number smaller than \code{nrow(a)}, each row will be compared against a
+random sample of other rows, not including the given row.}
 
 \item{ncores}{sets the number of CPU cores to be used during pairwise comparisons. If not
 specified, multiple cores will only be used if \code{nrow(a)} is greater than 1000, in which
