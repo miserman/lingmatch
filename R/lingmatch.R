@@ -302,6 +302,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
     }
     comp.data=comp.data[,cns]
   }
+  compmeanck=opt$comp=='mean'
   sim=speaker=NULL
   if(!is.null(group)){
     if(!is.null(comp.data) && NROW(comp.data)==1){
@@ -333,10 +334,10 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
     if(!is.null(comp.data)){
       if(ckf){
         opt$comp=paste(opt$comp.data,opt$comp)
-        sal$b=comp.data=if(opt$comp=='mean') colMeans(comp.data,na.rm=TRUE) else apply(na.omit(comp.data),2,comp)
+        sal$b=comp.data=if(compmeanck) colMeans(comp.data,na.rm=TRUE) else apply(na.omit(comp.data),2,comp)
       }else if(!is.null(nrow(comp.data)) && nrow(comp.data)==1) sal$b=comp.data else
         warning('a group must be specified when comp has more than one row')
-    }else if(ckf) sal$b=comp.data=if(opt$comp=='mean') colMeans(x,na.rm=TRUE) else apply(na.omit(x),2,comp)
+    }else if(ckf) sal$b=comp.data=if(compmeanck) colMeans(x,na.rm=TRUE) else apply(na.omit(x),2,comp)
     sim=do.call(lma_simets,c(list(x),sal))
   }else{
     cks=!is.null(speaker)
@@ -349,7 +350,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
         gs=unique(sim[,1])
         if(is.null(comp.data) && ckf){
           ckmc=TRUE
-          opt$comp=paste(opt$group,'group',opt$comp)
+          opt$comp=paste(deparse(opt$group),'group',opt$comp)
           comp.data=data.frame(matrix(NA,length(gs),nc,dimnames=list(gs,colnames(x))))
         }
         for(g in gs){
@@ -357,7 +358,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
           if(cks){sal$group=speaker[su];sal$mean=TRUE}else if(ckc){
             if(nrow(cc<-comp.data[if(!is.null(comp.group)) comp.group==g else g,,drop=FALSE])==1)
               sal$b=cc else warning('comp.data has too few/many rows in group ',g)
-          }else if(ckf) if(sum(su)>1) sal$b=if(opt$comp=='mean') colMeans(x[su,],na.rm=TRUE) else
+          }else if(ckf) if(sum(su)>1) sal$b=if(compmeanck) colMeans(x[su,],na.rm=TRUE) else
             apply(na.omit(x[su,]),2,comp) else{sim[su,mets]=1;next}
           if(!is.null(sal$b) && ckmc) comp.data[g,]=sal$b
           if((sum(su)==1 && is.null(sal$b))){sim[su,mets]=1;next}
@@ -445,7 +446,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
               lss=length(ssu)
               if(lss<2) next
               if(cks) sal$group=speaker[ssu] else if(ckf)
-                sal$b=if(opt$comp=='mean') colMeans(ssg[[ssn]],na.rm=TRUE) else
+                sal$b=if(compmeanck) colMeans(ssg[[ssn]],na.rm=TRUE) else
                   apply(na.omit(ssg[[ssn]]),2,comp)
               if(!is.null(sal$b) && identical(sal$b,ssg[[ssn]])){sim[ssu,gl+mw+(mn*(s-1))]=1;next}
               ssim=do.call(lma_simets,c(list(ssg[[ssn]]),sal))
