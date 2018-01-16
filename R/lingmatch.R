@@ -1080,32 +1080,34 @@ lma_simets=function(a,b=NULL,metric,metric.arg=list(),group=NULL,agg=TRUE,agg.me
     if(n<2) stop('a must have more than 1 row when b is not provided',call.=FALSE)
     if(is.null(group)){
       rand=is.numeric(sample) && n>sample
+      p=ncores>1 && (!missing(ncores) || n>1000)
+      if(p){
+        clust=makeCluster(ncores)
+        registerDoParallel(clust)
+      }else registerDoSEQ()
       res=if(rand){
         if(missing(mean)) mean=TRUE
-        vapply(metric,function(m){
-          res=vapply(seq_len(n),function(i)vapply(sample(seq_len(n)[-i],sample),function(b)
-            comp(a[i,],a[b,],m),0),numeric(sample))
-          if(mean) colMeans(res) else res
-        },numeric(if(mean) n else n*sample))
+        ms=length(metric)
+        res=matrix(numeric((if(mean) n else n*sample)*ms),ncol=ms,dimnames=list(c(),metric))
+        for(m in metric) res[,m]=foreach(i=seq_len(n),.combine=c) %dopar% {
+          r=vapply(sample(seq_len(n)[-i],sample),function(b)comp(a[i,],a[b,],m),0)
+          if(mean) mean(r) else r
+        }
+        res
       }else{
         if(missing(mean) && !missing(square) && !square) mean=TRUE
         su=diag(n)
         m=vapply(metric,function(met)list(met=su),list(0))
         su=lower.tri(su)
-        p=ncores>1 && (!missing(ncores) || n>1000)
-        if(p){
-          clust=makeCluster(ncores)
-          registerDoParallel(clust)
-        }else registerDoSEQ()
         for(met in metric) m[[met]][su]=foreach(i=seq_len(n),.combine=c) %dopar%
           vapply(seq_len(n-i)+i,function(r)comp(a[i,],a[r,],met),0)
-        if(p) stopCluster(clust)
         if(square){
           u=upper.tri(m[[1]])
           res=lapply(m,function(i){i[u]=t(i)[u];i})
           if(mean) vapply(res,function(i)(colSums(i)-1)/(ncol(i)-1),numeric(n)) else res
         }else vapply(m,function(i)i[su],numeric((n-1)*n/2))
       }
+      if(p) stopCluster(clust)
     }else{
       if(length(group)!=n) stop('length(group) != NROW(a)')
       cblock=function(i=1,d=1){
