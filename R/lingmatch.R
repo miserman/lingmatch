@@ -1155,7 +1155,7 @@ lma_simets=function(a,b=NULL,metric,metric.arg=list(),group=NULL,agg=TRUE,agg.me
       a=a[,an,drop=FALSE]
     }
     res=if(!is.null(n<-nrow(a)) && n>1){
-      if(nrow(b)==n){
+      if(!is.null(nrb<-nrow(b)) && nrb==n){
         vapply(metric,function(m)vapply(seq_len(n),function(r)comp(a[r,],b[r,],m),0),numeric(n))
       }else vapply(metric,function(m)vapply(seq_len(n),function(r)comp(a[r,],b,m),0),numeric(n))
     }else vapply(metric,function(m)comp(a,b,m),0)
