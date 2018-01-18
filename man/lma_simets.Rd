@@ -13,7 +13,8 @@ lma_simets(a, b = NULL, metric, metric.arg = list(), group = NULL,
 is missing, each row will be compared. If a matrix and \code{b} is not missing, each row will
 be compared with \code{b}.}
 
-\item{b}{vector to be compared with \code{a} or rows of \code{a}.}
+\item{b}{vector to be compared with \code{a} or rows of \code{a}, or a matrix with the same
+number of rows as \code{a}, in which case each row of \code{a} and \code{b} will be compared.}
 
 \item{metric}{a function (see details), or a character at least partially matching one of the
 available metrics:

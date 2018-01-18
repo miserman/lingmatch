@@ -335,7 +335,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
       if(ckf){
         opt$comp=paste(opt$comp.data,opt$comp)
         sal$b=comp.data=if(compmeanck) colMeans(comp.data,na.rm=TRUE) else apply(na.omit(comp.data),2,comp)
-      }else if(!is.null(nrow(comp.data)) && nrow(comp.data)==1) sal$b=comp.data else
+      }else if(!is.null(nrcd<-nrow(comp.data)) && (nrcd==1 || nrcd==rx)) sal$b=comp.data else
         warning('a group must be specified when comp has more than one row')
     }else if(ckf) sal$b=comp.data=if(compmeanck) colMeans(x,na.rm=TRUE) else apply(na.omit(x),2,comp)
     sim=do.call(lma_simets,c(list(x),sal))
@@ -986,7 +986,8 @@ lma_termcat=function(dtm,dict,term.weights=list(),bias=NULL,escape=FALSE,term.fi
 #' @param a vector or matrix. If a vector, \code{b} must also be provided. If a matrix and \code{b}
 #'   is missing, each row will be compared. If a matrix and \code{b} is not missing, each row will
 #'   be compared with \code{b}.
-#' @param b vector to be compared with \code{a} or rows of \code{a}.
+#' @param b vector to be compared with \code{a} or rows of \code{a}, or a matrix with the same
+#'   number of rows as \code{a}, in which case each row of \code{a} and \code{b} will be compared.
 #' @param metric a function (see details), or a character at least partially matching one of the
 #'   available metrics:
 #'   \tabular{ll}{
@@ -1154,7 +1155,9 @@ lma_simets=function(a,b=NULL,metric,metric.arg=list(),group=NULL,agg=TRUE,agg.me
       a=a[,an,drop=FALSE]
     }
     res=if(!is.null(n<-nrow(a)) && n>1){
-      vapply(metric,function(m)vapply(seq_len(n),function(r)comp(a[r,],b,m),0),numeric(n))
+      if(nrow(b)==n){
+        vapply(metric,function(m)vapply(seq_len(n),function(r)comp(a[r,],b[r,],m),0),numeric(n))
+      }else vapply(metric,function(m)vapply(seq_len(n),function(r)comp(a[r,],b,m),0),numeric(n))
     }else vapply(metric,function(m)comp(a,b,m),0)
   }
   if(mean && !square) res=if(is.list(res)) lapply(res,mean,na.rm=TRUE) else colMeans(res,na.rm=TRUE)

@@ -218,7 +218,7 @@ lma_patcat=function(text,dict,term='term',category='category',weight='weight',
     dict=dict[!bs,]
   }
   r=vapply(as.character(dict[,term]),function(p)
-    vapply(strsplit(text,p,fixed=TRUE),length,0)-1,numeric(length(text)))
+    vapply(strsplit(text,p,fixed=TRUE),length,0),numeric(length(text)))
   if(to.percent){
     rs=rowSums(r)
     if(any(rs!=0)) r[rs>0,]=r[rs>0,]/rs[rs>0]
