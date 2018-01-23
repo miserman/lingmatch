@@ -213,7 +213,9 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
     }
     x=do.call(lma_dtm,c(list(x),dsp$p))
   }
-  cc=if(is.numeric(comp)) 1 else if(is.character(comp)) {comp=tolower(comp);2} else 0
+  cc=if(class(comp)%in%c('data.frame','matrix','numeric')){
+    comp=as.matrix(comp);1
+  }else if(is.character(comp)) {comp=tolower(comp);2} else 0
   # group and order
   if(!missing(group)) group=if(length(opt$group)>1 && !grepl('\\$|\\[',as.character(opt$group[1])))
     lapply(opt$group[-1],gv,data) else list(as.character(gv(opt$group,data)))
