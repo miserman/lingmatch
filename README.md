@@ -21,7 +21,13 @@ Then load the package:
 library(lingmatch)
 ```
 ## examples
-Given a vector of texts:
+Can make a quick comparison between two bits of text;
+by default this will give the cosine similarity between raw word-count vectors:
+```R
+lingmatch('First text to look at.','Text to compare that text with.')
+```
+
+Or, given a vector of texts:
 ```R
 text = c(
   "Why, hello there! How are you this evening?",
@@ -34,8 +40,8 @@ text = c(
 Process the texts, then measure similarity between each:
 ```R
 dtm = lma_dtm(text)
-dtm_categorized = lma_termcat(dtm, lma_dict(1:9))
-dtm_weighted = lma_weight(dtm_categorized, 'frequency')
+dtm_weighted = lma_weight(dtm, 'frequency')
+dtm_categorized = lma_termcat(dtm_weighted, lma_dict(1:9))
 similarity = lma_simets(dtm_categorized, metric = 'canberra')
 ```
 
