@@ -219,6 +219,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
     }
     x=do.call(lma_dtm,c(list(x),dsp$p))
   }
+  if(is.data.frame(comp)) comp=as.matrix(comp)
   cc=if(is.numeric(comp)) 1 else if(is.character(comp)){comp=tolower(comp);2}else 0
   # group and order
   if(!missing(group)) group=if(length(opt$group)>1 && !grepl('\\$|\\[',as.character(opt$group[1])))
@@ -910,7 +911,7 @@ lma_lspace=function(dtm,space,path='~/Documents/Latent Semantic Spaces',
 #' @param term.filter A regular expression string used to format the text of each term (passed to
 #'   \code{gsub}). For example, if terms are part-of-speech tagged (e.g.,
 #'   \code{'a_DT'}), \code{filter='_.*'} would remove the tag.
-#' @param term.break A limit used to break up longer categories. Increase from 3900 if you get a PCRE compilation
+#' @param term.break A limit used to break up longer categories. Reduce from 3900 if you get a PCRE compilation
 #'   error.
 #' @export
 

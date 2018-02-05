@@ -29,7 +29,7 @@ as the \code{bias} for that category.}
 \code{gsub}). For example, if terms are part-of-speech tagged (e.g.,
 \code{'a_DT'}), \code{filter='_.*'} would remove the tag.}
 
-\item{term.break}{A limit used to break up longer categories. Increase from 3900 if you get a PCRE compilation
+\item{term.break}{A limit used to break up longer categories. Reduce from 3900 if you get a PCRE compilation
 error.}
 }
 \description{
