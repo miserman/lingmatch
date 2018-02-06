@@ -276,7 +276,9 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
   if(is.matrix(comp) && is.list(comp)) comp=apply(comp,2,as.numeric)
   dtm=Matrix(as.matrix(x),sparse=TRUE)
   if(do.wmc) x=wmc(x)
-  if(drop) x=x[,colSums(x,na.rm=TRUE)!=0]
+  if(drop){
+    if(sum(su<-colSums(x,na.rm=TRUE)!=0)!=0) x=x[,su] else stop('x is all 0s after processing')
+  }
   nc=ncol(x)
   # finalizing comp
   if(cc==1 || opt$comp=='text'){
@@ -865,6 +867,7 @@ lma_lspace=function(dtm,space,path='~/Documents/Latent Semantic Spaces',
       space=load(paste0(path,'/',if(ck) file else sub('.sqlite','_dict.rda',file,fixed=TRUE)))
       lss_dict=eval(parse(text=space))
       if(is.data.frame(space)) lss_dict=rownames(space)
+      dtm=dtm[,vapply(data.frame(dtm),function(col)!any(is.na(col)),TRUE)]
       ts=fmatch(colnames(dtm),lss_dict,nomatch='')
       ts=ts[!is.na(ts)]
       if(length(ts)==0) stop('found no terms in common with the loaded space')
@@ -879,15 +882,15 @@ lma_lspace=function(dtm,space,path='~/Documents/Latent Semantic Spaces',
         rownames(space)=lss_dict[ts]
       }else space=as.matrix(space[ts,-1])
       ts=rownames(space)
-      }else{
-        ts=colnames(dtm)[colnames(dtm)%in%rownames(space)]
-        space=as.matrix(space[ts,])
-      }
+    }else{
+      ts=colnames(dtm)[colnames(dtm)%in%rownames(space)]
+      space=as.matrix(space[ts,])
+    }
     rep=length(ts)/ncol(dtm)
     if(rep<.2) warning(paste0('
       only ',round(rep*100,2),'% of dtm terms appear in the provided space;
       you might consider using a different source or cleaning/partial matching terms
-      '))
+    '))
     dtm=dtm[,ts]%*%space
   }
   dtm
