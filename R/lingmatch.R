@@ -276,8 +276,9 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
   if(is.matrix(comp) && is.list(comp)) comp=apply(comp,2,as.numeric)
   dtm=Matrix(as.matrix(x),sparse=TRUE)
   if(do.wmc) x=wmc(x)
+  if(is.null(nrow(x))) x=t(as.matrix(x))
   if(drop){
-    if(sum(su<-colSums(x,na.rm=TRUE)!=0)!=0) x=x[,su] else stop('x is all 0s after processing')
+    if(sum(su<-colSums(x,na.rm=TRUE)!=0)!=0) x=x[,su,drop=FALSE] else stop('x is all 0s after processing')
   }
   nc=ncol(x)
   # finalizing comp
