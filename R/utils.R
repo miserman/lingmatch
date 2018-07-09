@@ -15,19 +15,14 @@ read.dic=function(path,cats){
     di=di[-seq_len(lst[1])]
     lst=lst[2]-2
   }else stop('file is not in the expected format')
-  ci=lapply(di[seq_len(lst)],function(l)strsplit(l,'[ \t][^A-z]*')[[1]])
+  ci=lapply(di[seq_len(lst)],function(l)strsplit(l,'[ \t]+')[[1]])
   names(ci)=vapply(ci,'[[','',2)
   if(missing(cats)) cats=names(ci)
   ci=lapply(ci[names(ci)%in%cats],'[[',1)
-  if(ckp<-any(grepl('(',di,fixed=TRUE))){
-    di=gsub(' +\\(','_(',di)
-    di=gsub('\\) +',')_',di)
-  }
-  di=strsplit(di[seq_along(di)[-(1:3)]],'[ \t][^0-9]*')
+  di=strsplit(di[seq_along(di)[-(1:3)]],'[ \t]+(?=[0-9]|$)',perl=TRUE)
   di=di[vapply(di,length,0)>1]
   names(di)=vapply(di,'[','',1)
   di=lapply(di,'[',-1)
-  if(ckp) names(di)=gsub('_(?=\\()|(?<=\\))_',' ',names(di),perl=TRUE)
   wl=list()
   for(w in names(di)){
     ck=ci%in%di[[w]]
