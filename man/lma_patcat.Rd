@@ -5,8 +5,8 @@
 \title{Categorize raw texts using a pattern-based dictionary}
 \usage{
 lma_patcat(text, dict, term = "term", category = "category",
-  weight = "weight", to.lower = TRUE, to.percent = TRUE, bias = NULL,
-  intname = "_intercept", dtm = FALSE)
+  weight = "weight", to.lower = TRUE, to.percent = FALSE,
+  bias = NULL, intname = "_intercept", dtm = FALSE)
 }
 \arguments{
 \item{text}{A vector of raw text to be categorized.}
@@ -16,9 +16,9 @@ categories, and weights.}
 
 \item{term, category, weight}{Strings specifying the relevant column names in \code{dict}.}
 
-\item{to.lower}{Logical indicating whether \code{text} should be convered to lower case.}
+\item{to.lower}{Logical indicating whether \code{text} should be converted to lower case.}
 
-\item{to.percent}{Logical indicating whether term-counts should be devided by document-counts before
+\item{to.percent}{Logical indicating whether term-counts should be divided by document-counts before
 being weighted.}
 
 \item{bias}{A constant to add to each category after weighting and summing. Can be a vector with names
@@ -45,6 +45,6 @@ text = c(
 # read in the temporal orientation lexicon from the World Well-Being Project
 tempori = read.csv('https://wwbp.org/downloads/public_data/temporalOrientationLexicon.csv')
 
-lma_patcat(text,tempori)
+lma_patcat(text, tempori)
 
 }

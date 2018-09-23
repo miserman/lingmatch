@@ -17,8 +17,8 @@
 
 <pre>
 lma_patcat(text, dict, term = "term", category = "category",
-  weight = "weight", to.lower = TRUE, to.percent = TRUE, bias = NULL,
-  intname = "_intercept", dtm = FALSE)
+  weight = "weight", to.lower = TRUE, to.percent = FALSE,
+  bias = NULL, intname = "_intercept", dtm = FALSE)
 </pre>
 
 
@@ -40,11 +40,11 @@ categories, and weights.</p>
 </td></tr>
 <tr valign="top"><td><code>to.lower</code></td>
 <td>
-<p>Logical indicating whether <code>text</code> should be convered to lower case.</p>
+<p>Logical indicating whether <code>text</code> should be converted to lower case.</p>
 </td></tr>
 <tr valign="top"><td><code>to.percent</code></td>
 <td>
-<p>Logical indicating whether term-counts should be devided by document-counts before
+<p>Logical indicating whether term-counts should be divided by document-counts before
 being weighted.</p>
 </td></tr>
 <tr valign="top"><td><code>bias</code></td>
@@ -79,7 +79,7 @@ text = c(
 # read in the temporal orientation lexicon from the World Well-Being Project
 tempori = read.csv('https://wwbp.org/downloads/public_data/temporalOrientationLexicon.csv')
 
-lma_patcat(text,tempori)
+lma_patcat(text, tempori)
 
 </pre>
 

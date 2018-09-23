@@ -16,8 +16,8 @@
 <h3>Usage</h3>
 
 <pre>
-lma_termcat(dtm, dict, term.weights = list(), bias = NULL, escape = FALSE,
-  term.filter = NULL, term.break = 3900)
+lma_termcat(dtm, dict, term.weights = list(), bias = NULL,
+  escape = FALSE, term.filter = NULL, term.break = 3900)
 </pre>
 
 
@@ -59,7 +59,7 @@ as the <code>bias</code> for that category.</p>
 </td></tr>
 <tr valign="top"><td><code>term.break</code></td>
 <td>
-<p>A limit used to break up longer categories. Increase from 3900 if you get a PCRE compilation
+<p>A limit used to break up longer categories. Reduce from 3900 if you get a PCRE compilation
 error.</p>
 </td></tr>
 </table>

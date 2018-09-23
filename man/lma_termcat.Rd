@@ -4,8 +4,8 @@
 \alias{lma_termcat}
 \title{Document-Term Matrix Categorization}
 \usage{
-lma_termcat(dtm, dict, term.weights = list(), bias = NULL, escape = FALSE,
-  term.filter = NULL, term.break = 3900)
+lma_termcat(dtm, dict, term.weights = list(), bias = NULL,
+  escape = FALSE, term.filter = NULL, term.break = 3900)
 }
 \arguments{
 \item{dtm}{A matrix with words as column names.}

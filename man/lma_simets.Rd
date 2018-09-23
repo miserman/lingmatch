@@ -19,15 +19,16 @@ number of rows as \code{a}, in which case each row of \code{a} and \code{b} will
 \item{metric}{a function (see details), or a character at least partially matching one of the
 available metrics:
 \tabular{ll}{
-  \code{euclidean} \tab \code{1 / (1 + sum((a - b)^2)^.5)} \cr
+  \code{euclidean} \tab \code{1 - sum((a-b)^2)^.5} \cr
   \code{canberra} \tab \code{mean(as.numeric(1 - abs(a - b) / (a + b + .0001)))} \cr
   \code{cosine} \tab \code{sum(a * b) / sum(a^2 * sum(b^2))^.5} \cr
   \code{pearson} \tab \code{cor(a, b, method='pearson')} \cr
   \code{kendall} \tab \code{cor(a, b, method='kendall')} \cr
   \code{spearman} \tab \code{cor(a, b, method='spearman')} \cr
   \code{jaccard} \tab \code{sum(a & b) / sum(a | b)} \cr
-  \code{kld} \tab \code{p = (p<-table(a,b)/100)/sum(p); q = rowSums(p) \%*\% matrix(colSums(p),1);
-    sum(p*log(p/q))}\cr
+  \code{kld} \tab \code{1 - sum(vapply(unique(c(a, b)), function(v){pq = c(mean(a == v), mean(b == v));
+  if(pq[2]) pq[1] * log(pq[1] / pq[2]) else 0
+  }, 0), na.rm = TRUE)}\cr
 }}
 
 \item{metric.arg}{a list of arguments to be passed to \code{metric} if \code{metric} is a
@@ -46,7 +47,7 @@ comparison.}
 
 \item{mean}{logical; if \code{TRUE}, a single mean for each metric is returned.}
 
-\item{sample}{If \code{a} is a matrix and \code{b} is not specified (a pariwise comparison is to
+\item{sample}{If \code{a} is a matrix and \code{b} is not specified (a pairwise comparison is to
 be made), this determines whether every comparison or a sample should be calculated. If
 \code{sample} is a number smaller than \code{nrow(a)}, each row will be compared against a
 random sample of other rows, not including the given row.}

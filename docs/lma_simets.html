@@ -45,7 +45,7 @@ available metrics:
 <table summary="Rd table">
 <tr>
  <td style="text-align: left;">
-  <code>euclidean</code> </td><td style="text-align: left;"> <code>1 / (1 + sum((a - b)^2)^.5)</code> </td>
+  <code>euclidean</code> </td><td style="text-align: left;"> <code>1 - sum((a-b)^2)^.5</code> </td>
 </tr>
 <tr>
  <td style="text-align: left;">
@@ -73,8 +73,9 @@ available metrics:
 </tr>
 <tr>
  <td style="text-align: left;">
-  <code>kld</code> </td><td style="text-align: left;"> <code>p = (p&lt;-table(a,b)/100)/sum(p); q = rowSums(p) %*% matrix(colSums(p),1);
-    sum(p*log(p/q))</code></td>
+  <code>kld</code> </td><td style="text-align: left;"> <code>1 - sum(vapply(unique(c(a, b)), function(v){pq = c(mean(a == v), mean(b == v));
+  if(pq[2]) pq[1] * log(pq[1] / pq[2]) else 0
+  }, 0), na.rm = TRUE)</code></td>
 </tr>
 <tr>
  <td style="text-align: left;">
@@ -113,7 +114,7 @@ comparison.</p>
 </td></tr>
 <tr valign="top"><td><code>sample</code></td>
 <td>
-<p>If <code>a</code> is a matrix and <code>b</code> is not specified (a pariwise comparison is to
+<p>If <code>a</code> is a matrix and <code>b</code> is not specified (a pairwise comparison is to
 be made), this determines whether every comparison or a sample should be calculated. If
 <code>sample</code> is a number smaller than <code>nrow(a)</code>, each row will be compared against a
 random sample of other rows, not including the given row.</p>

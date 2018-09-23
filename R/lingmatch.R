@@ -1,12 +1,12 @@
 #' Linguistic Matching and Accommodation
 #'
 #' Offers a variety of methods to assess linguistic matching or accommodation, where \emph{matching}
-#' is general similarity (sometimes called \emph{homophily}), and \emph{accomodation} is some form
+#' is general similarity (sometimes called \emph{homophily}), and \emph{accommodation} is some form
 #' of conditional similarity (accounting for some base rate or precedent; sometimes called
 #' \emph{alignment}).
 #'
 #' There are a great many points of decision in the assessment of linguistic similarity and/or
-#' accomodation, partly inherited from the great many point of decision inherent in the numerical
+#' accommodation, partly inherited from the great many point of decision inherent in the numerical
 #' representation of language. Two general types of matching are implemented here as sets of
 #' defaults: Language/Linguistic Style Matching (LSM; Niederhoffer & Pennebaker, 2002; Ireland &
 #' Pennebaker, 2010), and Latent Semantic Analysis/Similarity (LSA; Landauer & Dumais, 1997;
@@ -56,7 +56,7 @@
 #' @param all.levels logical; if \code{FALSE}, multiple groups are combined. See the Grouping and
 #'   Comparisons section.
 #' @param type A character at least partially matching 'lsm' or 'lsa'; applies default settings
-#'   alighning with the standard calculations of each type:
+#'   aligning with the standard calculations of each type:
 #'   \tabular{ll}{
 #'     LSM \tab \code{lingmatch(text, weight='count', dict=lma_dict(1:9), metric='canberra')}\cr
 #'     LSA \tab \code{lingmatch(text, weight='tfidf', space='internal', metric='cosine')}\cr
@@ -114,7 +114,7 @@
 #' @importFrom stats na.omit cor dpois
 
 lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.group=NULL,order=NULL,
-  drop=TRUE,all.levels=TRUE,type='lsm'){
+  drop=TRUE,all.levels=FALSE,type='lsm'){
   inp=as.list(substitute(list(...)))[-1]
   #setting up a default type if specified
   if(!missing(type) && !is.null(type)){
@@ -142,7 +142,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
     ta=a
     if(is.character(ta)){
       if(!is.null(data) && ta%in%colnames(data)) return(unlist(data[,ta])) else
-      if(length(ta)==1 || !any(grepl(' ',ta,fixed=TRUE))) ta=parse(text=a)
+        if(length(ta)==1 || !any(grepl(' ',ta,fixed=TRUE))) ta=parse(text=a)
     }
     ta=tryCatch(eval(ta,data,parent.frame(2)),error=function(e)NULL)
     if(length(ta)==0) ta=tryCatch(eval(a,globalenv()),error=function(e)NULL)
@@ -220,42 +220,62 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
     x=do.call(lma_dtm,c(list(x),dsp$p))
   }
   if(is.data.frame(comp)) comp=as.matrix(comp)
-  cc=if(is.numeric(comp)) 1 else if(is.character(comp)){comp=tolower(comp);2}else 0
+  cc=if(is.numeric(comp)) 1 else if(is.character(comp)){
+    comp=tolower(comp)
+    2
+  }else 0
   # group and order
-  if(!missing(group)) group=if(length(opt$group)>1 && !grepl('\\$|\\[',as.character(opt$group[1])))
-    lapply(as.character(opt$group)[-1],gv,data) else{
-      group=gv(opt$group,data)
-      if(is.factor(group)) group=as.character(group) else if(is.matrix(group)) group=as.data.frame(group,row.names=FALSE)
-      if(is.null(ncol(group))) list(group) else lapply(group,as.character)
+  agc = c('c', 'list', 'cbind', 'data.frame')
+  if(!missing(group)) group=if(length(opt$group)>1 && as.character(opt$group[1]) %in% agc
+    && !grepl('\\$|\\[',as.character(opt$group[1]))) lapply(as.character(opt$group)[-1],gv,data) else{
+      if(!is.null(data) && is.character(opt$group) && length(opt$group) < nrow(data)){
+        if(!all(opt$group %in% colnames(data))) stop('group appears to be column names, but were not found in data')
+        group = data[, opt$group]
+        if(!is.list(group)) group = if(is.matrix(group)) as.data.frame(group) else list(group)
+      }else{
+        group=gv(opt$group,data)
+        if(is.factor(group)) group=as.character(group) else if(is.matrix(group)) group=as.data.frame(group,row.names=FALSE)
+        if(is.null(ncol(group))) list(group) else lapply(group,as.character)
+      }
     }
-  if(!missing(comp.group) || !missing(comp.data)){
+  if(!missing(comp.group) || (!is.null(comp.data) && !missing(group))){
     cg=opt[[if(missing(comp.group)) 'group' else 'comp.group']]
     if(!is.null(cg)){
-      cg=if(length(cg)>1 && !grepl('\\$|\\[',as.character(cg[1]))) lapply(as.character(cg[-1]),gv,
-        comp.data) else list(gv(cg,comp.data))
+      cg=if(!is.null(comp.data) && length(cg)>1
+        && as.character(cg[1]) %in% agc && !grepl('\\$|\\[',as.character(cg[1]))){
+        lapply(as.character(cg[-1]),gv,comp.data)
+      }else if(is.character(cg)){
+        if(cg %in% colnames(comp.data)) list(comp.data[, cg]) else stop('groups not found in comp.data')
+      }else{
+        list(gv(cg, comp.data))
+      }
+      if(is.list(cg) && length(cg) == 1 && !is.null(nrow(cg[[1]]))) cg = as.data.frame(cg[[1]])
       if(cc!=1) if(NROW(comp)!=length(cg[[1]]) || NROW(x)!=length(group[[1]]))
         stop('data and comp.data mismatch',call.=FALSE)
-      comp.group=do.call(paste,cg)
-      if(!is.null(comp.data)) rownames(comp.data)=comp.group
-      if(length(group)>1){
-        group=do.call(paste,group)
-        if(!is.null(comp.data) && any(ck<-!(ckg<-unique(group))%in%unique(comp.group))) if(all(ck))
-          stop('group and comp.group had no levels in common') else{
-            warning('levels not found in comp.group: ',paste(ckg[ck],collapse=', '),call.=FALSE)
-            group=group[ck<-group%in%ckg[!ck]]
-            x=x[ck,,drop=FALSE]
-          }
+      if(all.levels){
+        comp.group = cg
+      }else{
+        comp.group=do.call(paste,cg)
+        if(length(group)>1){
+          group=do.call(paste,group)
+          if(!is.null(comp.data) && any(ck<-!(ckg<-unique(group))%in%unique(comp.group))) if(all(ck))
+            stop('group and comp.group had no levels in common') else{
+              warning('levels not found in comp.group: ',paste(ckg[ck],collapse=', '),call.=FALSE)
+              group=group[ck<-group%in%ckg[!ck]]
+              x=x[ck,,drop=FALSE]
+            }
+        }
       }
     }
   }
   if(!missing(group)) if(length(if(is.list(group)) group[[1]] else group)!=rx) stop('length(group) != nrow(x)')
   if(!missing(order)){
-    order=as.character(gv(opt$order,data))
+    order=gv(opt$order,data)
     if(!is.null(order)) if(length(order)==rx){
       x=x[order,]
       group=lapply(group,'[',order)
-    }else warning('length(order) != nrow(x), so order was not applied') else
-      warning('failed to apply order')
+    }else warning('length(order) != nrow(x), so order was not applied', call. = FALSE) else
+      warning('failed to apply order', call. = FALSE)
   }
   if(cc==2 && (length(comp)>1 || any(grepl(' ',comp,fixed=TRUE)))){
     comp=do.call(lma_dtm,c(list(comp),dsp$p))
@@ -272,8 +292,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
     x[seq_len(cr),cn]=comp
     comp=seq_len(cr)
   }
-  if(is.character(x)) x=apply(x,2,as.numeric)
-  if(is.matrix(comp) && is.list(comp)) comp=apply(comp,2,as.numeric)
+  if(is.character(x)) for(i in seq_len(ncol(x))) x[, i] = as.numeric(x[, i])
   dtm=Matrix(as.matrix(x),sparse=TRUE)
   if(do.wmc) x=wmc(x)
   if(is.null(nrow(x))) x=t(as.matrix(x))
@@ -284,6 +303,13 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
   # finalizing comp
   if(cc==1 || opt$comp=='text'){
     comp.data=x[comp,,drop=FALSE]
+    if(!missing(comp.group) && !all.levels){
+      if(anyDuplicated(comp.group)){
+        comp.data = t(vapply(split(as.data.frame(comp.data), comp.group), colMeans, numeric(ncol(comp.data))))
+        rownames(comp.data) = comp.group = unique(comp.group)
+        opt$comp = paste(opt$comp, opt$group, 'group means')
+      }else if(nrow(comp.data) == length(comp.group)) rownames(comp.data) = comp.group
+    }
     x=x[-comp,,drop=FALSE]
   }else if(cc==2){
     ckp=FALSE
@@ -299,7 +325,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
       opt$comp=paste('auto:',names(p))
       ckp=TRUE
       comp.data=lsm_profiles[p,,drop=FALSE]
-    }else opt$comp=deparse(substitute(comp))
+    }else opt$comp=substitute(comp)
     if(ckp){
       if(any(ckp<-!(cn<-colnames(x))%in%(bn<-colnames(comp.data)))){
         if(all(ckp)) stop('x and comp have no columns in common')
@@ -307,7 +333,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
         if('preps'%in%cn) bn[bn=='prep']='preps'
         colnames(comp.data)=bn
         if(any(ckp<-!cn%in%bn)){
-          warning('x columns were not found in comp: ',paste(cn[ckp],collapse=', '))
+          warning('x columns were not found in comp: ',paste(cn[ckp],collapse=', '), call. = FALSE)
           comp.data=comp.data[,cn[!ckp],drop=FALSE]
         }
       }else comp.data=comp.data[,cn,drop=FALSE]
@@ -316,36 +342,39 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
     cn=colnames(x)
     cns=cn[ck<-cn%in%colnames(comp.data)]
     if(!any(ck)) stop('x and comp have no columns in common') else if(any(!ck)){
-      warning('x columns were not found in comp: ',paste(cn[!ck],collapse=', '))
+      warning('x columns were not found in comp: ',paste(cn[!ck],collapse=', '), call. = FALSE)
       x=x[,cns]
     }
     comp.data=comp.data[,cns,drop=FALSE]
   }
-  if(is.matrix(comp.data) && is.list(comp.data)) comp.data=apply(comp.data,2,as.numeric)
   compmeanck=opt$comp=='mean'
   sim=speaker=NULL
   if(!is.null(group)){
     if(!is.null(comp.data) && NROW(comp.data)==1){
       group=NULL
-      warning('group does not appear to be meaningful for this comparison, so it was ignored')
+      warning('group does not appear to be meaningful for this comparison, so it was ignored', call. = FALSE)
     }else if(!is.list(group)) group=list(group)
-    gl=length(group)
-    if(opt$comp=='sequential'){
-      speaker=group[[gl]]
-      group=group[-gl]
-      gl=length(group)
+    gl = length(group)
+    if(opt$comp == 'sequential'){
+      speaker = group[[gl]]
+      group = if(gl == 1) NULL else group[-gl]
+      gl = length(group)
     }
-    if(gl>1 && !all.levels){
-      group=list(do.call(paste,group))
-      gl=1
+    if(gl > 1 && !all.levels){
+      group = list(do.call(paste, group))
+      gl = 1
     }
-    if(gl!=0){
-      sim=as.data.frame(group)
-      colnames(sim)=paste0('g',seq_len(gl))
-      for(m in inp$metric) sim[,m]=NA
-      mets=seq_along(inp$metric)+gl
+    if(gl){
+      sim = as.data.frame(group)
+      colnames(sim) = paste0('g', seq_len(gl))
+      for(m in inp$metric) sim[, m] = NA
+      mets = seq_along(inp$metric) + gl
     }
-  }
+    gs=as.character(unique(sim[,1]))
+    if(gl == 1 && !is.null(comp.data) && !is.null(comp.group) && !any(gs %in% rownames(comp.data))){
+      warning('no group levels were found in comp.data', call. = FALSE)
+    }
+  }else if(opt$comp == 'sequential' && is.null(speaker)) speaker = seq_len(nrow(x))
   #making comparisons
   sal=dsp$s
   ckf=is.function(comp)
@@ -357,7 +386,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
         sal$b=comp.data=if(is.null(nrow(comp.data))) comp.data else
           if(compmeanck) colMeans(comp.data,na.rm=TRUE) else apply(na.omit(comp.data),2,comp)
       }else if(is.null(nrcd<-nrow(comp.data)) || (nrcd==1 || nrcd==rx)) sal$b=comp.data else
-        warning('a group must be specified when comp has more than one row')
+        warning('a group must be specified when comp has more than one row', call. = FALSE)
     }else if(ckf) sal$b=comp.data=if(compmeanck) colMeans(x,na.rm=TRUE) else apply(na.omit(x),2,comp)
     sim=do.call(lma_simets,c(list(x),sal))
   }else{
@@ -368,21 +397,29 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
     if(gl==1){
       if(opt$comp!='pairwise'){
         ckmc=FALSE
-        gs=unique(sim[,1])
-        if(is.null(comp.data) && ckf){
+        if(!ckc && ckf){
           ckmc=TRUE
-          opt$comp=paste(deparse(opt$group),'group',opt$comp)
-          comp.data=data.frame(matrix(NA,length(gs),nc,dimnames=list(gs,colnames(x))))
+          opt$comp=paste(opt$group,'group',opt$comp)
+          comp.data=as.data.frame(matrix(NA,length(gs),nc,dimnames=list(gs,colnames(x))))
         }
         for(g in gs){
           su=sim[,1]==g
-          if(cks){sal$group=speaker[su];sal$mean=TRUE}else if(ckc){
+          if(cks){
+            sal$group=speaker[su]
+            sal$mean=TRUE
+          }else if(ckc){
             if(nrow(cc<-comp.data[if(!is.null(comp.group)) comp.group==g else g,,drop=FALSE])==1)
-              sal$b=cc else warning('comp.data has too few/many rows in group ',g)
+              sal$b=cc else warning('comp.data has too few/many rows in group ',g, call. = FALSE)
           }else if(ckf) if(sum(su)>1) sal$b=if(compmeanck) colMeans(x[su,],na.rm=TRUE) else
-            apply(na.omit(x[su,]),2,comp) else{sim[su,mets]=1;next}
+            apply(na.omit(x[su,]),2,comp) else{
+              sim[su,mets]=1
+              next
+            }
           if(!is.null(sal$b) && ckmc) comp.data[g,]=sal$b
-          if((sum(su)==1 && is.null(sal$b))){sim[su,mets]=1;next}
+          if(sum(su)==1 && is.null(sal$b)){
+            sim[su,mets]=1
+            next
+          }
           tm=do.call(lma_simets,c(list(x[su,,drop=FALSE]),sal))
           sim[su,mets]=if(cks) c(NA,tm) else tm
         }
@@ -407,7 +444,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
               vapply(sal$metric,function(m)NA,0)
           })
           if(!sal$square){
-            sim=data.frame(
+            sim=as.data.frame(
               if(sal$mean) ug else rep(ug,vapply(sim,function(gs)length(gs[[1]]),0)),
               do.call(rbind,if(sal$mean) sim else lapply(sim,as.data.frame))
             )
@@ -423,10 +460,11 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
       mw=seq_len(mn)
       colnames(sim)[-sug]=paste0(rep(vapply(seq_along(cn),function(e)
         paste0(cn[seq_len(e)],collapse='_'),''),each=mn),'_',inp$metric)
-      group=vapply(sug,function(g)do.call(paste,group[seq_len(g)]),character(nrow(sim)))
-      if(!is.null(comp.group) && NCOL(comp.group)==gl)
-        comp.group=vapply(sug,function(g)do.call(paste,comp.group[seq_len(g)]),
-          character(nrow(comp)))
+      group = vapply(sug, function(g) do.call(paste, group[seq_len(g)]), character(nrow(sim)))
+      if(!missing(comp.group)){
+        comp.group = vapply(sug, function(g)
+          do.call(paste, comp.group[seq_len(g)]), character(length(comp.group[[1]])))
+      }
       if(!is.null(dsp$s$mean) && !dsp$s$mean){
         sal$square=TRUE
         sim=lapply(ug<-unique(sim[,1]),function(g){
@@ -440,7 +478,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
           sim=do.call(rbind,lapply(sim,function(ll){
             m=ll[[1]]
             su=lower.tri(m)
-            data.frame(
+            as.data.frame(
               comp=outer(n<-colnames(m),n,function(a,b)paste0(a,' <-> ',b))[su],
               lapply(ll,function(m)m[su])
             )
@@ -448,37 +486,55 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
         }else names(sim)=ug
       }else{
         sal$square=FALSE
-        ssl=if(is.null(speaker)) TRUE else !is.na(speaker)
-        for(g in unique(sim[,1])){
-          su=which(sim[,1]==g & ssl)
-          sg=group[su,,drop=FALSE]
-          sx=x[su,,drop=FALSE]
-          for(s in sug){
-            usg=unique(sg[,s])
-            if(length(usg)==1){
-              ssg=list(sx)
-              names(ssg)=usg
-            }else{
-              ssg=lapply(usg,function(ss)sx[sg[,s]==ss,,drop=FALSE])
-              names(ssg)=usg
-              ssg=Filter(function(ss)nrow(ss)>1,ssg)
+        ssl = if(is.null(speaker)) TRUE else !is.na(speaker)
+        for(g in unique(sim[, 1])){
+          su = which(sim[, 1] == g & ssl)
+          sg = group[su,, drop = FALSE]
+          sx = x[su,, drop = FALSE]
+          gck = ckc && !missing(comp.group)
+          if(gck){
+            gcsub = comp.group[, 1] == g
+            if(!any(gcsub)){
+              warning('the first comparison group has no levels in common with the first data group', call. = FALSE)
+              gck = FALSE
             }
-            if(length(ssg)!=0) for(ssn in names(ssg)){
-              ssu=su[sg[,s]==ssn]
-              lss=length(ssu)
-              if(lss<2) next
-              if(cks) sal$group=speaker[ssu] else if(ckf)
-                sal$b=if(compmeanck) colMeans(ssg[[ssn]],na.rm=TRUE) else
-                  apply(na.omit(ssg[[ssn]]),2,comp)
-              if(!is.null(sal$b) && identical(sal$b,ssg[[ssn]])){sim[ssu,gl+mw+(mn*(s-1))]=1;next}
-              ssim=do.call(lma_simets,c(list(ssg[[ssn]]),sal))
+          }
+          for(s in sug){
+            usg = unique(sg[, s])
+            if(length(usg) == 1){
+              ssg = list(sx)
+              names(ssg) = usg
+            }else{
+              ssg = lapply(usg, function(ss) sx[sg[, s] == ss,, drop = FALSE])
+              names(ssg) = usg
+              ssg = Filter(function(ss) nrow(ss) > 1, ssg)
+            }
+            if(length(ssg) != 0) for(ssn in names(ssg)){
+              ssu = su[sg[, s] == ssn]
+              lss = length(ssu)
+              if(lss < 2) next
+              if(cks) sal$group = speaker[ssu] else if(ckf)
+                sal$b = if(compmeanck) colMeans(ssg[[ssn]], na.rm = TRUE) else
+                  apply(na.omit(ssg[[ssn]]), 2, comp)
+              if(!is.null(sal$b) && identical(sal$b, ssg[[ssn]])){
+                sim[ssu, gl + mw + (mn * (s - 1))] = 1
+                next
+              }
+              if(gck){
+                gcsu = comp.group[, s] == ssn & gcsub
+                if(!any(gcsu)) warning('no ', paste(usg, collapse = ', '),' level found in the comparison group(s)') else{
+                  sal$b = comp.data[gcsu,, drop = FALSE]
+                  if(nrow(sal$b) != 1) sal$b = colMeans(sal$b)
+                }
+              }
+              ssim = do.call(lma_simets, c(list(ssg[[ssn]]), sal))
               if(ckp || ckq){
                 if(ckp){
                   if(length(ssim[[1]])!=1) ssim=vapply(ssim,mean,0,na.rm=TRUE)
                 }else if(nrow(ssim)>1) ssim=colMeans(ssim,na.rm=TRUE)
                 if(lss!=1) ssim=vapply(ssim,rep,numeric(lss),lss)
               }
-              csu=gl+mw+(mn*(s-1))
+              csu = gl + mw + (mn * (s - 1))
               if(all(dim(ssim)==c(lss,length(csu)))) sim[ssu,csu]=ssim else warning(g,s)
             }
           }
@@ -497,10 +553,9 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
 #' @param exclude A character vector of words to be excluded. If \code{exclude} is a single string
 #'   matching \code{'function'}, \code{lma_dict()} will be used.
 #' @param context A character vector used to reformat text based on look- ahead/behind. For example,
-#'   you might (hopelessly) attempt to disambiguate \emph{like} by reformatting certain \emph{like}s
-#'   (e.g., \code{context=c('(i) like*','(you) like*','(do) like')}, where words in parentheses are
-#'   the
-#'   context for the target word, and asterisks denote partial matching). This would be converted
+#'   you might attempt to disambiguate \emph{like} by reformatting certain \emph{like}s
+#'   (e.g., \code{context = c('(i) like*','(you) like*','(do) like')}, where words in parentheses are
+#'   the context for the target word, and asterisks denote partial matching). This would be converted
 #'   to regular expression (i.e., \code{'(?=i) like[ .,?!:;/]'}) which, if matched, would be
 #'   replaced with a coded version of the word (e.g., \code{"Hey, i like that!"} would become
 #'   \code{"Hey, i i-like- that!"}). This would probably only be useful for categorization, where a
@@ -635,7 +690,7 @@ lma_dtm=function(text,exclude=NULL,context=NULL,numbers=FALSE,punct=FALSE,urls=T
 #'   \tabular{lll}{
 #'     \code{binary} \tab \code{(dtm > 0) * 1} \tab convert frequencies to 1s and 0s; remove
 #'       differences in frequencies\cr
-#'     \code{log} \tab \code{log(dtm + 1)} \tab logarithm of frequencies\cr
+#'     \code{log} \tab \code{log(dtm + 1)} \tab log of frequencies\cr
 #'     \code{sqrt} \tab \code{dtm^.5} \tab square root of frequencies\cr
 #'     \code{count} \tab \code{dtm} \tab unaltered; sometimes called term frequencies (tf)\cr
 #'     \code{amplify} \tab \code{dtm^1.1} \tab amplify difference in frequencies\cr
@@ -646,9 +701,9 @@ lma_dtm=function(text,exclude=NULL,context=NULL,numbers=FALSE,punct=FALSE,urls=T
 #'     \code{entropy} \tab \code{1 - rowSums(x * log(x) / log(ncol(x)))} \tab where
 #'       \code{x = t(dtm) / colSums(dtm > 0)};
 #'       entropy of term-conditional document distribution; gives common words more weight\cr
-#'     \code{dfmax} \tab \code{log(apply(dtm, 2, max))} \tab logarithm of maximum document
+#'     \code{dfmax} \tab \code{log(apply(dtm, 2, max))} \tab log of maximum document
 #'       frequency\cr
-#'     \code{df} \tab \code{log(colSums(dtm > 0))} \tab logarithm of binary document sum\cr
+#'     \code{df} \tab \code{log(colSums(dtm > 0))} \tab log of binary document sum\cr
 #'     \code{poisson} \tab \code{1 - dpois(0, colSums(dtm) / nrow(dtm))} \tab Poisson-predicted
 #'       erm distribution\cr
 #'     \code{ridf} \tab \code{idf - log(poisson)} \tab residual inverse document frequency;
@@ -657,15 +712,19 @@ lma_dtm=function(text,exclude=NULL,context=NULL,numbers=FALSE,punct=FALSE,urls=T
 #'     \code{idf} \tab \code{log(nrow(dtm) / colSums(dtm > 0))} \tab inverse document frequency\cr
 #'   }
 #'
-#' @param to.freq logical: if \code{FALSE}, the dtm is not divided by document word count before
+#' Alternatively, \code{'pmi'} or \code{'ppmi'} will apply a pointwise mutual information weighting
+#' scheme (with \code{'ppmi'} setting negative values to 0).
+#' @param to.freq logical: if \code{FALSE}, the dtm is not divided by document word-count before
 #'   being weighted.
 #' @param freq.complete if the dtm was made with \code{\link{lma_dtm}} (has a \code{'WC'}
 #'   attribute), word counts for
 #'   frequencies can be based on the raw count (default; \code{freq.complete = TRUE}). If
 #'   \code{freq.complete = FALSE}, or the dtm does not have a \code{'WC'} attribute,
 #'   \code{rowSums(dtm)} is used as word count.
-#' @param log.base the base of logarithms, applied to any weight using \code{\link[base]{log}}.
+#' @param log.base the base of logs, applied to any weight using \code{\link[base]{log}}.
 #'   Default is 10.
+#' @param alpha a scaling factor applied to document frequency as part of pointwise mutual information
+#'   weighting.
 #' @param doc.only logical: if \code{TRUE}, only document weights are returned (a single value for
 #'   each term).
 #' @param percent logical; if \code{TRUE}, frequencies are multiplied by 100.
@@ -707,13 +766,15 @@ lma_dtm=function(text,exclude=NULL,context=NULL,numbers=FALSE,punct=FALSE,urls=T
 #'
 #' @export
 
-lma_weight=function(dtm,weight='count',to.freq=TRUE,freq.complete=TRUE,log.base=10,doc.only=FALSE,percent=FALSE){
+lma_weight=function(dtm,weight='count',to.freq=TRUE,freq.complete=TRUE,log.base=10,alpha=1,doc.only=FALSE,percent=FALSE){
   ck=attr(dtm,'type')
   if(!is.null(ck) && length(ck)==3 && (ck[1]=='TRUE' || ck[2]!='count' || ck[3]!='NA')){
     message('the entered dtm appears to already be weighted (',paste(ck[2:3],collapse='*'),
       '), so it will not be altered')
     return(dtm)
   }
+  weight = tolower(weight)
+  if(missing(to.freq) && any(grepl('pmi', weight))) to.freq = FALSE
   dtm=if(to.freq){
     wc=attr(dtm,'WC')
     dtm=as.matrix(dtm)
@@ -725,43 +786,59 @@ lma_weight=function(dtm,weight='count',to.freq=TRUE,freq.complete=TRUE,log.base=
       d
     },numeric(ncol(dtm))))
   }else as.matrix(dtm)
-  term=function(x,type) switch(type,
-    binary=(x>0)*1,
-    log=log(x+1,base=log.base),
-    sqrt=x^.5,
-    count=x,
-    amplify=x^1.1
-  )
-  doc=function(x,type) switch(type,
-    df=log(colSums(x>0,na.rm=TRUE),base=log.base),
-    dfmax=log(apply(x,2,max),base=log.base),
-    idf=log(nrow(x)/colSums(x>0,na.rm=TRUE),base=log.base),
-    normal=1/colSums(x^2,na.rm=TRUE)^.5,
-    poisson=1-dpois(0,colSums(x,na.rm=TRUE)/nrow(x)),
-    ridf=doc(x,'idf')-log(doc(x,'poisson'),base=log.base),
-    entropy={x=t(x)/colSums(x>0,na.rm=TRUE);1-rowSums(x*log(x,base=log.base)/log(ncol(x),base=log.base),
-      na.rm=TRUE)}
-  )
-  if(length(weight)==1){
-    weight=strsplit(weight,' *[-:\\*_/; ,] *')[[1]]
-    if(length(weight)==1 && weight=='tfidf') weight=c('count','idf')
+  if(any(grepl('pmi', weight))){
+    tw = dw = 'pmi'
+    if(missing(log.base)) log.base = 2
+    twc = sum(dtm)
+    nr = nrow(dtm)
+    pc = colSums(dtm ^ alpha) / twc ^ alpha
+    dtm = log((dtm / twc) / (matrix(rep(pc, nr), nr, byrow = TRUE) *
+        matrix(rep(rowSums(dtm) / twc, ncol(dtm)), nr)), base = log.base)
+    dtm[!is.finite(dtm)] = 0
+    if(any(grepl('pp', weight))){
+      tw = dw = 'ppmi'
+      dtm[dtm < 0] = 0
+    }
+  }else{
+    term=function(x,type) switch(type,
+      binary=(x>0)*1,
+      log=log(x+1,base=log.base),
+      sqrt=x^.5,
+      count=x,
+      amplify=x^1.1
+    )
+    doc=function(x,type) switch(type,
+      df=log(colSums(x>0,na.rm=TRUE),base=log.base),
+      dfmax=log(apply(x,2,max),base=log.base),
+      idf=log(nrow(x)/colSums(x>0,na.rm=TRUE),base=log.base),
+      normal=1/colSums(x^2,na.rm=TRUE)^.5,
+      poisson=1-dpois(0,colSums(x,na.rm=TRUE)/nrow(x)),
+      ridf=doc(x,'idf')-log(doc(x,'poisson'),base=log.base),
+      entropy={x=t(x)/colSums(x>0,na.rm=TRUE);1-rowSums(x*log(x,base=log.base)/log(ncol(x),base=log.base),
+        na.rm=TRUE)}
+    )
+    if(length(weight)==1){
+      weight=strsplit(weight,' *[-:\\*_/; ,] *')[[1]]
+      if(length(weight)==1 && weight=='tfidf') weight=c('count','idf')
+    }
+    if(grepl('^t|^na|^non|^f',weight[1])) weight[1]='count'
+    tw=tryCatch(match.arg(weight[1],c('binary','log','sqrt','count','amplify')),error=function(e)NULL)
+    pdw=TRUE
+    dws=c('df','dfmax','idf','normal','poisson','ridf','entropy')
+    if(is.null(tw)){
+      tw=tryCatch(match.arg(weight[1],dws),error=function(e)NULL)
+      if(!is.null(tw)){
+        pdw=FALSE
+        if(!doc.only){
+          dw=tw
+          tw='count'
+        }else return(doc(dtm,tw))
+      }else stop(paste(weight),' is not a recognized weight',call.=FALSE)
+    }
+    if(pdw) dw=if(length(weight)>1) match.arg(weight[2],dws) else 'none'
+    dtm=if(dw=='none') term(dtm,tw) else t(t(term(dtm,tw))*doc(dtm,dw))
   }
-  if(grepl('^t|^na|^non|^f',weight[1],TRUE)) weight[1]='count'
-  tw=tryCatch(match.arg(weight[1],c('binary','log','sqrt','count','amplify')),error=function(e)NULL)
-  pdw=TRUE
-  dws=c('df','dfmax','idf','normal','poisson','ridf','entropy')
-  if(is.null(tw)){
-    tw=tryCatch(match.arg(weight[1],dws),error=function(e)NULL)
-    if(!is.null(tw)){
-      pdw=FALSE
-      if(!doc.only){
-        dw=tw
-        tw='count'
-      }else return(doc(dtm,tw))
-    }else stop(paste(weight),' is not a recognized weight',call.=FALSE)
-  }
-  if(pdw) dw=if(length(weight)>1) match.arg(weight[2],dws) else 'none'
-  dtm=if(dw=='none') term(dtm,tw) else t(t(term(dtm,tw))*doc(dtm,dw))
+  dtm[!is.finite(dtm)] = 0
   attr(dtm,'type')=c(freq=to.freq,term=tw,document=dw)
   dtm
 }
@@ -868,7 +945,7 @@ lma_lspace=function(dtm,space,path='~/Documents/Latent Semantic Spaces',
       space=load(paste0(path,'/',if(ck) file else sub('.sqlite','_dict.rda',file,fixed=TRUE)))
       lss_dict=eval(parse(text=space))
       if(is.data.frame(space)) lss_dict=rownames(space)
-      dtm=dtm[,vapply(data.frame(dtm),function(col)!any(is.na(col)),TRUE)]
+      dtm=dtm[,vapply(as.data.frame(dtm),function(col)!any(is.na(col)),TRUE)]
       ts=fmatch(colnames(dtm),lss_dict,nomatch='')
       ts=ts[!is.na(ts)]
       if(length(ts)==0) stop('found no terms in common with the loaded space')
@@ -891,7 +968,7 @@ lma_lspace=function(dtm,space,path='~/Documents/Latent Semantic Spaces',
     if(rep<.2) warning(paste0('
       only ',round(rep*100,2),'% of dtm terms appear in the provided space;
       you might consider using a different source or cleaning/partial matching terms
-    '))
+      '), call. = FALSE)
     dtm=dtm[,ts]%*%space
   }
   dtm
@@ -929,7 +1006,8 @@ lma_termcat=function(dtm,dict,term.weights=list(),bias=NULL,escape=FALSE,term.fi
           term.weights=term.weights[l][1]
           names(term.weights)='cat'
         }else{
-          if(!missing(term.weights)) warning('no weights line up with the dict category, so they will be ignored')
+          if(!missing(term.weights)) warning('no weights line up with the dict category, so they will be ignored'
+            , call. = FALSE)
           term.weights=list(cat=rep(1,length(dict)))
         }
       }
@@ -942,6 +1020,7 @@ lma_termcat=function(dtm,dict,term.weights=list(),bias=NULL,escape=FALSE,term.fi
     weight[[n]]=weight[[n]][!ii]
   }
   dict=lapply(dict,as.character)
+  if(is.character(dtm)) dtm=lma_dtm(dtm)
   ats=attributes(dtm)[c('opts','WC','orientation','type')]
   ats=ats[!vapply(ats,is.null,TRUE)]
   atsn=names(ats)
@@ -961,32 +1040,22 @@ lma_termcat=function(dtm,dict,term.weights=list(),bias=NULL,escape=FALSE,term.fi
       ))) else do.call(lma_termcat,c(ag,dict=dict[cat],if(missing(term.weights)) term.weights=term.weights[cat]))
     },numeric(nrow(dtm)))
   }else{
-    ord=dict
-    lab=lapply(dict,function(l)grep('(',l,fixed=TRUE))
-    lab=lab[vapply(lab,length,0)!=0]
-    if(length(lab)!=0){
-      special=lma_dict(special)[[1]][c('SMILE','FROWN')]
-      for(l in names(lab)){
-        for(en in c('SMILE','FROWN')) dict[[l]][lab[[l]]]=gsub(special[[en]],en,dict[[l]][lab[[l]]])
-        sul=grep('(',dict[[l]],fixed=TRUE)
-        dict[[l]][sul]=gsub("'|^-+|-(?=-)|\\*-+",'',
-          gsub('$','-',gsub('[^A-z0-9*\']','-',dict[[l]][sul])),perl=TRUE)
-        dict[[l]]=dict[[l]][!grepl('[(/:;]|\\)',dict[[l]])]
-      }
-    }
-    dict=if(!escape) lapply(ord,paste,collapse='|') else lapply(dict,function(l) if(length(l)!=1)
-      gsub('\\*\\$','',paste(paste0('^',gsub('(?=[*.^$({[\\]})+?-])','\\\\',l,perl=TRUE),'$',collapse='|'))) else l)
+    lab=lapply(dict,function(l) grepl('(',l,fixed=TRUE) + grepl(')',l,fixed=TRUE) == 1)
+    lab=lab[names(lab)[vapply(lab,any,TRUE)]]
+    if(length(lab)) for(l in names(lab)) dict[[l]][lab[[l]]]=gsub('([()])','\\\\\\1',dict[[l]][lab[[l]]])
+    dict=if(!escape) lapply(dict,paste,collapse='|') else lapply(dict,function(l) if(length(l)!=1)
+      gsub('\\*\\$','',paste(paste0('^',gsub('([*.^$({[\\]})+?-])','\\\\\\1',l),'$',collapse='|'))) else l)
     ws=if(is.null(term.filter)) colnames(dtm) else gsub(term.filter,'',colnames(dtm),perl=TRUE)
     if('opts'%in%atsn && !ats$opts['to.lower']) ws=tolower(ws)
     op=if(!missing(term.weights)){
-      ord=lapply(ord,function(cat)gsub('\\^|\\$','',cat))
+      dict=lapply(dict,function(cat)gsub('\\^|\\$','',cat))
       for(n in names(dict)){
-        l=length(ord[[n]])
+        l=length(dict[[n]])
         if(!n%in%names(term.weights)) term.weights[[n]]=rep(1,l) else if(length(term.weights[[n]])!=l){
           warning('weights do not line up with terms for the ',n,' category, so they were ignored',call.=FALSE)
           term.weights[[n]]=rep(1,l)
         }
-        names(term.weights[[n]])=ord[[n]]
+        names(term.weights[[n]])=dict[[n]]
       }
       vapply(names(dict),function(c){
         su=dtm[,grep(dict[[c]],ws,perl=TRUE),drop=FALSE]
@@ -996,7 +1065,7 @@ lma_termcat=function(dtm,dict,term.weights=list(),bias=NULL,escape=FALSE,term.fi
       vapply(names(dict),function(c)rowSums(dtm[,grep(dict[[c]],ws,perl=TRUE),drop=FALSE],na.rm=TRUE),numeric(nrow(dtm)))
     }
   }
-  if(!is.null(bias)) for(n in names(bias)) if(n%in%names(op)) op[,n]=op[,n]+bias[[n]]
+  if(!is.null(bias)) for(n in names(bias)) if(n%in%names(op)) op[, n] = op[, n] + bias[[n]]
   attr(op,'WC')=if('WC'%in%atsn) ats$WC else rowSums(dtm,na.rm=TRUE)
   attr(op,'time')=c(attr(dtm,'time'),termcat=unname(proc.time()[3]-st))
   if('orientation'%in%atsn) attr(op,'orientation')=ats$orientation
@@ -1014,15 +1083,16 @@ lma_termcat=function(dtm,dict,term.weights=list(),bias=NULL,escape=FALSE,term.fi
 #' @param metric a function (see details), or a character at least partially matching one of the
 #'   available metrics:
 #'   \tabular{ll}{
-#'     \code{euclidean} \tab \code{1 / (1 + sum((a - b)^2)^.5)} \cr
+#'     \code{euclidean} \tab \code{1 - sum((a-b)^2)^.5} \cr
 #'     \code{canberra} \tab \code{mean(as.numeric(1 - abs(a - b) / (a + b + .0001)))} \cr
 #'     \code{cosine} \tab \code{sum(a * b) / sum(a^2 * sum(b^2))^.5} \cr
 #'     \code{pearson} \tab \code{cor(a, b, method='pearson')} \cr
 #'     \code{kendall} \tab \code{cor(a, b, method='kendall')} \cr
 #'     \code{spearman} \tab \code{cor(a, b, method='spearman')} \cr
 #'     \code{jaccard} \tab \code{sum(a & b) / sum(a | b)} \cr
-#'     \code{kld} \tab \code{p = (p<-table(a,b)/100)/sum(p); q = rowSums(p) \%*\% matrix(colSums(p),1);
-#'       sum(p*log(p/q))}\cr
+#'     \code{kld} \tab \code{1 - sum(vapply(unique(c(a, b)), function(v){pq = c(mean(a == v), mean(b == v));
+#'     if(pq[2]) pq[1] * log(pq[1] / pq[2]) else 0
+#'     }, 0), na.rm = TRUE)}\cr
 #'   }
 #' @param metric.arg a list of arguments to be passed to \code{metric} if \code{metric} is a
 #'   function.
@@ -1034,7 +1104,7 @@ lma_termcat=function(dtm,dict,term.weights=list(),bias=NULL,escape=FALSE,term.fi
 #' @param square logical; if \code{FALSE}, only the lower triangle is returned from a pairwise
 #'   comparison.
 #' @param mean logical; if \code{TRUE}, a single mean for each metric is returned.
-#' @param sample If \code{a} is a matrix and \code{b} is not specified (a pariwise comparison is to
+#' @param sample If \code{a} is a matrix and \code{b} is not specified (a pairwise comparison is to
 #'   be made), this determines whether every comparison or a sample should be calculated. If
 #'   \code{sample} is a number smaller than \code{nrow(a)}, each row will be compared against a
 #'   random sample of other rows, not including the given row.
@@ -1076,15 +1146,19 @@ lma_simets=function(a,b=NULL,metric,metric.arg=list(),group=NULL,agg=TRUE,agg.me
   mean=FALSE,sample=200,ncores=detectCores()-2){
   cf=NULL
   comp=function(a,b,metric) switch(metric,
-    euclidean=1/(1+sum((a-b)^2)^.5),
+    euclidean = 1 / (1 + sum((a-b)^2)^.5),
     canberra=mean(as.numeric(1-abs(a-b)/(a+b+.0001))),
     cosine=sum(a*b)/sum(a^2*sum(b^2))^.5,
     pearson=cor(a,b,method='pearson'),
     kendall=cor(a,b,method='kendall'),
     spearman=cor(a,b,method='spearman'),
     jaccard=sum(a&b)/sum(a|b),
-    kld={p=(p<-table(a,b)/100)/sum(p);q=rowSums(p,na.rm=TRUE)%*%matrix(colSums(p,na.rm=TRUE),1);
-      sum(p*log(p/q+.0001))},
+    kld=1 - sum(vapply(unique(c(a, b)), function(v){
+      a = as.integer(a)
+      b = as.integer(b)
+      pq = c(mean(a == v), mean(b == v))
+      if(pq[2]) pq[1] * log(pq[1] / pq[2]) else 0
+    }, 0), na.rm = TRUE),
     custom=do.call(cf,c(list(a,b),metric.arg))
   )
   mets=c('euclidean','canberra','cosine','pearson','spearman','kendall','jaccard','kld')
@@ -1094,10 +1168,6 @@ lma_simets=function(a,b=NULL,metric,metric.arg=list(),group=NULL,agg=TRUE,agg.me
   }else{
     if(is.null(metric)) metric='cosine'
     mets[if(is.numeric(metric)) metric else pmatch(metric,mets)]
-  }
-  if('kld'%in%metric){
-    a=a!=0
-    if(!is.null(b)) b=b!=0
   }
   st=proc.time()[3]
   if(is.null(b)){
@@ -1136,41 +1206,31 @@ lma_simets=function(a,b=NULL,metric,metric.arg=list(),group=NULL,agg=TRUE,agg.me
       if(p) stopCluster(clust)
     }else{
       if(length(group)!=n) stop('length(group) != NROW(a)')
-      cblock=function(i=1,d=1){
-        f=d>0
-        e=if(f) l else 1
-        if(f && i>e) return(list(b=group[e],s=e,e=e))
-        if(!f && i>l) i=l
-        s=i
-        b=group[i]
-        while((if(f) i<e else i>e) && group[i]==group[i+d]){i=i+d; b=c(b,group[i])}
-        list(v=b,s=seq.int(s,i),e=i)
+      ager = if(agg.mean) colMeans else colSums
+      l = length(group)
+      chunks = NULL
+      i = 1
+      while(i < l){
+        st = i
+        g = group[i]
+        while(i < l && g == group[i + 1]) i = i + 1
+        chunks = c(chunks, list(seq(st, i)))
+        i = i + 1
       }
-      l=length(group)
-      rows=c()
-      res=NULL
-      i=1
-      while(i<l){
-        be=cblock(i)
-        cu=cblock(be$e+1)
-        af=cblock(cu$e+1)
-        ic=cu$e+1<=l
-        af$e=i=af$s[1]
-        cu$e=af$s[1]
-        r=lapply(list(a=be,b=cu,c=af),function(r){
-          r=a[if(((l<-length(r$s))>1 && agg) || l==1) r$s else r$e,,drop=FALSE]
-          if(length(l>1)) if(agg.mean) colMeans(r,na.rm=TRUE) else colSums(r,na.rm=TRUE) else r
-        })
-        res=rbind(res,vapply(metric,function(met)c(comp(r$a,r$b,met),if(ic)comp(r$b,r$c,met)),if(ic)
-          c(0,0) else 0))
-        rows=c(rows,
-          paste(paste(if(agg) be$s else be$e,collapse=', '),'<->',
-            paste(if(agg) cu$s else cu$e,collapse=', ')),
-          if(ic) paste(paste(if(agg) cu$s else cu$e,collapse=', '),'<->',paste(if(agg) af$s else
-            af$e,collapse=', '))
-        )
+      if(!any(chunks[[length(chunks)]] == l)) chunks = c(chunks, list(l))
+      rows = character(length(chunks) - 1)
+      res = NULL
+      for(i in seq_len(length(chunks) - 1)){
+        s = chunks[[i]]
+        sa = if(agg) s else s[length(s)]
+        ta = ager(a[sa,, drop = FALSE])
+        s = chunks[[i + 1]]
+        sb = if(agg) s else s[1]
+        tb = ager(a[sb,, drop = FALSE])
+        res = rbind(res, vapply(metric, function(m) comp(ta, tb, m), numeric(length(metric))))
+        rows[i] = paste(paste(sa, collapse = ', '), '<->', paste(sb, collapse = ', '))
       }
-      rownames(res)=rows
+      rownames(res) = rows
     }
   }else{
     nrb=nrow(b)
@@ -1188,6 +1248,7 @@ lma_simets=function(a,b=NULL,metric,metric.arg=list(),group=NULL,agg=TRUE,agg.me
     }else vapply(metric,function(m)comp(a,b,m),0)
   }
   if(mean && !square) res=if(is.list(res)) lapply(res,mean,na.rm=TRUE) else colMeans(res,na.rm=TRUE)
+  if(is.matrix(res)) res = as.data.frame(res)
   attr(res,'time')=c(simets=unname(proc.time()[3]-st))
   res
 }

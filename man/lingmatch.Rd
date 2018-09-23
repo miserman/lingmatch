@@ -6,7 +6,7 @@
 \usage{
 lingmatch(x, comp = mean, data = NULL, group = NULL, ...,
   comp.data = NULL, comp.group = NULL, order = NULL, drop = TRUE,
-  all.levels = TRUE, type = "lsm")
+  all.levels = FALSE, type = "lsm")
 }
 \arguments{
 \item{x}{Texts to be compared; a vector, document-term matrix (dtm; with terms as column names),
@@ -63,7 +63,7 @@ texts are not already ordered as desired.}
 Comparisons section.}
 
 \item{type}{A character at least partially matching 'lsm' or 'lsa'; applies default settings
-alighning with the standard calculations of each type:
+aligning with the standard calculations of each type:
 \tabular{ll}{
   LSM \tab \code{lingmatch(text, weight='count', dict=lma_dict(1:9), metric='canberra')}\cr
   LSA \tab \code{lingmatch(text, weight='tfidf', space='internal', metric='cosine')}\cr
@@ -71,13 +71,13 @@ alighning with the standard calculations of each type:
 }
 \description{
 Offers a variety of methods to assess linguistic matching or accommodation, where \emph{matching}
-is general similarity (sometimes called \emph{homophily}), and \emph{accomodation} is some form
+is general similarity (sometimes called \emph{homophily}), and \emph{accommodation} is some form
 of conditional similarity (accounting for some base rate or precedent; sometimes called
 \emph{alignment}).
 }
 \details{
 There are a great many points of decision in the assessment of linguistic similarity and/or
-accomodation, partly inherited from the great many point of decision inherent in the numerical
+accommodation, partly inherited from the great many point of decision inherent in the numerical
 representation of language. Two general types of matching are implemented here as sets of
 defaults: Language/Linguistic Style Matching (LSM; Niederhoffer & Pennebaker, 2002; Ireland &
 Pennebaker, 2010), and Latent Semantic Analysis/Similarity (LSA; Landauer & Dumais, 1997;

@@ -4,8 +4,9 @@
 \alias{lma_weight}
 \title{Document-Term Matrix Weighting}
 \usage{
-lma_weight(dtm, weight = "count", to.freq = TRUE, freq.complete = TRUE,
-  log.base = 10, doc.only = FALSE, percent = FALSE)
+lma_weight(dtm, weight = "count", to.freq = TRUE,
+  freq.complete = TRUE, log.base = 10, alpha = 1, doc.only = FALSE,
+  percent = FALSE)
 }
 \arguments{
 \item{dtm}{a matrix with words as column names.}
@@ -17,7 +18,7 @@ lma_weight(dtm, weight = "count", to.freq = TRUE, freq.complete = TRUE,
   \tabular{lll}{
     \code{binary} \tab \code{(dtm > 0) * 1} \tab convert frequencies to 1s and 0s; remove
       differences in frequencies\cr
-    \code{log} \tab \code{log(dtm + 1)} \tab logarithm of frequencies\cr
+    \code{log} \tab \code{log(dtm + 1)} \tab log of frequencies\cr
     \code{sqrt} \tab \code{dtm^.5} \tab square root of frequencies\cr
     \code{count} \tab \code{dtm} \tab unaltered; sometimes called term frequencies (tf)\cr
     \code{amplify} \tab \code{dtm^1.1} \tab amplify difference in frequencies\cr
@@ -28,18 +29,21 @@ lma_weight(dtm, weight = "count", to.freq = TRUE, freq.complete = TRUE,
     \code{entropy} \tab \code{1 - rowSums(x * log(x) / log(ncol(x)))} \tab where
       \code{x = t(dtm) / colSums(dtm > 0)};
       entropy of term-conditional document distribution; gives common words more weight\cr
-    \code{dfmax} \tab \code{log(apply(dtm, 2, max))} \tab logarithm of maximum document
+    \code{dfmax} \tab \code{log(apply(dtm, 2, max))} \tab log of maximum document
       frequency\cr
-    \code{df} \tab \code{log(colSums(dtm > 0))} \tab logarithm of binary document sum\cr
+    \code{df} \tab \code{log(colSums(dtm > 0))} \tab log of binary document sum\cr
     \code{poisson} \tab \code{1 - dpois(0, colSums(dtm) / nrow(dtm))} \tab Poisson-predicted
       erm distribution\cr
     \code{ridf} \tab \code{idf - log(poisson)} \tab residual inverse document frequency;
       gives uncommon words more weight\cr
     \code{normal} \tab \code{1 / colSums(dtm^2)^.5} \tab normalized document frequency\cr
     \code{idf} \tab \code{log(nrow(dtm) / colSums(dtm > 0))} \tab inverse document frequency\cr
-  }}
+  }
 
-\item{to.freq}{logical: if \code{FALSE}, the dtm is not divided by document word count before
+Alternatively, \code{'pmi'} or \code{'ppmi'} will apply a pointwise mutual information weighting
+scheme (with \code{'ppmi'} setting negative values to 0).}
+
+\item{to.freq}{logical: if \code{FALSE}, the dtm is not divided by document word-count before
 being weighted.}
 
 \item{freq.complete}{if the dtm was made with \code{\link{lma_dtm}} (has a \code{'WC'}
@@ -48,8 +52,11 @@ frequencies can be based on the raw count (default; \code{freq.complete = TRUE})
 \code{freq.complete = FALSE}, or the dtm does not have a \code{'WC'} attribute,
 \code{rowSums(dtm)} is used as word count.}
 
-\item{log.base}{the base of logarithms, applied to any weight using \code{\link[base]{log}}.
+\item{log.base}{the base of logs, applied to any weight using \code{\link[base]{log}}.
 Default is 10.}
+
+\item{alpha}{a scaling factor applied to document frequency as part of pointwise mutual information
+weighting.}
 
 \item{doc.only}{logical: if \code{TRUE}, only document weights are returned (a single value for
 each term).}

@@ -10,7 +10,7 @@
 <h3>Description</h3>
 
 <p>Offers a variety of methods to assess linguistic matching or accommodation, where <em>matching</em>
-is general similarity (sometimes called <em>homophily</em>), and <em>accomodation</em> is some form
+is general similarity (sometimes called <em>homophily</em>), and <em>accommodation</em> is some form
 of conditional similarity (accounting for some base rate or precedent; sometimes called
 <em>alignment</em>).
 </p>
@@ -21,7 +21,7 @@ of conditional similarity (accounting for some base rate or precedent; sometimes
 <pre>
 lingmatch(x, comp = mean, data = NULL, group = NULL, ...,
   comp.data = NULL, comp.group = NULL, order = NULL, drop = TRUE,
-  all.levels = TRUE, type = "lsm")
+  all.levels = FALSE, type = "lsm")
 </pre>
 
 
@@ -115,7 +115,7 @@ Comparisons section.</p>
 <tr valign="top"><td><code>type</code></td>
 <td>
 <p>A character at least partially matching 'lsm' or 'lsa'; applies default settings
-alighning with the standard calculations of each type:
+aligning with the standard calculations of each type:
 </p>
 
 <table summary="Rd table">
@@ -140,7 +140,7 @@ alighning with the standard calculations of each type:
 <h3>Details</h3>
 
 <p>There are a great many points of decision in the assessment of linguistic similarity and/or
-accomodation, partly inherited from the great many point of decision inherent in the numerical
+accommodation, partly inherited from the great many point of decision inherent in the numerical
 representation of language. Two general types of matching are implemented here as sets of
 defaults: Language/Linguistic Style Matching (LSM; Niederhoffer &amp; Pennebaker, 2002; Ireland &amp;
 Pennebaker, 2010), and Latent Semantic Analysis/Similarity (LSA; Landauer &amp; Dumais, 1997;

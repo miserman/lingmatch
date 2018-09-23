@@ -38,10 +38,9 @@ matching <code>'function'</code>, <code>lma_dict()</code> will be used.</p>
 <tr valign="top"><td><code>context</code></td>
 <td>
 <p>A character vector used to reformat text based on look- ahead/behind. For example,
-you might (hopelessly) attempt to disambiguate <em>like</em> by reformatting certain <em>like</em>s
-(e.g., <code>context=c('(i) like*','(you) like*','(do) like')</code>, where words in parentheses are
-the
-context for the target word, and asterisks denote partial matching). This would be converted
+you might attempt to disambiguate <em>like</em> by reformatting certain <em>like</em>s
+(e.g., <code>context = c('(i) like*','(you) like*','(do) like')</code>, where words in parentheses are
+the context for the target word, and asterisks denote partial matching). This would be converted
 to regular expression (i.e., <code>'(?=i) like[ .,?!:;/]'</code>) which, if matched, would be
 replaced with a coded version of the word (e.g., <code>"Hey, i like that!"</code> would become
 <code>"Hey, i i-like- that!"</code>). This would probably only be useful for categorization, where a

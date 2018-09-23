@@ -27,85 +27,92 @@ prompts = read.csv('https://osf.io/xm6ew/?action=download')
 responses = read.csv('https://osf.io/crgkn/?action=download')
 
 # for now, we'll just look at one of the studies included in the set
-responses = responses[responses$Study==4,]
+responses = responses[responses$Study == 4,]
 ```
 
-## Language Style Matching with a standard
+# Matching with a standard
 
+## Sample means
 The simplest type of LSM we can look at is LSM with the overall mean; each participant's LSM categories are
 compared with the average of all participants' LSM categories:
 ```{r}
 # since this file includes LIWC output, we can just enter the whole frame
-lsm_mean = lingmatch(responses, type='lsm')
+lsm_mean = lingmatch(responses, type = 'lsm')
 
 # or we could process the raw text in the same way
-lsm_mean_raw = lingmatch(responses$Text, type='lsm')
+lsm_mean_raw = lingmatch(responses$Text, type = 'lsm')
 
-# these will be a little different
+# these will be a little different due to differences in
+# function word dictionaries and text processing between LIWC and lingmatch
 cor(lsm_mean$sim, lsm_mean_raw$sim)
 ```
 
 The `sim` component of the lingmatch output has the actual LSM scores,
 but the comparison is also stored in the lingmatch output:
 ```{r}
-lsm_mean[c('comp.type','comp')]
+lsm_mean[c('comp.type', 'comp')]
 ```
 
 This type of LSM might be interpreted as a sort of generic matching; that is, how similar a given text is
 to the set of texts. Similar comparisons can be made to standards other than the current set's mean, such
 as the mean of other sets.
 
+## Stored means
 The LIWC manual includes the means of a few sets of texts, which can be manually or automatically specified:
 ```{r}
 # compare with means from a set of novels
-lsm_novels = lingmatch(responses, 'novels', type='lsm')
-lsm_novels[c('comp.type','comp')]
+lsm_novels = lingmatch(responses, 'novels', type = 'lsm')
+lsm_novels[c('comp.type', 'comp')]
 
 # or the means of the set that is most similar to the current set
-lsm_auto = lingmatch(responses, 'auto', type='lsm')
-lsm_auto[c('comp.type','comp')]
+lsm_auto = lingmatch(responses, 'auto', type = 'lsm')
+lsm_auto[c('comp.type', 'comp')]
 ```
 
-Another standard might be a set of texts you have (such as the prompts).
-The default is the mean, but this could be some other function such as `median`:
+## External means
+If you have another set of data, you can also use its means as the comparison:
 ```{r}
-lsm_prmed = lingmatch(responses, median, comp.data=prompts, type='lsm')
-lsm_prmed[c('comp.type','comp')]
+lsm_prmed = lingmatch(responses, prompts, type = 'lsm')
+lsm_prmed[c('comp.type', 'comp')]
 ```
 
-You can also compare to means (or whatever) within groups. This set, for example, had prompts of different topics,
+
+## Group means
+You can also compare to means within groups. This set, for example, had prompts of different topics,
 so we might look at LSM with the means of these groups:
 ```{r}
-lsm_topics = lingmatch(responses, group=Topic, type='lsm')
-lsm_topics[c('comp.type','comp')]
+lsm_topics = lingmatch(responses, group = Topic, type = 'lsm')
+lsm_topics[c('comp.type', 'comp')]
 ```
 
 These LSM scores might be interpreted as similarity to the texts of those who saw prompts with the same topic.
 
-This sort of grouping might be called splitting because it's doing the same thing, just independently within splits.
-So the `group` argument is just specifying how to split in this case.
+This sort of grouping might be called splitting because it's performing the same operation, just independently within splits (always comparing each text to the mean of all texts within the split).
+So the `group` argument is just specifying how to split the data.
 
 The other type of grouping applicable to this data uses the `group` argument more like a set of IDs -- it pairs texts
 to specific other texts.
 
-## Comparison groups
+# Matching with other texts
 
-The previous comparisons were all standards, where the LSM score could be interpreted as indicating a more or less
-generic langauge style (as defined by the comparison and grouping). What's often more interesting is to look at
+The previous comparisons were all with standards, where the LSM score could be interpreted as indicating a more or less
+generic language style (as defined by the comparison and grouping). What's often more interesting is to look at
 matching between individual texts.
 
-The data we're using had participant responding to a particular prompt, so we can look at
+## Condition ID
+The data we're using had participants responding to a particular prompt, so we can look at
 matching between the participant's response and the prompt they are responding to:
 ```{r}
-lsm = lingmatch(responses, prompts, group=c(Study, Topic, Style), type='lsm')
+lsm = lingmatch(responses, prompts, group = c('Study', 'Topic', 'Style'), type = 'lsm')
 lsm$sim[1:10,]
 ```
 
-Here, the `group` argument is just pasting together the included variables, and using the resulting string to identify a single comparison for each text.
+Here, the `group` argument is just pasting together the included variables, and using the resulting string to identify a single comparison for each text (acting as a condition ID).
 
+## Participant ID
 This study also collected two responses from each participant, so we might look at LSM between their prompts:
 ```{r}
-interlsm = lingmatch(responses, 'pair', group=ParticipantID, type='lsm')
+interlsm = lingmatch(responses, 'pair', group = ParticipantID, type = 'lsm')
 interlsm$sim[1:10,]
 ```
 

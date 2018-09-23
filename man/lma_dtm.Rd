@@ -16,10 +16,9 @@ or list.}
 matching \code{'function'}, \code{lma_dict()} will be used.}
 
 \item{context}{A character vector used to reformat text based on look- ahead/behind. For example,
-you might (hopelessly) attempt to disambiguate \emph{like} by reformatting certain \emph{like}s
-(e.g., \code{context=c('(i) like*','(you) like*','(do) like')}, where words in parentheses are
-the
-context for the target word, and asterisks denote partial matching). This would be converted
+you might attempt to disambiguate \emph{like} by reformatting certain \emph{like}s
+(e.g., \code{context = c('(i) like*','(you) like*','(do) like')}, where words in parentheses are
+the context for the target word, and asterisks denote partial matching). This would be converted
 to regular expression (i.e., \code{'(?=i) like[ .,?!:;/]'}) which, if matched, would be
 replaced with a coded version of the word (e.g., \code{"Hey, i like that!"} would become
 \code{"Hey, i i-like- that!"}). This would probably only be useful for categorization, where a

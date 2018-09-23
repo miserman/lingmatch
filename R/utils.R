@@ -74,9 +74,9 @@ write.dic=function(x,filename='custom'){
 #'   that many segments, each with a roughly equal number of words. If a character, texts will be broken at that character;
 #'   for example, a string matching \code{join} will split texts on returns.
 #' @param subdir If \code{TRUE} files in folders in \code{path} will also be included.
-#' @param ext The extention of the files you want to read in. '.txt' by default.
+#' @param ext The extension of the files you want to read in. '.txt' by default.
 #' @param fixed If \code{FALSE}, and \code{segment} is a character, \code{segment} will be treated as a regular expression.
-#' @param segment.size If specified, \code{segment} will be ignored, and texts will be broken into segments countaining roughtly
+#' @param segment.size If specified, \code{segment} will be ignored, and texts will be broken into segments containing roughly
 #'   \code{segment.size} number of words.
 #' @param bysentence If \code{TRUE}, and \code{segment} is a number or \code{wordcount} is specified, sentences will be kept
 #'   together, rather than being broken across segments.
@@ -166,8 +166,8 @@ download.lsspace=function(space='default',dir='~/Documents/Latent Semantic Space
 #' @param dict At least a vector of terms (patterns), usually a matrix-like object with columns for terms,
 #'   categories, and weights.
 #' @param term,category,weight Strings specifying the relevant column names in \code{dict}.
-#' @param to.lower Logical indicating whether \code{text} should be convered to lower case.
-#' @param to.percent Logical indicating whether term-counts should be devided by document-counts before
+#' @param to.lower Logical indicating whether \code{text} should be converted to lower case.
+#' @param to.percent Logical indicating whether term-counts should be divided by document-counts before
 #'   being weighted.
 #' @param bias A constant to add to each category after weighting and summing. Can be a vector with names
 #'   corresponding to the unique values in \code{dict[,category]}, but is usually extracted from dict based
@@ -187,47 +187,48 @@ download.lsspace=function(space='default',dir='~/Documents/Latent Semantic Space
 #' # read in the temporal orientation lexicon from the World Well-Being Project
 #' tempori = read.csv('https://wwbp.org/downloads/public_data/temporalOrientationLexicon.csv')
 #'
-#' lma_patcat(text,tempori)
+#' lma_patcat(text, tempori)
 #'
 #' @export
 
-lma_patcat=function(text,dict,term='term',category='category',weight='weight',
-  to.lower=TRUE,to.percent=TRUE,bias=NULL,intname='_intercept',dtm=FALSE){
-  text=as.character(text)
-  if(to.lower) text=tolower(text)
+lma_patcat = function(text, dict, term = 'term', category = 'category', weight = 'weight',
+  to.lower = TRUE, to.percent = FALSE, bias = NULL, intname = '_intercept', dtm = FALSE){
+  text = as.character(text)
+  if(to.lower) text = tolower(text)
   if(is.null(colnames(dict))){
-    if(is.list(dict)) dict=data.frame(
-      term=unlist(dict,use.names=FALSE),
-      category=unlist(lapply(names(dict),function(n)rep(n,length(dict[[n]]))))
-    ) else dict=data.frame(term=dict)
-    term='term'
-    category='category'
+    if(is.list(dict)){
+      if(is.null(names(dict))) names(dict) = seq_along(dict)
+      dict = data.frame(
+        term = unlist(dict, use.names = FALSE),
+        category = unlist(lapply(names(dict), function(n) rep(n, length(dict[[n]]))))
+      )
+    }else dict = data.frame(term = dict)
+    term = 'term'
+    category = 'category'
   }
-  if(!weight%in%names(dict)) dict[,weight]=1
-  if(any(bs<-dict[,term]==intname)){
-    bias=dict[bs,,drop=FALSE]
-    bias=if(sum(bs)!=1 && category%in%names(bias)){
-      rownames(bias)=bias[,category]
-      t(bias[,weight,drop=FALSE])[1,]
-    }else bias[1,weight]
-    dict=dict[!bs,]
+  if(!weight %in% names(dict)) dict[, weight] = 1
+  if(any(bs <- dict[, term] == intname)){
+    bias = dict[bs,, drop = FALSE]
+    bias = if(sum(bs) != 1 && category %in% names(bias)){
+      rownames(bias) = bias[, category]
+      t(bias[, weight, drop = FALSE])[1, ]
+    }else bias[1, weight]
+    dict = dict[!bs, ]
   }
-  r=vapply(as.character(dict[,term]),function(p)
-    vapply(strsplit(text,p,fixed=TRUE),length,0),numeric(length(text)))
+  r = vapply(as.character(dict[, term]), function(p)
+    vapply(strsplit(text, p, fixed = TRUE), length, 0) - 1, numeric(length(text)))
   if(to.percent){
-    rs=rowSums(r)
-    if(any(rs!=0)) r[rs>0,]=r[rs>0,]/rs[rs>0]
+    rs = rowSums(r)
+    if(any(rs != 0)) r[rs > 0,] = r[rs > 0,] / rs[rs > 0]
   }
-  r=t(r)
   if(dtm) return(r)
-  r=r*dict[,weight]
-  r=if(category%in%names(dict))
-    do.call(rbind,lapply(split(as.data.frame(r),dict[,category]),colSums)) else colSums(r)
-  if(!is.null(bias)) if(length(bias)==1) r=r+bias else if(!is.null(rownames(r))){
-    r[names(bias),]=r[names(bias),]+bias
-    r=t(r)
+  r = t(r) * dict[, weight]
+  r = if(category %in% names(dict))
+    do.call(rbind, lapply(split(as.data.frame(r), dict[, category]), colSums)) else colSums(r)
+  if(!is.null(bias)) if(length(bias) == 1) r = r + bias else if(!is.null(rownames(r))){
+    r[names(bias),] = r[names(bias),] + bias
   }
-  r
+  t(r)
 }
 
 #' English function word category lists
@@ -242,7 +243,7 @@ lma_patcat=function(text,dict,term='term',category='category',weight='weight',
 #' \code{as.regex} is set to \code{TRUE}.
 #'
 #' The \code{special} list is always used by both \code{\link{lma_dtm}} and \code{\link{lma_termcat}}. When creating a dtm,
-#' \code{special} is used to clean the original imput (so that, by default, the punctuation involved in ellipses and emojis
+#' \code{special} is used to clean the original input (so that, by default, the punctuation involved in ellipses and emojis
 #' are treated as different -- as ellipses and emojis rather than as periods and parens and colons and such). When categorizing
 #' a dtm, the input dictionary is passed by the special lists to be sure the terms in the dtm match up with the dictionary
 #' (so, for example, ": (" would be replaced with "FROWN" in both the text and dictionary).
@@ -337,8 +338,8 @@ lma_dict=function(...,as.regex=TRUE){
       "^zillion"),
     special=list(
       ELLIPSIS='\\.{3,}|\\. +\\. +[. ]+',
-      SMILE='[([{q][ -<.,]+[;:8]|[([{q][;:8]|[;:8][ ->.,][p3)}]|[:;8][ ->.,]\\]|[:;8][p3)}]|[:;8]\\]',
-      FROWN='\\][ -<.,]+[;:8]|[)}/\\>][ -<.,]+[;:8]|\\][:;8]|[)}/\\>][;:8]|[;:8][ ->.,][([{/\\<]|[:;8][([{/\\<]',
+      SMILE='[([{q][ -<.,]+[;:8]|[([{q][;:8]|[;:8][ ->.,][p3)}D]|[:;8][ ->.,]\\]|[:;8][p3)}D]|[:;8]\\]',
+      FROWN='\\][ -<.,]+[;:8]|[)}D/\\>][ -<.,]+[;:8]|\\][:;8]|[)}D/\\>][;:8]|[;:8][ ->.,][([{/\\<]|[:;8][([{/\\<]',
       LIKE=c(
         '(?<=could not) like[ .,?!:;/"\']','(?<=did not) like[ .,?!:;/"\']','(?<=did) like[ .,?!:;/"\']',
         '(?<=didn\'t) like[ .,?!:;/"\']','(?<=do not) like[ .,?!:;/"\']','(?<=do) like[ .,?!:;/"\']',

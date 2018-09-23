@@ -4,9 +4,10 @@
 \alias{read.folder}
 \title{Process texts in a folder}
 \usage{
-read.folder(path = NULL, segment = NULL, subdir = FALSE, ext = ".txt",
-  fixed = TRUE, segment.size = NULL, bysentence = FALSE,
-  reader = readLines, readarg = list(warn = FALSE))
+read.folder(path = NULL, segment = NULL, subdir = FALSE,
+  ext = ".txt", fixed = TRUE, segment.size = NULL,
+  bysentence = FALSE, reader = readLines, readarg = list(warn =
+  FALSE))
 }
 \arguments{
 \item{path}{Path to a folder containing files, or a vector of paths to files.}
@@ -17,11 +18,11 @@ for example, a string matching \code{join} will split texts on returns.}
 
 \item{subdir}{If \code{TRUE} files in folders in \code{path} will also be included.}
 
-\item{ext}{The extention of the files you want to read in. '.txt' by default.}
+\item{ext}{The extension of the files you want to read in. '.txt' by default.}
 
 \item{fixed}{If \code{FALSE}, and \code{segment} is a character, \code{segment} will be treated as a regular expression.}
 
-\item{segment.size}{If specified, \code{segment} will be ignored, and texts will be broken into segments countaining roughtly
+\item{segment.size}{If specified, \code{segment} will be ignored, and texts will be broken into segments containing roughly
 \code{segment.size} number of words.}
 
 \item{bysentence}{If \code{TRUE}, and \code{segment} is a number or \code{wordcount} is specified, sentences will be kept
