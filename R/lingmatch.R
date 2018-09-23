@@ -1227,7 +1227,7 @@ lma_simets=function(a,b=NULL,metric,metric.arg=list(),group=NULL,agg=TRUE,agg.me
         s = chunks[[i + 1]]
         sb = if(agg) s else s[1]
         tb = ager(a[sb,, drop = FALSE])
-        res = rbind(res, vapply(metric, function(m) comp(ta, tb, m), numeric(length(metric))))
+        res = rbind(res, vapply(metric, function(m) comp(ta, tb, m), 0))
         rows[i] = paste(paste(sa, collapse = ', '), '<->', paste(sb, collapse = ', '))
       }
       rownames(res) = rows
