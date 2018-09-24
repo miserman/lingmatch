@@ -120,8 +120,11 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
   if(!missing(type) && !is.null(type)){
     type=if(grepl('lsm|lang|ling|style|match',type,TRUE)) 'lsm' else 'lsa'
     ni=names(inp)
-    if(type=='lsm' && !'dict'%in%ni) inp$dict=lma_dict(1:9)
-    if(!'weight'%in%ni) inp$weight=if(type=='lsm'){inp$percent=TRUE;'count'}else c('count','idf')
+    if(type == 'lsm' && !'dict' %in% ni) inp$dict = lma_dict(1:9)
+    if(!'weight' %in% ni) inp$weight = if(type == 'lsm'){
+      if(!'percent' %in% ni) inp$percent = TRUE
+      'count'
+    }else c('count','idf')
     if(!'metric'%in%ni) inp$metric=if(type=='lsm') 'canberra' else 'cosine'
     if(type=='lsa' && !'space'%in%ni) inp$space='default'
   }

@@ -24,7 +24,7 @@ library(lingmatch)
 Can make a quick comparison between two bits of text;
 by default this will give the cosine similarity between raw word-count vectors:
 ```R
-lingmatch('First text to look at.','Text to compare that text with.')
+lingmatch('First text to look at.', 'Text to compare that text with.')
 ```
 
 Or, given a vector of texts:
@@ -40,7 +40,7 @@ text = c(
 Process the texts, then measure similarity between each:
 ```R
 dtm = lma_dtm(text)
-dtm_weighted = lma_weight(dtm, 'frequency')
+dtm_weighted = lma_weight(dtm)
 dtm_categorized = lma_termcat(dtm_weighted, lma_dict(1:9))
 similarity = lma_simets(dtm_categorized, metric = 'canberra')
 ```
@@ -54,5 +54,5 @@ similarity = lingmatch(text, 'pairwise',
 
 Or, if you want a standard form (as in this example), specify a default:
 ```R
-similarity = lingmatch(text, 'pairwise', type='lsm')
+similarity = lingmatch(text, 'pairwise', type = 'lsm', percent = FALSE)
 ```
