@@ -26,7 +26,7 @@ lma_dict(..., as.regex = TRUE)
 <tr valign="top"><td><code>...</code></td>
 <td>
 <p>Numbers or letters corresponding to category names: ppron, ipron, article,
-adverb, conj, prep, auxverb, negate, quant, interrog, number, or special.</p>
+adverb, conj, prep, auxverb, negate, quant, interrog, number, interjection, or special.</p>
 </td></tr>
 <tr valign="top"><td><code>as.regex</code></td>
 <td>
@@ -59,7 +59,7 @@ lma_dict()
 lma_dict(1:7)
 
 #return just a few categories without regular expression
-lma_dict(neg, int, aux, as.regex=FALSE)
+lma_dict(neg, ppron, aux, as.regex=FALSE)
 
 #return special specifically
 lma_dict(special)

@@ -99,12 +99,12 @@
 #'   78-88.
 #'
 #' Ireland, M. E., & Pennebaker, J. W. (2010). Language style matching in writing: synchrony in
-#'   essays, correspondence, and poetry. \emph{Journal of personality and social psychology, 99},
+#'   essays, correspondence, and poetry. \emph{Journal of Personality and Social Psychology, 99},
 #'   549.
 #'
 #' Landauer, T. K., & Dumais, S. T. (1997). A solution to Plato's problem: The latent semantic
 #'   analysis theory of acquisition, induction, and representation of knowledge.
-#'   \emph{Psychological review, 104}, 211.
+#'   \emph{Psychological Review, 104}, 211.
 #'
 #' Niederhoffer, K. G., & Pennebaker, J. W. (2002). Linguistic style matching in social interaction.
 #'   \emph{Journal of Language and Social Psychology, 21}, 337-360.
@@ -649,7 +649,13 @@ lma_dtm=function(text,exclude=NULL,context=NULL,numbers=FALSE,punct=FALSE,urls=T
     vapply(text,length,numeric(1))
   words=sort(unique(unlist(text)))
   words=words[!words=='']
-  if(!missing(exclude)) words=grep(paste(exclude,collapse='|'),words,value=TRUE,invert=TRUE)
+  if(!missing(exclude)){
+    if(is.list(exclude)) exclude = unlist(exclude, use.names = FALSE)
+    if(!any(grepl('^', exclude, fixed = TRUE))) exclude = gsub('\\^\\*|\\*\\$', '', paste0('^', exclude, '$'))
+    if(any(ck <- grepl('[[({]', exclude) + grepl('[})]|\\]', exclude) == 1))
+      exclude[ck] = gsub('([([{}\\])])', '\\\\\\1', exclude[ck], perl = TRUE)
+    words=grep(paste(exclude,collapse='|'),words,value=TRUE,invert=TRUE)
+  }
   m=matrix(0L,length(text),length(words),dimnames=list(c(),words))
   cseq=function(x){
     x=sort(x)

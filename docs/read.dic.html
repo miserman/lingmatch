@@ -16,7 +16,7 @@
 <h3>Usage</h3>
 
 <pre>
-read.dic(path, cats)
+read.dic(path, cats, to.regex = FALSE)
 
 write.dic(x, filename = "custom")
 </pre>
@@ -32,6 +32,11 @@ write.dic(x, filename = "custom")
 <tr valign="top"><td><code>cats</code></td>
 <td>
 <p>A character vector of category names to be returned. All categories are returned by default.</p>
+</td></tr>
+<tr valign="top"><td><code>to.regex</code></td>
+<td>
+<p>Logical; if <code>TRUE</code>, each dictionary entry is converted to regular expression
+(starts are marked with ^ and ends with $ when an * is present, and unmatched brackets/parens are escaped).</p>
 </td></tr>
 <tr valign="top"><td><code>x</code></td>
 <td>

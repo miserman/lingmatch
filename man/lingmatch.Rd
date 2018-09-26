@@ -124,12 +124,12 @@ Babcock, M. J., Ta, V. P., & Ickes, W. (2014). Latent semantic similarity and la
   78-88.
 
 Ireland, M. E., & Pennebaker, J. W. (2010). Language style matching in writing: synchrony in
-  essays, correspondence, and poetry. \emph{Journal of personality and social psychology, 99},
+  essays, correspondence, and poetry. \emph{Journal of Personality and Social Psychology, 99},
   549.
 
 Landauer, T. K., & Dumais, S. T. (1997). A solution to Plato's problem: The latent semantic
   analysis theory of acquisition, induction, and representation of knowledge.
-  \emph{Psychological review, 104}, 211.
+  \emph{Psychological Review, 104}, 211.
 
 Niederhoffer, K. G., & Pennebaker, J. W. (2002). Linguistic style matching in social interaction.
   \emph{Journal of Language and Social Psychology, 21}, 337-360.

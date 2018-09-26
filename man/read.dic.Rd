@@ -5,7 +5,7 @@
 \alias{write.dic}
 \title{Read/write LIWC dictionary files}
 \usage{
-read.dic(path, cats)
+read.dic(path, cats, to.regex = FALSE)
 
 write.dic(x, filename = "custom")
 }
@@ -13,6 +13,9 @@ write.dic(x, filename = "custom")
 \item{path}{Path to a .dic file.}
 
 \item{cats}{A character vector of category names to be returned. All categories are returned by default.}
+
+\item{to.regex}{Logical; if \code{TRUE}, each dictionary entry is converted to regular expression
+(starts are marked with ^ and ends with $ when an * is present, and unmatched brackets/parens are escaped).}
 
 \item{x}{A list object with names of categories and a vector of their words.}
 

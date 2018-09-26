@@ -8,7 +8,7 @@ lma_dict(..., as.regex = TRUE)
 }
 \arguments{
 \item{...}{Numbers or letters corresponding to category names: ppron, ipron, article,
-adverb, conj, prep, auxverb, negate, quant, interrog, number, or special.}
+adverb, conj, prep, auxverb, negate, quant, interrog, number, interjection, or special.}
 
 \item{as.regex}{Logical: if \code{FALSE}, lists are returned without regular expression.}
 }
@@ -34,7 +34,7 @@ lma_dict()
 lma_dict(1:7)
 
 #return just a few categories without regular expression
-lma_dict(neg, int, aux, as.regex=FALSE)
+lma_dict(neg, ppron, aux, as.regex=FALSE)
 
 #return special specifically
 lma_dict(special)
