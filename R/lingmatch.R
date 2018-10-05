@@ -121,10 +121,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
     type=if(grepl('lsm|lang|ling|style|match',type,TRUE)) 'lsm' else 'lsa'
     ni=names(inp)
     if(type == 'lsm' && !'dict' %in% ni) inp$dict = lma_dict(1:9)
-    if(!'weight' %in% ni) inp$weight = if(type == 'lsm'){
-      if(!'percent' %in% ni) inp$percent = TRUE
-      'count'
-    }else c('count','idf')
+    if(type == 'lsm' && !'percent' %in% ni) inp$percent = TRUE
     if(!'metric'%in%ni) inp$metric=if(type=='lsm') 'canberra' else 'cosine'
     if(type=='lsa' && !'space'%in%ni) inp$space='default'
   }
@@ -1152,7 +1149,7 @@ lma_termcat=function(dtm,dict,term.weights=list(),bias=NULL,escape=FALSE,term.fi
 #' @importFrom foreach foreach %dopar% registerDoSEQ
 
 lma_simets=function(a,b=NULL,metric,metric.arg=list(),group=NULL,agg=TRUE,agg.mean=TRUE,square=TRUE,
-  mean=FALSE,sample=200,ncores=detectCores()-2){
+  mean=FALSE,sample=NULL,ncores=detectCores()-2){
   cf=NULL
   comp=function(a,b,metric) switch(metric,
     euclidean = 1 / (1 + sum((a-b)^2)^.5),
