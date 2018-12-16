@@ -997,6 +997,7 @@ lma_lspace=function(dtm,space,path='~/Documents/Latent Semantic Spaces',
 #' @param escape Logical indicating whether the terms in \code{dict} should not be treated as plain text
 #'   (including asterisk wild cards). If \code{TRUE}, regular expression related characters are escaped. Set to
 #'   \code{TRUE} if you get PCRE compilation errors.
+#' @param partial Logical; if \code{TRUE} terms are partially matched (not padded by ^ and $).
 #' @param term.filter A regular expression string used to format the text of each term (passed to
 #'   \code{gsub}). For example, if terms are part-of-speech tagged (e.g.,
 #'   \code{'a_DT'}), \code{filter='_.*'} would remove the tag.
@@ -1004,17 +1005,21 @@ lma_lspace=function(dtm,space,path='~/Documents/Latent Semantic Spaces',
 #'   error.
 #' @export
 
-lma_termcat=function(dtm,dict,term.weights=list(),bias=NULL,escape=FALSE,term.filter=NULL,term.break=3900){
+lma_termcat=function(dtm,dict,term.weights=list(),bias=NULL,escape=FALSE,partial=FALSE,term.filter=NULL,term.break=3900){
   st=proc.time()[3]
   if(missing(dict)) dict=lma_dict(1:9)
+  if(missing(term.weights) && is.numeric(dict[[1]]) && !is.null(names(dict[[1]]))){
+    term.weights = dict
+    dict = lapply(dict, names)
+  }
   if(!is.list(dict)){
-    if(!missing(term.weights) && !is.list(term.weights)) term.weights=list(cat=term.weights) else{
+    if(!missing(term.weights)) if(!is.list(term.weights)) term.weights=list(cat=term.weights) else{
       if(length(term.weights)==1) names(term.weights)='cat' else{
         if(any(l<-lapply(term.weights,length)==length(dict))){
-          term.weights=term.weights[l][1]
+          term.weights=term.weights[[l]]
           names(term.weights)='cat'
         }else{
-          if(!missing(term.weights)) warning('no weights line up with the dict category, so they will be ignored'
+          warning('no weights line up with the dict category, so they will be ignored'
             , call. = FALSE)
           term.weights=list(cat=rep(1,length(dict)))
         }
@@ -1024,7 +1029,7 @@ lma_termcat=function(dtm,dict,term.weights=list(),bias=NULL,escape=FALSE,term.fi
   }
   for(n in names(dict)) if(!n%in%names(bias) && any(ii <- !is.na(dict[[n]]) & dict[[n]] == '_intercept')){
     dict[[n]]=dict[[n]][!ii]
-    bias[n]=weight[[n]][ii]
+    bias[n]=na.omit(weight[[n]][ii])
     weight[[n]]=weight[[n]][!ii]
   }
   dict=lapply(dict,as.character)
@@ -1032,7 +1037,8 @@ lma_termcat=function(dtm,dict,term.weights=list(),bias=NULL,escape=FALSE,term.fi
   ats=attributes(dtm)[c('opts','WC','orientation','type')]
   ats=ats[!vapply(ats,is.null,TRUE)]
   atsn=names(ats)
-  if(any((l<-vapply(dict,length,0))>term.break)){
+  cls = vapply(dict,length,0)
+  if(any(cls>term.break)){
     br=function(l,e=term.break){
       l=length(l)
       f=round(l/e+.49)
@@ -1043,35 +1049,31 @@ lma_termcat=function(dtm,dict,term.weights=list(),bias=NULL,escape=FALSE,term.fi
     ag=list(dtm,bias=bias,escape=escape,term.filter=term.filter,term.break=term.break)
     if(!missing(term.weights)) ag$term.weights=term.weights
     op=vapply(names(dict),function(n){
-      if(l[n]>term.break) Reduce('+',lapply(br(dict[[n]]),function(s) do.call(lma_termcat,
+      if(cls[n]>term.break) Reduce('+',lapply(br(dict[[n]]),function(s) do.call(lma_termcat,
         c(ag,dict=dict[[n]][s],if(missing(term.weights)) term.weights=term.weights[[n]][s])
       ))) else do.call(lma_termcat,c(ag,dict=dict[cat],if(missing(term.weights)) term.weights=term.weights[cat]))
     },numeric(nrow(dtm)))
   }else{
     lab=lapply(dict,function(l) grepl('(',l,fixed=TRUE) + grepl(')',l,fixed=TRUE) == 1)
     lab=lab[names(lab)[vapply(lab,any,TRUE)]]
+    if(!partial){
+      s = '^'
+      e = '$'
+    }else s = e = ''
     if(length(lab)) for(l in names(lab)) dict[[l]][lab[[l]]]=gsub('([()])','\\\\\\1',dict[[l]][lab[[l]]])
-    dict=if(!escape) lapply(dict,paste,collapse='|') else lapply(dict,function(l) if(length(l)!=1)
-      gsub('\\*\\$','',paste(paste0('^',gsub('([*.^$({[\\]})+?-])','\\\\\\1',l),'$',collapse='|'))) else l)
+    if(!missing(term.weights)) odict = dict
+    dict=if(!escape) lapply(dict,function(l) paste(paste0(s, l, e), collapse='|')) else lapply(dict,function(l) if(length(l)!=1)
+      gsub(paste0('\\*\\',e),'',paste(paste0(s,gsub('([*.^$({[\\]})+?-])','\\\\\\1',l),e,collapse='|'))) else l)
     ws=if(is.null(term.filter)) colnames(dtm) else gsub(term.filter,'',colnames(dtm),perl=TRUE)
     if('opts'%in%atsn && !ats$opts['to.lower']) ws=tolower(ws)
-    op=if(!missing(term.weights)){
-      dict=lapply(dict,function(cat)gsub('\\^|\\$','',cat))
-      for(n in names(dict)){
-        l=length(dict[[n]])
-        if(!n%in%names(term.weights)) term.weights[[n]]=rep(1,l) else if(length(term.weights[[n]])!=l){
-          warning('weights do not line up with terms for the ',n,' category, so they were ignored',call.=FALSE)
-          term.weights[[n]]=rep(1,l)
-        }
-        names(term.weights[[n]])=dict[[n]]
-      }
-      vapply(names(dict),function(c){
-        su=dtm[,grep(dict[[c]],ws,perl=TRUE),drop=FALSE]
-        colSums(t(su)*term.weights[[c]][colnames(su)],na.rm=TRUE)
-      },numeric(nrow(dtm)))
-    }else{
+    op=if(!missing(term.weights)) vapply(names(dict),function(cat){
+      su=dtm[,grep(dict[[cat]],ws,perl=TRUE),drop=FALSE]
+      if(!cat %in% names(term.weights)) term.weight[[cat]] = rep(1, cls[[cat]])
+      if(is.null(names(term.weights[[cat]])) && length(term.weights[[cat]]) == cls[[cat]]) names(term.weights[[cat]]) = odict[[cat]]
+      if(any(mcn <- !colnames(su) %in% names(term.weights[[cat]]))) term.weights[[cat]][colnames(su)[mcn]] = 1
+      colSums(t(su)*term.weights[[cat]][colnames(su)],na.rm=TRUE)
+    },numeric(nrow(dtm))) else
       vapply(names(dict),function(c)rowSums(dtm[,grep(dict[[c]],ws,perl=TRUE),drop=FALSE],na.rm=TRUE),numeric(nrow(dtm)))
-    }
   }
   if(!is.null(bias)) for(n in names(bias)) if(n%in%names(op)) op[, n] = op[, n] + bias[[n]]
   attr(op,'WC')=if('WC'%in%atsn) ats$WC else rowSums(dtm,na.rm=TRUE)

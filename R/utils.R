@@ -214,9 +214,8 @@ lma_patcat = function(text, dict, term = 'term', category = 'category', weight =
     term = 'term'
     category = 'category'
   }
-  dict = na.omit(dict)
   if(!weight %in% names(dict)) dict[, weight] = 1
-  if(missing(bias) && any(bs <- dict[, term] == intname)){
+  if(missing(bias) && any(bs <- !is.na(dict[, term]) & dict[, term] == intname)){
     bias = dict[bs,, drop = FALSE]
     bias = if(sum(bs) != 1 && category %in% names(bias)){
       rownames(bias) = bias[, category]
@@ -224,7 +223,7 @@ lma_patcat = function(text, dict, term = 'term', category = 'category', weight =
     }else bias[1, weight]
     dict = dict[!bs, ]
   }
-  terms = unique(dict[, term])
+  terms = na.omit(unique(dict[, term]))
   l = length(text)
   dtm = matrix(0, length(terms), l, dimnames = list(terms))
   for(w in terms) dtm[w,] = vapply(strsplit(text, w, fixed = fixed), length, 0) - 1
@@ -237,15 +236,18 @@ lma_patcat = function(text, dict, term = 'term', category = 'category', weight =
   }
   if(return_dtm) return(t(dtm))
   if(category %in% names(dict)){
-    terms = split(as.data.frame(dict[, c(term, weight)]), dict[, category])
-    cats = names(terms)
+    cats = unique(dict[, category])
+    terms = split(dict[, c(term, weight)], dict[, category])[cats]
     if(!is.null(bias) && is.null(names(bias))){
       bias = rep_len(bias, length(cats))
       names(bias) = cats
     }
     om = matrix(0, l, length(cats), dimnames = list(NULL, cats))
-    for(cat in cats) om[, cat] = colSums(dtm[as.character(terms[[cat]][, 1]),, drop = FALSE] * terms[[cat]][, 2]) +
-      if(!is.null(bias) && cat %in% names(bias)) bias[cat] else 0
+    for(cat in cats){
+      ct = na.omit(terms[[cat]])
+      if(nrow(ct)) om[, cat] = colSums(dtm[as.character(ct[, 1]),, drop = FALSE] * ct[, 2]) +
+        if(!is.null(bias) && cat %in% names(bias)) bias[cat] else 0
+    }
   }else om = rowSums(dtm * dict[, weight]) + if(!is.null(bias)) bias else 0
   om
 }

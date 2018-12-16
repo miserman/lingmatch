@@ -17,7 +17,8 @@
 
 <pre>
 lma_termcat(dtm, dict, term.weights = list(), bias = NULL,
-  escape = FALSE, term.filter = NULL, term.break = 3900)
+  escape = FALSE, partial = FALSE, term.filter = NULL,
+  term.break = 3900)
 </pre>
 
 
@@ -50,6 +51,10 @@ as the <code>bias</code> for that category.</p>
 <p>Logical indicating whether the terms in <code>dict</code> should not be treated as plain text
 (including asterisk wild cards). If <code>TRUE</code>, regular expression related characters are escaped. Set to
 <code>TRUE</code> if you get PCRE compilation errors.</p>
+</td></tr>
+<tr valign="top"><td><code>partial</code></td>
+<td>
+<p>Logical; if <code>TRUE</code> terms are partially matched (not padded by ^ and $).</p>
 </td></tr>
 <tr valign="top"><td><code>term.filter</code></td>
 <td>

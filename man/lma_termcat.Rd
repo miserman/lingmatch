@@ -5,7 +5,8 @@
 \title{Document-Term Matrix Categorization}
 \usage{
 lma_termcat(dtm, dict, term.weights = list(), bias = NULL,
-  escape = FALSE, term.filter = NULL, term.break = 3900)
+  escape = FALSE, partial = FALSE, term.filter = NULL,
+  term.break = 3900)
 }
 \arguments{
 \item{dtm}{A matrix with words as column names.}
@@ -24,6 +25,8 @@ as the \code{bias} for that category.}
 \item{escape}{Logical indicating whether the terms in \code{dict} should not be treated as plain text
 (including asterisk wild cards). If \code{TRUE}, regular expression related characters are escaped. Set to
 \code{TRUE} if you get PCRE compilation errors.}
+
+\item{partial}{Logical; if \code{TRUE} terms are partially matched (not padded by ^ and $).}
 
 \item{term.filter}{A regular expression string used to format the text of each term (passed to
 \code{gsub}). For example, if terms are part-of-speech tagged (e.g.,
