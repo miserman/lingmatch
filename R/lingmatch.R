@@ -637,6 +637,8 @@ lma_dtm=function(text,exclude=NULL,context=NULL,numbers=FALSE,punct=FALSE,urls=T
   if(!numbers) text=gsub('[^A-z ]*[0-9],*',' ',text)
   text=gsub('\\t|\\r|\\n|(?=[^A-z.0-9])|(?=[\\^`\\\\[\\]])|(?<=[\\^`\\\\[\\]])|(?<=[^A-z.0-9])',
     ' ',text,perl=TRUE)
+  text = gsub('[\u2033\u2036\u201C\u201D\u201F]', '"', text)
+  text = gsub('[\u2032\u2035\u2018\u2019]', "'", text)
   text=gsub("(?<=[A-z]) ['\u00E7\u00ED] (?=[A-z])","'",text,perl=TRUE)
   text=gsub('(?<=[A-z]) / (?=[A-z])','/',text,perl=TRUE)
   if(!punct) text=gsub('[[:punct:]] +',' ',text)
@@ -1020,13 +1022,13 @@ lma_termcat=function(dtm,dict,term.weights=list(),bias=NULL,escape=FALSE,term.fi
     }
     dict=list(cat=dict)
   }
-  for(n in names(dict)) if(!n%in%names(bias) && any(ii<-dict[[n]]=='_intercept')){
+  for(n in names(dict)) if(!n%in%names(bias) && any(ii <- !is.na(dict[[n]]) & dict[[n]] == '_intercept')){
     dict[[n]]=dict[[n]][!ii]
     bias[n]=weight[[n]][ii]
     weight[[n]]=weight[[n]][!ii]
   }
   dict=lapply(dict,as.character)
-  if(is.character(dtm)) dtm=lma_dtm(dtm)
+  if(is.character(dtm) || is.factor(dtm)) dtm=lma_dtm(dtm)
   ats=attributes(dtm)[c('opts','WC','orientation','type')]
   ats=ats[!vapply(ats,is.null,TRUE)]
   atsn=names(ats)

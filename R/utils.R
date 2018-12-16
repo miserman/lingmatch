@@ -174,14 +174,15 @@ download.lsspace=function(space='default',dir='~/Documents/Latent Semantic Space
 #' @param term,category,weight Strings specifying the relevant column names in \code{dict}.
 #' @param to.lower Logical indicating whether \code{text} should be converted to lower case.
 #' @param to.percent Logical indicating whether term-counts should be divided by document-counts before
-#'   being weighted.
+#'   being weighted (defaults to \code{FALSE}).
 #' @param bias A constant to add to each category after weighting and summing. Can be a vector with names
 #'   corresponding to the unique values in \code{dict[,category]}, but is usually extracted from dict based
 #'   on the intercept included in each category (defined by \code{intname}).
 #' @param intname The term representing the intercept (bias) of a category, to be extracted from \code{dict}
 #'   and used as \code{bias}.
-#' @param dtm Logical; if \code{TRUE}, only a document-term matrix will be returned, rather than the
+#' @param return_dtm Logical; if \code{TRUE}, only a document-term matrix will be returned, rather than the
 #'   weighted, summed, and adjusted category value.
+#' @param fixed Logical; if \code{FALSE}, patterns can be regular expressions.
 #' @examples
 #' # example text
 #' text = c(
@@ -198,12 +199,13 @@ download.lsspace=function(space='default',dir='~/Documents/Latent Semantic Space
 #' @export
 
 lma_patcat = function(text, dict, term = 'term', category = 'category', weight = 'weight',
-  to.lower = TRUE, to.percent = FALSE, bias = NULL, intname = '_intercept', dtm = FALSE){
+  to.lower = TRUE, to.percent = FALSE, bias = NULL, intname = '_intercept', return_dtm = FALSE, fixed = TRUE){
   text = as.character(text)
   if(to.lower) text = tolower(text)
   if(is.null(colnames(dict))){
     if(is.list(dict)){
       if(is.null(names(dict))) names(dict) = seq_along(dict)
+      dict = lapply(dict, as.character)
       dict = data.frame(
         term = unlist(dict, use.names = FALSE),
         category = unlist(lapply(names(dict), function(n) rep(n, length(dict[[n]]))))
@@ -212,8 +214,9 @@ lma_patcat = function(text, dict, term = 'term', category = 'category', weight =
     term = 'term'
     category = 'category'
   }
+  dict = na.omit(dict)
   if(!weight %in% names(dict)) dict[, weight] = 1
-  if(any(bs <- dict[, term] == intname)){
+  if(missing(bias) && any(bs <- dict[, term] == intname)){
     bias = dict[bs,, drop = FALSE]
     bias = if(sum(bs) != 1 && category %in% names(bias)){
       rownames(bias) = bias[, category]
@@ -221,20 +224,30 @@ lma_patcat = function(text, dict, term = 'term', category = 'category', weight =
     }else bias[1, weight]
     dict = dict[!bs, ]
   }
-  r = vapply(as.character(dict[, term]), function(p)
-    vapply(strsplit(text, p, fixed = TRUE), length, 0) - 1, numeric(length(text)))
+  terms = unique(dict[, term])
+  l = length(text)
+  dtm = matrix(0, length(terms), l, dimnames = list(terms))
+  for(w in terms) dtm[w,] = vapply(strsplit(text, w, fixed = fixed), length, 0) - 1
   if(to.percent){
-    rs = rowSums(r)
-    if(any(rs != 0)) r[rs > 0,] = r[rs > 0,] / rs[rs > 0]
+    rs = colSums(dtm)
+    if(any(rs != 0)){
+      su = rs > 0
+      dtm[, su] = t(t(dtm[, su]) / rs[su]) * 100
+    }
   }
-  if(dtm) return(r)
-  r = t(r) * dict[, weight]
-  r = if(category %in% names(dict))
-    do.call(rbind, lapply(split(as.data.frame(r), dict[, category]), colSums)) else colSums(r)
-  if(!is.null(bias)) if(length(bias) == 1) r = r + bias else if(!is.null(rownames(r))){
-    r[names(bias),] = r[names(bias),] + bias
-  }
-  t(r)
+  if(return_dtm) return(t(dtm))
+  if(category %in% names(dict)){
+    terms = split(as.data.frame(dict[, c(term, weight)]), dict[, category])
+    cats = names(terms)
+    if(!is.null(bias) && is.null(names(bias))){
+      bias = rep_len(bias, length(cats))
+      names(bias) = cats
+    }
+    om = matrix(0, l, length(cats), dimnames = list(NULL, cats))
+    for(cat in cats) om[, cat] = colSums(dtm[as.character(terms[[cat]][, 1]),, drop = FALSE] * terms[[cat]][, 2]) +
+      if(!is.null(bias) && cat %in% names(bias)) bias[cat] else 0
+  }else om = rowSums(dtm * dict[, weight]) + if(!is.null(bias)) bias else 0
+  om
 }
 
 #' English function word category lists

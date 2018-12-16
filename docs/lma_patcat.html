@@ -18,7 +18,8 @@
 <pre>
 lma_patcat(text, dict, term = "term", category = "category",
   weight = "weight", to.lower = TRUE, to.percent = FALSE,
-  bias = NULL, intname = "_intercept", dtm = FALSE)
+  bias = NULL, intname = "_intercept", return_dtm = FALSE,
+  fixed = TRUE)
 </pre>
 
 
@@ -45,7 +46,7 @@ categories, and weights.</p>
 <tr valign="top"><td><code>to.percent</code></td>
 <td>
 <p>Logical indicating whether term-counts should be divided by document-counts before
-being weighted.</p>
+being weighted (defaults to <code>FALSE</code>).</p>
 </td></tr>
 <tr valign="top"><td><code>bias</code></td>
 <td>
@@ -58,10 +59,14 @@ on the intercept included in each category (defined by <code>intname</code>).</p
 <p>The term representing the intercept (bias) of a category, to be extracted from <code>dict</code>
 and used as <code>bias</code>.</p>
 </td></tr>
-<tr valign="top"><td><code>dtm</code></td>
+<tr valign="top"><td><code>return_dtm</code></td>
 <td>
 <p>Logical; if <code>TRUE</code>, only a document-term matrix will be returned, rather than the
 weighted, summed, and adjusted category value.</p>
+</td></tr>
+<tr valign="top"><td><code>fixed</code></td>
+<td>
+<p>Logical; if <code>FALSE</code>, patterns can be regular expressions.</p>
 </td></tr>
 </table>
 

@@ -6,7 +6,7 @@
 \usage{
 lma_simets(a, b = NULL, metric, metric.arg = list(), group = NULL,
   agg = TRUE, agg.mean = TRUE, square = TRUE, mean = FALSE,
-  sample = 200, ncores = detectCores() - 2)
+  sample = NULL, ncores = detectCores() - 2)
 }
 \arguments{
 \item{a}{vector or matrix. If a vector, \code{b} must also be provided. If a matrix and \code{b}

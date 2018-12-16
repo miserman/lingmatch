@@ -6,7 +6,8 @@
 \usage{
 lma_patcat(text, dict, term = "term", category = "category",
   weight = "weight", to.lower = TRUE, to.percent = FALSE,
-  bias = NULL, intname = "_intercept", dtm = FALSE)
+  bias = NULL, intname = "_intercept", return_dtm = FALSE,
+  fixed = TRUE)
 }
 \arguments{
 \item{text}{A vector of raw text to be categorized.}
@@ -19,7 +20,7 @@ categories, and weights.}
 \item{to.lower}{Logical indicating whether \code{text} should be converted to lower case.}
 
 \item{to.percent}{Logical indicating whether term-counts should be divided by document-counts before
-being weighted.}
+being weighted (defaults to \code{FALSE}).}
 
 \item{bias}{A constant to add to each category after weighting and summing. Can be a vector with names
 corresponding to the unique values in \code{dict[,category]}, but is usually extracted from dict based
@@ -28,8 +29,10 @@ on the intercept included in each category (defined by \code{intname}).}
 \item{intname}{The term representing the intercept (bias) of a category, to be extracted from \code{dict}
 and used as \code{bias}.}
 
-\item{dtm}{Logical; if \code{TRUE}, only a document-term matrix will be returned, rather than the
+\item{return_dtm}{Logical; if \code{TRUE}, only a document-term matrix will be returned, rather than the
 weighted, summed, and adjusted category value.}
+
+\item{fixed}{Logical; if \code{FALSE}, patterns can be regular expressions.}
 }
 \description{
 Categorize raw texts using a pattern-based dictionary
