@@ -16,9 +16,9 @@
 <h3>Usage</h3>
 
 <pre>
-lma_termcat(dtm, dict, term.weights = list(), bias = NULL,
+lma_termcat(dtm, dict, term.weights = NULL, bias = NULL,
   escape = FALSE, partial = FALSE, term.filter = NULL,
-  term.break = 3900)
+  cat.limit = 25000)
 </pre>
 
 
@@ -62,12 +62,36 @@ as the <code>bias</code> for that category.</p>
 <code>gsub</code>). For example, if terms are part-of-speech tagged (e.g.,
 <code>'a_DT'</code>), <code>filter='_.*'</code> would remove the tag.</p>
 </td></tr>
-<tr valign="top"><td><code>term.break</code></td>
+<tr valign="top"><td><code>cat.limit</code></td>
 <td>
-<p>A limit used to break up longer categories. Reduce from 3900 if you get a PCRE compilation
-error.</p>
+<p>If a category has more than <code>cat.limit</code> characters, it will be processed in chunks.
+Reduce from 25000 if you get a PCRE compilation error.</p>
 </td></tr>
 </table>
+
+
+<h3>Examples</h3>
+
+<pre>
+# Score texts with the NRC Affect Intensity Lexicon
+
+dict = readLines('https://saifmohammad.com/WebDocs/NRC-AffectIntensity-Lexicon.txt')
+dict = read.table(
+  text = dict[-seq_len(grep('term\tscore', dict, fixed = TRUE)[[1]])],
+  col.names = c('term', 'weight', 'category')
+)
+
+text = c(
+  angry = 'We are outraged by their hateful brutality, and by the way they terrorize us with their hatred.',
+  fearful = 'The horrific torture of that terrorist was tantamount to the terrorism of terrorists.',
+  joyous = 'I am jubilant to be celebrating the bliss of this happiest happiness.',
+  sad = 'They are nearly suicidal in their mourning of the tragic and heartbreaking holocaust.'
+)
+
+emotion_scores = lma_termcat(text, split(dict$term, dict$category), split(dict$weight, dict$category))
+if(require('splot')) splot(emotion_scores ~ names(text), leg = 'out')
+
+</pre>
 
 
 </body></html>

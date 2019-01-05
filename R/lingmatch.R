@@ -59,7 +59,7 @@
 #'   aligning with the standard calculations of each type:
 #'   \tabular{ll}{
 #'     LSM \tab \code{lingmatch(text, weight='count', dict=lma_dict(1:9), metric='canberra')}\cr
-#'     LSA \tab \code{lingmatch(text, weight='tfidf', space='internal', metric='cosine')}\cr
+#'     LSA \tab \code{lingmatch(text, space='default', metric='cosine')}\cr
 #'   }
 #' @section Grouping and Comparisons:
 #' Defining groups and comparisons can sometimes be a bit complicated, and requires dataset
@@ -605,6 +605,7 @@ lma_dtm=function(text,exclude=NULL,context=NULL,numbers=FALSE,punct=FALSE,urls=T
     text=gsub('http[^ ]*|www[^ ]*| [a-z]+\\.[a-z]{2,}[./][^ ]*',' url ',text,TRUE)
     text=gsub('(?<=[A-Z])\\. ',' ',text,perl=TRUE)
   }
+  text=gsub('/', ' / ', text, fixed = TRUE)
   text=gsub('(?<=st|rd|ft|feat|dr|drs|mr|ms|mrs|messrs|jr|prof)\\. |^|$',' ',text,TRUE,perl=TRUE)
   text=gsub('\\.(?![A-z0-9])',' . ',text,perl=TRUE)
   if(to.lower) text=tolower(text)
@@ -640,7 +641,6 @@ lma_dtm=function(text,exclude=NULL,context=NULL,numbers=FALSE,punct=FALSE,urls=T
   text = gsub('[\u2033\u2036\u201C\u201D\u201F]', '"', text)
   text = gsub('[\u2032\u2035\u2018\u2019]', "'", text)
   text=gsub("(?<=[A-z]) ['\u00E7\u00ED] (?=[A-z])","'",text,perl=TRUE)
-  text=gsub('(?<=[A-z]) / (?=[A-z])','/',text,perl=TRUE)
   if(!punct) text=gsub('[[:punct:]] +',' ',text)
   text=gsub('^ +| (?= )| +$','',text,perl=TRUE)
   text=strsplit(text,word.break)
@@ -1001,19 +1001,38 @@ lma_lspace=function(dtm,space,path='~/Documents/Latent Semantic Spaces',
 #' @param term.filter A regular expression string used to format the text of each term (passed to
 #'   \code{gsub}). For example, if terms are part-of-speech tagged (e.g.,
 #'   \code{'a_DT'}), \code{filter='_.*'} would remove the tag.
-#' @param term.break A limit used to break up longer categories. Reduce from 3900 if you get a PCRE compilation
-#'   error.
+#' @param term.break If a category has more than \code{term.break} characters, it will be processed in chunks.
+#'   Reduce from 25000 if you get a PCRE compilation error.
+#' @examples
+#' # Score texts with the NRC Affect Intensity Lexicon
+#'
+#' dict = readLines('https://saifmohammad.com/WebDocs/NRC-AffectIntensity-Lexicon.txt')
+#' dict = read.table(
+#'   text = dict[-seq_len(grep('term\tscore', dict, fixed = TRUE)[[1]])],
+#'   col.names = c('term', 'weight', 'category')
+#' )
+#'
+#' text = c(
+#'   angry = 'We are outraged by their hateful brutality, and by the way they terrorize us with their hatred.',
+#'   fearful = 'The horrific torture of that terrorist was tantamount to the terrorism of terrorists.',
+#'   joyous = 'I am jubilant to be celebrating the bliss of this happiest happiness.',
+#'   sad = 'They are nearly suicidal in their mourning of the tragic and heartbreaking holocaust.'
+#' )
+#'
+#' emotion_scores = lma_termcat(text, split(dict$term, dict$category), split(dict$weight, dict$category))
+#' if(require('splot')) splot(emotion_scores ~ names(text), leg = 'out')
+#'
 #' @export
 
-lma_termcat=function(dtm,dict,term.weights=list(),bias=NULL,escape=FALSE,partial=FALSE,term.filter=NULL,term.break=3900){
+lma_termcat=function(dtm,dict,term.weights=NULL,bias=NULL,escape=FALSE,partial=FALSE,term.filter=NULL,term.break=25e3){
   st=proc.time()[3]
   if(missing(dict)) dict=lma_dict(1:9)
-  if(missing(term.weights) && is.numeric(dict[[1]]) && !is.null(names(dict[[1]]))){
+  if(is.null(term.weights) && is.numeric(dict[[1]]) && !is.null(names(dict[[1]]))){
     term.weights = dict
     dict = lapply(dict, names)
   }
   if(!is.list(dict)){
-    if(!missing(term.weights)) if(!is.list(term.weights)) term.weights=list(cat=term.weights) else{
+    if(!is.null(term.weights)) if(!is.list(term.weights)) term.weights=list(cat=term.weights) else{
       if(length(term.weights)==1) names(term.weights)='cat' else{
         if(any(l<-lapply(term.weights,length)==length(dict))){
           term.weights=term.weights[[l]]
@@ -1037,21 +1056,22 @@ lma_termcat=function(dtm,dict,term.weights=list(),bias=NULL,escape=FALSE,partial
   ats=attributes(dtm)[c('opts','WC','orientation','type')]
   ats=ats[!vapply(ats,is.null,TRUE)]
   atsn=names(ats)
-  cls = vapply(dict,length,0)
+  cls = vapply(dict, function(cat) nchar(paste(cat, collapse = '')), 0)
   if(any(cls>term.break)){
-    br=function(l,e=term.break){
-      l=length(l)
-      f=round(l/e+.49)
+    br=function(l, e = term.break){
+      f = round(cls[[l]] / e + .49)
+      l = length(dict[[l]])
+      e = round(l / f + .49)
       o=lapply(seq_len(f),function(i)seq_len(e)+e*(i-1))
       o[[f]]=o[[f]][o[[f]]<=l]
       o
     }
     ag=list(dtm,bias=bias,escape=escape,term.filter=term.filter,term.break=term.break)
-    if(!missing(term.weights)) ag$term.weights=term.weights
-    op=vapply(names(dict),function(n){
-      if(cls[n]>term.break) Reduce('+',lapply(br(dict[[n]]),function(s) do.call(lma_termcat,
-        c(ag,dict=dict[[n]][s],if(missing(term.weights)) term.weights=term.weights[[n]][s])
-      ))) else do.call(lma_termcat,c(ag,dict=dict[cat],if(missing(term.weights)) term.weights=term.weights[cat]))
+    if(!is.null(term.weights)) ag$term.weights=term.weights
+    op=vapply(names(dict),function(cat){
+      if(cls[[cat]] > term.break) Reduce('+', lapply(br(cat), function(s) do.call(lma_termcat,
+        c(ag, dict = list(dict[[cat]][s]), if(is.null(term.weights)) term.weights = list(term.weights[[cat]][s]))
+      ))) else do.call(lma_termcat, c(ag, dict = list(dict[[cat]]), if(is.null(term.weights)) term.weights = list(term.weights[[cat]])))
     },numeric(nrow(dtm)))
   }else{
     lab=lapply(dict,function(l) grepl('(',l,fixed=TRUE) + grepl(')',l,fixed=TRUE) == 1)
@@ -1061,19 +1081,22 @@ lma_termcat=function(dtm,dict,term.weights=list(),bias=NULL,escape=FALSE,partial
       e = '$'
     }else s = e = ''
     if(length(lab)) for(l in names(lab)) dict[[l]][lab[[l]]]=gsub('([()])','\\\\\\1',dict[[l]][lab[[l]]])
-    if(!missing(term.weights)) odict = dict
+    if(!is.null(term.weights)) odict = dict
     dict=if(!escape) lapply(dict,function(l) paste(paste0(s, l, e), collapse='|')) else lapply(dict,function(l) if(length(l)!=1)
       gsub(paste0('\\*\\',e),'',paste(paste0(s,gsub('([*.^$({[\\]})+?-])','\\\\\\1',l),e,collapse='|'))) else l)
     ws=if(is.null(term.filter)) colnames(dtm) else gsub(term.filter,'',colnames(dtm),perl=TRUE)
     if('opts'%in%atsn && !ats$opts['to.lower']) ws=tolower(ws)
-    op=if(!missing(term.weights)) vapply(names(dict),function(cat){
-      su=dtm[,grep(dict[[cat]],ws,perl=TRUE),drop=FALSE]
-      if(!cat %in% names(term.weights)) term.weight[[cat]] = rep(1, cls[[cat]])
-      if(is.null(names(term.weights[[cat]])) && length(term.weights[[cat]]) == cls[[cat]]) names(term.weights[[cat]]) = odict[[cat]]
-      if(any(mcn <- !colnames(su) %in% names(term.weights[[cat]]))) term.weights[[cat]][colnames(su)[mcn]] = 1
-      colSums(t(su)*term.weights[[cat]][colnames(su)],na.rm=TRUE)
-    },numeric(nrow(dtm))) else
-      vapply(names(dict),function(c)rowSums(dtm[,grep(dict[[c]],ws,perl=TRUE),drop=FALSE],na.rm=TRUE),numeric(nrow(dtm)))
+    op = if(!is.null(term.weights)){
+      vapply(names(dict), function(cat){
+        su = dtm[, grep(dict[[cat]], ws, perl = TRUE), drop = FALSE]
+        if(!cat %in% names(term.weights)) term.weights[[cat]] = rep(1, cls[[cat]])
+        if(is.null(names(term.weights[[cat]])) && length(term.weights[[cat]]) == length(odict[[cat]])) names(term.weights[[cat]]) = odict[[cat]]
+        if(any(mcn <- !colnames(su) %in% names(term.weights[[cat]]))) term.weights[[cat]][colnames(su)[mcn]] = 1
+        colSums(t(su) * term.weights[[cat]][colnames(su)], na.rm = TRUE)
+      }, numeric(nrow(dtm)))
+    }else{
+      vapply(names(dict), function(cat) rowSums(dtm[, grep(dict[[cat]], ws, perl = TRUE), drop = FALSE], na.rm = TRUE), numeric(nrow(dtm)))
+    }
   }
   if(!is.null(bias)) for(n in names(bias)) if(n%in%names(op)) op[, n] = op[, n] + bias[[n]]
   attr(op,'WC')=if('WC'%in%atsn) ats$WC else rowSums(dtm,na.rm=TRUE)

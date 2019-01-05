@@ -66,7 +66,7 @@ Comparisons section.}
 aligning with the standard calculations of each type:
 \tabular{ll}{
   LSM \tab \code{lingmatch(text, weight='count', dict=lma_dict(1:9), metric='canberra')}\cr
-  LSA \tab \code{lingmatch(text, weight='tfidf', space='internal', metric='cosine')}\cr
+  LSA \tab \code{lingmatch(text, space='default', metric='cosine')}\cr
 }}
 }
 \description{
