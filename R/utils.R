@@ -123,9 +123,9 @@ read.folder=function(path=NULL,segment=NULL,subdir=FALSE,ext='.txt',fixed=TRUE,
         ns=length(txt)
         sls=vapply(txt,function(s)sum(s!=''),0)
         wc=sum(sls)
-        segment=if(is.null(segment.size)) round(wc/segment+.49) else segment.size
+        seg=if(is.null(segment.size)) round(wc/segment+.49) else segment.size
         txt = vapply(
-          split(txt, cut(cumsum(sls), c(-Inf, seq_len(round(wc / segment + .49) - 1) * segment, Inf))),
+          unname(split(txt, cut(cumsum(sls), c(-Inf, seq_len(round(wc / seg + .49) - 1) * seg, Inf)))),
           paste, '', collapse = ' '
         )
         txt = txt[grepl('\\w', txt)]
