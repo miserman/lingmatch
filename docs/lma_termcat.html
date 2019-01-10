@@ -18,7 +18,7 @@
 <pre>
 lma_termcat(dtm, dict, term.weights = NULL, bias = NULL,
   escape = FALSE, partial = FALSE, term.filter = NULL,
-  cat.limit = 25000)
+  term.break = 25000)
 </pre>
 
 
@@ -62,9 +62,9 @@ as the <code>bias</code> for that category.</p>
 <code>gsub</code>). For example, if terms are part-of-speech tagged (e.g.,
 <code>'a_DT'</code>), <code>filter='_.*'</code> would remove the tag.</p>
 </td></tr>
-<tr valign="top"><td><code>cat.limit</code></td>
+<tr valign="top"><td><code>term.break</code></td>
 <td>
-<p>If a category has more than <code>cat.limit</code> characters, it will be processed in chunks.
+<p>If a category has more than <code>term.break</code> characters, it will be processed in chunks.
 Reduce from 25000 if you get a PCRE compilation error.</p>
 </td></tr>
 </table>

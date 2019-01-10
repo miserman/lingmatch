@@ -73,7 +73,7 @@ write.dic=function(x,filename='custom'){
 
 #' Process texts in a folder
 #'
-#' Read in and optionaly segment all texts within a folder.
+#' Read in and optionally segment all texts within a folder.
 #'
 #' @param path Path to a folder containing files, or a vector of paths to files.
 #' @param segment Specifies how the text of each file should be segmented. If a number, texts will be broken into
@@ -89,11 +89,12 @@ write.dic=function(x,filename='custom'){
 #' @param reader The function used to read files. File paths are always passed as the first argument.
 #'   \code{\link[base]{readLines}} by default.
 #' @param readarg A list of additional arguments to pass to \code{reader}, starting in the second position.
+#' @param ncores Number of CPU cores to use; defaults to total number of cores minus 2.
 #'
 #' @export
 
 read.folder=function(path=NULL,segment=NULL,subdir=FALSE,ext='.txt',fixed=TRUE,
-  segment.size=NULL,bysentence=FALSE,reader=readLines,readarg=list(warn=FALSE)){
+  segment.size=NULL,bysentence=FALSE,reader=readLines,readarg=list(warn=FALSE),ncores = parallel::detectCores() - 2){
   if(missing(path)){
     path=choose.dir()
     if(is.na(path)) return()
@@ -101,7 +102,13 @@ read.folder=function(path=NULL,segment=NULL,subdir=FALSE,ext='.txt',fixed=TRUE,
   fs=if(length(path)==1 && dir.exists(path)) fs=list.files(path,ext,recursive=subdir,full.names=TRUE) else path
   fs=data.frame(rbind(fs,gsub('^.*[\\/]+','',fs)),stringsAsFactors=FALSE)
   if(!missing(segment.size)) segment=NULL
-  d=do.call(rbind,lapply(fs,function(f){
+  if(ncores > 1 && (!missing(ncores) || length(fs) > 4)){
+    cl = makeCluster(ncores)
+    registerDoParallel(cl)
+    on.exit(stopCluster(cl))
+  }else registerDoSEQ()
+  d = foreach(i = seq_along(fs), .combine = rbind) %dopar%{
+    f = fs[[i]]
     txt=tryCatch(do.call(reader,c(f[1],readarg)),error=function(e)NULL)
     if(!is.null(txt)){
       txt=paste(txt,collapse='\r\n')
@@ -117,21 +124,16 @@ read.folder=function(path=NULL,segment=NULL,subdir=FALSE,ext='.txt',fixed=TRUE,
         sls=vapply(txt,function(s)sum(s!=''),0)
         wc=sum(sls)
         segment=if(is.null(segment.size)) round(wc/segment+.49) else segment.size
-        op=c()
-        cl=s=0
-        ind=1
-        for(i in seq_len(ns)) if(i<ns && cl+sls[i]<segment) cl=cl+sls[i] else{
-          cl=0
-          op[ind]=paste(unlist(txt[(s+1):i]),collapse=' ')
-          s=i
-          ind=ind+1
-        }
-        txt=op[!grepl('^[ ]*$',op)]
+        txt = vapply(
+          split(txt, cut(cumsum(sls), c(-Inf, seq_len(round(wc / segment + .49) - 1) * segment, Inf))),
+          paste, '', collapse = ' '
+        )
+        txt = txt[grepl('\\w', txt)]
       }
-      data.frame(file=f[2],segment=seq_along(txt),text=txt)
+      data.frame(file = f[2], segment = seq_along(txt), text = txt)
     }
-  }))
-  rownames(d)=seq_len(nrow(d))
+  }
+  rownames(d) = seq_len(nrow(d))
   d
 }
 

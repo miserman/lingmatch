@@ -1204,8 +1204,8 @@ lma_simets=function(a,b=NULL,metric,metric.arg=list(),group=NULL,agg=TRUE,agg.me
   }
   st=proc.time()[3]
   if(is.null(b)){
-    n=NROW(a)
-    if(n<2) stop('a must have more than 1 row when b is not provided',call.=FALSE)
+    n=nrow(a)
+    if(is.null(n) || n<2) stop('a must be a matrix with more than 1 row when b is not provided',call.=FALSE)
     if(!is.numeric(a)) a=if(n>1) apply(a,2,as.numeric) else as.numeric(a)
     if(is.null(group)){
       rand=is.numeric(sample) && n>sample
@@ -1213,6 +1213,7 @@ lma_simets=function(a,b=NULL,metric,metric.arg=list(),group=NULL,agg=TRUE,agg.me
       if(p){
         clust=makeCluster(ncores)
         registerDoParallel(clust)
+        on.exit(stopCluster(clust))
       }else registerDoSEQ()
       res=if(rand){
         if(missing(mean)) mean=TRUE
@@ -1236,7 +1237,6 @@ lma_simets=function(a,b=NULL,metric,metric.arg=list(),group=NULL,agg=TRUE,agg.me
           if(mean) vapply(res,function(i)(colSums(i)-1)/(ncol(i)-1),numeric(n)) else res
         }else vapply(m,function(i)i[su],numeric((n-1)*n/2))
       }
-      if(p) stopCluster(clust)
     }else{
       if(length(group)!=n) stop('length(group) != NROW(a)')
       ager = if(agg.mean) colMeans else colSums

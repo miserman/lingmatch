@@ -7,7 +7,7 @@
 read.folder(path = NULL, segment = NULL, subdir = FALSE,
   ext = ".txt", fixed = TRUE, segment.size = NULL,
   bysentence = FALSE, reader = readLines, readarg = list(warn =
-  FALSE))
+  FALSE), ncores = parallel::detectCores() - 2)
 }
 \arguments{
 \item{path}{Path to a folder containing files, or a vector of paths to files.}
@@ -32,7 +32,9 @@ together, rather than being broken across segments.}
 \code{\link[base]{readLines}} by default.}
 
 \item{readarg}{A list of additional arguments to pass to \code{reader}, starting in the second position.}
+
+\item{ncores}{Number of CPU cores to use; defaults to total number of cores minus 2.}
 }
 \description{
-Read in and optionaly segment all texts within a folder.
+Read in and optionally segment all texts within a folder.
 }

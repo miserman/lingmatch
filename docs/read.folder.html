@@ -9,7 +9,7 @@
 
 <h3>Description</h3>
 
-<p>Read in and optionaly segment all texts within a folder.
+<p>Read in and optionally segment all texts within a folder.
 </p>
 
 
@@ -19,7 +19,7 @@
 read.folder(path = NULL, segment = NULL, subdir = FALSE,
   ext = ".txt", fixed = TRUE, segment.size = NULL,
   bysentence = FALSE, reader = readLines, readarg = list(warn =
-  FALSE))
+  FALSE), ncores = parallel::detectCores() - 2)
 </pre>
 
 
@@ -66,6 +66,10 @@ together, rather than being broken across segments.</p>
 <tr valign="top"><td><code>readarg</code></td>
 <td>
 <p>A list of additional arguments to pass to <code>reader</code>, starting in the second position.</p>
+</td></tr>
+<tr valign="top"><td><code>ncores</code></td>
+<td>
+<p>Number of CPU cores to use; defaults to total number of cores minus 2.</p>
 </td></tr>
 </table>
 
