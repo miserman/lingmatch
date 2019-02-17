@@ -26,7 +26,8 @@ available metrics:
   \code{kendall} \tab \code{cor(a, b, method='kendall')} \cr
   \code{spearman} \tab \code{cor(a, b, method='spearman')} \cr
   \code{jaccard} \tab \code{sum(a & b) / sum(a | b)} \cr
-  \code{kld} \tab \code{1 - sum(vapply(unique(c(a, b)), function(v){pq = c(mean(a == v), mean(b == v));
+  \code{kld} \tab \code{1 - sum(vapply(unique(c(a, b)),
+  function(v){pq = c(mean(a == v), mean(b == v));
   if(pq[2]) pq[1] * log(pq[1] / pq[2]) else 0
   }, 0), na.rm = TRUE)}\cr
 }}

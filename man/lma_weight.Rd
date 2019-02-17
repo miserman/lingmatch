@@ -55,8 +55,8 @@ frequencies can be based on the raw count (default; \code{freq.complete = TRUE})
 \item{log.base}{the base of logs, applied to any weight using \code{\link[base]{log}}.
 Default is 10.}
 
-\item{alpha}{a scaling factor applied to document frequency as part of pointwise mutual information
-weighting.}
+\item{alpha}{a scaling factor applied to document frequency as part of pointwise mutual
+information weighting.}
 
 \item{doc.only}{logical: if \code{TRUE}, only document weights are returned (a single value for
 each term).}
@@ -71,9 +71,9 @@ Term weights works to dampen differences in word count, with differences meaning
 from \code{amplify} to \code{count} to \code{sqrt} to \code{log} to \code{binary}.
 
 Document weights work to treat words differently based on their frequency. \code{entropy},
-\code{dfmax}, \code{df}, and \code{poisson} (most to least intense over document frequencies of ~15)
-give more frequent words more weight, whereas \code{ridf}, \code{normal}, and \code{idf}, give less
-frequent words more weight.
+\code{dfmax}, \code{df}, and \code{poisson} (most to least intense over document frequencies of
+~15) give more frequent words more weight, whereas \code{ridf}, \code{normal}, and \code{idf},
+give less frequent words more weight.
 
 \code{weight} can either be a vector with two characters, corresponding to term weight and
 document weight (e.g., \code{weight = c('count','idf')}), or it can be a string with term and

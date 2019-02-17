@@ -13,18 +13,18 @@ lma_termcat(dtm, dict, term.weights = NULL, bias = NULL,
 
 \item{dict}{A \code{list} object with named character vectors as word lists.}
 
-\item{term.weights}{A \code{list} object with named numeric vectors lining up with the character vectors
-in \code{dict}, used to weight the terms in each \code{dict} vector. If a category in \code{dict}
-is not specified in \code{term.weights}, or the \code{dict} and \code{term.weights} vectors aren't the same
-length, the weight for that category will be 1.}
+\item{term.weights}{A \code{list} object with named numeric vectors lining up with the character
+vectors in \code{dict}, used to weight the terms in each \code{dict} vector. If a category in
+\code{dict} is not specified in \code{term.weights}, or the \code{dict} and \code{term.weights}
+vectors aren't the same length, the weight for that category will be 1.}
 
-\item{bias}{A list or named vector specifying a constant to add to the named category. If an '_intercept' is
-included in a category, if will be removed from the category, and the associated \code{weight} will be used
-as the \code{bias} for that category.}
+\item{bias}{A list or named vector specifying a constant to add to the named category. If an
+'_intercept' is included in a category, if will be removed from the category, and the associated
+\code{weight} will be used as the \code{bias} for that category.}
 
-\item{escape}{Logical indicating whether the terms in \code{dict} should not be treated as plain text
-(including asterisk wild cards). If \code{TRUE}, regular expression related characters are escaped. Set to
-\code{TRUE} if you get PCRE compilation errors.}
+\item{escape}{Logical indicating whether the terms in \code{dict} should not be treated as plain
+text (including asterisk wild cards). If \code{TRUE}, regular expression related characters are
+escaped. Set to \code{TRUE} if you get PCRE compilation errors.}
 
 \item{partial}{Logical; if \code{TRUE} terms are partially matched (not padded by ^ and $).}
 
@@ -32,8 +32,8 @@ as the \code{bias} for that category.}
 \code{gsub}). For example, if terms are part-of-speech tagged (e.g.,
 \code{'a_DT'}), \code{filter='_.*'} would remove the tag.}
 
-\item{term.break}{If a category has more than \code{term.break} characters, it will be processed in chunks.
-Reduce from 25000 if you get a PCRE compilation error.}
+\item{term.break}{If a category has more than \code{term.break} characters, it will be processed
+in chunks. Reduce from 25000 if you get a PCRE compilation error.}
 }
 \description{
 Reduces the dimensions of a document-term matrix by dictionary-based categorization.
@@ -48,13 +48,18 @@ dict = read.table(
 )
 
 text = c(
-  angry = 'We are outraged by their hateful brutality, and by the way they terrorize us with their hatred.',
+  angry = paste(
+    'We are outraged by their hateful brutality,',
+    'and by the way they terrorize us with their hatred.'
+  ),
   fearful = 'The horrific torture of that terrorist was tantamount to the terrorism of terrorists.',
   joyous = 'I am jubilant to be celebrating the bliss of this happiest happiness.',
   sad = 'They are nearly suicidal in their mourning of the tragic and heartbreaking holocaust.'
 )
 
-emotion_scores = lma_termcat(text, split(dict$term, dict$category), split(dict$weight, dict$category))
+emotion_scores = lma_termcat(
+  text, split(dict$term, dict$category), split(dict$weight, dict$category)
+)
 if(require('splot')) splot(emotion_scores ~ names(text), leg = 'out')
 
 }
