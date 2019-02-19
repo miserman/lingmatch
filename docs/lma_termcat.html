@@ -35,22 +35,22 @@ lma_termcat(dtm, dict, term.weights = NULL, bias = NULL,
 </td></tr>
 <tr valign="top"><td><code>term.weights</code></td>
 <td>
-<p>A <code>list</code> object with named numeric vectors lining up with the character vectors
-in <code>dict</code>, used to weight the terms in each <code>dict</code> vector. If a category in <code>dict</code>
-is not specified in <code>term.weights</code>, or the <code>dict</code> and <code>term.weights</code> vectors aren't the same
-length, the weight for that category will be 1.</p>
+<p>A <code>list</code> object with named numeric vectors lining up with the character
+vectors in <code>dict</code>, used to weight the terms in each <code>dict</code> vector. If a category in
+<code>dict</code> is not specified in <code>term.weights</code>, or the <code>dict</code> and <code>term.weights</code>
+vectors aren't the same length, the weight for that category will be 1.</p>
 </td></tr>
 <tr valign="top"><td><code>bias</code></td>
 <td>
-<p>A list or named vector specifying a constant to add to the named category. If an '_intercept' is
-included in a category, if will be removed from the category, and the associated <code>weight</code> will be used
-as the <code>bias</code> for that category.</p>
+<p>A list or named vector specifying a constant to add to the named category. If an
+'_intercept' is included in a category, if will be removed from the category, and the associated
+<code>weight</code> will be used as the <code>bias</code> for that category.</p>
 </td></tr>
 <tr valign="top"><td><code>escape</code></td>
 <td>
-<p>Logical indicating whether the terms in <code>dict</code> should not be treated as plain text
-(including asterisk wild cards). If <code>TRUE</code>, regular expression related characters are escaped. Set to
-<code>TRUE</code> if you get PCRE compilation errors.</p>
+<p>Logical indicating whether the terms in <code>dict</code> should not be treated as plain
+text (including asterisk wild cards). If <code>TRUE</code>, regular expression related characters are
+escaped. Set to <code>TRUE</code> if you get PCRE compilation errors.</p>
 </td></tr>
 <tr valign="top"><td><code>partial</code></td>
 <td>
@@ -64,8 +64,8 @@ as the <code>bias</code> for that category.</p>
 </td></tr>
 <tr valign="top"><td><code>term.break</code></td>
 <td>
-<p>If a category has more than <code>term.break</code> characters, it will be processed in chunks.
-Reduce from 25000 if you get a PCRE compilation error.</p>
+<p>If a category has more than <code>term.break</code> characters, it will be processed
+in chunks. Reduce from 25000 if you get a PCRE compilation error.</p>
 </td></tr>
 </table>
 
@@ -82,13 +82,18 @@ dict = read.table(
 )
 
 text = c(
-  angry = 'We are outraged by their hateful brutality, and by the way they terrorize us with their hatred.',
+  angry = paste(
+    'We are outraged by their hateful brutality,',
+    'and by the way they terrorize us with their hatred.'
+  ),
   fearful = 'The horrific torture of that terrorist was tantamount to the terrorism of terrorists.',
   joyous = 'I am jubilant to be celebrating the bliss of this happiest happiness.',
   sad = 'They are nearly suicidal in their mourning of the tragic and heartbreaking holocaust.'
 )
 
-emotion_scores = lma_termcat(text, split(dict$term, dict$category), split(dict$weight, dict$category))
+emotion_scores = lma_termcat(
+  text, split(dict$term, dict$category), split(dict$weight, dict$category)
+)
 if(require('splot')) splot(emotion_scores ~ names(text), leg = 'out')
 
 </pre>

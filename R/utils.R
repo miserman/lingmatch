@@ -107,6 +107,7 @@ read.folder=function(path=NULL,segment=NULL,subdir=FALSE,ext='.txt',fixed=TRUE,
     registerDoParallel(cl)
     on.exit(stopCluster(cl))
   }else registerDoSEQ()
+  i = 0
   d = foreach(i = seq_along(fs), .combine = rbind) %dopar%{
     f = fs[[i]]
     txt=tryCatch(do.call(reader,c(f[1],readarg)),error=function(e)NULL)
@@ -148,7 +149,7 @@ read.folder=function(path=NULL,segment=NULL,subdir=FALSE,ext='.txt',fixed=TRUE,
 #' @param space name of the space you wish to download. Options include \code{'default'} and \code{'tasa'}.
 #' @param dir desired path to the downloaded space; default is '~/Documents/Latent Semantic Spaces'.
 #' @export
-#' @importFrom utils download.file unzip
+#' @importFrom utils download.file unzip choose.dir
 
 download.lsspace=function(space='default',dir='~/Documents/Latent Semantic Spaces'){
   z=grepl('^l|^s|^z',space,TRUE)
@@ -185,12 +186,23 @@ download.lsspace=function(space='default',dir='~/Documents/Latent Semantic Space
 #' @param return_dtm Logical; if \code{TRUE}, only a document-term matrix will be returned, rather than the
 #'   weighted, summed, and adjusted category value.
 #' @param fixed Logical; if \code{FALSE}, patterns can be regular expressions.
+#' @param ncores Number of CPU cores to use. Default is number of cores - 2 if \code{text} has more than 100
+#'   entries. Otherwise, if not specified, only 1 core will be used.
 #' @examples
 #' # example text
 #' text = c(
-#'   "Oh, what youth was! What I had and gave away. What I took and spent and saw. What I lost. And now? Ruin.",
-#'   "God, are you so bored?! You just want what's gone from us all? I miss the you that was too. I love that you.",
-#'   "Tomorrow! Tomorrow--nay, even tonight--you wait, as I am about to change. Soon I will off to revert. Please wait."
+#'   paste(
+#'     "Oh, what youth was! What I had and gave away.",
+#'     "What I took and spent and saw. What I lost. And now? Ruin."
+#'   ),
+#'   paste(
+#'     "God, are you so bored?! You just want what's gone from us all?",
+#'     "I miss the you that was too. I love that you."
+#'   ),
+#'   paste(
+#'     "Tomorrow! Tomorrow--nay, even tonight--you wait, as I am about to change.",
+#'     "Soon I will off to revert. Please wait."
+#'   )
 #' )
 #'
 #' # read in the temporal orientation lexicon from the World Well-Being Project
@@ -201,7 +213,8 @@ download.lsspace=function(space='default',dir='~/Documents/Latent Semantic Space
 #' @export
 
 lma_patcat = function(text, dict, term = 'term', category = 'category', weight = 'weight',
-  to.lower = TRUE, to.percent = FALSE, bias = NULL, intname = '_intercept', return_dtm = FALSE, fixed = TRUE){
+  to.lower = TRUE, to.percent = FALSE, bias = NULL, intname = '_intercept', return_dtm = FALSE,
+  fixed = TRUE, ncores = detectCores() - 2){
   text = as.character(text)
   if(to.lower) text = tolower(text)
   if(is.null(colnames(dict))){
@@ -227,8 +240,15 @@ lma_patcat = function(text, dict, term = 'term', category = 'category', weight =
   }
   terms = na.omit(unique(dict[, term]))
   l = length(text)
-  dtm = matrix(0, length(terms), l, dimnames = list(terms))
-  for(w in terms) dtm[w,] = vapply(strsplit(text, w, fixed = fixed), length, 0) - 1
+  if(ncores > 1 && (!missing(ncores) || l > 100)){
+    clust = makeCluster(ncores)
+    registerDoParallel(clust)
+    on.exit(stopCluster(clust))
+  }else registerDoSEQ()
+  txt = ''
+  dtm = foreach(txt = text, .combine = cbind) %dopar%
+    Matrix(vapply(terms, function(w) length(strsplit(txt, w, fixed = fixed)[[1]]) - 1, 0), sparse = TRUE)
+  dimnames(dtm) = list(terms, seq_len(l))
   if(to.percent){
     rs = colSums(dtm)
     if(any(rs != 0)){

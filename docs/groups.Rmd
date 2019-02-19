@@ -42,7 +42,7 @@ lsm_mean = lingmatch(responses, type = 'lsm')
 # or we could process the raw text in the same way
 lsm_mean_raw = lingmatch(responses$Text, type = 'lsm')
 
-# these will be a little different due to differences in
+# these will be different due to differences in
 # function word dictionaries and text processing between LIWC and lingmatch
 cor(lsm_mean$sim, lsm_mean_raw$sim)
 ```

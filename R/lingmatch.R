@@ -110,7 +110,7 @@
 #'   \emph{Journal of Language and Social Psychology, 21}, 337-360.
 #'
 #' @export
-#' @importFrom Matrix Matrix as.matrix colSums rowSums t
+#' @importFrom Matrix Matrix as.matrix colSums rowSums colMeans rowMeans t sparseMatrix
 #' @importFrom stats na.omit cor dpois
 
 lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.group=NULL,order=NULL,
@@ -298,7 +298,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
     comp=seq_len(cr)
   }
   if(is.character(x)) for(i in seq_len(ncol(x))) x[, i] = as.numeric(x[, i])
-  dtm=Matrix(as.matrix(x),sparse=TRUE)
+  dtm = Matrix(if(is.data.frame(x)) as.matrix(x) else x, sparse = TRUE)
   if(do.wmc) x=wmc(x)
   if(is.null(nrow(x))) x=t(as.matrix(x))
   if(drop){
@@ -587,6 +587,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
 #'   Default is 0 (no limit).
 #' @param dc.max Numeric: excludes terms appearing in more than the set number of documents. Default
 #'   is Inf (no limit).
+#' @param sparse Logical: if \code{FALSE}, a regular matrix is returned.
 #' @note
 #' This is a relatively simple way to make a dtm. To calculate the (more or less) standard forms of
 #' LSM and LSS, a somewhat raw dtm should be fine, because both processes essentially use
@@ -607,18 +608,17 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
 #' @export
 #' @importFrom fastmatch fmatch
 
-lma_dtm=function(text,exclude=NULL,context=NULL,numbers=FALSE,punct=FALSE,urls=TRUE,
-  emojis=FALSE,to.lower=TRUE,word.break=' +',dc.min=0,dc.max=Inf){
+lma_dtm = function(text, exclude = NULL, context = NULL, numbers = FALSE, punct = FALSE, urls = TRUE,
+  emojis = FALSE, to.lower = TRUE, word.break = ' +', dc.min = 0, dc.max = Inf, sparse = TRUE){
   if(is.null(text)) stop(substitute(text),' not found')
-  text=as.character(text)
+  text = paste('', text, '')
   st=proc.time()[3]
   if(!urls){
     text=gsub('http[^ ]*|www[^ ]*| [a-z]+\\.[a-z]{2,}[./][^ ]*',' url ',text,TRUE)
     text=gsub('(?<=[A-Z])\\. ',' ',text,perl=TRUE)
   }
-  text=gsub('/', ' / ', text, fixed = TRUE)
-  text=gsub('(?<=st|rd|ft|feat|dr|drs|mr|ms|mrs|messrs|jr|prof)\\. |^|$',' ',text,TRUE,perl=TRUE)
-  text=gsub('\\.(?![A-z0-9])',' . ',text,perl=TRUE)
+  text = gsub('(?<=st|rd|ft|feat|dr|drs|mr|ms|mrs|messrs|jr|prof)\\. |[\\n\\t\\r]+', ' ', text, TRUE, TRUE)
+  text=gsub(' \\.|\\. ',' . ',text,perl=TRUE)
   if(to.lower) text=tolower(text)
   if(!missing(exclude)){
     if(length(exclude)==1 && grepl(exclude,'function',TRUE)){
@@ -645,11 +645,12 @@ lma_dtm=function(text,exclude=NULL,context=NULL,numbers=FALSE,punct=FALSE,urls=T
       for(rn in names(context)) text=gsub(context[[rn]],rn,text,perl=TRUE)
     }
   }
-  if(!numbers) text=gsub('[^A-z ]*[0-9,.]+',' ',text)
-  text=gsub('\\t|\\r|\\n|(?=[^A-z.0-9])|(?=[\\^`\\\\[\\]])|(?<=[\\^`\\\\[\\]])|(?<=[^A-z.0-9])',
-    ' ',text,perl=TRUE)
-  text = gsub('[\u2033\u2036\u201C\u201D\u201F]', '"', text)
+  if(!numbers) text = gsub('\\.*[0-9][0-9,.el-]+', ' ', text, TRUE)
   text = gsub('[\u2032\u2035\u2018\u2019]', "'", text)
+  text = gsub("[\u2033\u2036\u201C\u201D\u201F]|(?<=[^A-z0-9])'|'(?=[^A-z0-9])", '"', text, perl = TRUE)
+  text = gsub("([^a-z0-9.,'-]|,(?=[a-z])|(?<=[^a-z0-9])(,(?=[a-z0-9])|[.-](?=[a-z]))|[.,'-](?=[^0-9a-z]|[.,'-]))",
+    ' \\1 ', text, TRUE, TRUE)
+  text = gsub("([a-z0-9.,'-].*[^a-z0-9])", ' \\1 ', text, TRUE, TRUE)
   text=gsub("(?<=[A-z]) ['\u00E7\u00ED] (?=[A-z])","'",text,perl=TRUE)
   if(!punct) text=gsub('[[:punct:]] +',' ',text)
   text=gsub('^ +| (?= )| +$','',text,perl=TRUE)
@@ -666,24 +667,31 @@ lma_dtm=function(text,exclude=NULL,context=NULL,numbers=FALSE,punct=FALSE,urls=T
       exclude[ck] = gsub('([([{}\\])])', '\\\\\\1', exclude[ck], perl = TRUE)
     words=grep(paste(exclude,collapse='|'),words,value=TRUE,invert=TRUE)
   }
-  m=matrix(0L,length(text),length(words),dimnames=list(c(),words))
-  cseq=function(x){
-    x=sort(x)
-    l=length(x)
-    v=c=unique(x)
-    i=1
+  nc = length(text)
+  cseq = function(x){
+    l = length(x)
+    v = c = unique(x)
+    i = 1
     for(u in seq_along(v)){
-      n=i
-      while(i<l && x[i]==x[i+1]) i=i+1
-      c[u]=i-n+1
-      i=i+1
+      n = i
+      while(i < l && x[i] == x[i + 1]) i = i + 1
+      c[u] = i - n + 1
+      i = i + 1
     }
-    list(values=v,counts=as.integer(c))
+    data.frame(j = v, x = as.integer(c))
   }
-  for(t in seq_along(text)){
-    wm=fmatch(text[[t]],words)
-    wm=cseq(wm)
-    m[t,wm$value]=wm$count
+  if(sparse){
+    m = do.call(sparseMatrix, c(do.call(rbind, lapply(seq_len(nc), function(i){
+      ms = cseq(fmatch(text[[i]], words))
+      ms$i = rep(i, length(ms$j))
+      ms
+    })), list(dims = c(nc, length(words)), dimnames = list(NULL, words))))
+  }else{
+    m = matrix(0, nc, length(words), dimnames = list(NULL, words))
+    for(i in seq_len(nc)){
+      ms = cseq(fmatch(text[[i]], words))
+      m[i, ms$j] = ms$x
+    }
   }
   su=colSums(m>0,na.rm=TRUE)
   su=su>dc.min & su<dc.max
@@ -1239,8 +1247,7 @@ lma_simets=function(a,b=NULL,metric,metric.arg=list(),group=NULL,agg=TRUE,agg.me
     if(!is.numeric(a)) a=if(n>1) apply(a,2,as.numeric) else as.numeric(a)
     if(is.null(group)){
       rand=is.numeric(sample) && n>sample
-      p=ncores>1 && (!missing(ncores) || n>1000)
-      if(p){
+      if(ncores > 1 && (!missing(ncores) || n > 1000)){
         clust=makeCluster(ncores)
         registerDoParallel(clust)
         on.exit(stopCluster(clust))

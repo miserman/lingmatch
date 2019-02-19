@@ -7,7 +7,7 @@
 lma_patcat(text, dict, term = "term", category = "category",
   weight = "weight", to.lower = TRUE, to.percent = FALSE,
   bias = NULL, intname = "_intercept", return_dtm = FALSE,
-  fixed = TRUE)
+  fixed = TRUE, ncores = detectCores() - 2)
 }
 \arguments{
 \item{text}{A vector of raw text to be categorized.}
@@ -33,6 +33,9 @@ and used as \code{bias}.}
 weighted, summed, and adjusted category value.}
 
 \item{fixed}{Logical; if \code{FALSE}, patterns can be regular expressions.}
+
+\item{ncores}{Number of CPU cores to use. Default is number of cores - 2 if \code{text} has more than 100
+entries. Otherwise, if not specified, only 1 core will be used.}
 }
 \description{
 Categorize raw texts using a pattern-based dictionary
@@ -40,9 +43,18 @@ Categorize raw texts using a pattern-based dictionary
 \examples{
 # example text
 text = c(
-  "Oh, what youth was! What I had and gave away. What I took and spent and saw. What I lost. And now? Ruin.",
-  "God, are you so bored?! You just want what's gone from us all? I miss the you that was too. I love that you.",
-  "Tomorrow! Tomorrow--nay, even tonight--you wait, as I am about to change. Soon I will off to revert. Please wait."
+  paste(
+    "Oh, what youth was! What I had and gave away.",
+    "What I took and spent and saw. What I lost. And now? Ruin."
+  ),
+  paste(
+    "God, are you so bored?! You just want what's gone from us all?",
+    "I miss the you that was too. I love that you."
+  ),
+  paste(
+    "Tomorrow! Tomorrow--nay, even tonight--you wait, as I am about to change.",
+    "Soon I will off to revert. Please wait."
+  )
 )
 
 # read in the temporal orientation lexicon from the World Well-Being Project

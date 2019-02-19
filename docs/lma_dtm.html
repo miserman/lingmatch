@@ -18,7 +18,7 @@
 <pre>
 lma_dtm(text, exclude = NULL, context = NULL, numbers = FALSE,
   punct = FALSE, urls = TRUE, emojis = FALSE, to.lower = TRUE,
-  word.break = " +", dc.min = 0, dc.max = Inf)
+  word.break = " +", dc.min = 0, dc.max = Inf, sparse = TRUE)
 </pre>
 
 
@@ -85,6 +85,10 @@ Default is 0 (no limit).</p>
 <td>
 <p>Numeric: excludes terms appearing in more than the set number of documents. Default
 is Inf (no limit).</p>
+</td></tr>
+<tr valign="top"><td><code>sparse</code></td>
+<td>
+<p>Logical: if <code>FALSE</code>, a regular matrix is returned.</p>
 </td></tr>
 </table>
 

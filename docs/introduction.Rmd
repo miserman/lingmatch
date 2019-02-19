@@ -120,7 +120,7 @@ we just walked through.
 # load in the lingmatch package
 library(lingmatch)
 
-dtm = lma_dtm(text)
+dtm = lma_dtm(text, sparse = FALSE)
 dtm[, 1:10]
 ```
 

@@ -6,7 +6,7 @@
 \usage{
 lma_dtm(text, exclude = NULL, context = NULL, numbers = FALSE,
   punct = FALSE, urls = TRUE, emojis = FALSE, to.lower = TRUE,
-  word.break = " +", dc.min = 0, dc.max = Inf)
+  word.break = " +", dc.min = 0, dc.max = Inf, sparse = TRUE)
 }
 \arguments{
 \item{text}{Texts to be processed. This can be a vector (such as a column in a data frame)
@@ -47,6 +47,8 @@ Default is 0 (no limit).}
 
 \item{dc.max}{Numeric: excludes terms appearing in more than the set number of documents. Default
 is Inf (no limit).}
+
+\item{sparse}{Logical: if \code{FALSE}, a regular matrix is returned.}
 }
 \description{
 Creates a document-term matrix (dtm) from a set of texts.

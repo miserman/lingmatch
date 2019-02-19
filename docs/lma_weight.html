@@ -133,8 +133,8 @@ Default is 10.</p>
 </td></tr>
 <tr valign="top"><td><code>alpha</code></td>
 <td>
-<p>a scaling factor applied to document frequency as part of pointwise mutual information
-weighting.</p>
+<p>a scaling factor applied to document frequency as part of pointwise mutual
+information weighting.</p>
 </td></tr>
 <tr valign="top"><td><code>doc.only</code></td>
 <td>
@@ -154,9 +154,9 @@ each term).</p>
 from <code>amplify</code> to <code>count</code> to <code>sqrt</code> to <code>log</code> to <code>binary</code>.
 </p>
 <p>Document weights work to treat words differently based on their frequency. <code>entropy</code>,
-<code>dfmax</code>, <code>df</code>, and <code>poisson</code> (most to least intense over document frequencies of ~15)
-give more frequent words more weight, whereas <code>ridf</code>, <code>normal</code>, and <code>idf</code>, give less
-frequent words more weight.
+<code>dfmax</code>, <code>df</code>, and <code>poisson</code> (most to least intense over document frequencies of
+~15) give more frequent words more weight, whereas <code>ridf</code>, <code>normal</code>, and <code>idf</code>,
+give less frequent words more weight.
 </p>
 <p><code>weight</code> can either be a vector with two characters, corresponding to term weight and
 document weight (e.g., <code>weight = c('count','idf')</code>), or it can be a string with term and

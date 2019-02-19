@@ -11,6 +11,6 @@ Depends: R (>= 3.1), stats
 Imports: DBI, Matrix, RSQLite, doParallel, fastmatch, foreach
 License: GPL (>= 2)
 LazyData: TRUE
-RoxygenNote: 6.1.0
+RoxygenNote: 6.1.1
 Suggests: knitr, rmarkdown, splot
 VignetteBuilder: knitr

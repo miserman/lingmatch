@@ -73,7 +73,8 @@ available metrics:
 </tr>
 <tr>
  <td style="text-align: left;">
-  <code>kld</code> </td><td style="text-align: left;"> <code>1 - sum(vapply(unique(c(a, b)), function(v){pq = c(mean(a == v), mean(b == v));
+  <code>kld</code> </td><td style="text-align: left;"> <code>1 - sum(vapply(unique(c(a, b)),
+  function(v){pq = c(mean(a == v), mean(b == v));
   if(pq[2]) pq[1] * log(pq[1] / pq[2]) else 0
   }, 0), na.rm = TRUE)</code></td>
 </tr>
