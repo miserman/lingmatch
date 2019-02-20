@@ -620,12 +620,12 @@ lma_dtm = function(text, exclude = NULL, context = NULL, numbers = FALSE, punct 
   text = gsub('(?<=st|rd|ft|feat|dr|drs|mr|ms|mrs|messrs|jr|prof)\\. |[\\n\\t\\r]+', ' ', text, TRUE, TRUE)
   text=gsub(' \\.|\\. ',' . ',text,perl=TRUE)
   if(to.lower) text=tolower(text)
-  if(!missing(exclude)){
+  if(!is.null(exclude)){
     if(length(exclude)==1 && grepl(exclude,'function',TRUE)){
       exclude=unlist(lma_dict(),use.names=FALSE)
     }else if(is.list(exclude)) exclude=unlist(exclude,use.names=FALSE)
   }
-  if(any(punct,emojis,!missing(context))){
+  if(any(punct, emojis, !is.null(context))){
     special=lma_dict(special)[[1]]
     if(!missing(context) && length(context)==1 && grepl('like',context,TRUE))
       context=special[['LIKE']]
@@ -659,7 +659,7 @@ lma_dtm = function(text, exclude = NULL, context = NULL, numbers = FALSE, punct 
     vapply(text,length,numeric(1))
   words=sort(unique(unlist(text)))
   words=words[!words=='']
-  if(!missing(exclude)){
+  if(!is.null(exclude)){
     if(is.list(exclude)) exclude = unlist(exclude, use.names = FALSE)
     if(!any(grepl('^', exclude, fixed = TRUE))) exclude = gsub('\\^\\*|\\*\\$', '',
       paste0('^', exclude, '$'))
@@ -669,6 +669,7 @@ lma_dtm = function(text, exclude = NULL, context = NULL, numbers = FALSE, punct 
   }
   nc = length(text)
   cseq = function(x){
+    x = sort(x)
     l = length(x)
     v = c = unique(x)
     i = 1
