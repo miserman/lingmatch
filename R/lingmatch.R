@@ -110,7 +110,7 @@
 #'   \emph{Journal of Language and Social Psychology, 21}, 337-360.
 #'
 #' @export
-#' @importFrom Matrix Matrix as.matrix colSums rowSums colMeans rowMeans t sparseMatrix
+#' @import Matrix
 #' @importFrom stats na.omit cor dpois
 
 lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.group=NULL,order=NULL,
