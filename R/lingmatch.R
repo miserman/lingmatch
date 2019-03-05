@@ -1055,30 +1055,27 @@ lma_termcat=function(dtm,dict,term.weights=NULL,bias=NULL,escape=FALSE,partial=F
   term.break=25e3){
   st=proc.time()[3]
   if(missing(dict)) dict=lma_dict(1:9)
-  if(is.null(term.weights) && is.numeric(dict[[1]]) && !is.null(names(dict[[1]]))){
-    term.weights = dict
-    dict = lapply(dict, names)
+  if(!is.list(dict)) dict = list(dict)
+  if(is.null(names(dict))) names(dict) = seq_along(dict)
+  if(is.null(term.weights)){
+    if(is.numeric(dict[[1]]) && !is.null(names(dict[[1]]))){
+      term.weights = dict
+      dict = lapply(dict, names)
+    }else term.weights = lapply(dict, function(cat) rep(1, length(cat)))
+  }else{
+    if(!is.list(term.weights)) term.weights = list(term.weights)
+    dlen = length(dict)
+    if(is.null(names(term.weights)))
+      names(term.weights) = if(length(term.weights) == dlen) names(dict) else seq_along(term.weights)
+    if(length(term.weights) > dlen && dlen == 1 && all(vapply(term.weights, length, 0) == length(dict[[1]])))
+      dict = lapply(term.weights, function(ws) dict[[1]])
   }
-  if(!is.list(dict)){
-    if(!is.null(term.weights)) if(!is.list(term.weights)) term.weights=list(cat=term.weights) else{
-      if(length(term.weights)==1) names(term.weights)='cat' else{
-        if(any(l<-lapply(term.weights,length)==length(dict))){
-          term.weights=term.weights[[l]]
-          names(term.weights)='cat'
-        }else{
-          warning('no weights line up with the dict category, so they will be ignored'
-            , call. = FALSE)
-          term.weights=list(cat=rep(1,length(dict)))
-        }
-      }
-    }
-    dict=list(cat=dict)
-  }
-  for(n in names(dict)) if(!n%in%names(bias) && any(ii <- !is.na(dict[[n]]) &
-      dict[[n]] == '_intercept')){
-    dict[[n]]=dict[[n]][!ii]
-    bias[n]=na.omit(weight[[n]][ii])
-    weight[[n]]=weight[[n]][!ii]
+  if(!is.null(bias) && is.null(names(bias)))
+    names(bias) = if(length(bias) == length(dict)) names(dict) else seq_along(bias)
+  for(n in names(dict)) if(!n %in% names(bias) && any(ii <- !is.na(dict[[n]]) & dict[[n]] == '_intercept')){
+    dict[[n]] = dict[[n]][!ii]
+    bias[n] = term.weights[[n]][ii]
+    term.weights[[n]] = term.weights[[n]][!ii]
   }
   dict=lapply(dict,as.character)
   if(is.character(dtm) || is.factor(dtm)) dtm=lma_dtm(dtm)
@@ -1095,14 +1092,11 @@ lma_termcat=function(dtm,dict,term.weights=NULL,bias=NULL,escape=FALSE,partial=F
       o[[f]]=o[[f]][o[[f]]<=l]
       o
     }
-    ag=list(dtm,bias=bias,escape=escape,term.filter=term.filter,term.break=term.break)
-    if(!is.null(term.weights)) ag$term.weights=term.weights
+    ag=list(dtm,escape=escape,term.filter=term.filter,term.break=term.break)
     op=vapply(names(dict),function(cat){
       if(cls[[cat]] > term.break) Reduce('+', lapply(br(cat), function(s) do.call(lma_termcat,
-        c(ag, dict = list(dict[[cat]][s]), if(is.null(term.weights))
-          term.weights = list(term.weights[[cat]][s]))
-      ))) else do.call(lma_termcat, c(ag, dict = list(dict[[cat]]), if(is.null(term.weights))
-        term.weights = list(term.weights[[cat]])))
+        c(ag, dict = list(dict[[cat]][s]), term.weights = list(term.weights[[cat]][s]))
+      ))) else do.call(lma_termcat, c(ag, dict = list(dict[[cat]]), term.weights = list(term.weights[[cat]])))
     },numeric(nrow(dtm)))
   }else{
     lab=lapply(dict,function(l) grepl('(',l,fixed=TRUE) + grepl(')',l,fixed=TRUE) == 1)
@@ -1136,7 +1130,7 @@ lma_termcat=function(dtm,dict,term.weights=NULL,bias=NULL,escape=FALSE,partial=F
         drop = FALSE], na.rm = TRUE), numeric(nrow(dtm)))
     }
   }
-  if(!is.null(bias)) for(n in names(bias)) if(n%in%names(op)) op[, n] = op[, n] + bias[[n]]
+  if(!is.null(bias)) for(n in names(bias)) if(n %in% colnames(op)) op[, n] = op[, n] + bias[[n]]
   attr(op,'WC')=if('WC'%in%atsn) ats$WC else rowSums(dtm,na.rm=TRUE)
   attr(op,'time')=c(attr(dtm,'time'),termcat=unname(proc.time()[3]-st))
   if('orientation'%in%atsn) attr(op,'orientation')=ats$orientation
