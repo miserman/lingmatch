@@ -215,7 +215,7 @@ download.lsspace=function(space='default',dir='~/Documents/Latent Semantic Space
 lma_patcat = function(text, dict, term = 'term', category = 'category', weight = 'weight',
   to.lower = TRUE, to.percent = FALSE, bias = NULL, intname = '_intercept', return_dtm = FALSE,
   fixed = TRUE, ncores = detectCores() - 2){
-  text = as.character(text)
+  text = paste('', text, '')
   if(to.lower) text = tolower(text)
   if(is.null(colnames(dict))){
     if(is.list(dict)){
@@ -230,7 +230,7 @@ lma_patcat = function(text, dict, term = 'term', category = 'category', weight =
     category = 'category'
   }
   if(!weight %in% names(dict)) dict[, weight] = 1
-  if(missing(bias) && any(bs <- !is.na(dict[, term]) & dict[, term] == intname)){
+  if((missing(bias) || (is.logical(bias) && bias)) && any(bs <- !is.na(dict[, term]) & dict[, term] == intname)){
     bias = dict[bs,, drop = FALSE]
     bias = if(sum(bs) != 1 && category %in% names(bias)){
       rownames(bias) = bias[, category]

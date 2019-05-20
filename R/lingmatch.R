@@ -297,7 +297,16 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
     x[seq_len(cr),cn]=comp
     comp=seq_len(cr)
   }
-  if(is.character(x)) for(i in seq_len(ncol(x))) x[, i] = as.numeric(x[, i])
+  if(is.character(x) || (is.data.frame(x) && any(!vapply(x, class, '') %in% c('numeric', 'integer'))))
+    for(i in seq_len(ncol(x))) x[, i] = as.numeric(x[, i])
+  if(any(ckvc <- !vapply(seq_len(ncol(x)), function(col) class(x[, col]), '') %in% c('numeric', 'integer'))){
+    if(all(ckvc)){
+      for(col in seq_along(ckvc)) x[, col] = as.numeric(x[, col])
+    }else{
+      x = x[, !ckvc]
+      warning('some x variables were not of numeric or integer class, so they were removed')
+    }
+  }
   dtm = Matrix(if(is.data.frame(x)) as.matrix(x) else x, sparse = TRUE)
   if(do.wmc) x=wmc(x)
   if(is.null(nrow(x))) x=t(as.matrix(x))
@@ -815,11 +824,11 @@ lma_weight=function(dtm,weight='count',to.freq=TRUE,freq.complete=TRUE,log.base=
       d
     },numeric(ncol(dtm))))
   }else as.matrix(dtm)
+  nr = nrow(dtm)
   if(any(grepl('pmi', weight))){
     tw = dw = 'pmi'
     if(missing(log.base)) log.base = 2
     twc = sum(dtm)
-    nr = nrow(dtm)
     pc = colSums(dtm ^ alpha) / twc ^ alpha
     dtm = log((dtm / twc) / (matrix(rep(pc, nr), nr, byrow = TRUE) *
         matrix(rep(rowSums(dtm) / twc, ncol(dtm)), nr)), base = log.base)
@@ -866,7 +875,7 @@ lma_weight=function(dtm,weight='count',to.freq=TRUE,freq.complete=TRUE,log.base=
       }else stop(paste(weight),' is not a recognized weight',call.=FALSE)
     }
     if(pdw) dw=if(length(weight)>1) match.arg(weight[2],dws) else 'none'
-    dtm=if(dw=='none') term(dtm,tw) else t(t(term(dtm,tw))*doc(dtm,dw))
+    dtm=if(dw=='none') term(dtm,tw) else term(dtm,tw) * matrix(rep(doc(dtm, dw), nr), nr, byrow = TRUE)
   }
   dtm[!is.finite(dtm)] = 0
   attr(dtm,'type')=c(freq=to.freq,term=tw,document=dw)
