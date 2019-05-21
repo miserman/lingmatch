@@ -185,7 +185,14 @@ download.lsspace=function(space='default',dir='~/Documents/Latent Semantic Space
 #'   and used as \code{bias}.
 #' @param return_dtm Logical; if \code{TRUE}, only a document-term matrix will be returned, rather than the
 #'   weighted, summed, and adjusted category value.
+#' @param exclusive Logical; if \code{FALSE}, each dictionary term is searched for in the original text.
+#'   Otherwise (by default), terms are sorted by length (with longer terms being searched for first), and
+#'   matches are removed from the text (avoiding subsequent matched to matched patterns).
+#' @param boundary A string to add to the beginning and end of each dictionary term. If \code{TRUE},
+#'   \code{boundary} will be set to \code{' '}, avoiding pattern matches within words. By default, dictionary
+#'   terms are left as entered.
 #' @param fixed Logical; if \code{FALSE}, patterns can be regular expressions.
+#' @param perl Logical; passed to \code{\link{strsplit}. Set to \code{FALSE} if \code{fixed} is \code{TRUE}}.
 #' @param ncores Number of CPU cores to use. Default is number of cores - 2 if \code{text} has more than 100
 #'   entries. Otherwise, if not specified, only 1 core will be used.
 #' @examples
@@ -214,8 +221,8 @@ download.lsspace=function(space='default',dir='~/Documents/Latent Semantic Space
 
 lma_patcat = function(text, dict, term = 'term', category = 'category', weight = 'weight',
   to.lower = TRUE, to.percent = FALSE, bias = NULL, intname = '_intercept', return_dtm = FALSE,
-  fixed = TRUE, ncores = detectCores() - 2){
-  text = paste('', text, '')
+  exclusive = TRUE, boundary = NULL, fixed = TRUE, perl = TRUE, ncores = detectCores() - 2){
+  text = paste(' ', text, ' ')
   if(to.lower) text = tolower(text)
   if(is.null(colnames(dict))){
     if(is.list(dict)){
@@ -238,7 +245,23 @@ lma_patcat = function(text, dict, term = 'term', category = 'category', weight =
     }else bias[1, weight]
     dict = dict[!bs, ]
   }
-  terms = na.omit(unique(dict[, term]))
+  terms = na.omit(as.character(unique(dict[, term])))
+  mfun = if(exclusive){
+    terms = terms[order(-nchar(terms))]
+    function(w){
+      if(txt == '') 0 else{
+        tt = strsplit(txt, w, fixed = fixed, perl = perl)[[1]]
+        txt <<- paste(tt, collapse = ' ')
+        length(tt) - 1
+      }
+    }
+  }else function(w) length(strsplit(txt, w, fixed = fixed, perl = perl)[[1]]) - 1
+  if(is.logical(boundary)) boundary = if(boundary) ' ' else NULL
+  if(!is.null(boundary)){
+    oterms = terms
+    terms = paste0(boundary, terms, boundary)
+  }
+  if(fixed) perl = FALSE
   l = length(text)
   if(ncores > 1 && (!missing(ncores) || l > 100)){
     clust = makeCluster(ncores)
@@ -246,8 +269,8 @@ lma_patcat = function(text, dict, term = 'term', category = 'category', weight =
     on.exit(stopCluster(clust))
   }else registerDoSEQ()
   txt = ''
-  dtm = foreach(txt = text, .combine = cbind) %dopar%
-    Matrix(vapply(terms, function(w) length(strsplit(txt, w, fixed = fixed)[[1]]) - 1, 0), sparse = TRUE)
+  dtm = foreach(txt = text, .combine = cbind) %dopar% Matrix(vapply(terms, mfun, 0), sparse = TRUE)
+  if(!is.null(boundary)) terms = oterms
   dimnames(dtm) = list(terms, seq_len(l))
   if(to.percent){
     rs = colSums(dtm)

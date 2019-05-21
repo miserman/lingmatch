@@ -7,7 +7,8 @@
 lma_patcat(text, dict, term = "term", category = "category",
   weight = "weight", to.lower = TRUE, to.percent = FALSE,
   bias = NULL, intname = "_intercept", return_dtm = FALSE,
-  fixed = TRUE, ncores = detectCores() - 2)
+  exclusive = TRUE, boundary = NULL, fixed = TRUE, perl = TRUE,
+  ncores = detectCores() - 2)
 }
 \arguments{
 \item{text}{A vector of raw text to be categorized.}
@@ -32,7 +33,17 @@ and used as \code{bias}.}
 \item{return_dtm}{Logical; if \code{TRUE}, only a document-term matrix will be returned, rather than the
 weighted, summed, and adjusted category value.}
 
+\item{exclusive}{Logical; if \code{FALSE}, each dictionary term is searched for in the original text.
+Otherwise (by default), terms are sorted by length (with longer terms being searched for first), and
+matches are removed from the text (avoiding subsequent matched to matched patterns).}
+
+\item{boundary}{A string to add to the beginning and end of each dictionary term. If \code{TRUE},
+\code{boundary} will be set to \code{' '}, avoiding pattern matches within words. By default, dictionary
+terms are left as entered.}
+
 \item{fixed}{Logical; if \code{FALSE}, patterns can be regular expressions.}
+
+\item{perl}{Logical; passed to \code{\link{strsplit}. Set to \code{FALSE} if \code{fixed} is \code{TRUE}}.}
 
 \item{ncores}{Number of CPU cores to use. Default is number of cores - 2 if \code{text} has more than 100
 entries. Otherwise, if not specified, only 1 core will be used.}

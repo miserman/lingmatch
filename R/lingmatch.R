@@ -620,7 +620,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
 lma_dtm = function(text, exclude = NULL, context = NULL, numbers = FALSE, punct = FALSE, urls = TRUE,
   emojis = FALSE, to.lower = TRUE, word.break = ' +', dc.min = 0, dc.max = Inf, sparse = TRUE){
   if(is.null(text)) stop(substitute(text),' not found')
-  text = paste('', text, '')
+  text = paste(' ', text, ' ')
   st=proc.time()[3]
   if(!urls){
     text=gsub('http[^ ]*|www[^ ]*| [a-z]+\\.[a-z]{2,}[./][^ ]*',' url ',text,TRUE)

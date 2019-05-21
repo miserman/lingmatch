@@ -19,7 +19,8 @@
 lma_patcat(text, dict, term = "term", category = "category",
   weight = "weight", to.lower = TRUE, to.percent = FALSE,
   bias = NULL, intname = "_intercept", return_dtm = FALSE,
-  fixed = TRUE, ncores = detectCores() - 2)
+  exclusive = TRUE, boundary = NULL, fixed = TRUE, perl = TRUE,
+  ncores = detectCores() - 2)
 </pre>
 
 
@@ -64,9 +65,25 @@ and used as <code>bias</code>.</p>
 <p>Logical; if <code>TRUE</code>, only a document-term matrix will be returned, rather than the
 weighted, summed, and adjusted category value.</p>
 </td></tr>
+<tr valign="top"><td><code>exclusive</code></td>
+<td>
+<p>Logical; if <code>FALSE</code>, each dictionary term is searched for in the original text.
+Otherwise (by default), terms are sorted by length (with longer terms being searched for first), and
+matches are removed from the text (avoiding subsequent matched to matched patterns).</p>
+</td></tr>
+<tr valign="top"><td><code>boundary</code></td>
+<td>
+<p>A string to add to the beginning and end of each dictionary term. If <code>TRUE</code>,
+<code>boundary</code> will be set to <code>' '</code>, avoiding pattern matches within words. By default, dictionary
+terms are left as entered.</p>
+</td></tr>
 <tr valign="top"><td><code>fixed</code></td>
 <td>
 <p>Logical; if <code>FALSE</code>, patterns can be regular expressions.</p>
+</td></tr>
+<tr valign="top"><td><code>perl</code></td>
+<td>
+<p>Logical; passed to <code>strsplit. Set to <code>FALSE</code> if <code>fixed</code> is <code>TRUE</code></code>.</p>
 </td></tr>
 <tr valign="top"><td><code>ncores</code></td>
 <td>
