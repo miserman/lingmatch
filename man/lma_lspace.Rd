@@ -26,7 +26,7 @@ cutoffs result in fewer dimensions.}
 
 \item{keep.dim}{Logical: if \code{TRUE} and a space is being calculated from the input, a matrix
 in the same dimensions as \code{dtm} is returned. Otherwise, a matrix with terms as rows and
-svd dimensions as columns is returned. The default, truncated matrix}
+svd dimensions as columns is returned.}
 }
 \description{
 Calculate and reduce the singular value decomposition of a dtm (i.e., create a latent semantic
@@ -56,17 +56,23 @@ text = c(
 
 dtm = lma_dtm(text)
 
-#using a space from a file might look something like this:
-# lma_space(dtm,'default.zip','C:/user/name/downloads')
-
-#calculate a latent semantic space from the example text
+# calculate a latent semantic space from the example text
 lss = lma_lspace(dtm)
 
-#show that document similarities between the truncated and full space are the same
+# show that document similarities between the truncated and full space are the same
 spaces = list(
-  full = lma_lspace(dtm,keep.dim=TRUE),
-  truncated = lma_lspace(dtm,lss)
+  full = lma_lspace(dtm, keep.dim = TRUE),
+  truncated = lma_lspace(dtm, lss)
 )
-sapply(spaces,lma_simets,metric='cosine')
+sapply(spaces, lma_simets, metric = 'cosine')
 
+\dontrun{
+# using a space from a file might look something like this:
+lma_lspace(dtm, 'default.rda', '~/documents/latent semantic spaces')
+
+# or you could load the space before hand
+# (where default.rda contains an object called lss_default)
+load('~/documents/latent semantic spaces/default.rda')
+lma_lspace(dtm, lss_default)
+}
 }

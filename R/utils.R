@@ -187,7 +187,7 @@ download.lsspace=function(space='default',dir='~/Documents/Latent Semantic Space
 #'   weighted, summed, and adjusted category value.
 #' @param exclusive Logical; if \code{FALSE}, each dictionary term is searched for in the original text.
 #'   Otherwise (by default), terms are sorted by length (with longer terms being searched for first), and
-#'   matches are removed from the text (avoiding subsequent matched to matched patterns).
+#'   matches are removed from the text (avoiding subsequent matches to matched patterns).
 #' @param boundary A string to add to the beginning and end of each dictionary term. If \code{TRUE},
 #'   \code{boundary} will be set to \code{' '}, avoiding pattern matches within words. By default, dictionary
 #'   terms are left as entered.
