@@ -654,7 +654,7 @@ lma_dtm = function(text, exclude = NULL, context = NULL, numbers = FALSE, punct 
       for(rn in names(context)) text=gsub(context[[rn]],rn,text,perl=TRUE)
     }
   }
-  if(!numbers) text = gsub('\\.*[0-9][0-9,.el-]+', ' ', text, TRUE)
+  if(!numbers) text = gsub('\\.*[0-9][0-9,.el-]*', ' ', text, TRUE)
   text = gsub('[\u2032\u2035\u2018\u2019]', "'", text)
   text = gsub("[\u2033\u2036\u201C\u201D\u201F]|(?<=[^A-z0-9])'|'(?=[^A-z0-9])", '"', text, perl = TRUE)
   text = gsub("([^a-z0-9.,'-]|,(?=[a-z])|(?<=[^a-z0-9])(,(?=[a-z0-9])|[.-](?=[a-z]))|[.,'-](?=[^0-9a-z]|[.,'-]))",

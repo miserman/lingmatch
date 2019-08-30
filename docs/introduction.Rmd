@@ -182,7 +182,8 @@ document_frequency = seq_len(20)
 Comparing term weights:
 ```{r, fig.height=5, fig.width=10, dev='CairoSVG'}
 term_weights = c('binary', 'log', 'sqrt', 'count', 'amplify')
-term_frequency = sapply(term_weights, function(w) lma_weight(matrix(document_frequency, 1), w, FALSE))
+term_frequency = sapply(term_weights, function(w)
+  lma_weight(matrix(document_frequency, 1), w, FALSE))
 splot(myl = c(0, 25), options = op)
 ```
 
@@ -190,7 +191,8 @@ Comparing document weights (see `?lma_weight` for more about each scheme):
 ```{r, fig.height=5, fig.width=10, dev='CairoSVG'}
 doc_weights = c('df', 'dfmax', 'idf', 'normal', 'poisson', 'ridf', 'entropy')
 term_frequency = sapply(doc_weights,function(w)
-  lma_weight(sapply(document_frequency, function(i) sample(0:i, 5000, TRUE)), w, FALSE, doc.only = TRUE)
+  lma_weight(sapply(document_frequency, function(i)
+    sample(0:i, 5000, TRUE)), w, FALSE, doc.only = TRUE)
 )
 splot(myl = c(-3, 3), mv.scale = TRUE, options = op)
 ```

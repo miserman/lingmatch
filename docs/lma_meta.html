@@ -1,0 +1,142 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Calculate Text-Based Metastatistics</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for lma_meta"><tr><td>lma_meta</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Calculate Text-Based Metastatistics</h2>
+
+<h3>Description</h3>
+
+<p>Calculate simple descriptive statistics from text.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+lma_meta(text)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>text</code></td>
+<td>
+<p>A character vector of texts.
+<code>'document'</code> (default), <code>'sentence'</code>, or <code>'clause'</code>.</p>
+</td></tr>
+</table>
+
+
+<h3>Value</h3>
+
+<p>A data.frame: </p>
+
+<table summary="Rd table">
+<tr>
+ <td style="text-align: left;">
+  <code>characters</code> </td><td style="text-align: left;"> Total number of characters.</td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+  <code>syllables</code> </td><td style="text-align: left;"> Total number of syllables, as estimated by split lenght of
+    <code>'a+[eu]*|e+a*|i+|o+[ui]*|u+|y+[aeiou]*'</code> - 1.</td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+  <code>words</code> </td><td style="text-align: left;"> Total number of words (raw word count).</td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+  <code>unique_words</code> </td><td style="text-align: left;"> Number of unique words (binary word count).</td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+  <code>clauses</code> </td><td style="text-align: left;"> Number of clauses, as marked by commas, colons, semicolons, dashes, or brackets
+    within sentences.</td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+  <code>sentences</code> </td><td style="text-align: left;"> Number of sentences, as marked by periods, question marks, exclamation points,
+    or new line characters.</td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+  <code>words_per_clause</code> </td><td style="text-align: left;"> Average number of words per clause.</td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+  <code>words_per_sentence</code> </td><td style="text-align: left;"> Average number of words per sentence.</td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+  <code>sixltr</code> </td><td style="text-align: left;"> Number of words 6 or more characters long.</td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+  <code>characters_per_word</code> </td><td style="text-align: left;"> Average number of characters per word
+    (<code>characters</code> / <code>words</code>).</td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+  <code>syllables_per_word</code> </td><td style="text-align: left;"> Average number of syllables per word
+    (<code>syllables</code> / <code>words</code>).</td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+  <code>type_token_ratio</code> </td><td style="text-align: left;"> Ratio of unique to total words: <code>unique_words</code> / <code>words</code>.</td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+  <code>reading_grade</code> </td><td style="text-align: left;"> Flesch-Kincaid grade level: .39 * <code>words</code> / <code>sentences</code> +
+    11.8 * <code>syllables</code> / <code>words</code> - 15.59, with <code>words</code> / <code>clause</code> or <code>words</code>
+    in place of <code>words</code> / <code>sentences</code>, depending on <code>output</code>.</td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+  <code>numbers</code> </td><td style="text-align: left;"> Number of terms starting with numbers. </td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+  <code>punct</code> </td><td style="text-align: left;"> Number of terms starting with non-alphanumeric characters.</td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+  <code>periods</code> </td><td style="text-align: left;"> Number of periods.</td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+  <code>commas</code> </td><td style="text-align: left;"> Number of commas.</td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+  <code>qmarks</code> </td><td style="text-align: left;"> Number of question marks.</td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+  <code>exclams</code> </td><td style="text-align: left;"> Number of exclamation points.</td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+  <code>quotes</code> </td><td style="text-align: left;"> Number of quotation marks (single and double).</td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+  <code>brackets</code> </td><td style="text-align: left;"> Number of bracketing characters (including parentheses, and square,
+    curly, and angle brackets).</td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+  <code>organizemarks</code> </td><td style="text-align: left;"> Number of characters used for organization or structuring (including
+    dashes, foreward slashes, colons, and semicolons).
+</td>
+</tr>
+
+</table>
+
+
+
+</body></html>

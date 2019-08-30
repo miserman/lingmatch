@@ -297,6 +297,84 @@ lma_patcat = function(text, dict, term = 'term', category = 'category', weight =
   om
 }
 
+#' Calculate Text-Based Metastatistics
+#'
+#' Calculate simple descriptive statistics from text.
+#'
+#' @param text A character vector of texts.
+#' @return A data.frame: \tabular{ll}{
+#'   \code{characters} \tab Total number of characters.\cr
+#'   \code{syllables} \tab Total number of syllables, as estimated by split length of
+#'     \code{'a+[eu]*|e+a*|i+|o+[ui]*|u+|y+[aeiou]*'} - 1.\cr
+#'   \code{words} \tab Total number of words (raw word count).\cr
+#'   \code{unique_words} \tab Number of unique words (binary word count).\cr
+#'   \code{clauses} \tab Number of clauses, as marked by commas, colons, semicolons, dashes, or brackets
+#'     within sentences.\cr
+#'   \code{sentences} \tab Number of sentences, as marked by periods, question marks, exclamation points,
+#'     or new line characters.\cr
+#'   \code{words_per_clause} \tab Average number of words per clause.\cr
+#'   \code{words_per_sentence} \tab Average number of words per sentence.\cr
+#'   \code{sixltr} \tab Number of words 6 or more characters long.\cr
+#'   \code{characters_per_word} \tab Average number of characters per word
+#'     (\code{characters} / \code{words}).\cr
+#'   \code{syllables_per_word} \tab Average number of syllables per word
+#'     (\code{syllables} / \code{words}).\cr
+#'   \code{type_token_ratio} \tab Ratio of unique to total words: \code{unique_words} / \code{words}.\cr
+#'   \code{reading_grade} \tab Flesch-Kincaid grade level: .39 * \code{words} / \code{sentences} +
+#'     11.8 * \code{syllables} / \code{words} - 15.59, with \code{words} / \code{clause} or \code{words}
+#'     in place of \code{words} / \code{sentences}, depending on \code{output}.\cr
+#'   \code{numbers} \tab Number of terms starting with numbers. \cr
+#'   \code{punct} \tab Number of terms starting with non-alphanumeric characters.\cr
+#'   \code{periods} \tab Number of periods.\cr
+#'   \code{commas} \tab Number of commas.\cr
+#'   \code{qmarks} \tab Number of question marks.\cr
+#'   \code{exclams} \tab Number of exclamation points.\cr
+#'   \code{quotes} \tab Number of quotation marks (single and double).\cr
+#'   \code{brackets} \tab Number of bracketing characters (including parentheses, and square,
+#'     curly, and angle brackets).\cr
+#'   \code{organizemarks} \tab Number of characters used for organization or structuring (including
+#'     dashes, foreword slashes, colons, and semicolons).
+#' }
+#'
+#' @export
+
+lma_meta = function(text){
+  text = gsub('^\\s+|\\s+$', '', text)
+  dtm = lma_dtm(text, numbers = TRUE, punct = TRUE, urls = FALSE)
+  terms = colnames(dtm)
+  dwm = dtm[, grepl('^[a-z]', terms), drop = FALSE]
+  words = colnames(dwm)
+  word_lengths = nchar(words)
+  word_syllables = vapply(strsplit(words, 'a+[eu]*|e+a*|i+|o+[ui]*|u+|y+[aeiou]*'), length, 0) - 1
+  word_syllables[word_syllables == 0] = 1
+  res = data.frame(
+    characters = nchar(text),
+    syllables = as.numeric(dwm %*% word_syllables),
+    words = rowSums(dwm),
+    unique_words = rowSums(dwm != 0),
+    clauses = vapply(strsplit(text, '([.?!\n,:;)}>-]|\\])([.?!\n,:;)}>\n\'"-]|\\s|\\])*'), length, 0),
+    sentences = vapply(strsplit(text, '[.?!\n]([.?!\n\'"]|\\s)*'), length, 0)
+  )
+  cbind(res, with(res, data.frame(
+    words_per_clause = words / clauses,
+    words_per_sentence = words / sentences,
+    sixltr = as.numeric(dwm %*% (word_lengths > 5)),
+    characters_per_word = characters / words,
+    syllables_per_word = syllables / words,
+    type_token_ratio = unique_words / words,
+    reading_grade = .39 * words / sentences + 11.8 * syllables / words - 15.59,
+    numbers = if(any(su <- grepl('^[0-9]', terms))) rowSums(dtm[, su, drop = FALSE]) else 0,
+    puncts = if(any(su <- grepl('^[^a-z0-9]', terms))) rowSums(dtm[, su, drop = FALSE]) else 0,
+    periods = if('.' %in% terms) dtm[, '.'] else 0,
+    commas = if(',' %in% terms) dtm[, ','] else 0,
+    qmarks = if('?' %in% terms) dtm[, '?'] else 0,
+    exclams = if('!' %in% terms) dtm[, '!'] else 0,
+    quotes = if(any(su <- grepl('^[\'"]', terms))) rowSums(dtm[, su, drop = FALSE]) else 0,
+    brackets = if(any(su <- grepl('[(\\)<>{\\}[]|\\]', terms))) rowSums(dtm[, su, drop = FALSE]) else 0,
+    organizemarks = if(any(su <- grepl('[/:;-]', terms))) rowSums(dtm[, su, drop = FALSE]) else 0
+  )))
+}
+
 #' English function word category lists
 #'
 #' Returns a list of function words based on the Linguistic Inquiry and Word Count 2015 dictionary.
