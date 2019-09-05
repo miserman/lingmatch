@@ -41,7 +41,7 @@ A data.frame: \tabular{ll}{
     or single straight or curly quote surrounded by letters.\cr
   \code{brackets} \tab Number of bracketing characters (including parentheses, and square,
     curly, and angle brackets).\cr
-  \code{organizemarks} \tab Number of characters used for organization or structuring (including
+  \code{orgmarks} \tab Number of characters used for organization or structuring (including
     dashes, foreword slashes, colons, and semicolons).
 }
 }

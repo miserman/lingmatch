@@ -333,7 +333,7 @@ lma_patcat = function(text, dict, term = 'term', category = 'category', weight =
 #'     or single straight or curly quote surrounded by letters.\cr
 #'   \code{brackets} \tab Number of bracketing characters (including parentheses, and square,
 #'     curly, and angle brackets).\cr
-#'   \code{organizemarks} \tab Number of characters used for organization or structuring (including
+#'   \code{orgmarks} \tab Number of characters used for organization or structuring (including
 #'     dashes, foreword slashes, colons, and semicolons).
 #' }
 #'
@@ -349,7 +349,7 @@ lma_meta = function(text){
   word_syllables = vapply(strsplit(words, 'a+[eu]*|e+a*|i+|o+[ui]*|u+|y+[aeiou]*'), length, 0) - 1
   word_syllables[word_syllables == 0] = 1
   res = data.frame(
-    characters = nchar(text),
+    characters = as.numeric(dwm %*% word_lengths),
     syllables = as.numeric(dwm %*% word_syllables),
     words = rowSums(dwm),
     unique_words = rowSums(dwm != 0),
@@ -373,7 +373,7 @@ lma_meta = function(text){
     quotes = if(any(su <- grepl('^[\'"]', terms))) rowSums(dtm[, su, drop = FALSE]) else 0,
     apostrophes = vapply(strsplit(text, "[\u02bc]+|[A-z][\u0027\u0060\u2019]+[A-z]"), length, 0),
     brackets = if(any(su <- grepl('[(\\)<>{\\}[]|\\]', terms))) rowSums(dtm[, su, drop = FALSE]) else 0,
-    organizemarks = if(any(su <- grepl('[/:;-]', terms))) rowSums(dtm[, su, drop = FALSE]) else 0
+    orgmarks = if(any(su <- grepl('[/:;-]', terms))) rowSums(dtm[, su, drop = FALSE]) else 0
   )))
 }
 
