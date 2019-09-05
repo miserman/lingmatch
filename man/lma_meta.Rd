@@ -7,13 +7,12 @@
 lma_meta(text)
 }
 \arguments{
-\item{text}{A character vector of texts.
-\code{'document'} (default), \code{'sentence'}, or \code{'clause'}.}
+\item{text}{A character vector of texts.}
 }
 \value{
 A data.frame: \tabular{ll}{
   \code{characters} \tab Total number of characters.\cr
-  \code{syllables} \tab Total number of syllables, as estimated by split lenght of
+  \code{syllables} \tab Total number of syllables, as estimated by split length of
     \code{'a+[eu]*|e+a*|i+|o+[ui]*|u+|y+[aeiou]*'} - 1.\cr
   \code{words} \tab Total number of words (raw word count).\cr
   \code{unique_words} \tab Number of unique words (binary word count).\cr
@@ -30,8 +29,7 @@ A data.frame: \tabular{ll}{
     (\code{syllables} / \code{words}).\cr
   \code{type_token_ratio} \tab Ratio of unique to total words: \code{unique_words} / \code{words}.\cr
   \code{reading_grade} \tab Flesch-Kincaid grade level: .39 * \code{words} / \code{sentences} +
-    11.8 * \code{syllables} / \code{words} - 15.59, with \code{words} / \code{clause} or \code{words}
-    in place of \code{words} / \code{sentences}, depending on \code{output}.\cr
+    11.8 * \code{syllables} / \code{words} - 15.59.\cr
   \code{numbers} \tab Number of terms starting with numbers. \cr
   \code{punct} \tab Number of terms starting with non-alphanumeric characters.\cr
   \code{periods} \tab Number of periods.\cr
@@ -39,10 +37,12 @@ A data.frame: \tabular{ll}{
   \code{qmarks} \tab Number of question marks.\cr
   \code{exclams} \tab Number of exclamation points.\cr
   \code{quotes} \tab Number of quotation marks (single and double).\cr
+  \code{apostrophes} \tab Number of apostrophes, defined as any modified letter apostrophe, or backtick
+    or single straight or curly quote surrounded by letters.\cr
   \code{brackets} \tab Number of bracketing characters (including parentheses, and square,
     curly, and angle brackets).\cr
   \code{organizemarks} \tab Number of characters used for organization or structuring (including
-    dashes, foreward slashes, colons, and semicolons).
+    dashes, foreword slashes, colons, and semicolons).
 }
 }
 \description{

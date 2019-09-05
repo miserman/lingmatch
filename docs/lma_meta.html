@@ -25,8 +25,7 @@ lma_meta(text)
 <table summary="R argblock">
 <tr valign="top"><td><code>text</code></td>
 <td>
-<p>A character vector of texts.
-<code>'document'</code> (default), <code>'sentence'</code>, or <code>'clause'</code>.</p>
+<p>A character vector of texts.</p>
 </td></tr>
 </table>
 
@@ -42,7 +41,7 @@ lma_meta(text)
 </tr>
 <tr>
  <td style="text-align: left;">
-  <code>syllables</code> </td><td style="text-align: left;"> Total number of syllables, as estimated by split lenght of
+  <code>syllables</code> </td><td style="text-align: left;"> Total number of syllables, as estimated by split length of
     <code>'a+[eu]*|e+a*|i+|o+[ui]*|u+|y+[aeiou]*'</code> - 1.</td>
 </tr>
 <tr>
@@ -92,8 +91,7 @@ lma_meta(text)
 <tr>
  <td style="text-align: left;">
   <code>reading_grade</code> </td><td style="text-align: left;"> Flesch-Kincaid grade level: .39 * <code>words</code> / <code>sentences</code> +
-    11.8 * <code>syllables</code> / <code>words</code> - 15.59, with <code>words</code> / <code>clause</code> or <code>words</code>
-    in place of <code>words</code> / <code>sentences</code>, depending on <code>output</code>.</td>
+    11.8 * <code>syllables</code> / <code>words</code> - 15.59.</td>
 </tr>
 <tr>
  <td style="text-align: left;">
@@ -125,13 +123,18 @@ lma_meta(text)
 </tr>
 <tr>
  <td style="text-align: left;">
+  <code>apostrophes</code> </td><td style="text-align: left;"> Number of apostrophes, defined as any modified letter apostrophe, or backtick
+    or single straight or curly quote surrounded by letters.</td>
+</tr>
+<tr>
+ <td style="text-align: left;">
   <code>brackets</code> </td><td style="text-align: left;"> Number of bracketing characters (including parentheses, and square,
     curly, and angle brackets).</td>
 </tr>
 <tr>
  <td style="text-align: left;">
   <code>organizemarks</code> </td><td style="text-align: left;"> Number of characters used for organization or structuring (including
-    dashes, foreward slashes, colons, and semicolons).
+    dashes, foreword slashes, colons, and semicolons).
 </td>
 </tr>
 
