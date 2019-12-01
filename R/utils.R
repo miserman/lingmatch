@@ -50,13 +50,14 @@ read.dic=function(path,cats,to.regex=FALSE){
 #'   death = c('death*', 'dying', 'die*', 'kill*')
 #' )
 #'
-#' # save it as a .dic file: write.dic(dict,'murder')
-#' # read it back in as a list: read.dic('murder.dic')
+#' \dontrun{
+#' write.dic(dict, 'murder') # save it as a .dic file
+#' read.dic('murder.dic') # read it back in as a list
 #'
 #' # read in the Moral Foundations or LUSI dictionaries from urls
-#' moral_dict = read.dic('http://bit.ly/MoralFoundations')
+#' moral_dict = read.dic('http://bit.ly/moral_foundations')
 #' lusi_dict = read.dic('http://bit.ly/lusi_dict')
-#'
+#' }
 #' @export
 
 write.dic=function(x,filename='custom'){
@@ -92,13 +93,13 @@ write.dic=function(x,filename='custom'){
 #' @param ncores Number of CPU cores to use; defaults to total number of cores minus 2.
 #'
 #' @export
+#' @importFrom parallel detectCores makeCluster stopCluster
+#' @importFrom doParallel registerDoParallel
+#' @importFrom foreach foreach %dopar% registerDoSEQ
 
 read.folder=function(path=NULL,segment=NULL,subdir=FALSE,ext='.txt',fixed=TRUE,
   segment.size=NULL,bysentence=FALSE,reader=readLines,readarg=list(warn=FALSE),ncores = parallel::detectCores() - 2){
-  if(missing(path)){
-    path=choose.dir()
-    if(is.na(path)) return()
-  }
+  if(missing(path)) stop("path must be specified; enter the path to a folder, e.g., read.folder('~/texts')")
   fs=if(length(path)==1 && dir.exists(path)) fs=list.files(path,ext,recursive=subdir,full.names=TRUE) else path
   fs=data.frame(rbind(fs,gsub('^.*[\\/]+','',fs)),stringsAsFactors=FALSE)
   if(!missing(segment.size)) segment=NULL
@@ -143,15 +144,15 @@ read.folder=function(path=NULL,segment=NULL,subdir=FALSE,ext='.txt',fixed=TRUE,
 #' Downloads the specified semantic space.
 #'
 #' Spaces are slightly altered and reprocessed versions of those available at
-#' \url{http://www.lingexp.uni-tuebingen.de/z2/LSAspaces/}.
+#' \url{https://sites.google.com/site/fritzgntr/software-resources/semantic_spaces}.
 #'
 #' Spaces can (sometimes) be downloaded directly from \url{https://www.myweb.ttu.edu/miserman/lsspaces/}.
 #' @param space name of the space you wish to download. Options include \code{'default'} and \code{'tasa'}.
-#' @param dir desired path to the downloaded space; default is '~/Documents/Latent Semantic Spaces'.
+#' @param dir desired path to the downloaded space; default is '~/Latent Semantic Spaces'.
 #' @export
-#' @importFrom utils download.file unzip choose.dir
+#' @importFrom utils download.file unzip
 
-download.lsspace=function(space='default',dir='~/Documents/Latent Semantic Spaces'){
+download.lsspace=function(space='default',dir='~/Latent Semantic Spaces'){
   z=grepl('^l|^s|^z',space,TRUE)
   if(!grepl('.',space,fixed=TRUE)) space=paste0(space,'.zip') else if(grepl('.sqlite',space,fixed=TRUE))
     space=sub('.sqlite','.zip',space,fixed=TRUE)
@@ -192,7 +193,7 @@ download.lsspace=function(space='default',dir='~/Documents/Latent Semantic Space
 #'   \code{boundary} will be set to \code{' '}, avoiding pattern matches within words. By default, dictionary
 #'   terms are left as entered.
 #' @param fixed Logical; if \code{FALSE}, patterns can be regular expressions.
-#' @param perl Logical; passed to \code{\link{strsplit}. Set to \code{FALSE} if \code{fixed} is \code{TRUE}}.
+#' @param perl Logical; passed to \code{\link{strsplit}}. Set to \code{FALSE} if \code{fixed} is \code{TRUE}.
 #' @param ncores Number of CPU cores to use. Default is number of cores - 2 if \code{text} has more than 100
 #'   entries. Otherwise, if not specified, only 1 core will be used.
 #' @examples
@@ -371,7 +372,7 @@ lma_meta = function(text){
     qmarks = if('?' %in% terms) dtm[, '?'] else 0,
     exclams = if('!' %in% terms) dtm[, '!'] else 0,
     quotes = if(any(su <- grepl('^[\'"]', terms))) rowSums(dtm[, su, drop = FALSE]) else 0,
-    apostrophes = vapply(strsplit(text, "[\u02bc]+|[A-z][\u0027\u0060\u2019]+[A-z]"), length, 0),
+    apostrophes = vapply(strsplit(text, "[\u02bc]+|[A-z][\u0027\u0060\u2019]+[A-z]"), length, 0) - 1,
     brackets = if(any(su <- grepl('[(\\)<>{\\}[]|\\]', terms))) rowSums(dtm[, su, drop = FALSE]) else 0,
     orgmarks = if(any(su <- grepl('[/:;-]', terms))) rowSums(dtm[, su, drop = FALSE]) else 0
   )))

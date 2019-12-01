@@ -17,10 +17,10 @@
 
 <pre>
 lma_patcat(text, dict, term = "term", category = "category",
-  weight = "weight", to.lower = TRUE, to.percent = FALSE,
-  bias = NULL, intname = "_intercept", return_dtm = FALSE,
-  exclusive = TRUE, boundary = NULL, fixed = TRUE, perl = TRUE,
-  ncores = detectCores() - 2)
+  weight = "weight", to.lower = TRUE, to.percent = FALSE, bias = NULL,
+  intname = "_intercept", return_dtm = FALSE, exclusive = TRUE,
+  boundary = NULL, fixed = TRUE, perl = TRUE, ncores = detectCores() -
+  2)
 </pre>
 
 
@@ -83,7 +83,7 @@ terms are left as entered.</p>
 </td></tr>
 <tr valign="top"><td><code>perl</code></td>
 <td>
-<p>Logical; passed to <code>strsplit. Set to <code>FALSE</code> if <code>fixed</code> is <code>TRUE</code></code>.</p>
+<p>Logical; passed to <code>strsplit</code>. Set to <code>FALSE</code> if <code>fixed</code> is <code>TRUE</code>.</p>
 </td></tr>
 <tr valign="top"><td><code>ncores</code></td>
 <td>

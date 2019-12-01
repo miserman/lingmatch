@@ -2,38 +2,28 @@
 % Please edit documentation in R/lingmatch.R
 \name{lma_simets}
 \alias{lma_simets}
-\title{Similarity, Distance, and/or Accommodation Metrics}
+\title{Calculate similarity between vectors}
 \usage{
-lma_simets(a, b = NULL, metric, metric.arg = list(), group = NULL,
-  agg = TRUE, agg.mean = TRUE, square = TRUE, mean = FALSE,
-  sample = NULL, ncores = detectCores() - 2)
+lma_simets(a, b = NULL, metric, group = NULL, agg = TRUE,
+  agg.mean = TRUE, pairwise = TRUE, symmetrical = FALSE, mean = FALSE)
 }
 \arguments{
 \item{a}{vector or matrix. If a vector, \code{b} must also be provided. If a matrix and \code{b}
 is missing, each row will be compared. If a matrix and \code{b} is not missing, each row will
-be compared with \code{b}.}
+be compared with \code{b} or each row of \code{b}.}
 
-\item{b}{vector to be compared with \code{a} or rows of \code{a}, or a matrix with the same
-number of rows as \code{a}, in which case each row of \code{a} and \code{b} will be compared.}
+\item{b}{vector or matrix to be compared with \code{a} or rows of \code{a}.}
 
-\item{metric}{a function (see details), or a character at least partially matching one of the
-available metrics:
+\item{metric}{a character or vector of characters at least partially matching one of the
+available metric names, or a number or vector of numbers indicating the metric by index:
 \tabular{ll}{
-  \code{euclidean} \tab \code{1 - sum((a-b)^2)^.5} \cr
-  \code{canberra} \tab \code{mean(as.numeric(1 - abs(a - b) / (a + b + .0001)))} \cr
-  \code{cosine} \tab \code{sum(a * b) / sum(a^2 * sum(b^2))^.5} \cr
-  \code{pearson} \tab \code{cor(a, b, method='pearson')} \cr
-  \code{kendall} \tab \code{cor(a, b, method='kendall')} \cr
-  \code{spearman} \tab \code{cor(a, b, method='spearman')} \cr
   \code{jaccard} \tab \code{sum(a & b) / sum(a | b)} \cr
-  \code{kld} \tab \code{1 - sum(vapply(unique(c(a, b)),
-  function(v){pq = c(mean(a == v), mean(b == v));
-  if(pq[2]) pq[1] * log(pq[1] / pq[2]) else 0
-  }, 0), na.rm = TRUE)}\cr
+  \code{euclidean} \tab \code{1 / (1 + sqrt(sum((a - b) ^ 2)))} \cr
+  \code{canberra} \tab \code{mean(1 - abs(a - b) / (a + b))} \cr
+  \code{cosine} \tab \code{sum(a * b) / sqrt(sum(a ^ 2 * sum(b ^ 2)))} \cr
+  \code{pearson} \tab \code{(mean(a * b) - (mean(a) * mean(b))) / sqrt(mean(a ^ 2) - mean(a) ^ 2) /
+    sqrt(mean(b ^ 2) - mean(b) ^ 2)} \cr
 }}
-
-\item{metric.arg}{a list of arguments to be passed to \code{metric} if \code{metric} is a
-function.}
 
 \item{group}{if \code{b} is missing and \code{a} has multiple rows, this will be used to make
 comparisons between rows of \code{a}, as modified by \code{agg} and \code{add.mean}.}
@@ -41,50 +31,57 @@ comparisons between rows of \code{a}, as modified by \code{agg} and \code{add.me
 \item{agg}{logical; if \code{FALSE}, only the boundary rows between groups will be compared, see
 example.}
 
-\item{agg.mean}{logical; if \code{FALSE}, consecutive rows of the same group will be summed.}
+\item{agg.mean}{logical; if \code{FALSE} aggregated rows are summed instead of averaged.}
 
-\item{square}{logical; if \code{FALSE}, only the lower triangle is returned from a pairwise
-comparison.}
+\item{pairwise}{logical; if \code{FALSE} and \code{a} and \code{b} are matrices with the same number of
+rows, only paired rows are compared. Otherwise (and if only \code{a} is supplied), all pairwise
+comparisons are made.}
 
-\item{mean}{logical; if \code{TRUE}, a single mean for each metric is returned.}
+\item{symmetrical}{logical; if \code{TRUE} and pairwise comparisons between \code{a} rows were made,
+the results in the lower triangle are copied to the upper triangle.}
 
-\item{sample}{If \code{a} is a matrix and \code{b} is not specified (a pairwise comparison is to
-be made), this determines whether every comparison or a sample should be calculated. If
-\code{sample} is a number smaller than \code{nrow(a)}, each row will be compared against a
-random sample of other rows, not including the given row.}
-
-\item{ncores}{sets the number of CPU cores to be used during pairwise comparisons. If not
-specified, multiple cores will only be used if \code{nrow(a)} is greater than 1000, in which
-case the number of detected cores - 2 will be used.}
+\item{mean}{logical; if \code{TRUE}, a single mean for each metric is returned per row of \code{a}.}
+}
+\value{
+Output varies based on the dimensions of \code{a} and \code{b}:
+  \tabular{ll}{
+    \strong{output} \tab \strong{input} \cr
+    a vector with a value per metric \tab only when \code{a} and \code{b} are both vectors \cr
+    a data.frame with a column per metric \tab any time a single value is expected per row:
+      \code{a} or \code{b} is a vector, \code{a} and \code{b} are matrices with the same number of rows
+      and \code{pairwise = FALSE}, a group is specified, or \code{mean = TRUE} \cr
+    a list with a sparse matrix per metric \tab pairwise comparisons within an \code{a} matrix or between
+      an \code{a} and \code{b} matrix\cr
+  }
 }
 \description{
-Similarity, Distance, and/or Accommodation Metrics
+Calculate similarity between vectors
 }
 \details{
-When a function, \code{metric} is called in places of built-in metrics. Two arguments are always
-passed to it, generally corresponding to rows of \code{a} in the first position, and \code{b} in
-the second. If \code{b} is missing and \code{a} has more than one row, other rows of \code{a}
-will be in the second position.
-
-If \code{metric} is a function with compatible first and second position arguments, this can be
-entered directly (e.g., \code{metric = energy::dcor}). Otherwise, \code{a} and \code{b} might
-have to be reformatted (e.g., \code{metric = function(a,b) entropy::mi.empirical(table(a,b))}).
-
-The function entered as \code{metric} must always return a single numerical value.
+Use \code{\link[RcppParallel]{setThreadOptions}} to change parallelization options; e.g., run
+RcppParallel::setThreadOptions(4) before a call to lma_simets to set the number of CPU
+threads to 4.
 }
 \examples{
 text = c(
-  'words of speaker A','more words from speaker A',
-  'words from speaker B','more words from speaker B'
+  'words of speaker A', 'more words from speaker A',
+  'words from speaker B', 'more words from speaker B'
 )
-speaker = c('A','A','B','B')
-
 (dtm = lma_dtm(text))
 
-# by default, consecutive rows from the same group are averaged:
-lma_simets(dtm, group=speaker)
+# compare each entry
+lma_simets(dtm)
 
-# with agg = FALSE, only the rows at the boundary between
-# groups (rows 2 and 3 in this case) are used:
-lma_simets(dtm, group=speaker, agg=FALSE)
+# compare each entry with the mean of all entries
+lma_simets(dtm, colMeans(dtm))
+
+# compare by group (corresponding to speakers and turns in this case)
+speaker = c('A', 'A', 'B', 'B')
+
+## by default, consecutive rows from the same group are averaged:
+lma_simets(dtm, group = speaker)
+
+## with agg = FALSE, only the rows at the boundary between
+## groups (rows 2 and 3 in this case) are used:
+lma_simets(dtm, group = speaker, agg = FALSE)
 }

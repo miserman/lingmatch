@@ -4,9 +4,8 @@
 \alias{lma_termcat}
 \title{Document-Term Matrix Categorization}
 \usage{
-lma_termcat(dtm, dict, term.weights = NULL, bias = NULL,
-  escape = FALSE, partial = FALSE, term.filter = NULL,
-  term.break = 25000)
+lma_termcat(dtm, dict, term.weights = NULL, bias = NULL, escape = FALSE,
+  partial = FALSE, term.filter = NULL, term.break = 25000)
 }
 \arguments{
 \item{dtm}{A matrix with words as column names.}
@@ -40,10 +39,10 @@ Reduces the dimensions of a document-term matrix by dictionary-based categorizat
 }
 \examples{
 # Score texts with the NRC Affect Intensity Lexicon
-
+\dontrun{
 dict = readLines('https://saifmohammad.com/WebDocs/NRC-AffectIntensity-Lexicon.txt')
 dict = read.table(
-  text = dict[-seq_len(grep('term\\tscore', dict, fixed = TRUE)[[1]])],
+  text = dict[-seq_len(grep('term\tscore', dict, fixed = TRUE)[[1]])],
   col.names = c('term', 'weight', 'category')
 )
 
@@ -61,5 +60,5 @@ emotion_scores = lma_termcat(
   text, split(dict$term, dict$category), split(dict$weight, dict$category)
 )
 if(require('splot')) splot(emotion_scores ~ names(text), leg = 'out')
-
+}
 }

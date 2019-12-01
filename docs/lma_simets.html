@@ -1,24 +1,23 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Similarity, Distance, and/or Accommodation Metrics</title>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Calculate similarity between vectors</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <link rel="stylesheet" type="text/css" href="R.css" />
 </head><body>
 
 <table width="100%" summary="page for lma_simets"><tr><td>lma_simets</td><td style="text-align: right;">R Documentation</td></tr></table>
 
-<h2>Similarity, Distance, and/or Accommodation Metrics</h2>
+<h2>Calculate similarity between vectors</h2>
 
 <h3>Description</h3>
 
-<p>Similarity, Distance, and/or Accommodation Metrics
+<p>Calculate similarity between vectors
 </p>
 
 
 <h3>Usage</h3>
 
 <pre>
-lma_simets(a, b = NULL, metric, metric.arg = list(), group = NULL,
-  agg = TRUE, agg.mean = TRUE, square = TRUE, mean = FALSE,
-  sample = NULL, ncores = detectCores() - 2)
+lma_simets(a, b = NULL, metric, group = NULL, agg = TRUE,
+  agg.mean = TRUE, pairwise = TRUE, symmetrical = FALSE, mean = FALSE)
 </pre>
 
 
@@ -29,54 +28,39 @@ lma_simets(a, b = NULL, metric, metric.arg = list(), group = NULL,
 <td>
 <p>vector or matrix. If a vector, <code>b</code> must also be provided. If a matrix and <code>b</code>
 is missing, each row will be compared. If a matrix and <code>b</code> is not missing, each row will
-be compared with <code>b</code>.</p>
+be compared with <code>b</code> or each row of <code>b</code>.</p>
 </td></tr>
 <tr valign="top"><td><code>b</code></td>
 <td>
-<p>vector to be compared with <code>a</code> or rows of <code>a</code>, or a matrix with the same
-number of rows as <code>a</code>, in which case each row of <code>a</code> and <code>b</code> will be compared.</p>
+<p>vector or matrix to be compared with <code>a</code> or rows of <code>a</code>.</p>
 </td></tr>
 <tr valign="top"><td><code>metric</code></td>
 <td>
-<p>a function (see details), or a character at least partially matching one of the
-available metrics:
+<p>a character or vector of characters at least partially matching one of the
+available metric names, or a number or vector of numbers indicating the metric by index:
 </p>
 
 <table summary="Rd table">
-<tr>
- <td style="text-align: left;">
-  <code>euclidean</code> </td><td style="text-align: left;"> <code>1 - sum((a-b)^2)^.5</code> </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-  <code>canberra</code> </td><td style="text-align: left;"> <code>mean(as.numeric(1 - abs(a - b) / (a + b + .0001)))</code> </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-  <code>cosine</code> </td><td style="text-align: left;"> <code>sum(a * b) / sum(a^2 * sum(b^2))^.5</code> </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-  <code>pearson</code> </td><td style="text-align: left;"> <code>cor(a, b, method='pearson')</code> </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-  <code>kendall</code> </td><td style="text-align: left;"> <code>cor(a, b, method='kendall')</code> </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-  <code>spearman</code> </td><td style="text-align: left;"> <code>cor(a, b, method='spearman')</code> </td>
-</tr>
 <tr>
  <td style="text-align: left;">
   <code>jaccard</code> </td><td style="text-align: left;"> <code>sum(a &amp; b) / sum(a | b)</code> </td>
 </tr>
 <tr>
  <td style="text-align: left;">
-  <code>kld</code> </td><td style="text-align: left;"> <code>1 - sum(vapply(unique(c(a, b)),
-  function(v){pq = c(mean(a == v), mean(b == v));
-  if(pq[2]) pq[1] * log(pq[1] / pq[2]) else 0
-  }, 0), na.rm = TRUE)</code></td>
+  <code>euclidean</code> </td><td style="text-align: left;"> <code>1 / (1 + sqrt(sum((a - b) ^ 2)))</code> </td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+  <code>canberra</code> </td><td style="text-align: left;"> <code>mean(1 - abs(a - b) / (a + b))</code> </td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+  <code>cosine</code> </td><td style="text-align: left;"> <code>sum(a * b) / sqrt(sum(a ^ 2 * sum(b ^ 2)))</code> </td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+  <code>pearson</code> </td><td style="text-align: left;"> <code>(mean(a * b) - (mean(a) * mean(b))) / sqrt(mean(a ^ 2) - mean(a) ^ 2) /
+    sqrt(mean(b ^ 2) - mean(b) ^ 2)</code> </td>
 </tr>
 <tr>
  <td style="text-align: left;">
@@ -84,11 +68,6 @@ available metrics:
 </tr>
 
 </table>
-</td></tr>
-<tr valign="top"><td><code>metric.arg</code></td>
-<td>
-<p>a list of arguments to be passed to <code>metric</code> if <code>metric</code> is a
-function.</p>
 </td></tr>
 <tr valign="top"><td><code>group</code></td>
 <td>
@@ -102,65 +81,92 @@ example.</p>
 </td></tr>
 <tr valign="top"><td><code>agg.mean</code></td>
 <td>
-<p>logical; if <code>FALSE</code>, consecutive rows of the same group will be summed.</p>
+<p>logical; if <code>FALSE</code> aggregated rows are summed instead of averaged.</p>
 </td></tr>
-<tr valign="top"><td><code>square</code></td>
+<tr valign="top"><td><code>pairwise</code></td>
 <td>
-<p>logical; if <code>FALSE</code>, only the lower triangle is returned from a pairwise
-comparison.</p>
+<p>logical; if <code>FALSE</code> and <code>a</code> and <code>b</code> are matrices with the same number of
+rows, only paired rows are compared. Otherwise (and if only <code>a</code> is supplied), all pairwise
+comparisons are made.</p>
+</td></tr>
+<tr valign="top"><td><code>symmetrical</code></td>
+<td>
+<p>logical; if <code>TRUE</code> and pairwise comparisons between <code>a</code> rows were made,
+the results in the lower triangle are copied to the upper triangle.</p>
 </td></tr>
 <tr valign="top"><td><code>mean</code></td>
 <td>
-<p>logical; if <code>TRUE</code>, a single mean for each metric is returned.</p>
-</td></tr>
-<tr valign="top"><td><code>sample</code></td>
-<td>
-<p>If <code>a</code> is a matrix and <code>b</code> is not specified (a pairwise comparison is to
-be made), this determines whether every comparison or a sample should be calculated. If
-<code>sample</code> is a number smaller than <code>nrow(a)</code>, each row will be compared against a
-random sample of other rows, not including the given row.</p>
-</td></tr>
-<tr valign="top"><td><code>ncores</code></td>
-<td>
-<p>sets the number of CPU cores to be used during pairwise comparisons. If not
-specified, multiple cores will only be used if <code>nrow(a)</code> is greater than 1000, in which
-case the number of detected cores - 2 will be used.</p>
+<p>logical; if <code>TRUE</code>, a single mean for each metric is returned per row of <code>a</code>.</p>
 </td></tr>
 </table>
 
 
 <h3>Details</h3>
 
-<p>When a function, <code>metric</code> is called in places of built-in metrics. Two arguments are always
-passed to it, generally corresponding to rows of <code>a</code> in the first position, and <code>b</code> in
-the second. If <code>b</code> is missing and <code>a</code> has more than one row, other rows of <code>a</code>
-will be in the second position.
+<p>Use <code>setThreadOptions</code> to change parallelization options; e.g., run
+RcppParallel::setThreadOptions(4) before a call to lma_simets to set the number of CPU
+threads to 4.
 </p>
-<p>If <code>metric</code> is a function with compatible first and second position arguments, this can be
-entered directly (e.g., <code>metric = energy::dcor</code>). Otherwise, <code>a</code> and <code>b</code> might
-have to be reformatted (e.g., <code>metric = function(a,b) entropy::mi.empirical(table(a,b))</code>).
+
+
+<h3>Value</h3>
+
+<p>Output varies based on the dimensions of <code>a</code> and <code>b</code>:
 </p>
-<p>The function entered as <code>metric</code> must always return a single numerical value.
-</p>
+
+<table summary="Rd table">
+<tr>
+ <td style="text-align: left;">
+    <strong>output</strong> </td><td style="text-align: left;"> <strong>input</strong> </td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+    a vector with a value per metric </td><td style="text-align: left;"> only when <code>a</code> and <code>b</code> are both vectors </td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+    a data.frame with a column per metric </td><td style="text-align: left;"> any time a single value is expected per row:
+      <code>a</code> or <code>b</code> is a vector, <code>a</code> and <code>b</code> are matrices with the same number of rows
+      and <code>pairwise = FALSE</code>, a group is specified, or <code>mean = TRUE</code> </td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+    a list with a sparse matrix per metric </td><td style="text-align: left;"> pairwise comparisons within an <code>a</code> matrix or between
+      an <code>a</code> and <code>b</code> matrix</td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+  </td>
+</tr>
+
+</table>
+
 
 
 <h3>Examples</h3>
 
 <pre>
 text = c(
-  'words of speaker A','more words from speaker A',
-  'words from speaker B','more words from speaker B'
+  'words of speaker A', 'more words from speaker A',
+  'words from speaker B', 'more words from speaker B'
 )
-speaker = c('A','A','B','B')
-
 (dtm = lma_dtm(text))
 
-# by default, consecutive rows from the same group are averaged:
-lma_simets(dtm, group=speaker)
+# compare each entry
+lma_simets(dtm)
 
-# with agg = FALSE, only the rows at the boundary between
-# groups (rows 2 and 3 in this case) are used:
-lma_simets(dtm, group=speaker, agg=FALSE)
+# compare each entry with the mean of all entries
+lma_simets(dtm, colMeans(dtm))
+
+# compare by group (corresponding to speakers and turns in this case)
+speaker = c('A', 'A', 'B', 'B')
+
+## by default, consecutive rows from the same group are averaged:
+lma_simets(dtm, group = speaker)
+
+## with agg = FALSE, only the rows at the boundary between
+## groups (rows 2 and 3 in this case) are used:
+lma_simets(dtm, group = speaker, agg = FALSE)
 </pre>
 
 

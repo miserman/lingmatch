@@ -17,8 +17,8 @@ space), or map a dtm onto an existing latent semantic space.
 <h3>Usage</h3>
 
 <pre>
-lma_lspace(dtm, space, path = "~/Documents/Latent Semantic Spaces",
-  dim.cutoff = 0.5, keep.dim = FALSE)
+lma_lspace(dtm, space, path = "~/Latent Semantic Spaces", dim.cutoff = 0.5,
+  keep.dim = FALSE)
 </pre>
 
 
@@ -40,7 +40,7 @@ slower than using a full, preloaded .rda space, but faster than loading and unlo
 </td></tr>
 <tr valign="top"><td><code>path</code></td>
 <td>
-<p>Path to a folder containing spaces. Default is '~/Documents/Latent Semantic Spaces'.</p>
+<p>Path to a folder containing spaces. Default is '~/Latent Semantic Spaces'.</p>
 </td></tr>
 <tr valign="top"><td><code>dim.cutoff</code></td>
 <td>
@@ -99,11 +99,11 @@ sapply(spaces, lma_simets, metric = 'cosine')
 
 ## Not run: 
 # using a space from a file might look something like this:
-lma_lspace(dtm, 'default.rda', '~/documents/latent semantic spaces')
+lma_lspace(dtm, 'default.rda', '~/latent semantic spaces')
 
 # or you could load the space before hand
 # (where default.rda contains an object called lss_default)
-load('~/documents/latent semantic spaces/default.rda')
+load('~/latent semantic spaces/default.rda')
 lma_lspace(dtm, lss_default)
 
 ## End(Not run)

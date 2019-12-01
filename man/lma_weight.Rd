@@ -4,9 +4,8 @@
 \alias{lma_weight}
 \title{Document-Term Matrix Weighting}
 \usage{
-lma_weight(dtm, weight = "count", to.freq = TRUE,
-  freq.complete = TRUE, log.base = 10, alpha = 1, doc.only = FALSE,
-  percent = FALSE)
+lma_weight(dtm, weight = "count", to.freq = TRUE, freq.complete = TRUE,
+  log.base = 10, alpha = 1, doc.only = FALSE, percent = FALSE)
 }
 \arguments{
 \item{dtm}{a matrix with words as column names.}

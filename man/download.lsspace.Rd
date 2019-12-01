@@ -4,20 +4,19 @@
 \alias{download.lsspace}
 \title{Download Latent Semantic Spaces}
 \usage{
-download.lsspace(space = "default",
-  dir = "~/Documents/Latent Semantic Spaces")
+download.lsspace(space = "default", dir = "~/Latent Semantic Spaces")
 }
 \arguments{
 \item{space}{name of the space you wish to download. Options include \code{'default'} and \code{'tasa'}.}
 
-\item{dir}{desired path to the downloaded space; default is '~/Documents/Latent Semantic Spaces'.}
+\item{dir}{desired path to the downloaded space; default is '~/Latent Semantic Spaces'.}
 }
 \description{
 Downloads the specified semantic space.
 }
 \details{
 Spaces are slightly altered and reprocessed versions of those available at
-\url{http://www.lingexp.uni-tuebingen.de/z2/LSAspaces/}.
+\url{https://sites.google.com/site/fritzgntr/software-resources/semantic_spaces}.
 
 Spaces can (sometimes) be downloaded directly from \url{https://www.myweb.ttu.edu/miserman/lsspaces/}.
 }

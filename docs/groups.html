@@ -1489,6 +1489,12 @@ summary {
 }
 }
 
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
 
 .toc-content {
   padding-left: 30px;
@@ -1565,7 +1571,7 @@ div.tocify {
 
 
 <p>This example demonstrates a few ways to specify comparisons and groups in lingmatch.</p>
-<p><em>Built with R 3.6.1 on August 30 2019</em></p>
+<p><em>Built with R 3.6.1 on December 01 2019</em></p>
 <hr />
 <div id="setup" class="section level1">
 <h1>Setup</h1>
@@ -1595,17 +1601,15 @@ div.tocify {
 <a class="sourceLine" id="cb2-8" title="8"><span class="co"># function word dictionaries and text processing between LIWC and lingmatch</span></a>
 <a class="sourceLine" id="cb2-9" title="9"><span class="kw">cor</span>(lsm_mean<span class="op">$</span>sim, lsm_mean_raw<span class="op">$</span>sim)</a></code></pre></div>
 <pre><code>##           canberra
-## canberra 0.9034402</code></pre>
+## canberra 0.9034439</code></pre>
 <p>The <code>sim</code> component of the lingmatch output has the actual LSM scores, but the comparison is also stored in the lingmatch output:</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1">lsm_mean[<span class="kw">c</span>(<span class="st">&#39;comp.type&#39;</span>, <span class="st">&#39;comp&#39;</span>)]</a></code></pre></div>
 <pre><code>## $comp.type
 ## [1] &quot;mean&quot;
 ## 
 ## $comp
-##     ppron     ipron   article    adverb      conj      prep   auxverb 
-## 10.597605  7.087683  6.318364  5.439149  7.496309 13.652016 11.839450 
-##    negate     quant 
-##  1.933259  2.082788</code></pre>
+##     ppron     ipron   article    adverb      conj      prep   auxverb    negate     quant 
+## 10.597605  7.087683  6.318364  5.439149  7.496309 13.652016 11.839450  1.933259  2.082788</code></pre>
 <p>This type of LSM might be interpreted as a sort of generic matching; that is, how similar a given text is to the set of texts. Similar comparisons can be made to standards other than the current set’s mean, such as the mean of other sets.</p>
 </div>
 <div id="stored-means" class="section level2">
@@ -1639,10 +1643,8 @@ div.tocify {
 ## [1] &quot;prompts mean&quot;
 ## 
 ## $comp
-##     ppron     ipron   article    adverb      conj      prep   auxverb 
-## 10.342500  7.792500  6.209167  7.965000  6.110833 13.471667 11.355000 
-##    negate     quant 
-##  1.361667  3.734167</code></pre>
+##     ppron     ipron   article    adverb      conj      prep   auxverb    negate     quant 
+## 10.342500  7.792500  6.209167  7.965000  6.110833 13.471667 11.355000  1.361667  3.734167</code></pre>
 </div>
 <div id="group-means" class="section level2">
 <h2>Group means</h2>
@@ -1653,12 +1655,9 @@ div.tocify {
 ## [1] &quot;Topic group mean&quot;
 ## 
 ## $comp
-##                 ppron    ipron  article   adverb     conj     prep
-## Life Course 11.233613 6.767225 5.974895 5.598403 7.905026 13.84309
-## Relational   9.961597 7.408141 6.661832 5.279895 7.087592 13.46094
-##              auxverb   negate    quant
-## Life Course 11.94071 1.710550 2.220393
-## Relational  11.73819 2.155969 1.945183</code></pre>
+##                 ppron    ipron  article   adverb     conj     prep  auxverb   negate    quant
+## Life Course 11.233613 6.767225 5.974895 5.598403 7.905026 13.84309 11.94071 1.710550 2.220393
+## Relational   9.961597 7.408141 6.661832 5.279895 7.087592 13.46094 11.73819 2.155969 1.945183</code></pre>
 <p>These LSM scores might be interpreted as similarity to the texts of those who saw prompts with the same topic.</p>
 <p>This sort of grouping might be called splitting because it’s performing the same operation, just independently within splits (always comparing each text to the mean of all texts within the split). So the <code>group</code> argument is just specifying how to split the data.</p>
 <p>The other type of grouping applicable to this data uses the <code>group</code> argument more like a set of IDs – it pairs texts to specific other texts.</p>
@@ -1673,16 +1672,16 @@ div.tocify {
 <div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" title="1">lsm =<span class="st"> </span><span class="kw">lingmatch</span>(responses, prompts, <span class="dt">group =</span> <span class="kw">c</span>(<span class="st">&#39;Study&#39;</span>, <span class="st">&#39;Topic&#39;</span>, <span class="st">&#39;Style&#39;</span>), <span class="dt">type =</span> <span class="st">&#39;lsm&#39;</span>)</a>
 <a class="sourceLine" id="cb14-2" title="2">lsm<span class="op">$</span>sim[<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>,]</a></code></pre></div>
 <pre><code>##                         g1  canberra
-## 1   4 Life Course Feminine 0.6605930
-## 2   4 Relational Masculine 0.6713990
-## 3    4 Relational Feminine 0.6393596
-## 4  4 Life Course Masculine 0.4876877
-## 5  4 Life Course Masculine 0.4826971
-## 6   4 Life Course Feminine 0.6270596
-## 7    4 Relational Feminine 0.6651024
-## 8   4 Life Course Feminine 0.6224403
-## 9    4 Relational Feminine 0.6807682
-## 10 4 Life Course Masculine 0.4919491</code></pre>
+## 1   4 Life Course Feminine 0.7161725
+## 2   4 Relational Masculine 0.6713952
+## 3    4 Relational Feminine 0.6393550
+## 4  4 Life Course Masculine 0.4876817
+## 5  4 Life Course Masculine 0.4826694
+## 6   4 Life Course Feminine 0.6399802
+## 7    4 Relational Feminine 0.6650969
+## 8   4 Life Course Feminine 0.6224317
+## 9    4 Relational Feminine 0.6807624
+## 10 4 Life Course Masculine 0.4919428</code></pre>
 <p>Here, the <code>group</code> argument is just pasting together the included variables, and using the resulting string to identify a single comparison for each text (acting as a condition ID).</p>
 </div>
 <div id="participant-id" class="section level2">
@@ -1691,16 +1690,16 @@ div.tocify {
 <div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" title="1">interlsm =<span class="st"> </span><span class="kw">lingmatch</span>(responses, <span class="st">&#39;pair&#39;</span>, <span class="dt">group =</span> ParticipantID, <span class="dt">type =</span> <span class="st">&#39;lsm&#39;</span>)</a>
 <a class="sourceLine" id="cb16-2" title="2">interlsm<span class="op">$</span>sim[<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>,]</a></code></pre></div>
 <pre><code>##    ParticipantID  canberra
-## 1     7655755687 0.7584844
-## 2     9110709146 0.7254527
-## 3     7644179658 0.8386203
-## 4     7805617230 0.7103841
-## 5     4972477346 0.7641483
-## 6     4517497793 0.8234799
-## 7     8256969350 0.6834998
-## 8     3148443465 0.8852318
-## 9     3261756122 0.7878969
-## 10    5983239629 0.8617450</code></pre>
+## 1     7655755687 0.7584812
+## 2     9110709146 0.7254458
+## 3     7644179658 0.8386104
+## 4     7805617230 0.7103780
+## 5     4972477346 0.7641375
+## 6     4517497793 0.8234784
+## 7     8256969350 0.6834864
+## 8     3148443465 0.8852305
+## 9     3261756122 0.7878939
+## 10    5983239629 0.8617416</code></pre>
 <p>Here, the <code>comp</code> argument (that in the second position) is specifying a pairwise comparison; within levels of <code>ParticipantID</code>, each text will be compared. If there are more than two texts within a level, the scores will be averaged, but in this case the LSM scores are just the similarity between the participant’s two responses.</p>
 <p>If <code>comp</code> was a function (such as <code>mean</code>, the default), each prompt would be compared the to mean of the participant’s responses.</p>
 <p>Either of these might be interpreted as a measure of self-consistency in language style, with lower scores potentially indicating more sensitivity, or greater matching with other language sources. That is, if inter-LSM scores are very high, differences in LSM with other sources may mean less; they may speak more to how similar that other source happened to be to the participant’s default language style, rather than how much the participant is actively matching to that source.</p>

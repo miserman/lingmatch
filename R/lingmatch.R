@@ -2,7 +2,7 @@
 #'
 #' Offers a variety of methods to assess linguistic matching or accommodation, where \emph{matching}
 #' is general similarity (sometimes called \emph{homophily}), and \emph{accommodation} is some form
-#' of conditional similarity (accounting for some base rate or precedent; sometimes called
+#' of conditional similarity (accounting for some base-rate or precedent; sometimes called
 #' \emph{alignment}).
 #'
 #' There are a great many points of decision in the assessment of linguistic similarity and/or
@@ -110,8 +110,11 @@
 #'   \emph{Journal of Language and Social Psychology, 21}, 337-360.
 #'
 #' @export
-#' @import Matrix
+#' @import methods Matrix
 #' @importFrom stats na.omit cor dpois
+#' @importFrom Rcpp sourceCpp
+#' @importFrom RcppParallel RcppParallelLibs
+#' @useDynLib lingmatch, .registration = TRUE
 
 lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.group=NULL,order=NULL,
   drop=TRUE,all.levels=FALSE,type='lsm'){
@@ -299,7 +302,8 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
   }
   if(is.character(x) || (is.data.frame(x) && any(!vapply(x, class, '') %in% c('numeric', 'integer'))))
     for(i in seq_len(ncol(x))) x[, i] = as.numeric(x[, i])
-  if(any(ckvc <- !vapply(seq_len(ncol(x)), function(col) class(x[, col]), '') %in% c('numeric', 'integer'))){
+  if(class(x) == 'data.frame' && any(ckvc <- !vapply(seq_len(ncol(x)), function(col) class(x[, col]), '') %in%
+    c('numeric', 'integer'))){
     if(all(ckvc)){
       for(col in seq_along(ckvc)) x[, col] = as.numeric(x[, col])
     }else{
@@ -442,9 +446,9 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
           sim[su,mets]=if(cks) c(NA,tm) else tm
         }
       }else{
-        sal$square=if('square'%in%names(dsp$s)) dsp$s$square else TRUE
+        sal$symmetrical=if('symmetrical'%in%names(dsp$s)) dsp$s$symmetrical else TRUE
         sal$mean=if('mean'%in%names(dsp$s)) dsp$s$mean else TRUE
-        if(sal$square && sal$mean){
+        if(sal$symmetrical && sal$mean){
           sim=vapply(seq_along(group[[1]]),function(i){
             su=group[[1]]==group[[1]][i]
             su[i]=FALSE
@@ -461,7 +465,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
             if(sum(su)!=1) do.call(lma_simets,c(list(x[su,,drop=FALSE]),sal)) else
               vapply(sal$metric,function(m)NA,0)
           })
-          if(!sal$square){
+          if(!sal$symmetrical){
             sim=as.data.frame(
               if(sal$mean) ug else rep(ug,vapply(sim,function(gs)length(gs[[1]]),0)),
               do.call(rbind,if(sal$mean) sim else lapply(sim,as.data.frame))
@@ -484,7 +488,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
           do.call(paste, comp.group[seq_len(g)]), character(length(comp.group[[1]])))
       }
       if(!is.null(dsp$s$mean) && !dsp$s$mean){
-        sal$square=TRUE
+        sal$symmetrical=TRUE
         sim=lapply(ug<-unique(sim[,1]),function(g){
           su=sim[,1]==g
           gsm=do.call(lma_simets,c(list(x[su,]),sal))
@@ -492,7 +496,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
           for(m in names(gsm)) dimnames(gsm[[m]])=list(gn,gn)
           gsm
         })
-        if(!is.null(dsp$s$square) && !dsp$s$square){
+        if(!is.null(dsp$s$symmetrical) && !dsp$s$symmetrical){
           sim=do.call(rbind,lapply(sim,function(ll){
             m=ll[[1]]
             su=lower.tri(m)
@@ -503,7 +507,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
           }))
         }else names(sim)=ug
       }else{
-        sal$square=FALSE
+        sal$symmetrical=FALSE
         ssl = if(is.null(speaker)) TRUE else !is.na(speaker)
         for(g in unique(sim[, 1])){
           su = which(sim[, 1] == g & ssl)
@@ -615,43 +619,42 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
 #'
 #' lma_dtm(text)
 #' @export
-#' @importFrom fastmatch fmatch
 
 lma_dtm = function(text, exclude = NULL, context = NULL, numbers = FALSE, punct = FALSE, urls = TRUE,
   emojis = FALSE, to.lower = TRUE, word.break = ' +', dc.min = 0, dc.max = Inf, sparse = TRUE){
   if(is.null(text)) stop(substitute(text),' not found')
   text = paste(' ', text, ' ')
-  st=proc.time()[3]
+  st = proc.time()[[3]]
   if(!urls){
-    text=gsub('http[^ ]*|www[^ ]*| [a-z]+\\.[a-z]{2,}[./][^ ]*',' url ',text,TRUE)
-    text=gsub('(?<=[A-Z])\\. ',' ',text,perl=TRUE)
+    text = gsub('http[^ ]*|www[^ ]*| [a-z]+\\.[a-z]{2,}[./][^ ]*',' url ', text, TRUE)
+    text = gsub('(?<=[A-Z])\\. ', ' ', text, perl = TRUE)
   }
   text = gsub('(?<=st|rd|ft|feat|dr|drs|mr|ms|mrs|messrs|jr|prof)\\. |[\\n\\t\\r]+', ' ', text, TRUE, TRUE)
-  text=gsub(' \\.|\\. ',' . ',text,perl=TRUE)
-  if(to.lower) text=tolower(text)
+  text = gsub(' \\.|\\. ',' . ', text, perl = TRUE)
+  if(to.lower) text = tolower(text)
   if(!is.null(exclude)){
-    if(length(exclude)==1 && grepl(exclude,'function',TRUE)){
-      exclude=unlist(lma_dict(),use.names=FALSE)
-    }else if(is.list(exclude)) exclude=unlist(exclude,use.names=FALSE)
+    if(length(exclude) == 1 && grepl(exclude, 'function', TRUE)){
+      exclude=unlist(lma_dict(), use.names = FALSE)
+    }else if(is.list(exclude)) exclude = unlist(exclude, use.names = FALSE)
   }
   if(any(punct, emojis, !is.null(context))){
     special=lma_dict(special)[[1]]
-    if(!missing(context) && length(context)==1 && grepl('like',context,TRUE))
-      context=special[['LIKE']]
-    if(punct) text=gsub(special[['ELLIPSIS']],' ELLIPSIS ',text)
-    if(emojis) for(type in c('SMILE','FROWN')) text=gsub(special[[type]],paste('',type,''),text)
+    if(!missing(context) && length(context) == 1 && grepl('like', context, TRUE))
+      context = special[['LIKE']]
+    if(punct) text = gsub(special[['ELLIPSIS']], ' ELLIPSIS ', text)
+    if(emojis) for(type in c('SMILE', 'FROWN')) text = gsub(special[[type]], paste('', type, ''), text)
     if(!missing(context)){
-      if(!any(grepl('[?=]',context))){
-        context=gsub('^\\(','(?<=',context)
-        context=gsub('\\((?!\\?)','(?=',context,perl=TRUE)
-        context=gsub('(?<![)*])$','[ .,?!:;/"\']',context,perl=TRUE)
-        context=gsub('\\*','[^ /-]*',context,perl=TRUE)
+      if(!any(grepl('[?=]', context))){
+        context = gsub('^\\(','(?<=', context)
+        context = gsub('\\((?!\\?)','(?=', context, perl = TRUE)
+        context = gsub('(?<![)*])$','[ .,?!:;/"\']', context, perl = TRUE)
+        context = gsub('\\*','[^ /-]*', context, perl = TRUE)
       }
-      context=structure(
+      context = structure(
         as.list(context),
-        names=paste('',gsub('--+','-',gsub('[ ^[]|\\]','-',gsub('[^A-z0-9 ]','',context))),'')
+        names = paste('', gsub('--+', '-', gsub('[ ^[]|\\]', '-', gsub('[^A-z0-9 ]', '', context))), '')
       )
-      for(rn in names(context)) text=gsub(context[[rn]],rn,text,perl=TRUE)
+      for(rn in names(context)) text = gsub(context[[rn]], rn, text, perl = TRUE)
     }
   }
   if(!numbers) text = gsub('\\.*[0-9][0-9,.el-]*', ' ', text, TRUE)
@@ -660,59 +663,31 @@ lma_dtm = function(text, exclude = NULL, context = NULL, numbers = FALSE, punct 
   text = gsub("([^a-z0-9.,'-]|,(?=[a-z])|(?<=[^a-z0-9])(,(?=[a-z0-9])|[.-](?=[a-z]))|[.,'-](?=[^0-9a-z]|[.,'-]))",
     ' \\1 ', text, TRUE, TRUE)
   text = gsub("([a-z0-9.,'-].*[^a-z0-9])", ' \\1 ', text, TRUE, TRUE)
-  text=gsub("(?<=[A-z]) ['\u00E7\u00ED] (?=[A-z])","'",text,perl=TRUE)
-  if(!punct) text=gsub('[[:punct:]] +',' ',text)
-  text=gsub('^ +| (?= )| +$','',text,perl=TRUE)
-  text=strsplit(text,word.break)
-  wc=if(punct) vapply(text,function(l)sum(!grepl('^[[:punct:]]$|^ELLIPSIS$',l)),numeric(1)) else
-    vapply(text,length,numeric(1))
-  words=sort(unique(unlist(text)))
-  words=words[!words=='']
+  text = gsub("(?<=[A-z]) ['\u00E7\u00ED] (?=[A-z])", "'", text, perl = TRUE)
+  if(!punct) text = gsub('[[:punct:]] +', ' ', text)
+  text = gsub('^ +| (?= )| +$', '', text, perl = TRUE)
+  text = strsplit(text, word.break)
+  words = sort(unique(unlist(text)))
+  words = words[!words == '']
   if(!is.null(exclude)){
     if(is.list(exclude)) exclude = unlist(exclude, use.names = FALSE)
-    if(!any(grepl('^', exclude, fixed = TRUE))) exclude = gsub('\\^\\*|\\*\\$', '',
-      paste0('^', exclude, '$'))
+    if(!any(grepl('^', exclude, fixed = TRUE))) exclude = gsub('\\^\\*|\\*\\$', '', paste0('^', exclude, '$'))
     if(any(ck <- grepl('[[({]', exclude) + grepl('[})]|\\]', exclude) == 1))
       exclude[ck] = gsub('([([{}\\])])', '\\\\\\1', exclude[ck], perl = TRUE)
-    words=grep(paste(exclude,collapse='|'),words,value=TRUE,invert=TRUE)
+    words = grep(paste(exclude, collapse = '|'), words, value = TRUE, invert = TRUE)
   }
-  nc = length(text)
-  cseq = function(x){
-    x = sort(x)
-    l = length(x)
-    v = c = unique(x)
-    i = 1
-    for(u in seq_along(v)){
-      n = i
-      while(i < l && x[i] == x[i + 1]) i = i + 1
-      c[u] = i - n + 1
-      i = i + 1
-    }
-    data.frame(j = v, x = as.integer(c))
-  }
-  if(sparse){
-    m = do.call(sparseMatrix, c(do.call(rbind, lapply(seq_len(nc), function(i){
-      ms = cseq(fmatch(text[[i]], words))
-      ms$i = rep(i, length(ms$j))
-      ms
-    })), list(dims = c(nc, length(words)), dimnames = list(NULL, words))))
-  }else{
-    m = matrix(0, nc, length(words), dimnames = list(NULL, words))
-    for(i in seq_len(nc)){
-      ms = cseq(fmatch(text[[i]], words))
-      m[i, ms$j] = ms$x
-    }
-  }
-  su=colSums(m>0,na.rm=TRUE)
-  su=su>dc.min & su<dc.max
-  m=if(any(!su)) m[,su] else m
-  attr(m,'WC')=unlist(wc,use.names=FALSE)
-  attr(m,'type')='count'
-  if(!missing(dc.min) || !missing(dc.max))
-    attr(m,'info')=paste('a lim of',dc.min,'and',dc.max,'left',sum(su),'of',length(words),
-      'unique terms')
-  attr(m,'opts')=c(numbers=numbers,punct=punct,urls=urls,to.lower=to.lower)
-  attr(m,'time')=c(dtm=unname(proc.time()[3]-st))
+  msu = match_terms(text, words, !grepl('^[[:punct:]]$|^ELLIPSIS$', words), c(length(text), length(words)))
+  m = if(sparse) as(msu[[1]], 'dgCMatrix') else as.matrix(msu[[1]])
+  su = msu[[3]] > dc.min & msu[[3]] < dc.max
+  names(msu[[3]]) = words
+  if(any(!su)) m = m[, su]
+  attr(m, 'WC') = unlist(msu[[2]], use.names = FALSE)
+  attr(m, 'colsums') = msu[[3]]
+  attr(m, 'type') = 'count'
+  if(!missing(dc.min) || !missing(dc.max)) attr(m, 'info') =
+    paste('a lim of', dc.min, 'and', dc.max, 'left', sum(su), 'of', length(words), 'unique terms')
+  attr(m, 'opts') = c(numbers = numbers, punct = punct, urls = urls, to.lower = to.lower)
+  attr(m, 'time') = c(dtm = proc.time()[[3]] - st)
   m
 }
 
@@ -813,17 +788,17 @@ lma_weight=function(dtm,weight='count',to.freq=TRUE,freq.complete=TRUE,log.base=
   }
   weight = tolower(weight)
   if(missing(to.freq) && any(grepl('pmi', weight))) to.freq = FALSE
-  dtm=if(to.freq){
-    wc=attr(dtm,'WC')
-    dtm=as.matrix(dtm)
-    if(is.null(wc) || !freq.complete) wc=rowSums(dtm,na.rm=TRUE)
-    su=dtm!=0 & !is.na(dtm)
-    dtm=t(vapply(seq_along(wc),function(r){
-      d=dtm[r,]
-      if(any(su<-(!is.na(d) & d!=0))) d[su]=d[su]/wc[r]*if(percent) 100 else 1
-      d
-    },numeric(ncol(dtm))))
-  }else as.matrix(dtm)
+  if(to.freq){
+    wc = attr(dtm, 'WC')
+    if(is.null(wc) || !freq.complete) wc = rowSums(dtm, na.rm = TRUE)
+    if(.hasSlot(dtm, 'x')){
+      su = !is.na(dtm@x)
+      dtm@x[su] = dtm@x[su] / wc[dtm@i[su] + 1] * if(percent) 100 else 1
+    }else{
+      adj = if(percent) 100 else 1
+      for(r in seq_along(wc)[!is.na(wc)]) dtm[r,] = dtm[r,] / wc[r] * adj
+    }
+  }
   nr = nrow(dtm)
   if(any(grepl('pmi', weight))){
     tw = dw = 'pmi'
@@ -877,8 +852,8 @@ lma_weight=function(dtm,weight='count',to.freq=TRUE,freq.complete=TRUE,log.base=
     if(pdw) dw=if(length(weight)>1) match.arg(weight[2],dws) else 'none'
     dtm=if(dw=='none') term(dtm,tw) else term(dtm,tw) * matrix(rep(doc(dtm, dw), nr), nr, byrow = TRUE)
   }
-  dtm[!is.finite(dtm)] = 0
-  attr(dtm,'type')=c(freq=to.freq,term=tw,document=dw)
+  # dtm[!is.finite(dtm)] = 0
+  attr(dtm, 'type') = c(freq = to.freq, term = tw, document = dw)
   dtm
 }
 
@@ -893,7 +868,7 @@ lma_weight=function(dtm,weight='count',to.freq=TRUE,freq.complete=TRUE,log.base=
 #'   If the file has a .sqlite extension, only a subset will be loaded into RAM; this is slightly
 #'   slower than using a full, preloaded .rda space, but faster than loading and unloading a complete
 #'   .rda space, and less RAM intensive in all cases.
-#' @param path Path to a folder containing spaces. Default is '~/Documents/Latent Semantic Spaces'.
+#' @param path Path to a folder containing spaces. Default is '~/Latent Semantic Spaces'.
 #' @param dim.cutoff If a \code{space} is calculated, this will be used to decide on the number of
 #'   dimensions to be retained: \code{cumsum(d) / sum(d) < dim.cutoff}, where \code{d} is a vector
 #'   of singular values of \code{dtm} (i.e., \code{svd(dtm)$d}). The default is \code{.5}; lower
@@ -936,18 +911,18 @@ lma_weight=function(dtm,weight='count',to.freq=TRUE,freq.complete=TRUE,log.base=
 #'
 #' \dontrun{
 #' # using a space from a file might look something like this:
-#' lma_lspace(dtm, 'default.rda', '~/documents/latent semantic spaces')
+#' lma_lspace(dtm, 'default.rda', '~/latent semantic spaces')
 #'
 #' # or you could load the space before hand
 #' # (where default.rda contains an object called lss_default)
-#' load('~/documents/latent semantic spaces/default.rda')
+#' load('~/latent semantic spaces/default.rda')
 #' lma_lspace(dtm, lss_default)
 #' }
 #' @export
 #' @importFrom RSQLite SQLite
 #' @importFrom DBI dbConnect dbGetQuery dbDisconnect
 
-lma_lspace=function(dtm,space,path='~/Documents/Latent Semantic Spaces',
+lma_lspace=function(dtm,space,path='~/Latent Semantic Spaces',
   dim.cutoff=.5,keep.dim=FALSE){
   if(missing(space)){
     nr=nrow(dtm)
@@ -991,7 +966,7 @@ lma_lspace=function(dtm,space,path='~/Documents/Latent Semantic Spaces',
       space=eval(parse(text=space[[1]]))
       lss_dict = if(!is.null(rownames(space))) rownames(space) else space
       dtm = dtm[, vapply(seq_len(ncol(dtm)), function(col) !any(is.na(dtm[, col])), TRUE)]
-      ts=fmatch(colnames(dtm),lss_dict,nomatch='')
+      ts=match(colnames(dtm),lss_dict,nomatch='')
       ts=ts[!is.na(ts)]
       if(length(ts)==0) stop('found no terms in common with the loaded space')
       if(!ck){
@@ -1010,11 +985,11 @@ lma_lspace=function(dtm,space,path='~/Documents/Latent Semantic Spaces',
       space=as.matrix(space[ts,])
     }
     rep=length(ts)/ncol(dtm)
-    if(rep<.2) warning(paste0('
-      only ',round(rep*100,2),'% of dtm terms appear in the provided space;
-      you might consider using a different source or cleaning/partial matching terms
-      '), call. = FALSE)
-    dtm=dtm[,ts]%*%space
+    if(rep < .2) warning(paste0(
+     'only ', round(rep*100,2), '% of dtm terms appear in the provided space; ',
+     'you might consider using a different source or cleaning/partial matching terms'
+    ), call. = FALSE)
+    dtm = dtm[,ts] %*% space
   }
   dtm
 }
@@ -1042,7 +1017,7 @@ lma_lspace=function(dtm,space,path='~/Documents/Latent Semantic Spaces',
 #'   in chunks. Reduce from 25000 if you get a PCRE compilation error.
 #' @examples
 #' # Score texts with the NRC Affect Intensity Lexicon
-#'
+#' \dontrun{
 #' dict = readLines('https://saifmohammad.com/WebDocs/NRC-AffectIntensity-Lexicon.txt')
 #' dict = read.table(
 #'   text = dict[-seq_len(grep('term\tscore', dict, fixed = TRUE)[[1]])],
@@ -1063,12 +1038,12 @@ lma_lspace=function(dtm,space,path='~/Documents/Latent Semantic Spaces',
 #'   text, split(dict$term, dict$category), split(dict$weight, dict$category)
 #' )
 #' if(require('splot')) splot(emotion_scores ~ names(text), leg = 'out')
-#'
+#' }
 #' @export
 
 lma_termcat=function(dtm,dict,term.weights=NULL,bias=NULL,escape=FALSE,partial=FALSE,term.filter=NULL,
   term.break=25e3){
-  st=proc.time()[3]
+  st=proc.time()[[3]]
   if(missing(dict)) dict=lma_dict(1:9)
   if(!is.list(dict)) dict = list(dict)
   if(is.null(names(dict))) names(dict) = seq_along(dict)
@@ -1147,145 +1122,99 @@ lma_termcat=function(dtm,dict,term.weights=NULL,bias=NULL,escape=FALSE,partial=F
   }
   if(!is.null(bias)) for(n in names(bias)) if(n %in% colnames(op)) op[, n] = op[, n] + bias[[n]]
   attr(op,'WC')=if('WC'%in%atsn) ats$WC else rowSums(dtm,na.rm=TRUE)
-  attr(op,'time')=c(attr(dtm,'time'),termcat=unname(proc.time()[3]-st))
+  attr(op, 'time') = c(attr(dtm, 'time'), termcat = proc.time()[[3]] - st)
   if('orientation'%in%atsn) attr(op,'orientation')=ats$orientation
   if('type'%in%atsn) attr(op,'type')=ats$type
   op
 }
 
-#' Similarity, Distance, and/or Accommodation Metrics
+#' Calculate similarity between vectors
 #'
 #' @param a vector or matrix. If a vector, \code{b} must also be provided. If a matrix and \code{b}
 #'   is missing, each row will be compared. If a matrix and \code{b} is not missing, each row will
-#'   be compared with \code{b}.
-#' @param b vector to be compared with \code{a} or rows of \code{a}, or a matrix with the same
-#'   number of rows as \code{a}, in which case each row of \code{a} and \code{b} will be compared.
-#' @param metric a function (see details), or a character at least partially matching one of the
-#'   available metrics:
+#'   be compared with \code{b} or each row of \code{b}.
+#' @param b vector or matrix to be compared with \code{a} or rows of \code{a}.
+#' @param metric a character or vector of characters at least partially matching one of the
+#'   available metric names, or a number or vector of numbers indicating the metric by index:
 #'   \tabular{ll}{
-#'     \code{euclidean} \tab \code{1 - sum((a-b)^2)^.5} \cr
-#'     \code{canberra} \tab \code{mean(as.numeric(1 - abs(a - b) / (a + b + .0001)))} \cr
-#'     \code{cosine} \tab \code{sum(a * b) / sum(a^2 * sum(b^2))^.5} \cr
-#'     \code{pearson} \tab \code{cor(a, b, method='pearson')} \cr
-#'     \code{kendall} \tab \code{cor(a, b, method='kendall')} \cr
-#'     \code{spearman} \tab \code{cor(a, b, method='spearman')} \cr
 #'     \code{jaccard} \tab \code{sum(a & b) / sum(a | b)} \cr
-#'     \code{kld} \tab \code{1 - sum(vapply(unique(c(a, b)),
-#'     function(v){pq = c(mean(a == v), mean(b == v));
-#'     if(pq[2]) pq[1] * log(pq[1] / pq[2]) else 0
-#'     }, 0), na.rm = TRUE)}\cr
+#'     \code{euclidean} \tab \code{1 / (1 + sqrt(sum((a - b) ^ 2)))} \cr
+#'     \code{canberra} \tab \code{mean(1 - abs(a - b) / (a + b))} \cr
+#'     \code{cosine} \tab \code{sum(a * b) / sqrt(sum(a ^ 2 * sum(b ^ 2)))} \cr
+#'     \code{pearson} \tab \code{(mean(a * b) - (mean(a) * mean(b))) / sqrt(mean(a ^ 2) - mean(a) ^ 2) /
+#'       sqrt(mean(b ^ 2) - mean(b) ^ 2)} \cr
 #'   }
-#' @param metric.arg a list of arguments to be passed to \code{metric} if \code{metric} is a
-#'   function.
 #' @param group if \code{b} is missing and \code{a} has multiple rows, this will be used to make
 #'   comparisons between rows of \code{a}, as modified by \code{agg} and \code{add.mean}.
 #' @param agg logical; if \code{FALSE}, only the boundary rows between groups will be compared, see
 #'   example.
-#' @param agg.mean logical; if \code{FALSE}, consecutive rows of the same group will be summed.
-#' @param square logical; if \code{FALSE}, only the lower triangle is returned from a pairwise
-#'   comparison.
-#' @param mean logical; if \code{TRUE}, a single mean for each metric is returned.
-#' @param sample If \code{a} is a matrix and \code{b} is not specified (a pairwise comparison is to
-#'   be made), this determines whether every comparison or a sample should be calculated. If
-#'   \code{sample} is a number smaller than \code{nrow(a)}, each row will be compared against a
-#'   random sample of other rows, not including the given row.
-#' @param ncores sets the number of CPU cores to be used during pairwise comparisons. If not
-#'   specified, multiple cores will only be used if \code{nrow(a)} is greater than 1000, in which
-#'   case the number of detected cores - 2 will be used.
+#' @param agg.mean logical; if \code{FALSE} aggregated rows are summed instead of averaged.
+#' @param pairwise logical; if \code{FALSE} and \code{a} and \code{b} are matrices with the same number of
+#'   rows, only paired rows are compared. Otherwise (and if only \code{a} is supplied), all pairwise
+#'   comparisons are made.
+#' @param symmetrical logical; if \code{TRUE} and pairwise comparisons between \code{a} rows were made,
+#'   the results in the lower triangle are copied to the upper triangle.
+#' @param mean logical; if \code{TRUE}, a single mean for each metric is returned per row of \code{a}.
 #' @details
-#' When a function, \code{metric} is called in places of built-in metrics. Two arguments are always
-#' passed to it, generally corresponding to rows of \code{a} in the first position, and \code{b} in
-#' the second. If \code{b} is missing and \code{a} has more than one row, other rows of \code{a}
-#' will be in the second position.
-#'
-#' If \code{metric} is a function with compatible first and second position arguments, this can be
-#' entered directly (e.g., \code{metric = energy::dcor}). Otherwise, \code{a} and \code{b} might
-#' have to be reformatted (e.g., \code{metric = function(a,b) entropy::mi.empirical(table(a,b))}).
-#'
-#' The function entered as \code{metric} must always return a single numerical value.
+#' Use \code{\link[RcppParallel]{setThreadOptions}} to change parallelization options; e.g., run
+#' RcppParallel::setThreadOptions(4) before a call to lma_simets to set the number of CPU
+#' threads to 4.
+#' @return Output varies based on the dimensions of \code{a} and \code{b}:
+#'   \tabular{ll}{
+#'     \strong{output} \tab \strong{input} \cr
+#'     a vector with a value per metric \tab only when \code{a} and \code{b} are both vectors \cr
+#'     a data.frame with a column per metric \tab any time a single value is expected per row:
+#'       \code{a} or \code{b} is a vector, \code{a} and \code{b} are matrices with the same number of rows
+#'       and \code{pairwise = FALSE}, a group is specified, or \code{mean = TRUE} \cr
+#'     a list with a sparse matrix per metric \tab pairwise comparisons within an \code{a} matrix or between
+#'       an \code{a} and \code{b} matrix\cr
+#'   }
 #' @examples
 #' text = c(
-#'   'words of speaker A','more words from speaker A',
-#'   'words from speaker B','more words from speaker B'
+#'   'words of speaker A', 'more words from speaker A',
+#'   'words from speaker B', 'more words from speaker B'
 #' )
-#' speaker = c('A','A','B','B')
-#'
 #' (dtm = lma_dtm(text))
 #'
-#' # by default, consecutive rows from the same group are averaged:
-#' lma_simets(dtm, group=speaker)
+#' # compare each entry
+#' lma_simets(dtm)
 #'
-#' # with agg = FALSE, only the rows at the boundary between
-#' # groups (rows 2 and 3 in this case) are used:
-#' lma_simets(dtm, group=speaker, agg=FALSE)
+#' # compare each entry with the mean of all entries
+#' lma_simets(dtm, colMeans(dtm))
+#'
+#' # compare by group (corresponding to speakers and turns in this case)
+#' speaker = c('A', 'A', 'B', 'B')
+#'
+#' ## by default, consecutive rows from the same group are averaged:
+#' lma_simets(dtm, group = speaker)
+#'
+#' ## with agg = FALSE, only the rows at the boundary between
+#' ## groups (rows 2 and 3 in this case) are used:
+#' lma_simets(dtm, group = speaker, agg = FALSE)
 #' @export
-#' @importFrom parallel detectCores makeCluster stopCluster
-#' @importFrom doParallel registerDoParallel
-#' @importFrom foreach foreach %dopar% registerDoSEQ
 
-lma_simets=function(a,b=NULL,metric,metric.arg=list(),group=NULL,agg=TRUE,agg.mean=TRUE,square=TRUE,
-  mean=FALSE,sample=NULL,ncores=detectCores()-2){
-  cf=NULL
-  comp=function(a,b,metric) switch(metric,
-    euclidean = 1 / (1 + sum((a-b)^2)^.5),
-    canberra=mean(as.numeric(1-abs(a-b)/(a+b+.0001))),
-    cosine=sum(a*b)/sum(a^2*sum(b^2))^.5,
-    pearson=cor(a,b,method='pearson'),
-    kendall=cor(a,b,method='kendall'),
-    spearman=cor(a,b,method='spearman'),
-    jaccard=sum(a&b)/sum(a|b),
-    kld=1 - sum(vapply(unique(c(a, b)), function(v){
-      a = as.integer(a)
-      b = as.integer(b)
-      pq = c(mean(a == v), mean(b == v))
-      if(pq[2]) pq[1] * log(pq[1] / pq[2]) else 0
-    }, 0), na.rm = TRUE),
-    custom=do.call(cf,c(list(a,b),metric.arg))
-  )
-  mets=c('euclidean','canberra','cosine','pearson','spearman','kendall','jaccard','kld')
-  metric=if(missing(metric)) mets else if(is.function(metric)){
-    cf=metric
-    'custom'
+lma_simets=function(a, b = NULL, metric, group = NULL, agg = TRUE, agg.mean = TRUE,
+  pairwise = TRUE, symmetrical = FALSE, mean = FALSE){
+  cf = NULL
+  mets = c('jaccard', 'euclidean', 'canberra', 'cosine', 'pearson')
+  metric = if(missing(metric)) mets else if(is.function(metric)){
+    stop('only internal metrics are available: ', paste(mets, collapse = ', '))
   }else{
-    if(is.null(metric)) metric='cosine'
-    mets[if(is.numeric(metric)) metric else pmatch(metric,mets)]
+    if(is.null(metric)) metric = 'cosine'
+    mets[if(is.numeric(metric)) metric else pmatch(metric, mets)]
   }
-  st=proc.time()[3]
+  st = proc.time()[[3]]
+  metric_arg = as.integer(mets %in% metric)
+  slots = c('i', 'p', 'x', 'Dim')
+  if(is.data.frame(a)) a = Matrix(as.matrix(a), sparse = TRUE)
   if(is.null(b)){
-    n=nrow(a)
-    if(is.null(n) || n<2) stop('a must be a matrix with more than 1 row when b is not provided',call.=FALSE)
-    if(!is.numeric(a)) a=if(n>1) apply(a,2,as.numeric) else as.numeric(a)
+    n = dim(a)[1]
+    if(is.null(n) || n < 2) stop('a must have more than 1 row when b is not provided', call. = FALSE)
     if(is.null(group)){
-      rand=is.numeric(sample) && n>sample
-      if(ncores > 1 && (!missing(ncores) || n > 1000)){
-        clust=makeCluster(ncores)
-        registerDoParallel(clust)
-        on.exit(stopCluster(clust))
-      }else registerDoSEQ()
-      res=if(rand){
-        if(missing(mean)) mean=TRUE
-        ms=length(metric)
-        res=matrix(numeric((if(mean) n else n*sample)*ms),ncol=ms,dimnames=list(c(),metric))
-        for(m in metric) res[,m]=foreach(i=seq_len(n),.combine=c) %dopar% {
-          r=vapply(sample(seq_len(n)[-i],sample),function(b)comp(a[i,],a[b,],m),0)
-          if(mean) mean(r) else r
-        }
-        res
-      }else{
-        if(missing(mean) && !missing(square) && !square) mean=TRUE
-        su=diag(n)
-        m=vapply(metric,function(met)list(met=su),list(0))
-        su=lower.tri(su)
-        for(met in metric) m[[met]][su]=foreach(i=seq_len(n),.combine=c) %dopar%
-          vapply(seq_len(n-i)+i,function(r)comp(a[i,],a[r,],met),0)
-        if(square){
-          u=upper.tri(m[[1]])
-          res=lapply(m,function(i){i[u]=t(i)[u];i})
-          if(mean) vapply(res,function(i)(colSums(i)-1)/(ncol(i)-1),numeric(n)) else res
-        }else vapply(m,function(i)i[su],numeric((n-1)*n/2))
-      }
+      if(!all(slots %in% slotNames(a))) a = as(a, 'dgCMatrix')
+      res = calculate_similarities(a, NULL, 2, metric_arg)
     }else{
-      if(length(group)!=n) stop('length(group) != NROW(a)')
+      if(length(group) != n) stop('group is not the same length as a or columns in a')
       ager = if(agg.mean) colMeans else colSums
       l = length(group)
       chunks = NULL
@@ -1307,28 +1236,48 @@ lma_simets=function(a,b=NULL,metric,metric.arg=list(),group=NULL,agg=TRUE,agg.me
         s = chunks[[i + 1]]
         sb = if(agg) s else s[1]
         tb = ager(a[sb,, drop = FALSE])
-        res = rbind(res, vapply(metric, function(m) comp(ta, tb, m), 0))
+        res = rbind(res, vector_similarity(ta, tb, metric_arg))
         rows[i] = paste(paste(sa, collapse = ', '), '<->', paste(sb, collapse = ', '))
       }
-      rownames(res) = rows
+      res = as.data.frame(res, rows)
     }
   }else{
-    nrb=nrow(b)
-    if(!is.numeric(b)) b=if(is.null(nrb)) as.numeric(b) else if(nrb==1) as.matrix(b) else
-      apply(b,2,as.numeric)
-    if(!is.null(an<-colnames(a)) && identical(an,bn<-colnames(b))){
-      if(sum(sn<-an%in%bn)==0) stop('a and b have no columns in common')
-      b=b[,an<-an[sn],drop=FALSE]
-      a=a[,an,drop=FALSE]
+    res = if((is.null(dim(a)) || any(dim(a) == 1)) && (length(a) == length(b))){
+      vector_similarity(as.numeric(a), as.numeric(b), metric_arg)
+    }else{
+      if(is.null(dim(a))) a = Matrix(a, 1, dimnames = list(NULL, names(a)), sparse = TRUE)
+      if(!all(slots %in% slotNames(a))) a = as(a, 'dgCMatrix')
+      if(is.null(dim(b))) b = Matrix(b, 1, dimnames = list(NULL, names(b)), sparse = TRUE)
+      if(!all(slots %in% slotNames(b))) b = if(is.data.frame(b))
+        Matrix(as.matrix(b), sparse = TRUE) else as(b, 'dgCMatrix')
+      d = c(dim(a), dim(b))
+      if(d[2] != d[4]){
+        ns = colnames(a)
+        if(!is.null(ns)){
+          ns = ns[ns %in% colnames(b)]
+          if(length(ns)){
+            a = a[, ns]
+            b = b[, ns]
+          }
+        }
+        d = c(dim(a), dim(b))
+        if(d[2] != d[4])
+          stop('a and b have a different number of columns, which could not be aligned by name')
+      }
+      calculate_similarities(a, b, if((!pairwise && d[1] == d[3]) || d[3] == 1) 1 else 3, metric_arg)
     }
-    res=if(!is.null(n<-nrow(a)) && n>1){
-      if(!is.null(nrb) && nrb==n){
-        vapply(metric,function(m)vapply(seq_len(n),function(r)comp(a[r,],b[r,],m),0),numeric(n))
-      }else vapply(metric,function(m)vapply(seq_len(n),function(r)comp(a[r,],b,m),0),numeric(n))
-    }else vapply(metric,function(m)comp(a,b,m),0)
   }
-  if(mean && !square) res=if(is.list(res)) lapply(res,mean,na.rm=TRUE) else colMeans(res,na.rm=TRUE)
-  if(is.matrix(res)) res = as.data.frame(res)
-  attr(res,'time')=c(simets=unname(proc.time()[3]-st))
+  if(class(res) == 'list'){
+    pairwise = class(res[[1]]) == 'dtCMatrix'
+    if((pairwise && symmetrical) || mean) for(i in seq_along(res)){
+      if(pairwise && (symmetrical || mean)) res[[i]] = forceSymmetric(res[[i]], 'L')
+      if(mean) res[[i]] = rowMeans(res[[i]], TRUE)
+    }
+    if(is.null(dim(res[[1]]))){
+      attr(res, 'row.names') = seq_along(res[[1]])
+      attr(res, 'class') = 'data.frame'
+    }
+  }
+  attr(res, 'time') = c(simets = proc.time()[[3]] - st)
   res
 }

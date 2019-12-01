@@ -4,10 +4,10 @@
 \alias{read.folder}
 \title{Process texts in a folder}
 \usage{
-read.folder(path = NULL, segment = NULL, subdir = FALSE,
-  ext = ".txt", fixed = TRUE, segment.size = NULL,
-  bysentence = FALSE, reader = readLines, readarg = list(warn =
-  FALSE), ncores = parallel::detectCores() - 2)
+read.folder(path = NULL, segment = NULL, subdir = FALSE, ext = ".txt",
+  fixed = TRUE, segment.size = NULL, bysentence = FALSE,
+  reader = readLines, readarg = list(warn = FALSE),
+  ncores = parallel::detectCores() - 2)
 }
 \arguments{
 \item{path}{Path to a folder containing files, or a vector of paths to files.}

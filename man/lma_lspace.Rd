@@ -4,8 +4,8 @@
 \alias{lma_lspace}
 \title{Latent Semantic Space Operations}
 \usage{
-lma_lspace(dtm, space, path = "~/Documents/Latent Semantic Spaces",
-  dim.cutoff = 0.5, keep.dim = FALSE)
+lma_lspace(dtm, space, path = "~/Latent Semantic Spaces", dim.cutoff = 0.5,
+  keep.dim = FALSE)
 }
 \arguments{
 \item{dtm}{A matrix with terms as column names.}
@@ -17,7 +17,7 @@ If the file has a .sqlite extension, only a subset will be loaded into RAM; this
 slower than using a full, preloaded .rda space, but faster than loading and unloading a complete
 .rda space, and less RAM intensive in all cases.}
 
-\item{path}{Path to a folder containing spaces. Default is '~/Documents/Latent Semantic Spaces'.}
+\item{path}{Path to a folder containing spaces. Default is '~/Latent Semantic Spaces'.}
 
 \item{dim.cutoff}{If a \code{space} is calculated, this will be used to decide on the number of
 dimensions to be retained: \code{cumsum(d) / sum(d) < dim.cutoff}, where \code{d} is a vector
@@ -68,11 +68,11 @@ sapply(spaces, lma_simets, metric = 'cosine')
 
 \dontrun{
 # using a space from a file might look something like this:
-lma_lspace(dtm, 'default.rda', '~/documents/latent semantic spaces')
+lma_lspace(dtm, 'default.rda', '~/latent semantic spaces')
 
 # or you could load the space before hand
 # (where default.rda contains an object called lss_default)
-load('~/documents/latent semantic spaces/default.rda')
+load('~/latent semantic spaces/default.rda')
 lma_lspace(dtm, lss_default)
 }
 }

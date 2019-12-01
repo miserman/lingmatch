@@ -31,11 +31,12 @@ dict = list(
   death = c('death*', 'dying', 'die*', 'kill*')
 )
 
-# save it as a .dic file: write.dic(dict,'murder')
-# read it back in as a list: read.dic('murder.dic')
+\dontrun{
+write.dic(dict, 'murder') # save it as a .dic file
+read.dic('murder.dic') # read it back in as a list
 
 # read in the Moral Foundations or LUSI dictionaries from urls
-moral_dict = read.dic('http://bit.ly/MoralFoundations')
+moral_dict = read.dic('http://bit.ly/moral_foundations')
 lusi_dict = read.dic('http://bit.ly/lusi_dict')
-
+}
 }

@@ -7,10 +7,23 @@ Maintainer: Micah Iserman <micah.iserman@ttu.edu>
 Description: Aims to assimilate methods for, clarify, and ease the assessment of linguistic matching and accommodation.
 URL: https://github.com/miserman/lingmatch
 BugReports: https://github.com/miserman/lingmatch/issues
-Depends: R (>= 3.1), Matrix, stats
-Imports: DBI, RSQLite, doParallel, fastmatch, foreach
+Depends: R (>= 3.1), methods, Matrix
+Imports: 
+    DBI,
+    RSQLite,
+    doParallel,
+    foreach,
+    Rcpp,
+    RcppParallel
 License: GPL (>= 2)
 LazyData: TRUE
-RoxygenNote: 6.1.1
-Suggests: knitr, rmarkdown, splot
+RoxygenNote: 7.0.0
+Roxygen: list(old_usage = TRUE)
+Suggests: 
+    knitr,
+    rmarkdown,
+    splot,
+    testthat (>= 2.1.0)
 VignetteBuilder: knitr
+LinkingTo: Rcpp, RcppParallel
+SystemRequirements: C++11

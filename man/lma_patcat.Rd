@@ -5,10 +5,10 @@
 \title{Categorize raw texts using a pattern-based dictionary}
 \usage{
 lma_patcat(text, dict, term = "term", category = "category",
-  weight = "weight", to.lower = TRUE, to.percent = FALSE,
-  bias = NULL, intname = "_intercept", return_dtm = FALSE,
-  exclusive = TRUE, boundary = NULL, fixed = TRUE, perl = TRUE,
-  ncores = detectCores() - 2)
+  weight = "weight", to.lower = TRUE, to.percent = FALSE, bias = NULL,
+  intname = "_intercept", return_dtm = FALSE, exclusive = TRUE,
+  boundary = NULL, fixed = TRUE, perl = TRUE, ncores = detectCores() -
+  2)
 }
 \arguments{
 \item{text}{A vector of raw text to be categorized.}
@@ -43,7 +43,7 @@ terms are left as entered.}
 
 \item{fixed}{Logical; if \code{FALSE}, patterns can be regular expressions.}
 
-\item{perl}{Logical; passed to \code{\link{strsplit}. Set to \code{FALSE} if \code{fixed} is \code{TRUE}}.}
+\item{perl}{Logical; passed to \code{\link{strsplit}}. Set to \code{FALSE} if \code{fixed} is \code{TRUE}.}
 
 \item{ncores}{Number of CPU cores to use. Default is number of cores - 2 if \code{text} has more than 100
 entries. Otherwise, if not specified, only 1 core will be used.}
