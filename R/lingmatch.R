@@ -59,7 +59,7 @@
 #'   aligning with the standard calculations of each type:
 #'   \tabular{ll}{
 #'     LSM \tab \code{lingmatch(text, weight='count', dict=lma_dict(1:9), metric='canberra')}\cr
-#'     LSA \tab \code{lingmatch(text, space='default', metric='cosine')}\cr
+#'     LSA \tab \code{lingmatch(text, weight='tfidf', space='default', metric='cosine')}\cr
 #'   }
 #' @section Grouping and Comparisons:
 #' Defining groups and comparisons can sometimes be a bit complicated, and requires dataset
@@ -118,17 +118,20 @@
 
 lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.group=NULL,order=NULL,
   drop=TRUE,all.levels=FALSE,type='lsm'){
-  inp=as.list(substitute(list(...)))[-1]
+  inp = as.list(substitute(...()))
   #setting up a default type if specified
   if(!missing(type) && !is.null(type)){
-    type=if(grepl('lsm|lang|ling|style|match',type,TRUE)) 'lsm' else 'lsa'
-    ni=names(inp)
+    type = if(grepl('lsm|lang|ling|style|match', type, TRUE)) 'lsm' else 'lsa'
+    ni = names(inp)
     if(type == 'lsm' && !'dict' %in% ni) inp$dict = lma_dict(1:9)
-    if(type == 'lsm' && !'percent' %in% ni) inp$percent = TRUE
-    if(!'metric'%in%ni) inp$metric=if(type=='lsm') 'canberra' else 'cosine'
-    if(type=='lsa' && !'space'%in%ni) inp$space='default'
+    if(type != 'lsm' && !'space' %in% ni) inp$space = 'default'
+    if(!'metric' %in% ni) inp$metric = if(type == 'lsm') 'canberra' else 'cosine'
+    if(is.null(attr(x, 'type')) || length(attr(x, 'type')) == 1){
+      if(type == 'lsm' && !'percent' %in% ni) inp$percent = TRUE
+      if(type != 'lsm' && !'weight' %in% ni) inp$weight = 'tfidf'
+    }
   }
-  mets=c('euclidean','canberra','cosine','pearson','spearman','kendall','jaccard','kld')
+  mets = c('jaccard', 'euclidean', 'canberra', 'cosine', 'pearson')
   inp$metric=if(!is.null(inp$metric)) match.arg(as.character(inp$metric),mets,TRUE) else 'cosine'
   vs=c('x','comp','group','order','data','comp.data','comp.group')
   opt=as.list(match.call(expand.dots=FALSE))[vs]
@@ -162,10 +165,10 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
     r
   }
   # weight, map, and/or categorize
-  wmc=function(a){
-    if(length(dsp$w)!=0) a=do.call(lma_weight,c(list(a),dsp$w))
-    if(length(dsp$m)!=0) a=do.call(lma_lspace,c(list(a),dsp$m))
-    if(length(dsp$c)!=0) a=do.call(lma_termcat,c(list(a),dsp$c))
+  wmc = function(a){
+    if(length(dsp$w) != 0) a = do.call(lma_weight, c(list(a), lapply(dsp$w, eval, parent.frame(2))))
+    if(length(dsp$m) != 0) a = do.call(lma_lspace, c(list(a), lapply(dsp$m, eval, parent.frame(2))))
+    if(length(dsp$c) != 0) a = do.call(lma_termcat ,c(list(a), lapply(dsp$c, eval, parent.frame(2))))
     a
   }
   # initial data parsing
@@ -590,7 +593,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
 #' @param punct Logical: if \code{TRUE}, punctuation is preserved.
 #' @param urls Logical: if \code{FALSE}, attempts to replace all urls with "url".
 #' @param emojis Logical: if \code{TRUE}, attempts to replace emojis (e.g., ":(" would be replaced
-#'   with "FROWN").
+#'   with "repfrown").
 #' @param to.lower Logical: if \code{FALSE}, words with different capitalization are treated as
 #'   different terms.
 #' @param word.break A regular expression string determining the way words are split. Default is
@@ -625,47 +628,57 @@ lma_dtm = function(text, exclude = NULL, context = NULL, numbers = FALSE, punct 
   if(is.null(text)) stop(substitute(text),' not found')
   text = paste(' ', text, ' ')
   st = proc.time()[[3]]
+  text = gsub('[\u05be\u1806\u2010\u2011\u2013\uFE58\uFE63\uFF0D]', '-', text)
+  text = gsub('[\u2012\u2014\u2015\u2E3A\u2E3B]|--+', ' - ', text)
+  text = gsub('[\u2032\u2035\u2018\u2019]', "'", text)
+  text = gsub("[\u2033\u2036\u201C\u201D\u201F]|(?<=[^a-z-z0-9])'|'(?=[^a-z0-9])", '"', text, TRUE, TRUE)
   if(!urls){
-    text = gsub('http[^ ]*|www[^ ]*| [a-z]+\\.[a-z]{2,}[./][^ ]*',' url ', text, TRUE)
-    text = gsub('(?<=[A-Z])\\. ', ' ', text, perl = TRUE)
+    text = gsub('\\s[a-z]+://[^\\s]*|www\\.[^\\s]*|\\s[a-z_~-]+\\.[a-z_~-]{2,}[^\\s]*|\\s[a-z_~-]+\\.(?:io|com|net|org|gov|edu)\\s',
+      ' url ', text, TRUE, TRUE)
+    text = gsub('(?<=[A-Z])\\.\\s', ' ', text, perl = TRUE)
   }
-  text = gsub('(?<=st|rd|ft|feat|dr|drs|mr|ms|mrs|messrs|jr|prof)\\. |[\\n\\t\\r]+', ' ', text, TRUE, TRUE)
-  text = gsub(' \\.|\\. ',' . ', text, perl = TRUE)
-  if(to.lower) text = tolower(text)
-  if(!is.null(exclude)){
-    if(length(exclude) == 1 && grepl(exclude, 'function', TRUE)){
-      exclude=unlist(lma_dict(), use.names = FALSE)
-    }else if(is.list(exclude)) exclude = unlist(exclude, use.names = FALSE)
-  }
+  text = gsub('[\\n\\t\\r]+', ' ', text, perl = TRUE)
+  text = gsub('\\s(etc|st|rd|ft|feat|dr|drs|mr|ms|mrs|messrs|jr|prof)\\.', ' \\1tempperiod', text)
+  text = gsub('\\s\\.|\\.\\s',' . ', text)
   if(any(punct, emojis, !is.null(context))){
     special=lma_dict(special)[[1]]
     if(!missing(context) && length(context) == 1 && grepl('like', context, TRUE))
       context = special[['LIKE']]
-    if(punct) text = gsub(special[['ELLIPSIS']], ' ELLIPSIS ', text)
-    if(emojis) for(type in c('SMILE', 'FROWN')) text = gsub(special[[type]], paste('', type, ''), text)
+    if(punct) text = gsub(special[['ELLIPSIS']], ' repellipsis ', text)
+    if(emojis) for(type in c('SMILE', 'FROWN')) text = gsub(special[[type]], paste0(' rep', tolower(type), ' '), text)
     if(!missing(context)){
       if(!any(grepl('[?=]', context))){
         context = gsub('^\\(','(?<=', context)
         context = gsub('\\((?!\\?)','(?=', context, perl = TRUE)
-        context = gsub('(?<![)*])$','[ .,?!:;/"\']', context, perl = TRUE)
-        context = gsub('\\*','[^ /-]*', context, perl = TRUE)
+        context = gsub('(?<![)*])$','[\\\\s.,?!:;/"\']', context, perl = TRUE)
+        context = gsub('\\*','[^\\\\s/-]*', context, perl = TRUE)
       }
       context = structure(
         as.list(context),
-        names = paste('', gsub('--+', '-', gsub('[ ^[]|\\]', '-', gsub('[^A-z0-9 ]', '', context))), '')
+        names = paste('', gsub('--+', '-', gsub('[\\s^[]|\\\\s]', '-',
+          gsub('[^a-z0-9\\s]', '', context, TRUE, TRUE), perl = TRUE)), '')
       )
       for(rn in names(context)) text = gsub(context[[rn]], rn, text, perl = TRUE)
     }
   }
-  if(!numbers) text = gsub('\\.*[0-9][0-9,.el-]*', ' ', text, TRUE)
-  text = gsub('[\u2032\u2035\u2018\u2019]', "'", text)
-  text = gsub("[\u2033\u2036\u201C\u201D\u201F]|(?<=[^A-z0-9])'|'(?=[^A-z0-9])", '"', text, perl = TRUE)
-  text = gsub("([^a-z0-9.,'-]|,(?=[a-z])|(?<=[^a-z0-9])(,(?=[a-z0-9])|[.-](?=[a-z]))|[.,'-](?=[^0-9a-z]|[.,'-]))",
+  if(to.lower) text = tolower(text)
+  if(!is.null(exclude)){
+    if(length(exclude) == 1 && grepl(exclude, 'function', TRUE)){
+      exclude = unlist(lma_dict(), use.names = FALSE)
+    }else if(is.list(exclude)) exclude = unlist(exclude, use.names = FALSE)
+  }
+  if(!numbers) text = gsub('[[:punct:]]*[0-9][0-9,.el-]*', ' ', text, TRUE, TRUE)
+  text = gsub("([^a-z0-9.,':/?=#\\s-]|[:/?=#](?=\\s)|(?:(?<=\\s)[:/=-]|,)(?=[a-z])|(?<=[^a-z0-9])(,(?=[a-z0-9])|[.-](?=[a-z]))|[.,'-](?=[^0-9a-z]|[.,'-]))",
     ' \\1 ', text, TRUE, TRUE)
+  text = gsub("(\\s[a-z]+)/([a-z]+\\s)", ' \\1 / \\2 ', text, TRUE, TRUE)
   text = gsub("([a-z0-9.,'-].*[^a-z0-9])", ' \\1 ', text, TRUE, TRUE)
-  text = gsub("(?<=[A-z]) ['\u00E7\u00ED] (?=[A-z])", "'", text, perl = TRUE)
-  if(!punct) text = gsub('[[:punct:]] +', ' ', text)
-  text = gsub('^ +| (?= )| +$', '', text, perl = TRUE)
+  text = gsub("(?<=[a-z])\\s['\u00E7\u00ED]\\s(?=[a-z])", "'", text, TRUE, TRUE)
+  if(!punct){
+    text = gsub("[^A-Za-z0-9'._-]+", ' ', text)
+    text = gsub("(?=[a-z])\\.+|(?<=[^a-z0-9])['._-]+|'+\\s", ' ', text, TRUE, TRUE)
+  }
+  text = gsub('tempperiod', '.', text, fixed = TRUE)
+  text = gsub('^\\s+|\\s(?=\\s)|\\s+$', '', text, perl = TRUE)
   text = strsplit(text, word.break)
   words = sort(unique(unlist(text)))
   words = words[!words == '']
@@ -676,7 +689,10 @@ lma_dtm = function(text, exclude = NULL, context = NULL, numbers = FALSE, punct 
       exclude[ck] = gsub('([([{}\\])])', '\\\\\\1', exclude[ck], perl = TRUE)
     words = grep(paste(exclude, collapse = '|'), words, value = TRUE, invert = TRUE)
   }
-  msu = match_terms(text, words, !grepl('^[[:punct:]]$|^ELLIPSIS$', words), c(length(text), length(words)))
+  msu = match_terms(
+    text, words, !grepl('^[[:punct:]]$|^repellipsis$', words),
+    c(length(text), length(words)), is.null(exclude)
+  )
   m = if(sparse) as(msu[[1]], 'dgCMatrix') else as.matrix(msu[[1]])
   su = msu[[3]] > dc.min & msu[[3]] < dc.max
   names(msu[[3]]) = words

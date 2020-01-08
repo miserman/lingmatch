@@ -8,7 +8,7 @@ using namespace RcppParallel;
 
 // [[Rcpp::export]]
 List match_terms(const List &tokens, const CharacterVector &terms, const LogicalVector &isword,
-  const IntegerVector &dim){
+  const IntegerVector &dim, const bool &complete){
   const int n = tokens.length();
   int i = terms.length(), colindex, s = 0, un, p;
   vector<int> rows, columns, rowsums(n), colsums(i);
@@ -18,7 +18,7 @@ List match_terms(const List &tokens, const CharacterVector &terms, const Logical
   for(; i--;) dict.insert({terms[i], i});
   for(; s < n; s++){
     uses = tokens[s];
-    for(un = uses.length(), p = 0; p < un; p++){
+    for(un = uses.length(), p = 0; p < un; p++) if(complete || dict.find(uses[p]) != dict.end()){
       colindex = dict.at(uses[p]);
       colsums[colindex]++;
       if(isword[colindex]) rowsums[s]++;

@@ -33,7 +33,7 @@ does something like this with \emph{like}, and LIWC 2007 did something like this
 \item{urls}{Logical: if \code{FALSE}, attempts to replace all urls with "url".}
 
 \item{emojis}{Logical: if \code{TRUE}, attempts to replace emojis (e.g., ":(" would be replaced
-with "FROWN").}
+with "repfrown").}
 
 \item{to.lower}{Logical: if \code{FALSE}, words with different capitalization are treated as
 different terms.}

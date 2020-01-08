@@ -409,7 +409,7 @@ lma_meta = function(text){
 #' @export
 
 lma_dict=function(...,as.regex=TRUE){
-  cats=as.character(substitute(list(...)))[-1]
+  cats = as.character(substitute(...()))
   dict=list(
     ppron=c("^dae$","^dem$","^eir$","^eirself$","^em$","^he$","^he'","^her$","^hers$","^herself$","^hes$","^him$","^himself$",
       "^hir$","^hirs$","^hirself$","^his$","^hisself$","^i$","^i'","^id$","^idc$","^idgaf$","^idk$","^idontknow$","^idve$",
@@ -497,8 +497,8 @@ lma_dict=function(...,as.regex=TRUE){
       "^w[ow]+$","^wee+ll+$","^y[aes]+$","^ya+h+$","^yeah$","^yus+$"),
     special=list(
       ELLIPSIS='\\.{3,}|\\. +\\. +[. ]+',
-      SMILE='[([{q][ -<.,]+[;:8=]|[([{q][;:8=]|[;:8=][ ->.,][p3)}D]|[:;8=][ ->.,]\\]|[:;8=][p3)}D]|[:;8=]\\]',
-      FROWN='\\][ -<.,]+[;:8=]|[)}D/\\>][ -<.,]+[;:8=]|\\][:;8=]|[)}D/\\>][;:8=]|[;:8=][ ->.,][([{/\\<]|[:;8=][([{/\\<]',
+      SMILE='[([{q][ <-]+[;:8=]|[([{q][;:8=]|[;:8=][ >-][p3)}D]|[:;8=][ >-]\\]|[:;8=][p3)}D]|[:;8=]\\]',
+      FROWN='\\][ <.,-]+[;:8=]|[)}D/\\>][ <.,-]+[;:8=]|\\][:;8=]|[)}D/\\>][;:8=]|[;:8=][ >.,-][([{/\\<]|[:;8=][([{/\\<]',
       LIKE=c(
         '(?<=could not) like[ .,?!:;/"\']','(?<=did not) like[ .,?!:;/"\']','(?<=did) like[ .,?!:;/"\']',
         '(?<=didn\'t) like[ .,?!:;/"\']','(?<=do not) like[ .,?!:;/"\']','(?<=do) like[ .,?!:;/"\']',
