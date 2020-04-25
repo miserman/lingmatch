@@ -21,12 +21,12 @@ First, we need some text -- anything that results in a vector of text will do.
 ```{r}
 text = c(
   "Hey, I like kittens. I think all kinds of cats really are just the best pet ever.",
-  "Oh yeah? Well I really like cars. All the wheels and the turbos... I think that's the best
-   ever.",
-  "You know what? Poo on you. Cats, dogs, rabbits -- you know, living creatures... to think
-   you'd care about anything else!",
-  "You can stick to your opinion. You can not be right if you want. You know what life's about?
-   Supercharging, diesel guzzling, exhaust spewing, piston moving ignitions."
+  "Oh yeah? Well I really like cars. All the wheels and the turbos... I think that's
+   the best ever.",
+  "You know what? Poo on you. Cats, dogs, rabbits -- you know, living creatures... to
+   think you'd care about anything else!",
+  "You can stick to your opinion. You can not be right if you want. You know what life's
+   about? Supercharging, diesel guzzling, exhaust spewing, piston moving ignitions."
 )
 ```
 
@@ -95,15 +95,16 @@ Now we can fill the matrix with counts for each word for each text.
 We can count up all of the words at once, so we only have to loop through texts:
 ```{r}
 # this will perform whats inside the curly brackets as many times as there are texts
-# i will be set to each number in the sequence, so i will equal 1 on the first run, and so on
-# the words and dtm objects all line up, so words[[i]] corresponds to dtm[i,]
+# i will be set to each number in the sequence, so i will equal 1 on the first run,
+# and so on the words and dtm objects all line up, so words[[i]] corresponds to dtm[i,]
 for(i in seq_along(words)){
   
   # we can use the table function to count the words in a text
   counts = table(words[[i]])
   
   # now the counts object has words associated with their count for the ith text
-  # to get this into the dtm, we can use i to select the row, and counts' names to select the columns
+  # to get this into the dtm, we can use i to select the row,
+  # and counts' names to select the columns
   dtm[i, names(counts)] = counts
   
 }

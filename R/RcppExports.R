@@ -13,3 +13,15 @@ calculate_similarities <- function(m, comp, type, metrics) {
     .Call(`_lingmatch_calculate_similarities`, m, comp, type, metrics)
 }
 
+reformat_embedding <- function(infile, outfile, sep = ' ', digits = 9L, remove = "", term_check = "^[a-zA-Z]+$|^['a-zA-Z][a-zA-Z.'\\/-]*[a-zA-Z.]$", verbose = FALSE) {
+    invisible(.Call(`_lingmatch_reformat_embedding`, infile, outfile, sep, digits, remove, term_check, verbose))
+}
+
+extract_indices <- function(indices, file, sep = ' ') {
+    .Call(`_lingmatch_extract_indices`, indices, file, sep)
+}
+
+extract_matches <- function(terms, file, sep = ' ') {
+    .Call(`_lingmatch_extract_matches`, terms, file, sep)
+}
+

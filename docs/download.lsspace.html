@@ -9,14 +9,15 @@
 
 <h3>Description</h3>
 
-<p>Downloads the specified semantic space.
+<p>Downloads the specified semantic space from <a href="https://osf.io/489he">osf.io/489he</a>.
 </p>
 
 
 <h3>Usage</h3>
 
 <pre>
-download.lsspace(space = "default", dir = "~/Latent Semantic Spaces")
+download.lsspace(space = "100k", include.terms = TRUE, decompress = TRUE,
+  check.md5 = TRUE, mode = "wb", dir = getOption("lingmatch.lspace.dir"))
 </pre>
 
 
@@ -25,22 +26,58 @@ download.lsspace(space = "default", dir = "~/Latent Semantic Spaces")
 <table summary="R argblock">
 <tr valign="top"><td><code>space</code></td>
 <td>
-<p>name of the space you wish to download. Options include <code>'default'</code> and <code>'tasa'</code>.</p>
+<p>Name of the space you want to download. '100k' is the default, and
+some other common options might be 'google', 'facebook', or 'glove'. See
+<a href="https://osf.io/489he/wiki/home">osf.io/489he/wiki</a> for more information, and a full
+list of spaces.</p>
+</td></tr>
+<tr valign="top"><td><code>include.terms</code></td>
+<td>
+<p>Logical; if <code>FALSE</code>, only the <code>.dat.bz2</code> file is downloaded
+(which only has numeric vectors).</p>
+</td></tr>
+<tr valign="top"><td><code>decompress</code></td>
+<td>
+<p>Logical; if <code>TRUE</code> (default), decompresses the downloaded file
+with the <code>bunzip2</code> system command assuming it is available (as indicated by
+<code>Sys.which('bunzip2')</code>).</p>
+</td></tr>
+<tr valign="top"><td><code>check.md5</code></td>
+<td>
+<p>Logical; if <code>TRUE</code> (default), retrieves the MD5 checksum from OSF,
+and compares it with that calculated from the downloaded file to check its integrity.</p>
+</td></tr>
+<tr valign="top"><td><code>mode</code></td>
+<td>
+<p>A character specifying the file write mode; default is 'wb'. See
+<code>download.file</code>.</p>
 </td></tr>
 <tr valign="top"><td><code>dir</code></td>
 <td>
-<p>desired path to the downloaded space; default is '~/Latent Semantic Spaces'.</p>
+<p>Directory in which to save the space; default is
+<code>getOption('lingmatch.lspace.dir')</code>.</p>
 </td></tr>
 </table>
 
 
-<h3>Details</h3>
+<h3>See Also</h3>
 
-<p>Spaces are slightly altered and reprocessed versions of those available at
-<a href="https://sites.google.com/site/fritzgntr/software-resources/semantic_spaces">https://sites.google.com/site/fritzgntr/software-resources/semantic_spaces</a>.
+<p>Other Latent Semantic Space functions: 
+<code>lma_lspace()</code>,
+<code>select.lsspace()</code>,
+<code>standardize.lsspace()</code>
 </p>
-<p>Spaces can (sometimes) be downloaded directly from <a href="https://www.myweb.ttu.edu/miserman/lsspaces/">https://www.myweb.ttu.edu/miserman/lsspaces/</a>.
-</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+## Not run: 
+
+download.lsspace('glove_crawl')
+
+## End(Not run)
+</pre>
 
 
 </body></html>

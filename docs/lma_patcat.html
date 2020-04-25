@@ -83,7 +83,8 @@ terms are left as entered.</p>
 </td></tr>
 <tr valign="top"><td><code>perl</code></td>
 <td>
-<p>Logical; passed to <code>strsplit</code>. Set to <code>FALSE</code> if <code>fixed</code> is <code>TRUE</code>.</p>
+<p>Logical; passed to <code>strsplit</code>. This is set to <code>FALSE</code> if <code>fixed</code> is
+<code>TRUE</code>.</p>
 </td></tr>
 <tr valign="top"><td><code>ncores</code></td>
 <td>
@@ -93,9 +94,17 @@ entries. Otherwise, if not specified, only 1 core will be used.</p>
 </table>
 
 
+<h3>See Also</h3>
+
+<p>For applying term-based dictionaries (to a document-term matrix) see <code>lma_termcat</code>.
+</p>
+
+
 <h3>Examples</h3>
 
 <pre>
+## Not run: 
+
 # example text
 text = c(
   paste(
@@ -117,6 +126,7 @@ tempori = read.csv('https://wwbp.org/downloads/public_data/temporalOrientationLe
 
 lma_patcat(text, tempori)
 
+## End(Not run)
 </pre>
 
 

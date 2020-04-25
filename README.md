@@ -8,10 +8,16 @@ An all-in-one R package for the assessment of linguistic matching and/or accommo
 * Measure similarity and/or accommodation with various metrics.
 * Calculate standard forms of Language Style Matching (LSM) and Latent Semantic Similarity (LSS).
 
-## documentation
-[miserman.github.io/lingmatch](https://miserman.github.io/lingmatch/)
+## resources
+* Documentation and guides: [miserman.github.io/lingmatch](https://miserman.github.io/lingmatch/)
+  * [Introduction](https://miserman.github.io/lingmatch/#introduction)
+  * [Comparisons](https://miserman.github.io/lingmatch/#comparisons)
+  * [Word vectors](https://miserman.github.io/lingmatch/#word_vectors)
+* Latent semantic space repository: [osf.io/489he](https://osf.io/489he/wiki/home/)
 
 ## installation
+Download R from [r-project.org](https://www.r-project.org/).
+
 ```R
 install.packages('devtools')
 devtools::install_github('miserman/lingmatch')

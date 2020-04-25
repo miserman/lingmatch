@@ -4,16 +4,23 @@
 \alias{lma_dict}
 \title{English function word category lists}
 \usage{
-lma_dict(..., as.regex = TRUE)
+lma_dict(..., as.regex = TRUE, as.function = FALSE)
 }
 \arguments{
 \item{...}{Numbers or letters corresponding to category names: ppron, ipron, article,
 adverb, conj, prep, auxverb, negate, quant, interrog, number, interjection, or special.}
 
 \item{as.regex}{Logical: if \code{FALSE}, lists are returned without regular expression.}
+
+\item{as.function}{Logical or a function: if specified and \code{as.regex} is \code{TRUE}, the selected dictionary
+will be collapsed to a regex string (terms separated by `|`) and function for matching characters to that
+string will be returned. The regex string is passed to the matching function (\code{\link{grepl}} by default)
+as a 'pattern' argument, with the first argument of the returned function being passed as an 'x' argument.
+See examples.}
 }
 \description{
-Returns a list of function words based on the Linguistic Inquiry and Word Count 2015 dictionary.
+Returns a list of function words based on the Linguistic Inquiry and Word Count 2015 dictionary
+(in terms of category names -- words were selected independently).
 }
 \note{
 The \code{special} category is not returned unless specifically requested. It is a list of regular expression
@@ -27,15 +34,31 @@ a dtm, the input dictionary is passed by the special lists to be sure the terms 
 (so, for example, ": (" would be replaced with "FROWN" in both the text and dictionary).
 }
 \examples{
-#return the full dictionary (excluding special)
+# return the full dictionary (excluding special)
 lma_dict()
 
-#return the standard 7 category lsm categories
+# return the standard 7 category lsm categories
 lma_dict(1:7)
 
-#return just a few categories without regular expression
+# return just a few categories without regular expression
 lma_dict(neg, ppron, aux, as.regex=FALSE)
 
-#return special specifically
+# return special specifically
 lma_dict(special)
+
+# returning a function
+is.ppron = lma_dict(ppron, as.function = TRUE)
+is.ppron(c('i', 'am', 'you', 'were'))
+
+is.lsmcat = lma_dict(1:7, as.function = TRUE)
+is.lsmcat(c('a', 'frog', 'for', 'me'))
+
+## use as a stopword filter
+is.stopword = lma_dict(as.function = TRUE)
+dtm = lma_dtm('Most of these words might not be all that relevant.')
+dtm[, !is.stopword(colnames(dtm))]
+
+}
+\seealso{
+To score texts with these categories, use \code{\link{lma_termcat}}.
 }

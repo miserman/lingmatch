@@ -23,8 +23,8 @@ We'll use texts from a study which had participants responding to a few prompts.
 library('lingmatch')
 
 # download prompt and response data
-prompts = read.csv('https://osf.io/xm6ew/?action=download')
-responses = read.csv('https://osf.io/crgkn/?action=download')
+prompts = read.csv('https://osf.io/download/xm6ew')
+responses = read.csv('https://osf.io/download/crgkn')
 
 # for now, we'll just look at one of the studies included in the set
 responses = responses[responses$Study == 4,]

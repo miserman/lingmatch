@@ -4,19 +4,44 @@
 \alias{download.lsspace}
 \title{Download Latent Semantic Spaces}
 \usage{
-download.lsspace(space = "default", dir = "~/Latent Semantic Spaces")
+download.lsspace(space = "100k", include.terms = TRUE, decompress = TRUE,
+  check.md5 = TRUE, mode = "wb", dir = getOption("lingmatch.lspace.dir"))
 }
 \arguments{
-\item{space}{name of the space you wish to download. Options include \code{'default'} and \code{'tasa'}.}
+\item{space}{Name of the space you want to download. '100k' is the default, and
+some other common options might be 'google', 'facebook', or 'glove'. See
+\href{https://osf.io/489he/wiki/home}{osf.io/489he/wiki} for more information, and a full
+list of spaces.}
 
-\item{dir}{desired path to the downloaded space; default is '~/Latent Semantic Spaces'.}
+\item{include.terms}{Logical; if \code{FALSE}, only the \code{.dat.bz2} file is downloaded
+(which only has numeric vectors).}
+
+\item{decompress}{Logical; if \code{TRUE} (default), decompresses the downloaded file
+with the \code{bunzip2} system command assuming it is available (as indicated by
+\code{Sys.which('bunzip2')}).}
+
+\item{check.md5}{Logical; if \code{TRUE} (default), retrieves the MD5 checksum from OSF,
+and compares it with that calculated from the downloaded file to check its integrity.}
+
+\item{mode}{A character specifying the file write mode; default is 'wb'. See
+\code{\link{download.file}}.}
+
+\item{dir}{Directory in which to save the space; default is
+\code{getOption('lingmatch.lspace.dir')}.}
 }
 \description{
-Downloads the specified semantic space.
+Downloads the specified semantic space from \href{https://osf.io/489he}{osf.io/489he}.
 }
-\details{
-Spaces are slightly altered and reprocessed versions of those available at
-\url{https://sites.google.com/site/fritzgntr/software-resources/semantic_spaces}.
+\examples{
+\dontrun{
 
-Spaces can (sometimes) be downloaded directly from \url{https://www.myweb.ttu.edu/miserman/lsspaces/}.
+download.lsspace('glove_crawl')
 }
+}
+\seealso{
+Other Latent Semantic Space functions: 
+\code{\link{lma_lspace}()},
+\code{\link{select.lsspace}()},
+\code{\link{standardize.lsspace}()}
+}
+\concept{Latent Semantic Space functions}

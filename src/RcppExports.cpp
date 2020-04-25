@@ -47,11 +47,56 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// reformat_embedding
+void reformat_embedding(const std::string& infile, const std::string& outfile, const char& sep, const int& digits, const std::string& remove, const std::string& term_check, const bool& verbose);
+RcppExport SEXP _lingmatch_reformat_embedding(SEXP infileSEXP, SEXP outfileSEXP, SEXP sepSEXP, SEXP digitsSEXP, SEXP removeSEXP, SEXP term_checkSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const std::string& >::type infile(infileSEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type outfile(outfileSEXP);
+    Rcpp::traits::input_parameter< const char& >::type sep(sepSEXP);
+    Rcpp::traits::input_parameter< const int& >::type digits(digitsSEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type remove(removeSEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type term_check(term_checkSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type verbose(verboseSEXP);
+    reformat_embedding(infile, outfile, sep, digits, remove, term_check, verbose);
+    return R_NilValue;
+END_RCPP
+}
+// extract_indices
+NumericVector extract_indices(const IntegerVector& indices, const std::string& file, const char& sep);
+RcppExport SEXP _lingmatch_extract_indices(SEXP indicesSEXP, SEXP fileSEXP, SEXP sepSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const IntegerVector& >::type indices(indicesSEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type file(fileSEXP);
+    Rcpp::traits::input_parameter< const char& >::type sep(sepSEXP);
+    rcpp_result_gen = Rcpp::wrap(extract_indices(indices, file, sep));
+    return rcpp_result_gen;
+END_RCPP
+}
+// extract_matches
+NumericVector extract_matches(const CharacterVector& terms, const std::string& file, const char& sep);
+RcppExport SEXP _lingmatch_extract_matches(SEXP termsSEXP, SEXP fileSEXP, SEXP sepSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const CharacterVector& >::type terms(termsSEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type file(fileSEXP);
+    Rcpp::traits::input_parameter< const char& >::type sep(sepSEXP);
+    rcpp_result_gen = Rcpp::wrap(extract_matches(terms, file, sep));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_lingmatch_match_terms", (DL_FUNC) &_lingmatch_match_terms, 5},
     {"_lingmatch_vector_similarity", (DL_FUNC) &_lingmatch_vector_similarity, 3},
     {"_lingmatch_calculate_similarities", (DL_FUNC) &_lingmatch_calculate_similarities, 4},
+    {"_lingmatch_reformat_embedding", (DL_FUNC) &_lingmatch_reformat_embedding, 7},
+    {"_lingmatch_extract_indices", (DL_FUNC) &_lingmatch_extract_indices, 3},
+    {"_lingmatch_extract_matches", (DL_FUNC) &_lingmatch_extract_matches, 3},
     {NULL, NULL, 0}
 };
 

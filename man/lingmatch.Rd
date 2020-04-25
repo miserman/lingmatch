@@ -44,8 +44,8 @@ other arguments (e.g., \code{lingmatch(text, data=data)} would be the same as
 groups.}
 
 \item{...}{Passes arguments to \code{\link{lma_dtm}}, \code{\link{lma_weight}},
-\code{\link{lma_lspace}}, and/or \code{\link{lma_termcat}}, depending on \code{x} and
-\code{comp}.}
+\code{\link{lma_lspace}}, \code{\link{lma_termcat}}, and/or \code{\link{lma_simets}},
+depending on \code{x} and \code{comp}.}
 
 \item{comp.data}{A matrix-like object as a reference to \code{comp} variables.}
 

@@ -32,6 +32,7 @@ dict = list(
 )
 
 \dontrun{
+
 write.dic(dict, 'murder') # save it as a .dic file
 read.dic('murder.dic') # read it back in as a list
 

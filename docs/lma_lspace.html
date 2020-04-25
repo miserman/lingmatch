@@ -1,24 +1,27 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Latent Semantic Space Operations</title>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Latent Semantic Space (Embeddings) Operations</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <link rel="stylesheet" type="text/css" href="R.css" />
 </head><body>
 
 <table width="100%" summary="page for lma_lspace"><tr><td>lma_lspace</td><td style="text-align: right;">R Documentation</td></tr></table>
 
-<h2>Latent Semantic Space Operations</h2>
+<h2>Latent Semantic Space (Embeddings) Operations</h2>
 
 <h3>Description</h3>
 
-<p>Calculate and reduce the singular value decomposition of a dtm (i.e., create a latent semantic
-space), or map a dtm onto an existing latent semantic space.
+<p>Map a document-term matrix onto a latent semantic space, extract terms from a
+latent semantic space (if <code>dtm</code> is a character vector, or <code>map.space =</code> <code>FALSE</code>),
+or perform a singular value decomposition on a document-term matrix (if <code>dtm</code> is a matrix
+and <code>space</code> is missing).
 </p>
 
 
 <h3>Usage</h3>
 
 <pre>
-lma_lspace(dtm, space, path = "~/Latent Semantic Spaces", dim.cutoff = 0.5,
-  keep.dim = FALSE)
+lma_lspace(dtm = "", space, map.space = TRUE, term_map = NULL,
+  dim.cutoff = 0.5, keep.dim = FALSE, use.scan = FALSE,
+  dir = getOption("lingmatch.lspace.dir"))
 </pre>
 
 
@@ -27,20 +30,32 @@ lma_lspace(dtm, space, path = "~/Latent Semantic Spaces", dim.cutoff = 0.5,
 <table summary="R argblock">
 <tr valign="top"><td><code>dtm</code></td>
 <td>
-<p>A matrix with terms as column names.</p>
+<p>A matrix with terms as column names, or a character vector of terms to be extracted
+from a specified space. If this is of length 1 and <code>space</code> is missing, it will be treated
+as <code>space</code>.</p>
 </td></tr>
 <tr valign="top"><td><code>space</code></td>
 <td>
-<p>A matrix of right singular vectors (a latent semantic space), with terms as
-rownames. If missing, this will be calculated from the <code>dtm</code>. If a character, a file
-matching the character will be searched for in <code>path</code> (e.g., <code>space = 'default'</code>).
-If the file has a .sqlite extension, only a subset will be loaded into RAM; this is slightly
-slower than using a full, preloaded .rda space, but faster than loading and unloading a complete
-.rda space, and less RAM intensive in all cases.</p>
+<p>A matrix with terms as rownames. If missing, this will be the right singular vectors
+of a singular value decomposition of <code>dtm</code>. If a character, a file matching the character
+will be searched for in <code>dir</code> (e.g., <code>space = 'google'</code>). If a file is not found and
+the character matches one of the <a href="https://osf.io/489he/wiki/home">available spaces</a>, you
+will be given the option to download it, as handled by <code>download.lsspace</code>.
+If <code>dtm</code> is missing, the entire space will be loaded and returned.</p>
 </td></tr>
-<tr valign="top"><td><code>path</code></td>
+<tr valign="top"><td><code>map.space</code></td>
 <td>
-<p>Path to a folder containing spaces. Default is '~/Latent Semantic Spaces'.</p>
+<p>Logical: if <code>FALSE</code>, the original vectors of <code>space</code> for terms
+found in <code>dtm</code> are returned. Otherwise <code>dtm</code> <code>%*%</code> <code>space</code> is returned,
+excluding uncommon columns of <code>dtm</code> and rows of <code>space</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>term_map</code></td>
+<td>
+<p>A matrix with <code>space</code> as a column name, terms as row names, and indices of
+the terms in the given space as values, or a numeric vector of indices with terms as names, or
+a character vector or terms corresponding to rows of the space. This is used instead of reading
+in an &quot;_terms.txt&quot; file corresponding to a <code>space</code> entered as a character (the name of a
+space file).</p>
 </td></tr>
 <tr valign="top"><td><code>dim.cutoff</code></td>
 <td>
@@ -51,23 +66,41 @@ cutoffs result in fewer dimensions.</p>
 </td></tr>
 <tr valign="top"><td><code>keep.dim</code></td>
 <td>
-<p>Logical: if <code>TRUE</code> and a space is being calculated from the input, a matrix
+<p>Logical: if <code>TRUE</code>, and a space is being calculated from the input, a matrix
 in the same dimensions as <code>dtm</code> is returned. Otherwise, a matrix with terms as rows and
-svd dimensions as columns is returned.</p>
+dimensions as columns is returned.</p>
+</td></tr>
+<tr valign="top"><td><code>use.scan</code></td>
+<td>
+<p>Logical: if <code>TRUE</code>, reads in the rows of <code>space</code> with <code>scan</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>dir</code></td>
+<td>
+<p>Path to a folder containing spaces. Default is <code>getOption('lingmatch.lspace.dir')</code>;
+change with options(lingmatch.lspace.dir = 'desired/path').</p>
 </td></tr>
 </table>
 
 
 <h3>Note</h3>
 
-<p>A general latent semantic space is a selection of right singular vectors from the singular value
-decomposition of a dtm (<code>svd(dtm)$v[,1:k]</code>, where <code>k</code> is the selected number of
+<p>A traditional latent semantic space is a selection of right singular vectors from the singular
+value decomposition of a dtm (<code>svd(dtm)$v[, 1:k]</code>, where <code>k</code> is the selected number of
 dimensions, decided here by <code>cutoff</code>).
 </p>
 <p>Mapping a new dtm into a latent semantic space consists of multiplying common terms:
-<code>dtm[,ct] %*% space[ct,]</code>, where <code>ct = colnames(dtm)[colnames(dtm) %in%
-rownames(space)]</code> &ndash; the terms common between the dtm and the space. This results in a matrix
-with documents as rows, and svd dimensions as columns, replacing terms.
+<code>dtm[, ct] %*% space[ct,]</code>, where <code>ct</code> <code>=</code> <code>colnames(dtm)[colnames(dtm)</code>
+<code>%in%</code> <code>rownames(space)]</code> &ndash; the terms common between the dtm and the space. This
+results in a matrix with documents as rows, and dimensions as columns, replacing terms.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other Latent Semantic Space functions: 
+<code>download.lsspace()</code>,
+<code>select.lsspace()</code>,
+<code>standardize.lsspace()</code>
 </p>
 
 
@@ -80,7 +113,7 @@ text = c(
   "Oh year? Well I really like cars. All the wheels and the turbos... I think that's the best
     ever.",
   "You know what? Poo on you. Cats, dogs, rabbits -- you know, living creatures... to think
-     you'd care about anything else!",
+    you'd care about anything else!",
   "You can stick to your opinion. You can be wrong if you want. You know what life's about?
     Supercharging, diesel guzzling, exhaust spewing, piston moving ignitions."
 )
@@ -98,13 +131,23 @@ spaces = list(
 sapply(spaces, lma_simets, metric = 'cosine')
 
 ## Not run: 
-# using a space from a file might look something like this:
-lma_lspace(dtm, 'default.rda', '~/latent semantic spaces')
 
-# or you could load the space before hand
-# (where default.rda contains an object called lss_default)
-load('~/latent semantic spaces/default.rda')
-lma_lspace(dtm, lss_default)
+# map to a pretained space
+ddm = lma_lspace(dtm, '100k')
+
+# load the matching subset of the space
+# without mapping
+lss_100k_part = lma_lspace(colnames(dtm), '100k')
+
+## or
+lss_100k_part = lma_lspace(dtm, '100k', map.space = FALSE)
+
+# load the full space
+lss_100k = lma_lspace('100k')
+
+## or
+lss_100k = lma_lspace(space = '100k')
+
 
 ## End(Not run)
 </pre>

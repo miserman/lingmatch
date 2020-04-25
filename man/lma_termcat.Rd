@@ -40,6 +40,7 @@ Reduces the dimensions of a document-term matrix by dictionary-based categorizat
 \examples{
 # Score texts with the NRC Affect Intensity Lexicon
 \dontrun{
+
 dict = readLines('https://saifmohammad.com/WebDocs/NRC-AffectIntensity-Lexicon.txt')
 dict = read.table(
   text = dict[-seq_len(grep('term\tscore', dict, fixed = TRUE)[[1]])],
@@ -61,4 +62,7 @@ emotion_scores = lma_termcat(
 )
 if(require('splot')) splot(emotion_scores ~ names(text), leg = 'out')
 }
+}
+\seealso{
+For applying patttern-based dictionaries (to raw text) see \code{\link{lma_patcat}}.
 }

@@ -40,7 +40,7 @@ different terms.}
 
 \item{word.break}{A regular expression string determining the way words are split. Default is
 \code{' +'} which breaks words at one or more blank spaces. You may also like to break by
-dashes or slashes (\code{' +|/|-'}), depending on the text.}
+dashes or slashes (\code{'[ /-]+'}), depending on the text.}
 
 \item{dc.min}{Numeric: excludes terms appearing in fewer than the set number of documents.
 Default is 0 (no limit).}

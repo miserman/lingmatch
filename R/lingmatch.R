@@ -1,3 +1,8 @@
+.onLoad = function(lib, pkg){
+  if(!'lingmatch.lspace.dir' %in% names(options()))
+    options(list(lingmatch.lspace.dir = path.expand('~/Latent Semantic Spaces')))
+}
+
 #' Linguistic Matching and Accommodation
 #'
 #' Offers a variety of methods to assess linguistic matching or accommodation, where \emph{matching}
@@ -43,8 +48,8 @@
 #' @param group A logical or factor-like vector the same length as \code{nrow(x)}, used to defined
 #'   groups.
 #' @param ... Passes arguments to \code{\link{lma_dtm}}, \code{\link{lma_weight}},
-#'   \code{\link{lma_lspace}}, and/or \code{\link{lma_termcat}}, depending on \code{x} and
-#'   \code{comp}.
+#'   \code{\link{lma_lspace}}, \code{\link{lma_termcat}}, and/or \code{\link{lma_simets}},
+#'   depending on \code{x} and \code{comp}.
 #' @param comp.data A matrix-like object as a reference to \code{comp} variables.
 #' @param comp.group The Column name of the grouping variable(s) in \code{comp.data}; if
 #'   \code{group} contains references to column names, and \code{comp.group} is not specified,
@@ -124,7 +129,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
     type = if(grepl('lsm|lang|ling|style|match', type, TRUE)) 'lsm' else 'lsa'
     ni = names(inp)
     if(type == 'lsm' && !'dict' %in% ni) inp$dict = lma_dict(1:9)
-    if(type != 'lsm' && !'space' %in% ni) inp$space = 'default'
+    if(type != 'lsm' && !'space' %in% ni) inp$space = '100k_lsa'
     if(!'metric' %in% ni) inp$metric = if(type == 'lsm') 'canberra' else 'cosine'
     if(is.null(attr(x, 'type')) || length(attr(x, 'type')) == 1){
       if(type == 'lsm' && !'percent' %in% ni) inp$percent = TRUE
@@ -168,7 +173,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
   wmc = function(a){
     if(length(dsp$w) != 0) a = do.call(lma_weight, c(list(a), lapply(dsp$w, eval, parent.frame(2))))
     if(length(dsp$m) != 0) a = do.call(lma_lspace, c(list(a), lapply(dsp$m, eval, parent.frame(2))))
-    if(length(dsp$c) != 0) a = do.call(lma_termcat ,c(list(a), lapply(dsp$c, eval, parent.frame(2))))
+    if(length(dsp$c) != 0) a = do.call(lma_termcat, c(list(a), lapply(dsp$c, eval, parent.frame(2))))
     a
   }
   # initial data parsing
@@ -187,7 +192,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
   if(is.factor(comp)) comp=as.character(comp) else if(is.data.frame(comp))
     comp=comp[,!vapply(comp,function(c)is.factor(c)||is.character(c),TRUE)]
   do.wmc=TRUE
-  if(class(x)%in%c('matrix','data.frame') && is.null(attr(x,'Type'))){
+  if(any(class(x)%in%c('matrix','data.frame')) && is.null(attr(x,'Type'))){
     dn=if('dict'%in%names(inp)) eval(inp$dict) else names(lma_dict(1:9))
     if(is.list(dn)) dn=names(dn)
     cn=colnames(x)
@@ -202,7 +207,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
       x=x[,dn]
       do.wmc=FALSE
       if(!missing(comp)){
-        if(class(comp)%in%c('matrix','data.frame')){
+        if(any(class(comp)%in%c('matrix','data.frame'))){
           if(missing(group) && missing(comp.group)){
             comp=mean
             opt[c('comp','comp.data')]=c('mean',opt$comp)
@@ -305,7 +310,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
   }
   if(is.character(x) || (is.data.frame(x) && any(!vapply(x, class, '') %in% c('numeric', 'integer'))))
     for(i in seq_len(ncol(x))) x[, i] = as.numeric(x[, i])
-  if(class(x) == 'data.frame' && any(ckvc <- !vapply(seq_len(ncol(x)), function(col) class(x[, col]), '') %in%
+  if('data.frame' %in% class(x) && any(ckvc <- !vapply(seq_len(ncol(x)), function(col) class(x[, col])[1], '') %in%
     c('numeric', 'integer'))){
     if(all(ckvc)){
       for(col in seq_along(ckvc)) x[, col] = as.numeric(x[, col])
@@ -452,21 +457,22 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
         sal$symmetrical=if('symmetrical'%in%names(dsp$s)) dsp$s$symmetrical else TRUE
         sal$mean=if('mean'%in%names(dsp$s)) dsp$s$mean else TRUE
         if(sal$symmetrical && sal$mean){
-          sim=vapply(seq_along(group[[1]]),function(i){
-            su=group[[1]]==group[[1]][i]
-            su[i]=FALSE
-            sal$b=x[i,]
-            r=if(sum(su)!=0) do.call(lma_simets,c(list(x[su,,drop=FALSE]),sal)) else
-              vapply(sal$metric,function(m)NA,0)
-            if(is.null(nrow(r)) || nrow(r)==1) r else if(ncol(r)!=1) colMeans(r) else mean(r)
-          },numeric(length(sal$metric)))
-          sim=data.frame(group[[1]],if(is.matrix(sim)) t(sim) else sim)
-          colnames(sim)=c(opt$group,sal$metric)
+          sim = vapply(seq_along(group[[1]]), function(i){
+            su = group[[1]] == group[[1]][i]
+            su[i] = FALSE
+            sal$b = x[i,]
+            r = if(sum(su) != 0) do.call(lma_simets, c(list(x[su,]), sal)) else
+              numeric(length(sal$metric)) + 1
+            if(is.null(nrow(r))) r else if(nrow(r) == 1) as.numeric(r) else
+              if(ncol(r) != 1) colMeans(r, TRUE) else mean(r, na.rm = TRUE)
+          }, numeric(length(sal$metric)))
+          sim = data.frame(group[[1]], if(is.matrix(sim)) t(sim) else sim)
+          colnames(sim) = c(opt$group, sal$metric)
         }else{
           sim=lapply(ug<-unique(group[[1]]),function(g){
             su=group[[1]]==g
-            if(sum(su)!=1) do.call(lma_simets,c(list(x[su,,drop=FALSE]),sal)) else
-              vapply(sal$metric,function(m)NA,0)
+            if(sum(su)!=1) do.call(lma_simets,c(list(x[su,]),sal)) else
+              numeric(length(sal$metric)) + 1
           })
           if(!sal$symmetrical){
             sim=as.data.frame(
@@ -598,7 +604,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
 #'   different terms.
 #' @param word.break A regular expression string determining the way words are split. Default is
 #'   \code{' +'} which breaks words at one or more blank spaces. You may also like to break by
-#'   dashes or slashes (\code{' +|/|-'}), depending on the text.
+#'   dashes or slashes (\code{'[ /-]+'}), depending on the text.
 #' @param dc.min Numeric: excludes terms appearing in fewer than the set number of documents.
 #'   Default is 0 (no limit).
 #' @param dc.max Numeric: excludes terms appearing in more than the set number of documents. Default
@@ -631,7 +637,7 @@ lma_dtm = function(text, exclude = NULL, context = NULL, numbers = FALSE, punct 
   text = gsub('[\u05be\u1806\u2010\u2011\u2013\uFE58\uFE63\uFF0D]', '-', text)
   text = gsub('[\u2012\u2014\u2015\u2E3A\u2E3B]|--+', ' - ', text)
   text = gsub('[\u2032\u2035\u2018\u2019]', "'", text)
-  text = gsub("[\u2033\u2036\u201C\u201D\u201F]|(?<=[^a-z-z0-9])'|'(?=[^a-z0-9])", '"', text, TRUE, TRUE)
+  text = gsub("[\u2033\u2036\u201C\u201D\u201F]|(?<=[^a-z0-9])'|'(?=[^a-z0-9])", '"', text, TRUE, TRUE)
   if(!urls){
     text = gsub('\\s[a-z]+://[^\\s]*|www\\.[^\\s]*|\\s[a-z_~-]+\\.[a-z_~-]{2,}[^\\s]*|\\s[a-z_~-]+\\.(?:io|com|net|org|gov|edu)\\s',
       ' url ', text, TRUE, TRUE)
@@ -873,34 +879,49 @@ lma_weight=function(dtm,weight='count',to.freq=TRUE,freq.complete=TRUE,log.base=
   dtm
 }
 
-#' Latent Semantic Space Operations
+#' Latent Semantic Space (Embeddings) Operations
 #'
-#' Calculate and reduce the singular value decomposition of a dtm (i.e., create a latent semantic
-#' space), or map a dtm onto an existing latent semantic space.
-#' @param dtm A matrix with terms as column names.
-#' @param space A matrix of right singular vectors (a latent semantic space), with terms as
-#'   rownames. If missing, this will be calculated from the \code{dtm}. If a character, a file
-#'   matching the character will be searched for in \code{path} (e.g., \code{space = 'default'}).
-#'   If the file has a .sqlite extension, only a subset will be loaded into RAM; this is slightly
-#'   slower than using a full, preloaded .rda space, but faster than loading and unloading a complete
-#'   .rda space, and less RAM intensive in all cases.
-#' @param path Path to a folder containing spaces. Default is '~/Latent Semantic Spaces'.
+#' Map a document-term matrix onto a latent semantic space, extract terms from a
+#' latent semantic space (if \code{dtm} is a character vector, or \code{map.space =} \code{FALSE}),
+#' or perform a singular value decomposition on a document-term matrix (if \code{dtm} is a matrix
+#' and \code{space} is missing).
+#' @param dtm A matrix with terms as column names, or a character vector of terms to be extracted
+#'   from a specified space. If this is of length 1 and \code{space} is missing, it will be treated
+#'   as \code{space}.
+#' @param space A matrix with terms as rownames. If missing, this will be the right singular vectors
+#'   of a singular value decomposition of \code{dtm}. If a character, a file matching the character
+#'   will be searched for in \code{dir} (e.g., \code{space = 'google'}). If a file is not found and
+#'   the character matches one of the \href{https://osf.io/489he/wiki/home}{available spaces}, you
+#'   will be given the option to download it, as handled by \code{\link{download.lsspace}}.
+#'   If \code{dtm} is missing, the entire space will be loaded and returned.
+#' @param map.space Logical: if \code{FALSE}, the original vectors of \code{space} for terms
+#'   found in \code{dtm} are returned. Otherwise \code{dtm} \code{\%*\%} \code{space} is returned,
+#'   excluding uncommon columns of \code{dtm} and rows of \code{space}.
+#' @param term_map A matrix with \code{space} as a column name, terms as row names, and indices of
+#'   the terms in the given space as values, or a numeric vector of indices with terms as names, or
+#'   a character vector or terms corresponding to rows of the space. This is used instead of reading
+#'   in an "_terms.txt" file corresponding to a \code{space} entered as a character (the name of a
+#'   space file).
 #' @param dim.cutoff If a \code{space} is calculated, this will be used to decide on the number of
 #'   dimensions to be retained: \code{cumsum(d) / sum(d) < dim.cutoff}, where \code{d} is a vector
 #'   of singular values of \code{dtm} (i.e., \code{svd(dtm)$d}). The default is \code{.5}; lower
 #'   cutoffs result in fewer dimensions.
-#' @param keep.dim Logical: if \code{TRUE} and a space is being calculated from the input, a matrix
+#' @param keep.dim Logical: if \code{TRUE}, and a space is being calculated from the input, a matrix
 #'   in the same dimensions as \code{dtm} is returned. Otherwise, a matrix with terms as rows and
-#'   svd dimensions as columns is returned.
+#'   dimensions as columns is returned.
+#' @param use.scan Logical: if \code{TRUE}, reads in the rows of \code{space} with \code{\link{scan}}.
+#' @param dir Path to a folder containing spaces. Default is \code{getOption('lingmatch.lspace.dir')};
+#'   change with options(lingmatch.lspace.dir = 'desired/path').
 #' @note
-#' A general latent semantic space is a selection of right singular vectors from the singular value
-#' decomposition of a dtm (\code{svd(dtm)$v[,1:k]}, where \code{k} is the selected number of
+#' A traditional latent semantic space is a selection of right singular vectors from the singular
+#' value decomposition of a dtm (\code{svd(dtm)$v[, 1:k]}, where \code{k} is the selected number of
 #' dimensions, decided here by \code{cutoff}).
 #'
 #' Mapping a new dtm into a latent semantic space consists of multiplying common terms:
-#' \code{dtm[,ct] \%*\% space[ct,]}, where \code{ct = colnames(dtm)[colnames(dtm) \%in\%
-#' rownames(space)]} -- the terms common between the dtm and the space. This results in a matrix
-#' with documents as rows, and svd dimensions as columns, replacing terms.
+#' \code{dtm[, ct] \%*\% space[ct,]}, where \code{ct} \code{=} \code{colnames(dtm)[colnames(dtm)}
+#' \code{\%in\%} \code{rownames(space)]} -- the terms common between the dtm and the space. This
+#' results in a matrix with documents as rows, and dimensions as columns, replacing terms.
+#' @family Latent Semantic Space functions
 #' @examples
 #'
 #' text = c(
@@ -908,7 +929,7 @@ lma_weight=function(dtm,weight='count',to.freq=TRUE,freq.complete=TRUE,log.base=
 #'   "Oh year? Well I really like cars. All the wheels and the turbos... I think that's the best
 #'     ever.",
 #'   "You know what? Poo on you. Cats, dogs, rabbits -- you know, living creatures... to think
-#'      you'd care about anything else!",
+#'     you'd care about anything else!",
 #'   "You can stick to your opinion. You can be wrong if you want. You know what life's about?
 #'     Supercharging, diesel guzzling, exhaust spewing, piston moving ignitions."
 #' )
@@ -926,86 +947,141 @@ lma_weight=function(dtm,weight='count',to.freq=TRUE,freq.complete=TRUE,log.base=
 #' sapply(spaces, lma_simets, metric = 'cosine')
 #'
 #' \dontrun{
-#' # using a space from a file might look something like this:
-#' lma_lspace(dtm, 'default.rda', '~/latent semantic spaces')
 #'
-#' # or you could load the space before hand
-#' # (where default.rda contains an object called lss_default)
-#' load('~/latent semantic spaces/default.rda')
-#' lma_lspace(dtm, lss_default)
+#' # map to a pretained space
+#' ddm = lma_lspace(dtm, '100k')
+#'
+#' # load the matching subset of the space
+#' # without mapping
+#' lss_100k_part = lma_lspace(colnames(dtm), '100k')
+#'
+#' ## or
+#' lss_100k_part = lma_lspace(dtm, '100k', map.space = FALSE)
+#'
+#' # load the full space
+#' lss_100k = lma_lspace('100k')
+#'
+#' ## or
+#' lss_100k = lma_lspace(space = '100k')
+#'
 #' }
 #' @export
-#' @importFrom RSQLite SQLite
-#' @importFrom DBI dbConnect dbGetQuery dbDisconnect
 
-lma_lspace=function(dtm,space,path='~/Latent Semantic Spaces',
-  dim.cutoff=.5,keep.dim=FALSE){
+lma_lspace = function(dtm = '', space, map.space = TRUE, term_map = NULL, dim.cutoff = .5,
+  keep.dim = FALSE, use.scan = FALSE, dir = getOption('lingmatch.lspace.dir')){
+  if(is.character(dtm) && length(dtm) == 1 && dtm != ''){
+    if(missing(use.scan)) use.scan = TRUE
+    space = dtm
+    dtm = ''
+  }
   if(missing(space)){
-    nr=nrow(dtm)
-    nc=ncol(dtm)
-    md=min(nr,nc)
-    s=svd(dtm)
-    s$v=t(s$v)
-    k=cumsum(s$d)/sum(s$d)
-    k=seq_len(if(any(k<dim.cutoff)) which(k>=dim.cutoff)[1] else 1)
-    if(keep.dim) dtm[] = s$u[,k, drop = FALSE] %*% diag(s$d[k]) %*% s$v[k,] else{
-      cn=colnames(dtm)
+    nr = nrow(dtm)
+    if(is.null(nr)) stop('enter a matrix for dtm, or specify a space')
+    nc = ncol(dtm)
+    md = min(nr, nc)
+    s = svd(dtm)
+    s$v = t(s$v)
+    k = cumsum(s$d) / sum(s$d)
+    k = seq_len(if(any(k < dim.cutoff)) which(k >= dim.cutoff)[1] else 1)
+    if(keep.dim) dtm[] = s$u[, k, drop = FALSE] %*% diag(s$d[k]) %*% s$v[k,] else{
+      cn = colnames(dtm)
       dtm = t(s$v[k,, drop = FALSE])
-      rownames(dtm)=cn
+      rownames(dtm) = cn
     }
   }else{
+    terms = if(is.null(colnames(dtm))){
+      map.space = FALSE
+      dtm
+    }else colnames(dtm)
     if(is.character(space)){
-      if(!missing(path)) path=sub('/$','',path)
-      if(length(fls<-list.files(path))==0 || !any(grepl(space,fls))){
-        message('spaces not found in ',path)
-        if(grepl('^y',readline('would you like to download the space? (y/n): '),TRUE)){
-          download.lsspace(space,dir=path)
-          fls=list.files(path)
-        }else stop('no spaces available; load and specify a space,
-            or download one with download.lsspace()',call.=FALSE)
+      if(space == 'default') space = '100k'
+      name = sub('\\..*$', '', space)[1]
+      spaces = list.files(dir)
+      ts = grep(space, spaces, fixed = TRUE, value = TRUE)
+      if(!length(ts)){
+        ts = rownames(select.lsspace(name)$selected)[1]
+        if(!is.na(ts) && grepl('^$|^[yt1]|^ent', readline(paste0(
+          'would you like to download the ', ts, ' space? (press Enter or type yes): ')))){
+          download.lsspace(ts, dir = dir)
+          ts = paste0(ts, '.dat')
+        }else stop('space (', space, ') not found in dir (', dir, ')', call. = FALSE)
       }
-      file=grep(space,fls,value=TRUE)
-      if(length(file)==0) file=NA
-      if(length(file)>1) file=if(any(ck<-grepl('sqlite|zip',fls))) file[ck][1] else file[1]
-      ck=grepl('.rda',file,fixed=TRUE)
-      if(!ck && ((nck<-is.na(file)) || grepl('.zip',file,fixed=TRUE))){
-        if(any(fck<-grepl(sub('\\..*','.sqlite',file),fls,fixed=TRUE))){
-          file=fls[fck]
-        }else{
-          if(nck) if(!(file<-sub('\\..*','.zip',space))%in%fls)
-            stop('could not find ',space,' in ',path)
-          unzip(paste0(path,'/',file),exdir=path)
-          file=sub('.zip','.sqlite',file,fixed=TRUE)
+      if(grepl('[bgx]z[ip2]*$', ts[1])) use.scan = TRUE
+      space_path = paste0(dir, '/', ts[1])
+      name = sub('\\..*$', '', ts[1])
+      if(name %in% colnames(term_map)) term_map = term_map[term_map[, name] != 0, name]
+      rex = function(inds, f, sep = ' '){
+        nc = length(strsplit(readLines(f, 1), sep)[[1]])
+        l = length(inds)
+        r = matrix(0, l, nc)
+        i = 1
+        con = file(f, 'r')
+        on.exit(close(con))
+        while(i <= l){
+          if(l == inds[l]){
+            n = l
+          }else{
+            n = 1
+            while(i + n < l && inds[i + n - 1] == inds[i + n] - 1) n = n + 1
+          }
+          r[seq_len(n) + i - 1,] = matrix(scan(
+            con, n = n * nc, sep = sep, quiet = TRUE,
+            skip = (if(i == 1) inds[i] else inds[i] - inds[i - 1]) - 1,
+            quote = '', comment.char = '', na.strings = ''
+          ), n, nc, byrow = TRUE)
+          i = i + n
         }
+        r
       }
-      space=load(paste0(path,'/',if(ck) file else sub('.sqlite','_dict.rda',file,fixed=TRUE)))
-      space=eval(parse(text=space[[1]]))
-      lss_dict = if(!is.null(rownames(space))) rownames(space) else space
-      dtm = dtm[, vapply(seq_len(ncol(dtm)), function(col) !any(is.na(dtm[, col])), TRUE)]
-      ts=match(colnames(dtm),lss_dict,nomatch='')
-      ts=ts[!is.na(ts)]
-      if(length(ts)==0) stop('found no terms in common with the loaded space')
-      if(!ck){
-        tryCatch({
-          db=dbConnect(SQLite(),dbname=paste0(path,'/',file))
-          on.exit(dbDisconnect(db))
-          space=dbGetQuery(db,paste0('SELECT * FROM en where _INDEX IN (',
-            paste(ts,collapse=','),')'))
-        },error=function(e)stop('failed to query space: ',e$message,call.=FALSE))
-        space=as.matrix(space[,-1])
-        rownames(space)=lss_dict[ts]
-      }else space=as.matrix(space[ts,-1])
-      ts=rownames(space)
+      if(!is.null(term_map)){
+        if(is.character(term_map)) term_map = structure(seq_along(term_map), names = term_map)
+        inds = as.numeric(sort(if(length(terms) == 1 && terms == '') term_map else
+          term_map[names(term_map) %in% terms]))
+        if(length(inds)){
+          space = if(use.scan) rex(inds, space_path) else t(extract_indices(inds, space_path))
+          rownames(space) = ts = names(term_map)[inds]
+        }else stop('no matching terms in space ', space)
+      }else{
+        if(!file.exists(paste0(dir, '/', name, '_terms.txt')))
+          stop('terms file (', space, '_terms.txt) not found in dir (', dir, ')')
+        space_terms = readLines(paste0(dir, '/', name, '_terms.txt'))
+        su = if(length(terms) == 1 && terms == ''){
+          terms = space_terms
+          !logical(length(space_terms))
+        }else space_terms %in% terms
+        if(sum(su) < length(terms)){
+          lsterms = tolower(space_terms)
+          su2 = !duplicated(lsterms) & lsterms %in% terms[!terms %in% space_terms[su]]
+          if(any(su2)){
+            space_terms[su2] = lsterms[su2]
+            su = su | su2
+          }
+        }
+        if(sum(su)){
+          space = if(use.scan) rex(which(su), space_path) else t(extract_indices(which(su), space_path))
+          rownames(space) = space_terms[su]
+          ts = terms[terms %in% rownames(space)]
+          space = space[ts,, drop = FALSE]
+        }else stop('no matching terms in space ', space)
+      }
     }else{
-      ts=colnames(dtm)[colnames(dtm)%in%rownames(space)]
-      space=as.matrix(space[ts,])
+      su = terms %in% rownames(space)
+      if(sum(su)){
+        ts = terms[su]
+        space = space[ts,, drop = FALSE]
+      }else if(sum(su <- terms %in% colnames(space))){
+        ts = terms[su]
+        space = t(space[, ts, drop = FALSE])
+      }else stop('no matching terms in provided space')
     }
-    rep=length(ts)/ncol(dtm)
-    if(rep < .2) warning(paste0(
-     'only ', round(rep*100,2), '% of dtm terms appear in the provided space; ',
-     'you might consider using a different source or cleaning/partial matching terms'
-    ), call. = FALSE)
-    dtm = dtm[,ts] %*% space
+    if(map.space){
+      rep = length(ts) / ncol(dtm)
+      if(rep < .2) warning(paste0(
+        'only ', round(rep * 100, 2), '% of dtm terms appear in the provided space; ',
+        'you might consider using a different source or cleaning/partial matching terms'
+      ), call. = FALSE)
+      dtm = dtm[, ts, drop = FALSE] %*% space
+    }else return(space)
   }
   dtm
 }
@@ -1031,9 +1107,11 @@ lma_lspace=function(dtm,space,path='~/Latent Semantic Spaces',
 #'   \code{'a_DT'}), \code{filter='_.*'} would remove the tag.
 #' @param term.break If a category has more than \code{term.break} characters, it will be processed
 #'   in chunks. Reduce from 25000 if you get a PCRE compilation error.
+#' @seealso For applying patttern-based dictionaries (to raw text) see \code{\link{lma_patcat}}.
 #' @examples
 #' # Score texts with the NRC Affect Intensity Lexicon
 #' \dontrun{
+#'
 #' dict = readLines('https://saifmohammad.com/WebDocs/NRC-AffectIntensity-Lexicon.txt')
 #' dict = read.table(
 #'   text = dict[-seq_len(grep('term\tscore', dict, fixed = TRUE)[[1]])],
@@ -1171,6 +1249,8 @@ lma_termcat=function(dtm,dict,term.weights=NULL,bias=NULL,escape=FALSE,partial=F
 #' @param symmetrical logical; if \code{TRUE} and pairwise comparisons between \code{a} rows were made,
 #'   the results in the lower triangle are copied to the upper triangle.
 #' @param mean logical; if \code{TRUE}, a single mean for each metric is returned per row of \code{a}.
+#' @param return.list logical; if \code{TRUE}, a list-like object will always be returned, with an entry
+#'   for each metric, even when only one metric is requested.
 #' @details
 #' Use \code{\link[RcppParallel]{setThreadOptions}} to change parallelization options; e.g., run
 #' RcppParallel::setThreadOptions(4) before a call to lma_simets to set the number of CPU
@@ -1179,11 +1259,16 @@ lma_termcat=function(dtm,dict,term.weights=NULL,bias=NULL,escape=FALSE,partial=F
 #'   \tabular{ll}{
 #'     \strong{output} \tab \strong{input} \cr
 #'     a vector with a value per metric \tab only when \code{a} and \code{b} are both vectors \cr
-#'     a data.frame with a column per metric \tab any time a single value is expected per row:
+#'     a vector with a value per row \tab any time a single value is expected per row:
 #'       \code{a} or \code{b} is a vector, \code{a} and \code{b} are matrices with the same number of rows
-#'       and \code{pairwise = FALSE}, a group is specified, or \code{mean = TRUE} \cr
-#'     a list with a sparse matrix per metric \tab pairwise comparisons within an \code{a} matrix or between
-#'       an \code{a} and \code{b} matrix\cr
+#'       and \code{pairwise = FALSE}, a group is specified, or \code{mean = TRUE}, and only one metric is
+#'       requested \cr
+#'     a data.frame with a column per metric \tab when multiple metrics are requested in the previous
+#'       case\cr
+#'     sparse matrix \tab pairwise comparisons within an \code{a} matrix or between
+#'       an \code{a} and \code{b} matrix, when only 1 metric is requested\cr
+#'     a list with a sparse matrix per metric \tab when multiple metrics are requested in the previous
+#'       case\cr
 #'   }
 #' @examples
 #' text = c(
@@ -1210,14 +1295,18 @@ lma_termcat=function(dtm,dict,term.weights=NULL,bias=NULL,escape=FALSE,partial=F
 #' @export
 
 lma_simets=function(a, b = NULL, metric, group = NULL, agg = TRUE, agg.mean = TRUE,
-  pairwise = TRUE, symmetrical = FALSE, mean = FALSE){
+  pairwise = TRUE, symmetrical = FALSE, mean = FALSE, return.list = FALSE){
   cf = NULL
   mets = c('jaccard', 'euclidean', 'canberra', 'cosine', 'pearson')
+  if(missing(metric) && length(b) == 1){
+    metric = b
+    b = NULL
+  }
   metric = if(missing(metric)) mets else if(is.function(metric)){
     stop('only internal metrics are available: ', paste(mets, collapse = ', '))
   }else{
     if(is.null(metric)) metric = 'cosine'
-    mets[if(is.numeric(metric)) metric else pmatch(metric, mets)]
+    mets[if(is.numeric(metric)) metric else pmatch(substr(metric, 1, 2), mets)]
   }
   st = proc.time()[[3]]
   metric_arg = as.integer(mets %in% metric)
@@ -1229,6 +1318,7 @@ lma_simets=function(a, b = NULL, metric, group = NULL, agg = TRUE, agg.mean = TR
     if(is.null(group)){
       if(!all(slots %in% slotNames(a))) a = as(a, 'dgCMatrix')
       res = calculate_similarities(a, NULL, 2, metric_arg)
+      for(i in seq_along(res)) attr(res[[i]], 'metric') = mets[metric_arg == 1][i]
     }else{
       if(length(group) != n) stop('group is not the same length as a or columns in a')
       ager = if(agg.mean) colMeans else colSums
@@ -1272,27 +1362,35 @@ lma_simets=function(a, b = NULL, metric, group = NULL, agg = TRUE, agg.mean = TR
         if(!is.null(ns)){
           ns = ns[ns %in% colnames(b)]
           if(length(ns)){
-            a = a[, ns]
-            b = b[, ns]
+            a = a[, ns, drop = FALSE]
+            b = b[, ns, drop = FALSE]
           }
         }
         d = c(dim(a), dim(b))
         if(d[2] != d[4])
           stop('a and b have a different number of columns, which could not be aligned by name')
       }
-      calculate_similarities(a, b, if((!pairwise && d[1] == d[3]) || d[3] == 1) 1 else 3, metric_arg)
+      calculate_similarities(a, b, if(((missing(pairwise) || !pairwise) && d[1] == d[3]) ||
+          d[3] == 1) 1 else 3, metric_arg)
     }
   }
-  if(class(res) == 'list'){
-    pairwise = class(res[[1]]) == 'dtCMatrix'
+  if('list' %in% class(res)){
+    pairwise = 'dtCMatrix' %in% class(res[[1]])
     if((pairwise && symmetrical) || mean) for(i in seq_along(res)){
       if(pairwise && (symmetrical || mean)) res[[i]] = forceSymmetric(res[[i]], 'L')
-      if(mean) res[[i]] = rowMeans(res[[i]], TRUE)
+      if(mean) res[[i]] = if(is.null(nrow(res[[i]]))) mean(res[[i]], na.rm = TRUE) else rowMeans(res[[i]], TRUE)
     }
     if(is.null(dim(res[[1]]))){
-      attr(res, 'row.names') = seq_along(res[[1]])
-      attr(res, 'class') = 'data.frame'
+      rn = if(!is.na(nd <- which(d == length(res[[1]]))[1]) && !is.null(rownames(if(nd == 1) a else b)))
+        rownames(if(nd == 1) a else b) else NULL
+      if(length(metric) == 1){
+        if(length(rn) == length(res[[1]])) names(res[[1]]) = rn
+      }else{
+        attr(res, 'row.names') = if(length(rn) == length(res[[1]])) rn else seq_along(res[[1]])
+        attr(res, 'class') = 'data.frame'
+      }
     }
+    if(!return.list && length(metric) == 1) res = res[[1]]
   }
   attr(res, 'time') = c(simets = proc.time()[[3]] - st)
   res

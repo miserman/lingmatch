@@ -51,6 +51,7 @@ read.dic=function(path,cats,to.regex=FALSE){
 #' )
 #'
 #' \dontrun{
+#'
 #' write.dic(dict, 'murder') # save it as a .dic file
 #' read.dic('murder.dic') # read it back in as a list
 #'
@@ -120,8 +121,8 @@ read.folder=function(path=NULL,segment=NULL,subdir=FALSE,ext='.txt',fixed=TRUE,
         txt=if(bysentence){
           txt=gsub('(?<=st|rd|ft|feat|dr|drs|mr|ms|mrs|messrs|jr|prof)\\.','__PERIOD__',txt,TRUE,TRUE)
           txt=strsplit(gsub('(?<=[.?!][ ")}\\]])','__BREAK__',txt,perl=TRUE),'__BREAK__',fixed=TRUE)[[1]]
-          lapply(txt,function(t)strsplit(sub('__PERIOD__','.',t,fixed=TRUE),' [^A-z0-9]+ | +|\r\n',perl=TRUE)[[1]])
-        }else strsplit(txt,' [^A-z0-9]+ | +|\r\n',perl=TRUE)[[1]]
+          lapply(txt,function(t)strsplit(sub('__PERIOD__','.',t,fixed=TRUE),' [^A-Za-z0-9]+ | +|\r\n',perl=TRUE)[[1]])
+        }else strsplit(txt,' [^A-Za-z0-9]+ | +|\r\n',perl=TRUE)[[1]]
         ns=length(txt)
         sls=vapply(txt,function(s)sum(s!=''),0)
         wc=sum(sls)
@@ -139,35 +140,258 @@ read.folder=function(path=NULL,segment=NULL,subdir=FALSE,ext='.txt',fixed=TRUE,
   d
 }
 
+
+#' Select Latent Semantic Spaces
+#'
+#' Retrieve information and links to latent semantic spaces
+#' (sets of word vectors/embeddings) available at \href{https://osf.io/489he}{osf.io/489he},
+#' and optionally download their term mappings (\href{https://osf.io/xr7jv}{osf.io/xr7jv}).
+#'
+#' @param query A character matching a space name, or a character vector of terms, used
+#'   to select spaces. If length is over 1, \code{get.map} is set to \code{TRUE}.
+#' @param dir Path to \code{lma_term_map.rda} and downloaded spaces.
+#' @param get.map Logical; if \code{TRUE} and \code{lma_term_map.rda} is not found in
+#'   \code{dir}, the term map \href{https://osf.io/xr7jv}{lma_term_map.rda} is
+#'   downloaded and decompressed.
+#' @param check.md5 Logical; if \code{TRUE} (default), retrieves the MD5 checksum from OSF,
+#'   and compares it with that calculated from the downloaded file to check its integrity.
+#' @param mode Passed to \code{\link{download.file}} when downloading the term map.
+#' @return a list with varying entries:
+#'   \tabular{ll}{
+#'     info \tab The version of \href{https://osf.io/9yzca}{osf.io/9yzca} stored internally; a
+#'       \code{data.frame}  with spaces as row names, and information about each space in columns:
+#'         \tabular{ll}{
+#'           \code{terms} \tab number of terms in the space \cr
+#'           \code{corpus} \tab corpus(es) on which the space was trained \cr
+#'           \code{model} \tab model from which the space was trained \cr
+#'           \code{dimensions} \tab number of dimensions in the model (columns of the space) \cr
+#'           \code{model_info} \tab some parameter details about the model \cr
+#'           \code{original_max} \tab maximum value used to normalize the space; the original
+#'             space would be \code{(vectors *} \code{original_max) /} \code{100} \cr
+#'           \code{osf_dat} \tab OSF id for the \code{.dat} files; the URL would be
+#'             https://osf.io/{osf_dat} \cr
+#'           \code{osf_terms} \tab OSF id for the \code{_terms.txt} files; the URL would be
+#'             https://osf.io/{osf_terms} \cr
+#'           \code{wiki} \tab link to the wiki for the space \cr
+#'           \code{downloaded} \tab indicates whether the space's files are found in \code{dir} \cr
+#'         }
+#'       \cr
+#'     selected \tab A subset of \code{spaces} selected by \code{query}. \cr
+#'     term_map \tab If \code{get.map} is \code{TRUE} or \code{lma_term_map.rda} is found in
+#'       \code{dir}, a copy of \href{https://osf.io/xr7jv}{osf.io/xr7jv}, which has space names as
+#'       column names, terms as row names, and indices as values, with 0 indicating the term is not
+#'       present in the associated space. \cr
+#'   }
+#' @family Latent Semantic Space functions
+#' @examples
+#' # just retrieve information about available spaces
+#' spaces = select.lsspace()
+#'
+#' # retrieve all spaces that used word2vec
+#' w2v_spaces = select.lsspace('word2vec')$selected
+#'
+#' \dontrun{
+#'
+#' # select spaces by terms
+#' select.lsspace(c(
+#'   'part-time', 'i/o', "'cause", 'brexit', 'debuffs'
+#' ))$selected[, c('terms', 'coverage')]
+#' }
+#' @export
+
+select.lsspace = function(query = NULL, dir = getOption('lingmatch.lspace.dir'),
+  get.map = FALSE, check.md5 = TRUE, mode = 'wb'){
+  dir = sub('/+$', '', dir)
+  map_path = paste0(dir, '/lma_term_map.rda')
+  if(!missing(query) && length(query) > 1) get.map = TRUE
+  if(!exists('lma_term_map')) lma_term_map = NULL
+  if(get.map && !(file.exists(map_path) || !is.null(lma_term_map))){
+    if(!file.exists(map_path)){
+      status = tryCatch(download.file('https://osf.io/download/xr7jv',
+        map_path, mode = mode), error = function(e) 1)
+      if(!status && check.md5){
+        fi = strsplit(readLines('https://api.osf.io/v2/files/xr7jv', 1, TRUE, FALSE, 'utf-8'), '[:,{}"]+')[[1]]
+        ck = md5sum(map_path)
+        if(fi[which(fi == 'md5') + 1] == ck){
+          load(map_path)
+          save(lma_term_map, file = map_path, compress = FALSE)
+        }else warning(paste0(
+          "The term map's MD5 (", ck, ') does not seem to match the one on record;\n',
+          'double check and try manually downloading at https://osf.io/9yzca/?show=revision'
+        ))
+      }
+    }
+  }
+  r = list(info = lss_info, selected = lss_info[NULL,])
+  r$info[, 'wiki'] = paste0('https://osf.io/489he/wiki/', rownames(lss_info))
+  r$info[, 'downloaded'] = grepl(paste(sub('\\..*$', '', list.files(dir, '\\.dat')), collapse = '|'),
+    rownames(r$info), TRUE)
+  if(get.map || missing(query)) if(!is.null(lma_term_map)){
+    r$term_map = lma_term_map
+  }else if(file.exists(map_path) && is.null(lma_term_map)){
+    load(map_path)
+    r$term_map = lma_term_map
+    rm(list = 'lma_term_map')
+  }
+  if(!missing(query)){
+    if(!is.character(query) && !is.null(colnames(query))) query = colnames(query)
+    if(length(query) > 1 && 'term_map' %in% names(r)){
+      query = tolower(query)
+      overlap = query[query %in% rownames(r$term_map)]
+      if(length(overlap)){
+        r$info$coverage = colMeans(r$term_map[overlap,] != 0)
+        r$selected = r$info[order(r$info$coverage, decreasing = TRUE)[1:5],]
+        r$space_terms = overlap
+      }else warning('query was treated as terms, but non were found')
+    }else{
+      if(!length(sel <- grep(query, rownames(lss_info), TRUE))){
+        collapsed = vapply(seq_len(nrow(lss_info)),
+          function(r) paste(c(rownames(lss_info)[r], lss_info[r,]), collapse = ' '), '')
+        if(!length(sel <- grep(query, collapsed, TRUE)))
+          sel <- grep(paste(strsplit(query, '[ ,]+')[[1]], collapse = '|'), collapsed, TRUE)
+      }
+      if(length(sel)) r$selected = r$info[sel,]
+    }
+  }
+  r
+}
+
 #' Download Latent Semantic Spaces
 #'
-#' Downloads the specified semantic space.
+#' Downloads the specified semantic space from \href{https://osf.io/489he}{osf.io/489he}.
 #'
-#' Spaces are slightly altered and reprocessed versions of those available at
-#' \url{https://sites.google.com/site/fritzgntr/software-resources/semantic_spaces}.
+#' @param space Name of the space you want to download. '100k' is the default, and
+#'  some other common options might be 'google', 'facebook', or 'glove'. See
+#'  \href{https://osf.io/489he/wiki/home}{osf.io/489he/wiki} for more information, and a full
+#'  list of spaces.
+#' @param include.terms Logical; if \code{FALSE}, only the \code{.dat.bz2} file is downloaded
+#'  (which only has numeric vectors).
+#' @param decompress Logical; if \code{TRUE} (default), decompresses the downloaded file
+#'  with the \code{bunzip2} system command assuming it is available (as indicated by
+#'  \code{Sys.which('bunzip2')}).
+#' @param check.md5 Logical; if \code{TRUE} (default), retrieves the MD5 checksum from OSF,
+#'  and compares it with that calculated from the downloaded file to check its integrity.
+#' @param mode A character specifying the file write mode; default is 'wb'. See
+#'  \code{\link{download.file}}.
+#' @param dir Directory in which to save the space; default is
+#'  \code{getOption('lingmatch.lspace.dir')}.
+#' @family Latent Semantic Space functions
+#' @examples
+#' \dontrun{
 #'
-#' Spaces can (sometimes) be downloaded directly from \url{https://www.myweb.ttu.edu/miserman/lsspaces/}.
-#' @param space name of the space you wish to download. Options include \code{'default'} and \code{'tasa'}.
-#' @param dir desired path to the downloaded space; default is '~/Latent Semantic Spaces'.
-#' @export
-#' @importFrom utils download.file unzip
+#' download.lsspace('glove_crawl')
+#' }
+#' @importFrom utils download.file
+#' @importFrom tools md5sum
 
-download.lsspace=function(space='default',dir='~/Latent Semantic Spaces'){
-  z=grepl('^l|^s|^z',space,TRUE)
-  if(!grepl('.',space,fixed=TRUE)) space=paste0(space,'.zip') else if(grepl('.sqlite',space,fixed=TRUE))
-    space=sub('.sqlite','.zip',space,fixed=TRUE)
-  space=match.arg(space,c('default.zip','tasa.zip'))
-  if(!dir.exists(dir)) dir.create(dir) else if(space%in%list.files(dir)){
-    if(z && !(uzf<-sub('.zip','.sqlite',space,fixed=TRUE))%in%list.files(dir)){
-      unzip(paste0(dir,'/',space),exdir=dir)
-      return(message(space,' uncompressed as ',uzf,' to ',dir))
-    }else stop(space,' already exists in ',dir)
+download.lsspace = function(space = '100k', include.terms = TRUE, decompress = TRUE,
+  check.md5 = TRUE, mode = 'wb', dir = getOption('lingmatch.lspace.dir')){
+  dir = sub('/+$', '', dir)
+  if(space == 'default') space = '100k'
+  name = grep(sub('\\..*$', '', space), rownames(lss_info), value = TRUE, fixed = TRUE)
+  if(!length(name)) name = grep(substr(space, 1, 4), rownames(lss_info), TRUE, value = TRUE)
+  if(!length(name)){
+    stop('space ', space, ' not recognized; see https://osf.io/489he/wiki/home for available spaces')
+  }else name = name[1]
+  urls = list(
+    info = function(id) paste0('https://api.osf.io/v2/files/', id),
+    dl = function(id) paste0('https://osf.io/download/', id),
+    versions = function(id) paste0('https://osf.io/', id, '/?show=revision')
+  )
+  if(!dir.exists(dir)) dir.create(dir)
+  dl = function(id, ext, ck){
+    s = urls$dl(id)
+    o = paste0(dir, '/', name, ext)
+    status = tryCatch(download.file(s, o, mode = mode), error = function(e) 1)
+    if(!status && check.md5){
+      fi = strsplit(readLines(urls$info(id), 1, TRUE, FALSE, 'utf-8'), '[:,{}"]+')[[1]]
+      ck = md5sum(o)
+      if(fi[which(fi == 'md5') + 1] != ck) warning(paste0(
+        'MD5 (', ck, ') does not seem to match the one on record;\n',
+        'double check and try manually downloading at ', urls$versions(id)
+      ))
+    }
+    if(status) warning('failed to download file from ', s, call. = FALSE)
+    status
   }
-  td=try(download.file(url<-paste0('https://www.myweb.ttu.edu/miserman/lsspaces/',space),paste0(dir,'/',space)),TRUE)
-  if(inherits(td,'try-error')) stop(if(grepl('Permission',td)) 'R does not have permission to save the file;' else
-    sub('^.* : ','',td),'\ndownload it directly from ',url,call.=FALSE)
-  if(z) unzip(paste0(dir,'/',space),exdir=dir)
-  message(space,' downloaded to ',dir)
+  status = if(include.terms) dl(lss_info[name, 'osf_terms'], '_terms.txt', check.md5) else 0
+  if(!status) status = dl(lss_info[name, 'osf_dat'], '.dat.bz2', check.md5)
+  if(!status && decompress){
+    if(Sys.which('bunzip2') == ''){
+      warning('could not find path to bunzip2 command for decompression')
+    }else{
+      o = paste0(dir, '/', name, '.dat.bz2')
+      status = tryCatch(system2('bunzip2', shQuote(path.expand(o))), error = function(e) 1)
+      if(status) warning(
+        'failed to decompress; might try this from a system console:\nbunzip2 "', path.expand(o), '"'
+      )
+    }
+  }
+  message('downloaded ', name, ':\n  ', paste0(dir, '/', name, c(if(!status && decompress) '.dat' else
+    '.dat.bz2', '_terms.txt'), collapse = '\n  '))
+}
+
+#' Standardize a Latent Semantic Space
+#'
+#' Reformat a .rda file which has a matrix with terms as row names, or a plain-text embeddings file
+#' which has a term at the start of each line, and consistent delimiting characters. Plain-text files
+#' are processed line-by-line, so large spaces can be reformatted RAM-conservatively.
+#'
+#' @param infile name of the .rda or plain-text file relative to \code{dir},
+#'   e.g., "default.rda" or "glove/glove.6B.300d.txt".
+#' @param name base name of the reformatted file and term file; e.g., "glove" would result in
+#'   \code{glove.dat} and \code{glove_terms.txt} in \code{outdir}.
+#' @param sep delimiting character between values in each line, e.g., \code{" "} or \code{"\\t"}.
+#'   Only applies to plain-text files.
+#' @param digits number of digits to round values to; default is 9.
+#' @param dir path to folder containing \code{infile}s; default is \code{getOption('lingmatch.lspace.dir')}.
+#' @param outdir path to folder in which to save standardized files; defaults to \code{dir}.
+#' @param remove a string with a regex pattern to be removed from term names (as in \code{gsub(}\code{remove,}
+#'   \code{"", term)}); default is \code{""}, which is ignored.
+#' @param term_check a string with a regex pattern by which to filter terms; i.e., only lines with fully
+#'   matched terms are written to the reformatted file. The default attempts to retain only regular words, including
+#'   those with dashes, foreword slashes, and periods. Set to an empty string (\code{""}) to write all lines
+#'   regardless of term.
+#' @param verbose logical; if \code{TRUE}, prints the current line number and its term to the console every 1,000 lines.
+#'   Only applies to plain-text files.
+#' @family Latent Semantic Space functions
+#' @examples
+#' \dontrun{
+#'
+#' # from https://sites.google.com/site/fritzgntr/software-resources/semantic_spaces
+#' standardize('EN_100k_lsa.rda', '100k_lsa')
+#'
+#' # from https://fasttext.cc/docs/en/english-vectors.html
+#' standardize('crawl-300d-2M.vec', 'facebook_crawl')
+#' }
+#' @export
+
+standardize.lsspace = function(infile, name, sep = ' ', digits = 9, dir = options('lingmatch.lspace.dir'),
+  outdir = dir, remove = '', term_check = "^[a-zA-Z]+$|^['a-zA-Z][a-zA-Z.'\\/-]*[a-zA-Z.]$", verbose = FALSE){
+  if(!is.character(term_check)) term_check = ''
+  ip = paste0(sub('/+$', '', dir), '/', infile)
+  op = paste0(sub('/+$', '', outdir), '/', name)
+  cop = options(scipen = digits + 1)
+  on.exit(options(cop))
+  if(!is.character(infile) || grepl('\\.rda$', infile)){
+    if(is.character(infile)){
+      f = load(ip)
+      o = get(f)
+    }else o = infile
+    m = max(o)
+    o = round(o, digits)
+    ot = rownames(o)
+    if(term_check != ''){
+      su = grepl(term_check, ot)
+      o = o[su,]
+      ot = ot[su]
+    }
+    if(remove != '') ot = gsub(remove, '', ot)
+    writeLines(ot, paste0(op, '_terms.txt'))
+    write(o, paste0(op, '.dat'), ncol(o))
+    if(is.character(infile)) rm(f, 'o')
+  }else reformat_embedding(ip, op, sep, digits, remove, term_check, verbose)
+  message('created ', op, '.dat\nfrom ', ip)
 }
 
 #' Categorize raw texts using a pattern-based dictionary
@@ -193,10 +417,14 @@ download.lsspace=function(space='default',dir='~/Latent Semantic Spaces'){
 #'   \code{boundary} will be set to \code{' '}, avoiding pattern matches within words. By default, dictionary
 #'   terms are left as entered.
 #' @param fixed Logical; if \code{FALSE}, patterns can be regular expressions.
-#' @param perl Logical; passed to \code{\link{strsplit}}. Set to \code{FALSE} if \code{fixed} is \code{TRUE}.
+#' @param perl Logical; passed to \code{\link{strsplit}}. This is set to \code{FALSE} if \code{fixed} is
+#'   \code{TRUE}.
 #' @param ncores Number of CPU cores to use. Default is number of cores - 2 if \code{text} has more than 100
 #'   entries. Otherwise, if not specified, only 1 core will be used.
+#' @seealso For applying term-based dictionaries (to a document-term matrix) see \code{\link{lma_termcat}}.
 #' @examples
+#' \dontrun{
+#'
 #' # example text
 #' text = c(
 #'   paste(
@@ -217,7 +445,7 @@ download.lsspace=function(space='default',dir='~/Latent Semantic Spaces'){
 #' tempori = read.csv('https://wwbp.org/downloads/public_data/temporalOrientationLexicon.csv')
 #'
 #' lma_patcat(text, tempori)
-#'
+#' }
 #' @export
 
 lma_patcat = function(text, dict, term = 'term', category = 'category', weight = 'weight',
@@ -344,7 +572,7 @@ lma_meta = function(text){
   text = gsub('^\\s+|\\s+$', '', text)
   dtm = lma_dtm(text, numbers = TRUE, punct = TRUE, urls = FALSE)
   terms = colnames(dtm)
-  dwm = dtm[, grepl('^[a-z]', terms), drop = FALSE]
+  dwm = dtm[, grepl("^[a-z']", terms), drop = FALSE]
   words = colnames(dwm)
   word_lengths = nchar(words)
   word_syllables = vapply(strsplit(words, 'a+[eu]*|e+a*|i+|o+[ui]*|u+|y+[aeiou]*'), length, 0) - 1
@@ -372,7 +600,7 @@ lma_meta = function(text){
     qmarks = if('?' %in% terms) dtm[, '?'] else 0,
     exclams = if('!' %in% terms) dtm[, '!'] else 0,
     quotes = if(any(su <- grepl('^[\'"]', terms))) rowSums(dtm[, su, drop = FALSE]) else 0,
-    apostrophes = vapply(strsplit(text, "[\u02bc]+|[A-z][\u0027\u0060\u2019]+[A-z]"), length, 0) - 1,
+    apostrophes = vapply(strsplit(text, "[\u02bc]+|[a-zA-Z][\u0027\u0060\u2019]+[a-zA-Z]"), length, 0) - 1,
     brackets = if(any(su <- grepl('[(\\)<>{\\}[]|\\]', terms))) rowSums(dtm[, su, drop = FALSE]) else 0,
     orgmarks = if(any(su <- grepl('[/:;-]', terms))) rowSums(dtm[, su, drop = FALSE]) else 0
   )))
@@ -380,10 +608,16 @@ lma_meta = function(text){
 
 #' English function word category lists
 #'
-#' Returns a list of function words based on the Linguistic Inquiry and Word Count 2015 dictionary.
+#' Returns a list of function words based on the Linguistic Inquiry and Word Count 2015 dictionary
+#' (in terms of category names -- words were selected independently).
 #' @param ... Numbers or letters corresponding to category names: ppron, ipron, article,
 #' adverb, conj, prep, auxverb, negate, quant, interrog, number, interjection, or special.
 #' @param as.regex Logical: if \code{FALSE}, lists are returned without regular expression.
+#' @param as.function Logical or a function: if specified and \code{as.regex} is \code{TRUE}, the selected dictionary
+#' will be collapsed to a regex string (terms separated by `|`) and function for matching characters to that
+#' string will be returned. The regex string is passed to the matching function (\code{\link{grepl}} by default)
+#' as a 'pattern' argument, with the first argument of the returned function being passed as an 'x' argument.
+#' See examples.
 #' @note
 #' The \code{special} category is not returned unless specifically requested. It is a list of regular expression
 #' strings attempting to capture special things like ellipses and emojis. If \code{special} is part of the returned list,
@@ -394,21 +628,35 @@ lma_meta = function(text){
 #' are treated as different -- as ellipses and emojis rather than as periods and parens and colons and such). When categorizing
 #' a dtm, the input dictionary is passed by the special lists to be sure the terms in the dtm match up with the dictionary
 #' (so, for example, ": (" would be replaced with "FROWN" in both the text and dictionary).
+#' @seealso To score texts with these categories, use \code{\link{lma_termcat}}.
 #' @examples
-#' #return the full dictionary (excluding special)
+#' # return the full dictionary (excluding special)
 #' lma_dict()
 #'
-#' #return the standard 7 category lsm categories
+#' # return the standard 7 category lsm categories
 #' lma_dict(1:7)
 #'
-#' #return just a few categories without regular expression
+#' # return just a few categories without regular expression
 #' lma_dict(neg, ppron, aux, as.regex=FALSE)
 #'
-#' #return special specifically
+#' # return special specifically
 #' lma_dict(special)
+#'
+#' # returning a function
+#' is.ppron = lma_dict(ppron, as.function = TRUE)
+#' is.ppron(c('i', 'am', 'you', 'were'))
+#'
+#' is.lsmcat = lma_dict(1:7, as.function = TRUE)
+#' is.lsmcat(c('a', 'frog', 'for', 'me'))
+#'
+#' ## use as a stopword filter
+#' is.stopword = lma_dict(as.function = TRUE)
+#' dtm = lma_dtm('Most of these words might not be all that relevant.')
+#' dtm[, !is.stopword(colnames(dtm))]
+#'
 #' @export
 
-lma_dict=function(...,as.regex=TRUE){
+lma_dict=function(..., as.regex = TRUE, as.function = FALSE){
   cats = as.character(substitute(...()))
   dict=list(
     ppron=c("^dae$","^dem$","^eir$","^eirself$","^em$","^he$","^he'","^her$","^hers$","^herself$","^hes$","^him$","^himself$",
@@ -521,6 +769,16 @@ lma_dict=function(...,as.regex=TRUE){
   )
   if('special'%in%names(cats)) as.regex=TRUE
   if(as.regex){
-    dict[cats]
+    if(!missing(as.function)){
+      dict = paste(unlist(dict[cats]), collapse = '|')
+      fun = if(is.function(as.function)) as.function else grepl
+      function(terms, ...){
+        args = list(...)
+        args$pattern = dict
+        args$x = terms
+        if(!is.function(as.function) && !'perl' %in% names(args)) args$perl = TRUE
+        do.call(fun, args)
+      }
+    }else dict[cats]
   }else lapply(dict[cats],function(l)gsub('\\^|\\$','',sub('(?<=[^$])$','*',l,perl=TRUE)))
 }

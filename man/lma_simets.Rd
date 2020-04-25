@@ -5,7 +5,8 @@
 \title{Calculate similarity between vectors}
 \usage{
 lma_simets(a, b = NULL, metric, group = NULL, agg = TRUE,
-  agg.mean = TRUE, pairwise = TRUE, symmetrical = FALSE, mean = FALSE)
+  agg.mean = TRUE, pairwise = TRUE, symmetrical = FALSE, mean = FALSE,
+  return.list = FALSE)
 }
 \arguments{
 \item{a}{vector or matrix. If a vector, \code{b} must also be provided. If a matrix and \code{b}
@@ -41,17 +42,25 @@ comparisons are made.}
 the results in the lower triangle are copied to the upper triangle.}
 
 \item{mean}{logical; if \code{TRUE}, a single mean for each metric is returned per row of \code{a}.}
+
+\item{return.list}{logical; if \code{TRUE}, a list-like object will always be returned, with an entry
+for each metric, even when only one metric is requested.}
 }
 \value{
 Output varies based on the dimensions of \code{a} and \code{b}:
   \tabular{ll}{
     \strong{output} \tab \strong{input} \cr
     a vector with a value per metric \tab only when \code{a} and \code{b} are both vectors \cr
-    a data.frame with a column per metric \tab any time a single value is expected per row:
+    a vector with a value per row \tab any time a single value is expected per row:
       \code{a} or \code{b} is a vector, \code{a} and \code{b} are matrices with the same number of rows
-      and \code{pairwise = FALSE}, a group is specified, or \code{mean = TRUE} \cr
-    a list with a sparse matrix per metric \tab pairwise comparisons within an \code{a} matrix or between
-      an \code{a} and \code{b} matrix\cr
+      and \code{pairwise = FALSE}, a group is specified, or \code{mean = TRUE}, and only one metric is
+      requested \cr
+    a data.frame with a column per metric \tab when multiple metrics are requested in the previous
+      case\cr
+    sparse matrix \tab pairwise comparisons within an \code{a} matrix or between
+      an \code{a} and \code{b} matrix, when only 1 metric is requested\cr
+    a list with a sparse matrix per metric \tab when multiple metrics are requested in the previous
+      case\cr
   }
 }
 \description{

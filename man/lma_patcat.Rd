@@ -43,7 +43,8 @@ terms are left as entered.}
 
 \item{fixed}{Logical; if \code{FALSE}, patterns can be regular expressions.}
 
-\item{perl}{Logical; passed to \code{\link{strsplit}}. Set to \code{FALSE} if \code{fixed} is \code{TRUE}.}
+\item{perl}{Logical; passed to \code{\link{strsplit}}. This is set to \code{FALSE} if \code{fixed} is
+\code{TRUE}.}
 
 \item{ncores}{Number of CPU cores to use. Default is number of cores - 2 if \code{text} has more than 100
 entries. Otherwise, if not specified, only 1 core will be used.}
@@ -52,6 +53,8 @@ entries. Otherwise, if not specified, only 1 core will be used.}
 Categorize raw texts using a pattern-based dictionary
 }
 \examples{
+\dontrun{
+
 # example text
 text = c(
   paste(
@@ -72,5 +75,8 @@ text = c(
 tempori = read.csv('https://wwbp.org/downloads/public_data/temporalOrientationLexicon.csv')
 
 lma_patcat(text, tempori)
-
+}
+}
+\seealso{
+For applying term-based dictionaries (to a document-term matrix) see \code{\link{lma_termcat}}.
 }

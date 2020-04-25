@@ -27,3 +27,5 @@ vignettes/
 # Utilities
 build.R
 .Rproj.user
+*.csl
+*.bib

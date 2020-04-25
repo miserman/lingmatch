@@ -17,7 +17,8 @@
 
 <pre>
 lma_simets(a, b = NULL, metric, group = NULL, agg = TRUE,
-  agg.mean = TRUE, pairwise = TRUE, symmetrical = FALSE, mean = FALSE)
+  agg.mean = TRUE, pairwise = TRUE, symmetrical = FALSE, mean = FALSE,
+  return.list = FALSE)
 </pre>
 
 
@@ -98,6 +99,11 @@ the results in the lower triangle are copied to the upper triangle.</p>
 <td>
 <p>logical; if <code>TRUE</code>, a single mean for each metric is returned per row of <code>a</code>.</p>
 </td></tr>
+<tr valign="top"><td><code>return.list</code></td>
+<td>
+<p>logical; if <code>TRUE</code>, a list-like object will always be returned, with an entry
+for each metric, even when only one metric is requested.</p>
+</td></tr>
 </table>
 
 
@@ -125,14 +131,25 @@ threads to 4.
 </tr>
 <tr>
  <td style="text-align: left;">
-    a data.frame with a column per metric </td><td style="text-align: left;"> any time a single value is expected per row:
+    a vector with a value per row </td><td style="text-align: left;"> any time a single value is expected per row:
       <code>a</code> or <code>b</code> is a vector, <code>a</code> and <code>b</code> are matrices with the same number of rows
-      and <code>pairwise = FALSE</code>, a group is specified, or <code>mean = TRUE</code> </td>
+      and <code>pairwise = FALSE</code>, a group is specified, or <code>mean = TRUE</code>, and only one metric is
+      requested </td>
 </tr>
 <tr>
  <td style="text-align: left;">
-    a list with a sparse matrix per metric </td><td style="text-align: left;"> pairwise comparisons within an <code>a</code> matrix or between
-      an <code>a</code> and <code>b</code> matrix</td>
+    a data.frame with a column per metric </td><td style="text-align: left;"> when multiple metrics are requested in the previous
+      case</td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+    sparse matrix </td><td style="text-align: left;"> pairwise comparisons within an <code>a</code> matrix or between
+      an <code>a</code> and <code>b</code> matrix, when only 1 metric is requested</td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+    a list with a sparse matrix per metric </td><td style="text-align: left;"> when multiple metrics are requested in the previous
+      case</td>
 </tr>
 <tr>
  <td style="text-align: left;">
