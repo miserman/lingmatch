@@ -31,9 +31,9 @@ or path to a file (.txt or .csv, with texts separated by one or more lines/rows)
     \code{comp = type=='prompt'} would make a logical vector identifying prompts, assuming
     "type" was the name of a column in \code{data}, or a variable in the global environment,
     and the value "prompt" marked the prompts).
-  \item If a matrix-like object (having multiple rows and columns), this will be treated as a
-    sort of dtm, assuming there are common column names between \code{x} and \code{comp} (e.g.,
-    if you had prompt and response texts that were already processed separately).
+  \item If a matrix-like object (having multiple rows and columns), or a named vector, this will
+    be treated as a sort of dtm, assuming there are common (column) names between \code{x} and
+    \code{comp} (e.g., if you had prompt and response texts that were already processed separately).
 }}
 
 \item{data}{A matrix-like object as a reference for column names, if variables are refereed to in
@@ -44,8 +44,8 @@ other arguments (e.g., \code{lingmatch(text, data=data)} would be the same as
 groups.}
 
 \item{...}{Passes arguments to \code{\link{lma_dtm}}, \code{\link{lma_weight}},
-\code{\link{lma_lspace}}, \code{\link{lma_termcat}}, and/or \code{\link{lma_simets}},
-depending on \code{x} and \code{comp}.}
+\code{\link{lma_termcat}}, and/or \code{\link{lma_lspace}},
+depending on \code{x} and \code{comp}, and \code{\link{lma_simets}}.}
 
 \item{comp.data}{A matrix-like object as a reference to \code{comp} variables.}
 
@@ -65,8 +65,8 @@ Comparisons section.}
 \item{type}{A character at least partially matching 'lsm' or 'lsa'; applies default settings
 aligning with the standard calculations of each type:
 \tabular{ll}{
-  LSM \tab \code{lingmatch(text, weight='count', dict=lma_dict(1:9), metric='canberra')}\cr
-  LSA \tab \code{lingmatch(text, weight='tfidf', space='default', metric='cosine')}\cr
+  LSM \tab \code{lingmatch(text, weight='freq', dict=lma_dict(1:9), metric='canberra')}\cr
+  LSA \tab \code{lingmatch(text, weight='tfidf', space='100k_lsa', metric='cosine')}\cr
 }}
 }
 \description{
@@ -118,6 +118,39 @@ specific knowledge, so it can't always (readily) be done automatically. Variable
 }
 }
 
+\examples{
+# compare single strings
+lingmatch('Compare this sentence.', 'With this other sentence.')
+
+# compare each entry in a character vector with...
+texts = c(
+  'One bit of text as an entry...',
+  'Maybe multiple sentences in an entry. Maybe essays or posts or a book.',
+  'Could be lines or a column from a read-in file...'
+)
+
+## one another
+lingmatch(texts)
+
+## the first
+lingmatch(texts, 1)
+
+## the next
+lingmatch(texts, 'seq')
+
+## the set average
+lingmatch(texts, mean)
+
+## other entries in a group
+lingmatch(texts, group = c('a', 'a', 'b'))
+
+## one another, without stop words
+lingmatch(texts, exclude = 'function')
+
+## a standard average (based on function words)
+lingmatch(texts, 'auto', dict = lma_dict(1:9))
+
+}
 \references{
 Babcock, M. J., Ta, V. P., & Ickes, W. (2014). Latent semantic similarity and language style
   matching in initial dyadic interactions. \emph{Journal of Language and Social Psychology, 33},

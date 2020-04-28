@@ -161,11 +161,11 @@ struct Compare : public Worker{
         if(metrics[0]) jaccard[p] = sj / si;
         if(metrics[1]) euclidean[p] = 1 / (1 + sqrt(sse));
         if(metrics[2]) canberra[p] = 1 - sne / ncol;
-      }
-      if(metrics[3] && asq && bsq) cosine[p] = cp / sqrt(asq) / sqrt(bsq);
-      if(metrics[4]){
-        x = (cp / ncol - ma * mb) / sqrt(asq / ncol - pow(ma, 2)) / sqrt(bsq / ncol - pow(mb, 2));
-        pearson[p] = !isnan(x) ? x : NA_REAL;
+        if(metrics[3] && asq && bsq) cosine[p] = cp / sqrt(asq) / sqrt(bsq);
+        if(metrics[4]){
+          x = (cp / ncol - ma * mb) / sqrt(asq / ncol - pow(ma, 2)) / sqrt(bsq / ncol - pow(mb, 2));
+          pearson[p] = !isnan(x) ? x : NA_REAL;
+        }
       }
     }
     if(!--ck){

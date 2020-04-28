@@ -1,6 +1,6 @@
 .onLoad = function(lib, pkg){
-  if(!'lingmatch.lspace.dir' %in% names(options()))
-    options(list(lingmatch.lspace.dir = path.expand('~/Latent Semantic Spaces')))
+  if(is.null(getOption('lingmatch.lspace.dir')))
+    options(lingmatch.lspace.dir = path.expand('~/Latent Semantic Spaces'))
 }
 
 #' Linguistic Matching and Accommodation
@@ -38,9 +38,9 @@
 #'     \code{comp = type=='prompt'} would make a logical vector identifying prompts, assuming
 #'     "type" was the name of a column in \code{data}, or a variable in the global environment,
 #'     and the value "prompt" marked the prompts).
-#'   \item If a matrix-like object (having multiple rows and columns), this will be treated as a
-#'     sort of dtm, assuming there are common column names between \code{x} and \code{comp} (e.g.,
-#'     if you had prompt and response texts that were already processed separately).
+#'   \item If a matrix-like object (having multiple rows and columns), or a named vector, this will
+#'     be treated as a sort of dtm, assuming there are common (column) names between \code{x} and
+#'     \code{comp} (e.g., if you had prompt and response texts that were already processed separately).
 #' }
 #' @param data A matrix-like object as a reference for column names, if variables are refereed to in
 #'   other arguments (e.g., \code{lingmatch(text, data=data)} would be the same as
@@ -48,8 +48,8 @@
 #' @param group A logical or factor-like vector the same length as \code{nrow(x)}, used to defined
 #'   groups.
 #' @param ... Passes arguments to \code{\link{lma_dtm}}, \code{\link{lma_weight}},
-#'   \code{\link{lma_lspace}}, \code{\link{lma_termcat}}, and/or \code{\link{lma_simets}},
-#'   depending on \code{x} and \code{comp}.
+#'   \code{\link{lma_termcat}}, and/or \code{\link{lma_lspace}},
+#'   depending on \code{x} and \code{comp}, and \code{\link{lma_simets}}.
 #' @param comp.data A matrix-like object as a reference to \code{comp} variables.
 #' @param comp.group The Column name of the grouping variable(s) in \code{comp.data}; if
 #'   \code{group} contains references to column names, and \code{comp.group} is not specified,
@@ -63,8 +63,8 @@
 #' @param type A character at least partially matching 'lsm' or 'lsa'; applies default settings
 #'   aligning with the standard calculations of each type:
 #'   \tabular{ll}{
-#'     LSM \tab \code{lingmatch(text, weight='count', dict=lma_dict(1:9), metric='canberra')}\cr
-#'     LSA \tab \code{lingmatch(text, weight='tfidf', space='default', metric='cosine')}\cr
+#'     LSM \tab \code{lingmatch(text, weight='freq', dict=lma_dict(1:9), metric='canberra')}\cr
+#'     LSA \tab \code{lingmatch(text, weight='tfidf', space='100k_lsa', metric='cosine')}\cr
 #'   }
 #' @section Grouping and Comparisons:
 #' Defining groups and comparisons can sometimes be a bit complicated, and requires dataset
@@ -113,10 +113,41 @@
 #'
 #' Niederhoffer, K. G., & Pennebaker, J. W. (2002). Linguistic style matching in social interaction.
 #'   \emph{Journal of Language and Social Psychology, 21}, 337-360.
+#' @examples
+#' # compare single strings
+#' lingmatch('Compare this sentence.', 'With this other sentence.')
+#'
+#' # compare each entry in a character vector with...
+#' texts = c(
+#'   'One bit of text as an entry...',
+#'   'Maybe multiple sentences in an entry. Maybe essays or posts or a book.',
+#'   'Could be lines or a column from a read-in file...'
+#' )
+#'
+#' ## one another
+#' lingmatch(texts)
+#'
+#' ## the first
+#' lingmatch(texts, 1)
+#'
+#' ## the next
+#' lingmatch(texts, 'seq')
+#'
+#' ## the set average
+#' lingmatch(texts, mean)
+#'
+#' ## other entries in a group
+#' lingmatch(texts, group = c('a', 'a', 'b'))
+#'
+#' ## one another, without stop words
+#' lingmatch(texts, exclude = 'function')
+#'
+#' ## a standard average (based on function words)
+#' lingmatch(texts, 'auto', dict = lma_dict(1:9))
 #'
 #' @export
 #' @import methods Matrix
-#' @importFrom stats na.omit cor dpois
+#' @importFrom stats na.omit dpois
 #' @importFrom Rcpp sourceCpp
 #' @importFrom RcppParallel RcppParallelLibs
 #' @useDynLib lingmatch, .registration = TRUE
@@ -157,8 +188,15 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
     }
     ta=tryCatch(eval(ta,data,parent.frame(2)),error=function(e)NULL)
     if(length(ta)==0) ta=tryCatch(eval(a,globalenv()),error=function(e)NULL)
-    if(is.null(ta)) ta=tryCatch(eval(ta,data),error=function(e)NULL)
-    if(is.null(ta)) stop('could not find ',a,call.=FALSE)
+    if(is.null(ta)) ta=tryCatch(eval(a,data),error=function(e)NULL)
+    if(is.null(ta)){
+      p = 2
+      while(is.null(ta) && p < 99){
+        p = p + 1
+        ta = tryCatch(eval(a, parent.frame(p)), error = function(e) NULL)
+      }
+    }
+    if(is.null(ta)) stop('could not find ', deparse(a), call. = FALSE)
     ta
   }
   gd=function(a,data=NULL){
@@ -169,17 +207,20 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
     if(is.factor(r)) r=as.character(r)
     r
   }
-  # weight, map, and/or categorize
+  # weight, categorize, and/or map
   wmc = function(a){
-    if(length(dsp$w) != 0) a = do.call(lma_weight, c(list(a), lapply(dsp$w, eval, parent.frame(2))))
-    if(length(dsp$m) != 0) a = do.call(lma_lspace, c(list(a), lapply(dsp$m, eval, parent.frame(2))))
-    if(length(dsp$c) != 0) a = do.call(lma_termcat, c(list(a), lapply(dsp$c, eval, parent.frame(2))))
+    if(!is.null(colnames(a)) || (length(dsp$c) == 0 && length(dsp$m) == 0)){
+      if(length(dsp$w) != 0) a = do.call(lma_weight, c(list(a), lapply(dsp$w, eval, parent.frame(2))))
+      if(length(dsp$c) != 0) a = do.call(lma_termcat, c(list(a), lapply(dsp$c, eval, parent.frame(2))))
+      if(length(dsp$m) != 0) a = do.call(lma_lspace, c(list(a), lapply(dsp$m, eval, parent.frame(2))))
+    }
     a
   }
   # initial data parsing
   # x
   if(missing(x)) opt$x=file.choose()
-  if(!missing(data)) x=gd(opt$x,data)
+  if(is.function(x)) stop('enter a character vector or matrix-like object as x')
+  if(!missing(data)) x = gd(opt$x, data) else if(!missing(group)) data = x
   rx=NROW(x)
   cx=NCOL(x)
   # comp
@@ -187,6 +228,8 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
     comp=gd(opt$comp,if(missing(comp.data)) data else comp.data)
     if(is.logical(comp)) comp=which(comp)
     if(missing(comp.data) && !is.null(colnames(comp))) comp.data=comp
+  }else if(missing(comp) && missing(group) && missing(comp.data) && missing(comp.group)){
+    opt$comp = comp = 'pairwise'
   }else opt$comp='mean'
   if(is.factor(x)) x=as.character(x)
   if(is.factor(comp)) comp=as.character(comp) else if(is.data.frame(comp))
@@ -208,12 +251,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
       do.wmc=FALSE
       if(!missing(comp)){
         if(any(class(comp)%in%c('matrix','data.frame'))){
-          if(missing(group) && missing(comp.group)){
-            comp=mean
-            opt[c('comp','comp.data')]=c('mean',opt$comp)
-          }else{
-            if(all(dn%in%colnames(comp))) comp=comp[,dn]
-          }
+          if(all(dn%in%colnames(comp))) comp=comp[,dn]
         }else{
           if(is.character(comp) && (length(comp)>1 || grepl(' ',comp,fixed=TRUE)))
             comp=wmc(do.call(lma_dtm,c(list(comp),dsp$p)))
@@ -231,15 +269,15 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
     x=do.call(lma_dtm,c(list(x),dsp$p))
   }
   if(is.data.frame(comp)) comp=as.matrix(comp)
-  cc=if(is.numeric(comp)) 1 else if(is.character(comp)){
+  cc=if(is.numeric(comp) && (!is.null(comp.data) || is.null(dim(comp)))) 1 else if(is.character(comp)){
     comp=tolower(comp)
     2
   }else 0
   # group and order
   agc = c('c', 'list', 'cbind', 'data.frame')
-  if(!missing(group)) group=if(length(opt$group)>1 && as.character(opt$group[1]) %in% agc
-    && !grepl('\\$|\\[',as.character(opt$group[1])))
-    lapply(as.character(opt$group)[-1],gv,data) else{
+  if(!missing(group) && !(is.null(colnames(data)) && rx == length(opt$group) - 1))
+    group = if(length(opt$group) > 1 && as.character(opt$group[1]) %in% agc
+    && !grepl('[$[]',as.character(opt$group[1]))) lapply(as.character(opt$group)[-1],gv,data) else{
       if(!is.null(data) && is.character(opt$group) && length(opt$group) < nrow(data)){
         if(!all(opt$group %in% colnames(data)))
           stop('group appears to be column names, but were not found in data')
@@ -256,7 +294,7 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
     cg=opt[[if(missing(comp.group)) 'group' else 'comp.group']]
     if(!is.null(cg)){
       cg=if(!is.null(comp.data) && length(cg)>1
-        && as.character(cg[1]) %in% agc && !grepl('\\$|\\[',as.character(cg[1]))){
+        && as.character(cg[1]) %in% agc && !grepl('[$[]',as.character(cg[1]))){
         lapply(as.character(cg[-1]),gv,comp.data)
       }else if(is.character(cg)){
         if(cg %in% colnames(comp.data)) list(comp.data[, cg]) else
@@ -293,21 +331,6 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
     }else warning('length(order) != nrow(x), so order was not applied', call. = FALSE) else
       warning('failed to apply order', call. = FALSE)
   }
-  if(cc==2 && (length(comp)>1 || any(grepl(' ',comp,fixed=TRUE)))){
-    comp=do.call(lma_dtm,c(list(comp),dsp$p))
-    cc=1
-  }
-  # if comp appears to be a dtm, unifying x and comp
-  if(cc==1 && !is.null(names(comp))) comp=t(as.matrix(comp))
-  cr=nrow(comp)
-  cn=colnames(comp)
-  if(cc==1 && !is.null(cr) && !is.null(cn) && any(vapply(dsp[-1],length,0)>0)){
-    nn=cn[!cn%in%colnames(x)]
-    if(length(nn)!=0) x=cbind(x,matrix(0,nrow(x),length(nn),dimnames=list(c(),nn)))
-    x=rbind(matrix(0,cr,ncol(x),dimnames=list(c(),colnames(x))),x)
-    x[seq_len(cr),cn]=comp
-    comp=seq_len(cr)
-  }
   if(is.character(x) || (is.data.frame(x) && any(!vapply(x, class, '') %in% c('numeric', 'integer'))))
     for(i in seq_len(ncol(x))) x[, i] = as.numeric(x[, i])
   if('data.frame' %in% class(x) && any(ckvc <- !vapply(seq_len(ncol(x)), function(col) class(x[, col])[1], '') %in%
@@ -327,6 +350,21 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
       stop('x is all 0s after processing')
   }
   nc=ncol(x)
+  if(cc==2 && (length(comp)>1 || any(grepl(' ',comp,fixed=TRUE)))){
+    comp=do.call(lma_dtm,c(list(comp),dsp$p))
+    cc=1
+  }
+  # if comp appears to be a dtm, unifying x and comp
+  if(cc==1 && !is.null(names(comp))) comp=t(as.matrix(comp))
+  cr=nrow(comp)
+  cn=colnames(comp)
+  if(cc==1 && !is.null(cr) && !is.null(cn) && any(vapply(dsp[-1],length,0)>0)){
+    nn=cn[!cn%in%colnames(x)]
+    if(length(nn)!=0) x=cbind(x,matrix(0,nrow(x),length(nn),dimnames=list(c(),nn)))
+    x=rbind(matrix(0,cr,ncol(x),dimnames=list(c(),colnames(x))),x)
+    x[seq_len(cr),cn]=comp
+    comp=seq_len(cr)
+  }
   # finalizing comp
   if(cc==1 || opt$comp=='text'){
     comp.data=x[comp,,drop=FALSE]
@@ -337,7 +375,8 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
         rownames(comp.data) = comp.group = unique(comp.group)
         opt$comp = paste(opt$comp, opt$group, 'group means')
       }else if(nrow(comp.data) == length(comp.group)) rownames(comp.data) = comp.group
-    }
+    }else if(nrow(comp.data) == 1) comp.data = structure(as.numeric(comp.data[1,]),
+      names = colnames(comp.data))
     x=x[-comp,,drop=FALSE]
   }else if(cc==2){
     ckp=FALSE
@@ -348,8 +387,8 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
       ckp=TRUE
       comp.data=lsm_profiles[p,,drop=FALSE]
     }else if(grepl('^au',comp)){
-      p=colMeans(x,na.rm=TRUE)
-      p=which.max(apply(lsm_profiles,1,function(r)cor(r,p)))
+      p = colMeans(x, na.rm=TRUE)
+      p = which.max(lma_simets(lsm_profiles, p, 'pearson'))
       opt$comp=paste('auto:',names(p))
       ckp=TRUE
       comp.data=lsm_profiles[p,,drop=FALSE]
@@ -414,10 +453,10 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
         opt$comp=paste(opt$comp.data,opt$comp)
         sal$b=comp.data=if(is.null(nrow(comp.data))) comp.data else
           if(compmeanck) colMeans(comp.data,na.rm=TRUE) else apply(na.omit(comp.data),2,comp)
-      }else if(is.null(nrcd<-nrow(comp.data)) || (nrcd==1 || nrcd==rx)) sal$b=comp.data else
-        warning('a group must be specified when comp has more than one row', call. = FALSE)
+      }else sal$b=comp.data
     }else if(ckf) sal$b=comp.data=if(compmeanck) colMeans(x,na.rm=TRUE) else
       apply(na.omit(x),2,comp)
+    if(!'b' %in% names(sal) && (is.numeric(comp) || !is.null(dim(comp)))) sal$b = comp
     sim=do.call(lma_simets,c(list(x),sal))
   }else{
     cks=!is.null(speaker)
@@ -426,32 +465,50 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
     ckq=cc==2 && opt$comp=='sequential'
     if(gl==1){
       if(opt$comp!='pairwise'){
-        ckmc=FALSE
-        if(!ckc && ckf){
-          ckmc=TRUE
-          opt$comp=paste(opt$group,'group',opt$comp)
-          comp.data=as.data.frame(matrix(NA,length(gs),nc,dimnames=list(gs,colnames(x))))
-        }
-        for(g in gs){
-          su=sim[,1]==g
-          if(cks){
-            sal$group=speaker[su]
-            sal$mean=TRUE
-          }else if(ckc){
-            if(nrow(cc<-comp.data[if(!is.null(comp.group)) comp.group==g else g,,drop=FALSE])==1)
-              sal$b=cc else warning('comp.data has too few/many rows in group ',g, call. = FALSE)
-          }else if(ckf) if(sum(su)>1) sal$b=if(compmeanck) colMeans(x[su,],na.rm=TRUE) else
-            apply(na.omit(x[su,]),2,comp) else{
+        if(opt$comp == 'sequential'){
+          group = sim[, 1]
+          sim = do.call(rbind, lapply(gs, function(g){
+            su = which(group == g)
+            s = speaker[su]
+            r = if(length(su) < 2 || length(unique(s)) < 2){
+              data.frame(group = g, structure(as.list(numeric(length(mets)) + 1),
+                names = inp$metric), row.names = paste(su, collapse = ', '))
+            }else{
+              sal$group = s
+              r = do.call(lma_simets, c(list(x[su,, drop = FALSE]), sal))
+              rs = as.integer(unlist(strsplit(rownames(r), '[^0-9]+')))
+              rownames(r) = strsplit(do.call(sprintf, c(
+                paste(gsub('[0-9]+', '%i', rownames(r)), collapse = '|'), as.list(rs - 1 + su[1])
+              )), '|', fixed = TRUE)[[1]]
+              data.frame(group = g, r)
+            }
+          }))
+        }else{
+          ckmc=FALSE
+          if(!ckc && ckf){
+            ckmc=TRUE
+            opt$comp=paste(opt$group,'group',opt$comp)
+            comp.data=as.data.frame(matrix(NA,length(gs),nc,dimnames=list(gs,colnames(x))))
+          }
+          for(g in gs){
+            su=sim[,1]==g
+            if(ckc){
+              if(nrow(cc<-comp.data[if(!is.null(comp.group)) comp.group==g else g,,drop=FALSE])==1)
+                sal$b=cc else warning('comp.data has too few/many rows in group ',g, call. = FALSE)
+            }else if(ckf) if(sum(su)>1) sal$b=if(compmeanck) colMeans(x[su,],na.rm=TRUE) else
+              apply(na.omit(x[su,]),2,comp) else{
+                if(ckmc) comp.data[g,] = x[su,]
+                sim[su,mets]=1
+                next
+              }
+            if(!is.null(sal$b) && ckmc) comp.data[g,]=sal$b
+            if(sum(su)==1 && is.null(sal$b)){
               sim[su,mets]=1
               next
             }
-          if(!is.null(sal$b) && ckmc) comp.data[g,]=sal$b
-          if(sum(su)==1 && is.null(sal$b)){
-            sim[su,mets]=1
-            next
+            tm=do.call(lma_simets,c(list(x[su,,drop=FALSE]),sal))
+            sim[su, mets] = tm
           }
-          tm=do.call(lma_simets,c(list(x[su,,drop=FALSE]),sal))
-          sim[su,mets]=if(cks) c(NA,tm) else tm
         }
       }else{
         sal$symmetrical=if('symmetrical'%in%names(dsp$s)) dsp$s$symmetrical else TRUE

@@ -1,0 +1,45 @@
+context('lma_lspace')
+
+dir = getOption('lingmatch.lspace.dir')
+map = paste0(dir, '/lma_term_map.rda')
+files = list.files(dir, '\\.dat$', full.names = TRUE)
+skip_if(
+  is.null(dir) || !dir.exists(dir) || !file.exists(map) ||
+  !length(files), 'embeddings files not downloaded'
+)
+
+spaces = select.lsspace()
+names = gsub('^.+/|\\.dat$', '', files)
+name = names[which(names %in% rownames(spaces$info))[1]]
+
+skip_if(is.na(name), 'no recognized .dat file')
+
+terms = names(which(spaces$term_map[, name] != 0))[1:5000]
+space = matrix(scan(
+  paste0(dir, '/', name, '.dat'), nlines = 5000,
+  quiet = TRUE, quote = '', comment.char = '', na.strings = ''
+), 5000, spaces$info[name, 'dimensions'], byrow = TRUE, dimnames = list(terms))
+
+test_that('random reads align', {
+  sel = sample(terms, 1000)
+  read_c = lma_lspace(sel, name)
+  read_r = lma_lspace(sel, name, use.scan = TRUE)
+  expect_equal(read_c, read_r)
+  expect_equal(read_c, space[sel,])
+})
+
+texts = vapply(seq_len(50), function(d) paste0(c(sample(c('aaaa', 'bbbb'), 1), sample(
+  terms, sample(100, 1), TRUE, prob = sort(rbeta(length(terms), .01, 1), TRUE)
+)), collapse = ' '), '')
+dtm = lma_dtm(texts)
+
+test_that('mapping works', {
+  overlap = colnames(dtm)[colnames(dtm) %in% terms]
+  mapped = lma_lspace(dtm, name)
+  expect_equal(mapped, dtm[, overlap] %*% space[overlap,])
+  mapped_sim = lma_simets(mapped, 'cosine')
+  expect_equivalent(mapped_sim, lingmatch(dtm, space = name)$sim)
+  expect_equivalent(mapped_sim, lingmatch(texts, space = space)$sim)
+  expect_equivalent(mapped_sim, lingmatch(dtm, space = space)$sim)
+  expect_equivalent(mapped_sim, lingmatch(mapped, space = space)$sim)
+})

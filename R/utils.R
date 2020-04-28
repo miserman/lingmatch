@@ -359,10 +359,10 @@ download.lsspace = function(space = '100k', include.terms = TRUE, decompress = T
 #' \dontrun{
 #'
 #' # from https://sites.google.com/site/fritzgntr/software-resources/semantic_spaces
-#' standardize('EN_100k_lsa.rda', '100k_lsa')
+#' standardize.lsspace('EN_100k_lsa.rda', '100k_lsa')
 #'
 #' # from https://fasttext.cc/docs/en/english-vectors.html
-#' standardize('crawl-300d-2M.vec', 'facebook_crawl')
+#' standardize.lsspace('crawl-300d-2M.vec', 'facebook_crawl')
 #' }
 #' @export
 
