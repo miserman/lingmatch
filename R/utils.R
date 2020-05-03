@@ -281,6 +281,7 @@ select.lsspace = function(query = NULL, dir = getOption('lingmatch.lspace.dir'),
 #'
 #' download.lsspace('glove_crawl')
 #' }
+#' @export
 #' @importFrom utils download.file
 #' @importFrom tools md5sum
 

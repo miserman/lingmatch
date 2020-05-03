@@ -90,7 +90,7 @@ sapply(spaces, lma_simets, metric = 'cosine')
 
 \dontrun{
 
-# map to a pretained space
+# map to a pretrained space
 ddm = lma_lspace(dtm, '100k')
 
 # load the matching subset of the space
