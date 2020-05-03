@@ -6,7 +6,8 @@
 \usage{
 lma_dtm(text, exclude = NULL, context = NULL, numbers = FALSE,
   punct = FALSE, urls = TRUE, emojis = FALSE, to.lower = TRUE,
-  word.break = " +", dc.min = 0, dc.max = Inf, sparse = TRUE)
+  word.break = " +", dc.min = 0, dc.max = Inf, sparse = TRUE,
+  tokens.only = FALSE)
 }
 \arguments{
 \item{text}{Texts to be processed. This can be a vector (such as a column in a data frame)
@@ -49,6 +50,14 @@ Default is 0 (no limit).}
 is Inf (no limit).}
 
 \item{sparse}{Logical: if \code{FALSE}, a regular matrix is returned.}
+
+\item{tokens.only}{Logical: if \code{TRUE}, returns a list rather than a matrix:
+\tabular{ll}{
+  \code{tokens} \tab A vector of indices with terms as names. \cr
+  \code{frequencies} \tab A vector of counts with terms as names. \cr
+  \code{WC} \tab A vector of term counts for each document. \cr
+  \code{indices} \tab A list with a vector of token indices for each document. \cr
+}}
 }
 \description{
 Creates a document-term matrix (dtm) from a set of texts.

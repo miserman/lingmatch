@@ -32,7 +32,7 @@ lma_weight(dtm, weight = "count", to.freq = TRUE, freq.complete = TRUE,
       frequency\cr
     \code{df} \tab \code{log(colSums(dtm > 0))} \tab log of binary document sum\cr
     \code{poisson} \tab \code{1 - dpois(0, colSums(dtm) / nrow(dtm))} \tab Poisson-predicted
-      erm distribution\cr
+      term distribution\cr
     \code{ridf} \tab \code{idf - log(poisson)} \tab residual inverse document frequency;
       gives uncommon words more weight\cr
     \code{normal} \tab \code{1 / colSums(dtm^2)^.5} \tab normalized document frequency\cr

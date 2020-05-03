@@ -6,8 +6,8 @@
 using namespace Rcpp;
 
 // match_terms
-List match_terms(const List& tokens, const CharacterVector& terms, const LogicalVector& isword, const IntegerVector& dim, const bool& complete);
-RcppExport SEXP _lingmatch_match_terms(SEXP tokensSEXP, SEXP termsSEXP, SEXP iswordSEXP, SEXP dimSEXP, SEXP completeSEXP) {
+List match_terms(const List& tokens, const CharacterVector& terms, const LogicalVector& isword, const IntegerVector& dim, const bool& complete, const bool& tokensonly);
+RcppExport SEXP _lingmatch_match_terms(SEXP tokensSEXP, SEXP termsSEXP, SEXP iswordSEXP, SEXP dimSEXP, SEXP completeSEXP, SEXP tokensonlySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -16,7 +16,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const LogicalVector& >::type isword(iswordSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type dim(dimSEXP);
     Rcpp::traits::input_parameter< const bool& >::type complete(completeSEXP);
-    rcpp_result_gen = Rcpp::wrap(match_terms(tokens, terms, isword, dim, complete));
+    Rcpp::traits::input_parameter< const bool& >::type tokensonly(tokensonlySEXP);
+    rcpp_result_gen = Rcpp::wrap(match_terms(tokens, terms, isword, dim, complete, tokensonly));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -91,7 +92,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_lingmatch_match_terms", (DL_FUNC) &_lingmatch_match_terms, 5},
+    {"_lingmatch_match_terms", (DL_FUNC) &_lingmatch_match_terms, 6},
     {"_lingmatch_vector_similarity", (DL_FUNC) &_lingmatch_vector_similarity, 3},
     {"_lingmatch_calculate_similarities", (DL_FUNC) &_lingmatch_calculate_similarities, 4},
     {"_lingmatch_reformat_embedding", (DL_FUNC) &_lingmatch_reformat_embedding, 7},

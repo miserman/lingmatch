@@ -667,6 +667,13 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
 #' @param dc.max Numeric: excludes terms appearing in more than the set number of documents. Default
 #'   is Inf (no limit).
 #' @param sparse Logical: if \code{FALSE}, a regular matrix is returned.
+#' @param tokens.only Logical: if \code{TRUE}, returns a list rather than a matrix:
+#'   \tabular{ll}{
+#'     \code{tokens} \tab A vector of indices with terms as names. \cr
+#'     \code{frequencies} \tab A vector of counts with terms as names. \cr
+#'     \code{WC} \tab A vector of term counts for each document. \cr
+#'     \code{indices} \tab A list with a vector of token indices for each document. \cr
+#'   }
 #' @note
 #' This is a relatively simple way to make a dtm. To calculate the (more or less) standard forms of
 #' LSM and LSS, a somewhat raw dtm should be fine, because both processes essentially use
@@ -687,7 +694,22 @@ lingmatch=function(x,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.grou
 #' @export
 
 lma_dtm = function(text, exclude = NULL, context = NULL, numbers = FALSE, punct = FALSE, urls = TRUE,
-  emojis = FALSE, to.lower = TRUE, word.break = ' +', dc.min = 0, dc.max = Inf, sparse = TRUE){
+  emojis = FALSE, to.lower = TRUE, word.break = ' +', dc.min = 0, dc.max = Inf, sparse = TRUE,
+  tokens.only = FALSE){
+  if(is.list(text) && all(c('tokens', 'indices') %in% names(text))){
+    m = do.call(rbind, lapply(seq_along(text$indices), function(i){
+      inds = as.factor(text$indices[[i]])
+      cbind(i, as.integer(levels(inds)), tabulate(inds))
+    }))
+    dtm = sparseMatrix(m[, 1], m[, 2], x = m[, 3], dimnames = list(NULL, names(text$tokens)))
+    if(!sparse) dtm = as.matrix(dtm)
+    attr(dtm, 'colsums') = text$frequencies
+    attr(dtm, 'type') = 'count'
+    attr(dtm, 'WC') = text$WC
+    attr(dtm, 'opts') = attr(text, 'opts')
+    attr(dtm, 'time') = attr(text, 'time')
+    return(dtm)
+  }
   if(is.null(text)) stop(substitute(text),' not found')
   text = paste(' ', text, ' ')
   st = proc.time()[[3]]
@@ -745,26 +767,38 @@ lma_dtm = function(text, exclude = NULL, context = NULL, numbers = FALSE, punct 
   text = strsplit(text, word.break)
   words = sort(unique(unlist(text)))
   words = words[!words == '']
-  if(!is.null(exclude)){
-    if(is.list(exclude)) exclude = unlist(exclude, use.names = FALSE)
-    if(!any(grepl('^', exclude, fixed = TRUE))) exclude = gsub('\\^\\*|\\*\\$', '', paste0('^', exclude, '$'))
-    if(any(ck <- grepl('[[({]', exclude) + grepl('[})]|\\]', exclude) == 1))
-      exclude[ck] = gsub('([([{}\\])])', '\\\\\\1', exclude[ck], perl = TRUE)
-    words = grep(paste(exclude, collapse = '|'), words, value = TRUE, invert = TRUE)
+  if(tokens.only){
+    m = match_terms(
+      text, words, !grepl('^[[:punct:]]$|^repellipsis$', words),
+      c(length(text), length(words)), is.null(exclude), TRUE
+    )
+    names(m) = c('tokens', 'frequencies', 'WC', 'indices')
+    m$tokens = m$tokens + 1
+    m$tokens = sort(m$tokens)
+    names(m$frequencies) = names(m$tokens)
+    m$indices = unname(split(m$indices + 1, rep(seq_along(text), m$WC)))
+  }else{
+    if(!is.null(exclude)){
+      if(is.list(exclude)) exclude = unlist(exclude, use.names = FALSE)
+      if(!any(grepl('^', exclude, fixed = TRUE))) exclude = gsub('\\^\\*|\\*\\$', '', paste0('^', exclude, '$'))
+      if(any(ck <- grepl('[[({]', exclude) + grepl('[})]|\\]', exclude) == 1))
+        exclude[ck] = gsub('([([{}\\])])', '\\\\\\1', exclude[ck], perl = TRUE)
+      words = grep(paste(exclude, collapse = '|'), words, value = TRUE, invert = TRUE)
+    }
+    msu = match_terms(
+      text, words, !grepl('^[[:punct:]]$|^repellipsis$', words),
+      c(length(text), length(words)), is.null(exclude), FALSE
+    )
+    m = if(sparse) as(msu[[1]], 'dgCMatrix') else as.matrix(msu[[1]])
+    su = msu[[3]] > dc.min & msu[[3]] < dc.max
+    names(msu[[3]]) = words
+    if(any(!su)) m = m[, su]
+    attr(m, 'WC') = unlist(msu[[2]], use.names = FALSE)
+    attr(m, 'colsums') = msu[[3]]
+    attr(m, 'type') = 'count'
+    if(!missing(dc.min) || !missing(dc.max)) attr(m, 'info') =
+      paste('a lim of', dc.min, 'and', dc.max, 'left', sum(su), 'of', length(words), 'unique terms')
   }
-  msu = match_terms(
-    text, words, !grepl('^[[:punct:]]$|^repellipsis$', words),
-    c(length(text), length(words)), is.null(exclude)
-  )
-  m = if(sparse) as(msu[[1]], 'dgCMatrix') else as.matrix(msu[[1]])
-  su = msu[[3]] > dc.min & msu[[3]] < dc.max
-  names(msu[[3]]) = words
-  if(any(!su)) m = m[, su]
-  attr(m, 'WC') = unlist(msu[[2]], use.names = FALSE)
-  attr(m, 'colsums') = msu[[3]]
-  attr(m, 'type') = 'count'
-  if(!missing(dc.min) || !missing(dc.max)) attr(m, 'info') =
-    paste('a lim of', dc.min, 'and', dc.max, 'left', sum(su), 'of', length(words), 'unique terms')
   attr(m, 'opts') = c(numbers = numbers, punct = punct, urls = urls, to.lower = to.lower)
   attr(m, 'time') = c(dtm = proc.time()[[3]] - st)
   m
@@ -796,7 +830,7 @@ lma_dtm = function(text, exclude = NULL, context = NULL, numbers = FALSE, punct 
 #'       frequency\cr
 #'     \code{df} \tab \code{log(colSums(dtm > 0))} \tab log of binary document sum\cr
 #'     \code{poisson} \tab \code{1 - dpois(0, colSums(dtm) / nrow(dtm))} \tab Poisson-predicted
-#'       erm distribution\cr
+#'       term distribution\cr
 #'     \code{ridf} \tab \code{idf - log(poisson)} \tab residual inverse document frequency;
 #'       gives uncommon words more weight\cr
 #'     \code{normal} \tab \code{1 / colSums(dtm^2)^.5} \tab normalized document frequency\cr
@@ -954,6 +988,9 @@ lma_weight=function(dtm,weight='count',to.freq=TRUE,freq.complete=TRUE,log.base=
 #' @param map.space Logical: if \code{FALSE}, the original vectors of \code{space} for terms
 #'   found in \code{dtm} are returned. Otherwise \code{dtm} \code{\%*\%} \code{space} is returned,
 #'   excluding uncommon columns of \code{dtm} and rows of \code{space}.
+#' @param fill.missing Logical: if \code{TRUE} and terms are being extracted from a space, includes
+#'   terms not found in the space as rows of 0s, such that the returned matrix will have a row
+#'   for every requested term.
 #' @param term_map A matrix with \code{space} as a column name, terms as row names, and indices of
 #'   the terms in the given space as values, or a numeric vector of indices with terms as names, or
 #'   a character vector or terms corresponding to rows of the space. This is used instead of reading
@@ -968,7 +1005,7 @@ lma_weight=function(dtm,weight='count',to.freq=TRUE,freq.complete=TRUE,log.base=
 #'   dimensions as columns is returned.
 #' @param use.scan Logical: if \code{TRUE}, reads in the rows of \code{space} with \code{\link{scan}}.
 #' @param dir Path to a folder containing spaces. Default is \code{getOption('lingmatch.lspace.dir')};
-#'   change with options(lingmatch.lspace.dir = 'desired/path').
+#'   change with \code{options(lingmatch.lspace.dir} \code{= 'desired/path')}.
 #' @note
 #' A traditional latent semantic space is a selection of right singular vectors from the singular
 #' value decomposition of a dtm (\code{svd(dtm)$v[, 1:k]}, where \code{k} is the selected number of
@@ -1005,7 +1042,7 @@ lma_weight=function(dtm,weight='count',to.freq=TRUE,freq.complete=TRUE,log.base=
 #'
 #' \dontrun{
 #'
-#' # map to a pretained space
+#' # map to a pretrained space
 #' ddm = lma_lspace(dtm, '100k')
 #'
 #' # load the matching subset of the space
@@ -1024,8 +1061,8 @@ lma_weight=function(dtm,weight='count',to.freq=TRUE,freq.complete=TRUE,log.base=
 #' }
 #' @export
 
-lma_lspace = function(dtm = '', space, map.space = TRUE, term_map = NULL, dim.cutoff = .5,
-  keep.dim = FALSE, use.scan = FALSE, dir = getOption('lingmatch.lspace.dir')){
+lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, term_map = NULL,
+  dim.cutoff = .5, keep.dim = FALSE, use.scan = FALSE, dir = getOption('lingmatch.lspace.dir')){
   if(is.character(dtm) && length(dtm) == 1 && dtm != ''){
     if(missing(use.scan)) use.scan = TRUE
     space = dtm
@@ -1067,24 +1104,24 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, term_map = NULL, dim.cu
       space_path = paste0(dir, '/', ts[1])
       name = sub('\\..*$', '', ts[1])
       if(name %in% colnames(term_map)) term_map = term_map[term_map[, name] != 0, name]
-      rex = function(inds, f, sep = ' '){
-        nc = length(strsplit(readLines(f, 1), sep)[[1]])
+      rex = function(inds, f){
+        nc = length(strsplit(readLines(f, 1), '\\s+')[[1]])
         l = length(inds)
+        all = all(seq_len(l) == inds)
         r = matrix(0, l, nc)
         i = 1
         con = file(f, 'r')
         on.exit(close(con))
         while(i <= l){
-          if(l == inds[l]){
+          if(all){
             n = l
           }else{
             n = 1
             while(i + n < l && inds[i + n - 1] == inds[i + n] - 1) n = n + 1
           }
           r[seq_len(n) + i - 1,] = matrix(scan(
-            con, n = n * nc, sep = sep, quiet = TRUE,
-            skip = (if(i == 1) inds[i] else inds[i] - inds[i - 1]) - 1,
-            quote = '', comment.char = '', na.strings = ''
+            con, n = n * nc, quiet = TRUE, skip = (if(i == 1) inds[i] else
+              inds[i] - inds[i - 1]) - 1, quote = '', comment.char = '', na.strings = ''
           ), n, nc, byrow = TRUE)
           i = i + n
         }
@@ -1092,16 +1129,25 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, term_map = NULL, dim.cu
       }
       if(!is.null(term_map)){
         if(is.character(term_map)) term_map = structure(seq_along(term_map), names = term_map)
-        inds = as.numeric(sort(if(length(terms) == 1 && terms == '') term_map else
-          term_map[names(term_map) %in% terms]))
+        su = which(names(term_map) %in% terms)
+        inds = as.numeric(sort(if(length(terms) == 1 && terms == '') term_map else term_map[su]))
         if(length(inds)){
           space = if(use.scan) rex(inds, space_path) else t(extract_indices(inds, space_path))
           rownames(space) = ts = names(term_map)[inds]
         }else stop('no matching terms in space ', space)
       }else{
-        if(!file.exists(paste0(dir, '/', name, '_terms.txt')))
-          stop('terms file (', space, '_terms.txt) not found in dir (', dir, ')')
-        space_terms = readLines(paste0(dir, '/', name, '_terms.txt'))
+        if(!file.exists(paste0(dir, '/', name, '_terms.txt'))){
+          if(file.exists(paste0(dir, '/lma_term_map.rda'))){
+            lma_term_map = NULL
+            load(paste0(dir, '/lma_term_map.rda'))
+            if(!is.null(lma_term_map) && !is.null(colnames(lma_term_map)) && name %in% colnames(lma_term_map)){
+              space_terms = names(lma_term_map[lma_term_map[, name] != 0, name])
+            }else stop(
+              'could not find terms file (', space, '_terms.txt) in space (', dir, '),',
+              'nor retrieve terms from them term map (lma_term_map.rda).'
+            )
+          }else stop('terms file (', space, '_terms.txt) not found in dir (', dir, ')')
+        }else space_terms = readLines(paste0(dir, '/', name, '_terms.txt'))
         su = if(length(terms) == 1 && terms == ''){
           terms = space_terms
           !logical(length(space_terms))
@@ -1130,6 +1176,13 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, term_map = NULL, dim.cu
         ts = terms[su]
         space = t(space[, ts, drop = FALSE])
       }else stop('no matching terms in provided space')
+    }
+    if(fill.missing){
+      su = which(!terms %in% rownames(space))
+      if(length(su)){
+        space = rbind(space, matrix(0, length(su), ncol(space), dimnames = list(terms[su])))
+        space = space[terms,]
+      }
     }
     if(map.space){
       rep = length(ts) / ncol(dtm)

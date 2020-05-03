@@ -38,3 +38,16 @@ test_that('emojis works', {
   expect_equal(colnames(lma_dtm(text, emojis = TRUE)), c('repfrown', 'repsmile', 'word'))
   expect_true(all(lma_dtm(text, emojis = TRUE) == 3))
 })
+
+test_that('tokens.only lines up', {
+  words = vapply(seq_len(200), function(w)
+    paste0(sample(letters, sample(9, 1)), collapse = ''), '')
+  texts = vapply(seq_len(10), function(d){
+    paste0(sample(words, sample(100, 1), TRUE), collapse = ' ')
+  }, '')
+  dtm = lma_dtm(texts)
+  tokens = lma_dtm(texts, tokens.only = TRUE)
+  expect_equal(texts, vapply(tokens$indices, function(inds)
+    paste(names(tokens$tokens)[inds], collapse = ' '), ''))
+  expect_equivalent(lma_dtm(tokens), dtm)
+})

@@ -19,9 +19,9 @@ and <code>space</code> is missing).
 <h3>Usage</h3>
 
 <pre>
-lma_lspace(dtm = "", space, map.space = TRUE, term_map = NULL,
-  dim.cutoff = 0.5, keep.dim = FALSE, use.scan = FALSE,
-  dir = getOption("lingmatch.lspace.dir"))
+lma_lspace(dtm = "", space, map.space = TRUE, fill.missing = FALSE,
+  term_map = NULL, dim.cutoff = 0.5, keep.dim = FALSE,
+  use.scan = FALSE, dir = getOption("lingmatch.lspace.dir"))
 </pre>
 
 
@@ -48,6 +48,12 @@ If <code>dtm</code> is missing, the entire space will be loaded and returned.</p
 <p>Logical: if <code>FALSE</code>, the original vectors of <code>space</code> for terms
 found in <code>dtm</code> are returned. Otherwise <code>dtm</code> <code>%*%</code> <code>space</code> is returned,
 excluding uncommon columns of <code>dtm</code> and rows of <code>space</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>fill.missing</code></td>
+<td>
+<p>Logical: if <code>TRUE</code> and terms are being extracted from a space, includes
+terms not found in the space as rows of 0s, such that the returned matrix will have a row
+for every requested term.</p>
 </td></tr>
 <tr valign="top"><td><code>term_map</code></td>
 <td>
@@ -77,7 +83,7 @@ dimensions as columns is returned.</p>
 <tr valign="top"><td><code>dir</code></td>
 <td>
 <p>Path to a folder containing spaces. Default is <code>getOption('lingmatch.lspace.dir')</code>;
-change with options(lingmatch.lspace.dir = 'desired/path').</p>
+change with <code>options(lingmatch.lspace.dir</code> <code>= 'desired/path')</code>.</p>
 </td></tr>
 </table>
 

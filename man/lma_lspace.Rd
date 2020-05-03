@@ -4,9 +4,9 @@
 \alias{lma_lspace}
 \title{Latent Semantic Space (Embeddings) Operations}
 \usage{
-lma_lspace(dtm = "", space, map.space = TRUE, term_map = NULL,
-  dim.cutoff = 0.5, keep.dim = FALSE, use.scan = FALSE,
-  dir = getOption("lingmatch.lspace.dir"))
+lma_lspace(dtm = "", space, map.space = TRUE, fill.missing = FALSE,
+  term_map = NULL, dim.cutoff = 0.5, keep.dim = FALSE,
+  use.scan = FALSE, dir = getOption("lingmatch.lspace.dir"))
 }
 \arguments{
 \item{dtm}{A matrix with terms as column names, or a character vector of terms to be extracted
@@ -23,6 +23,10 @@ If \code{dtm} is missing, the entire space will be loaded and returned.}
 \item{map.space}{Logical: if \code{FALSE}, the original vectors of \code{space} for terms
 found in \code{dtm} are returned. Otherwise \code{dtm} \code{\%*\%} \code{space} is returned,
 excluding uncommon columns of \code{dtm} and rows of \code{space}.}
+
+\item{fill.missing}{Logical: if \code{TRUE} and terms are being extracted from a space, includes
+terms not found in the space as rows of 0s, such that the returned matrix will have a row
+for every requested term.}
 
 \item{term_map}{A matrix with \code{space} as a column name, terms as row names, and indices of
 the terms in the given space as values, or a numeric vector of indices with terms as names, or
@@ -42,7 +46,7 @@ dimensions as columns is returned.}
 \item{use.scan}{Logical: if \code{TRUE}, reads in the rows of \code{space} with \code{\link{scan}}.}
 
 \item{dir}{Path to a folder containing spaces. Default is \code{getOption('lingmatch.lspace.dir')};
-change with options(lingmatch.lspace.dir = 'desired/path').}
+change with \code{options(lingmatch.lspace.dir} \code{= 'desired/path')}.}
 }
 \description{
 Map a document-term matrix onto a latent semantic space, extract terms from a

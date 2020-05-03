@@ -18,7 +18,8 @@
 <pre>
 lma_dtm(text, exclude = NULL, context = NULL, numbers = FALSE,
   punct = FALSE, urls = TRUE, emojis = FALSE, to.lower = TRUE,
-  word.break = " +", dc.min = 0, dc.max = Inf, sparse = TRUE)
+  word.break = " +", dc.min = 0, dc.max = Inf, sparse = TRUE,
+  tokens.only = FALSE)
 </pre>
 
 
@@ -89,6 +90,35 @@ is Inf (no limit).</p>
 <tr valign="top"><td><code>sparse</code></td>
 <td>
 <p>Logical: if <code>FALSE</code>, a regular matrix is returned.</p>
+</td></tr>
+<tr valign="top"><td><code>tokens.only</code></td>
+<td>
+<p>Logical: if <code>TRUE</code>, returns a list rather than a matrix:
+</p>
+
+<table summary="Rd table">
+<tr>
+ <td style="text-align: left;">
+  <code>tokens</code> </td><td style="text-align: left;"> A vector of indices with terms as names. </td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+  <code>frequencies</code> </td><td style="text-align: left;"> A vector of counts with terms as names. </td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+  <code>WC</code> </td><td style="text-align: left;"> A vector of term counts for each document. </td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+  <code>indices</code> </td><td style="text-align: left;"> A list with a vector of token indices for each document. </td>
+</tr>
+<tr>
+ <td style="text-align: left;">
+</td>
+</tr>
+
+</table>
 </td></tr>
 </table>
 

@@ -80,13 +80,13 @@ Similarity between documents that have been mapped to embeddings is sometimes ca
 
 For Latent Semantic Similarity, the Document-Term Matrix is usually initially weighted (as by Term-Frequency Inverse Document Frequency or Pointwise Mutual Information schemes), and has stop words removed (though that isn't relevant in this case, since "are" appears in all documents), then mapped to a Singular Value Decomposition space, and similarity is measured by cosine similarity. These settings are default for the `'lsa'` type (using the "100k_lsa" space):
 ```{r}
-lingmatch(texts, 'pairwise', type = 'lsa')$sim
+lingmatch(texts, type = 'lsa')$sim
 ```
 
 For Word Centroid Distance, a space usually also has stop words removed, but might then be frequency weighted (normalized), mapped to a word2vec space, and have distances measured by Euclidean distance (which is inverted here for similarity):
 ```{r}
 lingmatch(
-  texts, 'pairwise', exclude = 'function', weight = 'freq',
+  texts, exclude = 'function', weight = 'freq',
   space = 'google', metric = 'euclidean'
 )$sim
 ```
@@ -110,7 +110,7 @@ spaces$selected[, c('terms', 'coverage')]
 ```
 
 ### Term similarity
-Another possible, though more intensive thing to look at might be similarities between words of particular interest. In out initial set of texts, for example, we were looking at animals in relation to attributes, so we might look at those relationships in whatever spaces you've downloaded:
+Another possible, though more intensive thing to look at might be similarities between words of particular interest. In our initial set of texts, for example, we were looking at animals in relation to attributes, so we might look at those relationships in whatever spaces you've downloaded:
 ```{r, fig.height=4, fig.width=10, dev='CairoSVG'}
 # retrieve names of downloaded spaces
 space_names = unique(sub('\\..*$', '', list.files(getOption('lingmatch.lspace.dir'), 'dat')))
