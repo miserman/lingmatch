@@ -965,7 +965,6 @@ lma_weight=function(dtm,weight='count',to.freq=TRUE,freq.complete=TRUE,log.base=
     if(pdw) dw=if(length(weight)>1) match.arg(weight[2],dws) else 'none'
     dtm=if(dw=='none') term(dtm,tw) else term(dtm,tw) * matrix(rep(doc(dtm, dw), nr), nr, byrow = TRUE)
   }
-  # dtm[!is.finite(dtm)] = 0
   attr(dtm, 'type') = c(freq = to.freq, term = tw, document = dw)
   dtm
 }
@@ -1063,6 +1062,7 @@ lma_weight=function(dtm,weight='count',to.freq=TRUE,freq.complete=TRUE,log.base=
 
 lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, term_map = NULL,
   dim.cutoff = .5, keep.dim = FALSE, use.scan = FALSE, dir = getOption('lingmatch.lspace.dir')){
+  dir = path.expand(dir)
   if(is.character(dtm) && length(dtm) == 1 && dtm != ''){
     if(missing(use.scan)) use.scan = TRUE
     space = dtm
@@ -1214,9 +1214,9 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, t
 #' @param partial Logical; if \code{TRUE} terms are partially matched (not padded by ^ and $).
 #' @param term.filter A regular expression string used to format the text of each term (passed to
 #'   \code{gsub}). For example, if terms are part-of-speech tagged (e.g.,
-#'   \code{'a_DT'}), \code{filter='_.*'} would remove the tag.
+#'   \code{'a_DT'}), \code{'_.*'} would remove the tag.
 #' @param term.break If a category has more than \code{term.break} characters, it will be processed
-#'   in chunks. Reduce from 25000 if you get a PCRE compilation error.
+#'   in chunks. Reduce from 20000 if you get a PCRE compilation error.
 #' @seealso For applying patttern-based dictionaries (to raw text) see \code{\link{lma_patcat}}.
 #' @examples
 #' # Score texts with the NRC Affect Intensity Lexicon
@@ -1245,10 +1245,10 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, t
 #' }
 #' @export
 
-lma_termcat=function(dtm,dict,term.weights=NULL,bias=NULL,escape=FALSE,partial=FALSE,term.filter=NULL,
-  term.break=25e3){
+lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = FALSE, partial = FALSE,
+  term.filter = NULL, term.break = 2e4){
   st=proc.time()[[3]]
-  if(missing(dict)) dict=lma_dict(1:9)
+  if(missing(dict)) dict = lma_dict(1:9)
   if(!is.list(dict)) dict = list(dict)
   if(is.null(names(dict))) names(dict) = seq_along(dict)
   if(is.null(term.weights)){
@@ -1264,6 +1264,8 @@ lma_termcat=function(dtm,dict,term.weights=NULL,bias=NULL,escape=FALSE,partial=F
     if(length(term.weights) > dlen && dlen == 1 && all(vapply(term.weights, length, 0) == length(dict[[1]])))
       dict = lapply(term.weights, function(ws) dict[[1]])
   }
+  dict = lapply(dict, function(cat) if(!is.character(cat))
+    if(is.null(names(cat))) as.character(cat) else names(cat) else cat)
   if(!is.null(bias) && is.null(names(bias)))
     names(bias) = if(length(bias) == length(dict)) names(dict) else seq_along(bias)
   for(n in names(dict)) if(!n %in% names(bias) && any(ii <- !is.na(dict[[n]]) & dict[[n]] == '_intercept')){
@@ -1271,53 +1273,67 @@ lma_termcat=function(dtm,dict,term.weights=NULL,bias=NULL,escape=FALSE,partial=F
     bias[n] = term.weights[[n]][ii]
     term.weights[[n]] = term.weights[[n]][!ii]
   }
-  dict=lapply(dict,as.character)
   if(is.character(dtm) || is.factor(dtm)) dtm=lma_dtm(dtm)
-  ats=attributes(dtm)[c('opts','WC','orientation','type')]
-  ats=ats[!vapply(ats,is.null,TRUE)]
-  atsn=names(ats)
+  ats = attributes(dtm)[c('opts', 'WC', 'type')]
+  ats = ats[!vapply(ats, is.null, TRUE)]
+  atsn = names(ats)
   cls = vapply(dict, function(cat) nchar(paste(cat, collapse = '')), 0)
-  if(any(cls>term.break)){
-    br=function(l, e = term.break){
-      f = round(cls[[l]] / e + .49)
-      l = length(dict[[l]])
-      e = round(l / f + .49)
-      o=lapply(seq_len(f),function(i)seq_len(e)+e*(i-1))
-      o[[f]]=o[[f]][o[[f]]<=l]
-      o
-    }
-    ag=list(dtm,escape=escape,term.filter=term.filter,term.break=term.break)
-    op=vapply(names(dict),function(cat){
-      if(cls[[cat]] > term.break) Reduce('+', lapply(br(cat), function(s) do.call(lma_termcat,
-        c(ag, dict = list(dict[[cat]][s]), term.weights = list(term.weights[[cat]][s]))
-      ))) else do.call(lma_termcat, c(ag, dict = list(dict[[cat]]), term.weights = list(term.weights[[cat]])))
-    },numeric(nrow(dtm)))
-  }else{
-    lab=lapply(dict,function(l) grepl('(',l,fixed=TRUE) + grepl(')',l,fixed=TRUE) == 1)
-    lab=lab[names(lab)[vapply(lab,any,TRUE)]]
+  odict = dict
+  formatdict = function(dict){
+    lab = lapply(dict, function(l) grepl('[{([]', l) + grepl('[])}]', l) == 1)
+    lab = lab[names(lab)[vapply(lab, any, TRUE)]]
     if(!partial){
       s = '^'
       e = '$'
     }else s = e = ''
-    if(length(lab)) for(l in names(lab)) dict[[l]][lab[[l]]]=gsub('([()])','\\\\\\1',
-      dict[[l]][lab[[l]]])
-    if(!is.null(term.weights)) odict = dict
-    dict=if(!escape) lapply(dict,function(l) paste(paste0(s, l, e), collapse='|')) else
-      lapply(dict, function(l)
-      if(length(l)!=1) gsub(paste0('\\*\\',e),'',paste(paste0(s,
-        gsub('([*.^$({[\\]})+?-])','\\\\\\1',l),e,collapse='|'))) else l)
-    ws=if(is.null(term.filter)) colnames(dtm) else gsub(term.filter,'',colnames(dtm),perl=TRUE)
-    if('opts'%in%atsn && !ats$opts['to.lower']) ws=tolower(ws)
+    rec = '([][)(}{*.^$+?-])'
+    if(length(lab)){
+      for(l in names(lab)) dict[[l]][lab[[l]]] = gsub('([][)(}{])', '\\\\\\1',
+        dict[[l]][lab[[l]]])
+      rec = '([*.^$+?-])'
+    }
+    if(!escape) lapply(dict, function(l) paste(paste0(s, l, e), collapse='|')) else
+      lapply(dict, function(l) gsub(paste0('\\*\\', e), '', paste(
+        paste0(s, gsub(rec, '\\\\\\1', l, perl = TRUE), e, collapse = '|')
+      )))
+  }
+  getweights = function(terms, cat){
+    if(!cat %in% names(term.weights)) term.weights[[cat]] = rep(1, cls[[cat]])
+    if(is.null(names(term.weights[[cat]])) && length(term.weights[[cat]]) == length(odict[[cat]]))
+      names(term.weights[[cat]]) = odict[[cat]]
+    if(any(mcn <- !terms %in% names(term.weights[[cat]])))
+      term.weights[[cat]][terms[mcn]] = 1
+    term.weights[[cat]][terms]
+  }
+  ws = if(is.null(term.filter)) colnames(dtm) else gsub(term.filter, '', colnames(dtm), perl = TRUE)
+  if('opts' %in% atsn && !ats$opts['to.lower']) ws = tolower(ws)
+  if(any(cls > term.break)){
+    br = function(l, e = term.break){
+      f = ceiling(cls[[l]] / e)
+      l = length(dict[[l]])
+      e = ceiling(l / f)
+      o = lapply(seq_len(f), function(i) seq_len(e) + e * (i - 1))
+      o[[f]] = o[[f]][o[[f]] <= l]
+      o
+    }
+    op = matrix(0, nrow(dtm), length(dict), dimnames = list(rownames(dtm), names(dict)))
+    for(cat in names(dict)){
+      matches = if(cls[[cat]] > term.break){
+        unique(unlist(lapply(br(cat), function(s)
+          grep(formatdict(list(dict[[cat]][s]))[[1]], ws, perl = TRUE))))
+      }else grep(formatdict(list(dict[[cat]])), ws, perl = TRUE)
+      op[, cat] = if(length(matches)){
+        weights = getweights(colnames(dtm)[matches], cat)
+        colSums(t(dtm[, matches, drop = FALSE]) * weights, na.rm = TRUE)
+      }else numeric(ncol(dtm))
+    }
+  }else{
+    dict = formatdict(dict)
     op = if(!is.null(term.weights)){
       vapply(names(dict), function(cat){
         su = dtm[, grep(dict[[cat]], ws, perl = TRUE), drop = FALSE]
-        if(!ncol(su)) return(numeric(nrow(su)))
-        if(!cat %in% names(term.weights)) term.weights[[cat]] = rep(1, cls[[cat]])
-        if(is.null(names(term.weights[[cat]])) && length(term.weights[[cat]]) == length(odict[[cat]]))
-          names(term.weights[[cat]]) = odict[[cat]]
-        if(any(mcn <- !colnames(su) %in% names(term.weights[[cat]])))
-          term.weights[[cat]][colnames(su)[mcn]] = 1
-        colSums(t(su) * term.weights[[cat]][colnames(su)], na.rm = TRUE)
+        weights = getweights(colnames(su), cat)
+        if(!ncol(su)) numeric(nrow(su)) else colSums(t(su) * weights, na.rm = TRUE)
       }, numeric(nrow(dtm)))
     }else{
       vapply(names(dict), function(cat) rowSums(dtm[, grep(dict[[cat]], ws, perl = TRUE),
@@ -1327,7 +1343,6 @@ lma_termcat=function(dtm,dict,term.weights=NULL,bias=NULL,escape=FALSE,partial=F
   if(!is.null(bias)) for(n in names(bias)) if(n %in% colnames(op)) op[, n] = op[, n] + bias[[n]]
   attr(op,'WC')=if('WC'%in%atsn) ats$WC else rowSums(dtm,na.rm=TRUE)
   attr(op, 'time') = c(attr(dtm, 'time'), termcat = proc.time()[[3]] - st)
-  if('orientation'%in%atsn) attr(op,'orientation')=ats$orientation
   if('type'%in%atsn) attr(op,'type')=ats$type
   op
 }

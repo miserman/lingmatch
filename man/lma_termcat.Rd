@@ -5,7 +5,7 @@
 \title{Document-Term Matrix Categorization}
 \usage{
 lma_termcat(dtm, dict, term.weights = NULL, bias = NULL, escape = FALSE,
-  partial = FALSE, term.filter = NULL, term.break = 25000)
+  partial = FALSE, term.filter = NULL, term.break = 20000)
 }
 \arguments{
 \item{dtm}{A matrix with words as column names.}
@@ -29,10 +29,10 @@ escaped. Set to \code{TRUE} if you get PCRE compilation errors.}
 
 \item{term.filter}{A regular expression string used to format the text of each term (passed to
 \code{gsub}). For example, if terms are part-of-speech tagged (e.g.,
-\code{'a_DT'}), \code{filter='_.*'} would remove the tag.}
+\code{'a_DT'}), \code{'_.*'} would remove the tag.}
 
 \item{term.break}{If a category has more than \code{term.break} characters, it will be processed
-in chunks. Reduce from 25000 if you get a PCRE compilation error.}
+in chunks. Reduce from 20000 if you get a PCRE compilation error.}
 }
 \description{
 Reduces the dimensions of a document-term matrix by dictionary-based categorization.

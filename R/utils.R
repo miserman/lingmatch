@@ -201,7 +201,7 @@ read.folder=function(path=NULL,segment=NULL,subdir=FALSE,ext='.txt',fixed=TRUE,
 
 select.lsspace = function(query = NULL, dir = getOption('lingmatch.lspace.dir'),
   get.map = FALSE, check.md5 = TRUE, mode = 'wb'){
-  dir = sub('/+$', '', dir)
+  dir = sub('/+$', '', path.expand(dir))
   map_path = paste0(dir, '/lma_term_map.rda')
   if(!missing(query) && length(query) > 1) get.map = TRUE
   if(!exists('lma_term_map')) lma_term_map = NULL
@@ -287,7 +287,7 @@ select.lsspace = function(query = NULL, dir = getOption('lingmatch.lspace.dir'),
 
 download.lsspace = function(space = '100k', include.terms = TRUE, decompress = TRUE,
   check.md5 = TRUE, mode = 'wb', dir = getOption('lingmatch.lspace.dir')){
-  dir = sub('/+$', '', dir)
+  dir = sub('/+$', '', path.expand(dir))
   if(space == 'default') space = '100k'
   name = grep(sub('\\..*$', '', space), rownames(lss_info), value = TRUE, fixed = TRUE)
   if(!length(name)) name = grep(substr(space, 1, 4), rownames(lss_info), TRUE, value = TRUE)
@@ -299,6 +299,7 @@ download.lsspace = function(space = '100k', include.terms = TRUE, decompress = T
     dl = function(id) paste0('https://osf.io/download/', id),
     versions = function(id) paste0('https://osf.io/', id, '/?show=revision')
   )
+  dir = path.expand(dir)
   if(!dir.exists(dir)) dir.create(dir)
   dl = function(id, ext, ck){
     s = urls$dl(id)
@@ -370,8 +371,8 @@ download.lsspace = function(space = '100k', include.terms = TRUE, decompress = T
 standardize.lsspace = function(infile, name, sep = ' ', digits = 9, dir = options('lingmatch.lspace.dir'),
   outdir = dir, remove = '', term_check = "^[a-zA-Z]+$|^['a-zA-Z][a-zA-Z.'\\/-]*[a-zA-Z.]$", verbose = FALSE){
   if(!is.character(term_check)) term_check = ''
-  ip = paste0(sub('/+$', '', dir), '/', infile)
-  op = paste0(sub('/+$', '', outdir), '/', name)
+  ip = paste0(sub('/+$', '', path.expand(dir)), '/', infile)
+  op = paste0(sub('/+$', '', path.expand(outdir)), '/', name)
   cop = options(scipen = digits + 1)
   on.exit(options(cop))
   if(!is.character(infile) || grepl('\\.rda$', infile)){

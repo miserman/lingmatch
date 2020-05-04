@@ -17,7 +17,7 @@
 
 <pre>
 lma_termcat(dtm, dict, term.weights = NULL, bias = NULL, escape = FALSE,
-  partial = FALSE, term.filter = NULL, term.break = 25000)
+  partial = FALSE, term.filter = NULL, term.break = 20000)
 </pre>
 
 
@@ -59,12 +59,12 @@ escaped. Set to <code>TRUE</code> if you get PCRE compilation errors.</p>
 <td>
 <p>A regular expression string used to format the text of each term (passed to
 <code>gsub</code>). For example, if terms are part-of-speech tagged (e.g.,
-<code>'a_DT'</code>), <code>filter='_.*'</code> would remove the tag.</p>
+<code>'a_DT'</code>), <code>'_.*'</code> would remove the tag.</p>
 </td></tr>
 <tr valign="top"><td><code>term.break</code></td>
 <td>
 <p>If a category has more than <code>term.break</code> characters, it will be processed
-in chunks. Reduce from 25000 if you get a PCRE compilation error.</p>
+in chunks. Reduce from 20000 if you get a PCRE compilation error.</p>
 </td></tr>
 </table>
 
