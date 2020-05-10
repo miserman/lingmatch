@@ -4,7 +4,7 @@
 \alias{lma_weight}
 \title{Document-Term Matrix Weighting}
 \usage{
-lma_weight(dtm, weight = "count", to.freq = TRUE, freq.complete = TRUE,
+lma_weight(dtm, weight = "count", normalize = TRUE, wc.complete = TRUE,
   log.base = 10, alpha = 1, doc.only = FALSE, percent = FALSE)
 }
 \arguments{
@@ -18,44 +18,49 @@ lma_weight(dtm, weight = "count", to.freq = TRUE, freq.complete = TRUE,
     \code{binary} \tab \code{(dtm > 0) * 1} \tab convert frequencies to 1s and 0s; remove
       differences in frequencies\cr
     \code{log} \tab \code{log(dtm + 1)} \tab log of frequencies\cr
-    \code{sqrt} \tab \code{dtm^.5} \tab square root of frequencies\cr
+    \code{sqrt} \tab \code{sqrt(dtm)} \tab square root of frequencies\cr
     \code{count} \tab \code{dtm} \tab unaltered; sometimes called term frequencies (tf)\cr
-    \code{amplify} \tab \code{dtm^1.1} \tab amplify difference in frequencies\cr
+    \code{amplify} \tab \code{dtm ^ alpha} \tab amplify difference in frequencies\cr
   }
 
   \strong{Document weights} (applied by column)
   \tabular{lll}{
+    \code{dflog} \tab \code{log(colSums(dtm > 0))} \tab log of binary term sum\cr
     \code{entropy} \tab \code{1 - rowSums(x * log(x) / log(ncol(x)))} \tab where
       \code{x = t(dtm) / colSums(dtm > 0)};
-      entropy of term-conditional document distribution; gives common words more weight\cr
-    \code{dfmax} \tab \code{log(apply(dtm, 2, max))} \tab log of maximum document
-      frequency\cr
-    \code{df} \tab \code{log(colSums(dtm > 0))} \tab log of binary document sum\cr
-    \code{poisson} \tab \code{1 - dpois(0, colSums(dtm) / nrow(dtm))} \tab Poisson-predicted
+      entropy of term-conditional term distribution\cr
+    \code{ppois} \tab \code{1 - ppois(alpha, colSums(dtm) / nrow(dtm))} \tab Poisson-predicted
       term distribution\cr
-    \code{ridf} \tab \code{idf - log(poisson)} \tab residual inverse document frequency;
-      gives uncommon words more weight\cr
-    \code{normal} \tab \code{1 / colSums(dtm^2)^.5} \tab normalized document frequency\cr
+    \code{dpois} \tab \code{1 - dpois(alpha, colSums(dtm) / nrow(dtm))} \tab Poisson-predicted
+      term density\cr
+    \code{dfmlog} \tab \code{log(diag(x[max.col(t(x)),]))} \tab log of maximum term
+      frequency\cr
+    \code{dfmax} \tab \code{diag(x[max.col(t(x)),])} \tab maximum term frequency\cr
+    \code{df} \tab \code{colSums(dtm > 0)} \tab sum of binary term occurance across documents\cr
     \code{idf} \tab \code{log(nrow(dtm) / colSums(dtm > 0))} \tab inverse document frequency\cr
+    \code{ridf} \tab \code{idf - log(poisson)} \tab residual inverse document frequency\cr
+    \code{normal} \tab \code{1 / colSums(dtm ^ 2) ^ .5} \tab normalized document frequency\cr
   }
 
 Alternatively, \code{'pmi'} or \code{'ppmi'} will apply a pointwise mutual information weighting
 scheme (with \code{'ppmi'} setting negative values to 0).}
 
-\item{to.freq}{logical: if \code{FALSE}, the dtm is not divided by document word-count before
+\item{normalize}{logical: if \code{FALSE}, the dtm is not divided by document word-count before
 being weighted.}
 
-\item{freq.complete}{if the dtm was made with \code{\link{lma_dtm}} (has a \code{'WC'}
+\item{wc.complete}{if the dtm was made with \code{\link{lma_dtm}} (has a \code{'WC'}
 attribute), word counts for
-frequencies can be based on the raw count (default; \code{freq.complete = TRUE}). If
-\code{freq.complete = FALSE}, or the dtm does not have a \code{'WC'} attribute,
+frequencies can be based on the raw count (default; \code{wc.complete = TRUE}). If
+\code{wc.complete = FALSE}, or the dtm does not have a \code{'WC'} attribute,
 \code{rowSums(dtm)} is used as word count.}
 
 \item{log.base}{the base of logs, applied to any weight using \code{\link[base]{log}}.
 Default is 10.}
 
 \item{alpha}{a scaling factor applied to document frequency as part of pointwise mutual
-information weighting.}
+information weighting, or amplify's power (\code{dtm ^ alpha}, which defaults to 1.1), or the
+specified quantile of the poisson distribution (\code{dpois(alpha,}
+\code{colSums(x, na.rm = TRUE) /} \code{nrow(x))}).}
 
 \item{doc.only}{logical: if \code{TRUE}, only document weights are returned (a single value for
 each term).}
@@ -66,19 +71,19 @@ each term).}
 Weight a document-term matrix.
 }
 \note{
-Term weights works to dampen differences in word count, with differences meaning increasingly less
-from \code{amplify} to \code{count} to \code{sqrt} to \code{log} to \code{binary}.
+Term weights works to adjust differences in counts within documents, with differences meaning
+increasingly more from \code{binary} to \code{log} to \code{sqrt} to \code{count} to \code{amplify}.
 
-Document weights work to treat words differently based on their frequency. \code{entropy},
-\code{dfmax}, \code{df}, and \code{poisson} (most to least intense over document frequencies of
-~15) give more frequent words more weight, whereas \code{ridf}, \code{normal}, and \code{idf},
-give less frequent words more weight.
+Document weights work to treat words differently based on their between-document or overall frequency.
+When term frequencies are constant, \code{dpois}, \code{idf}, \code{ridf}, and \code{normal} give
+less common words increasingly more weight, and \code{ppois}, \code{df}, \code{dflog}, and
+\code{entropy} give less common words increasingly less weight.
 
 \code{weight} can either be a vector with two characters, corresponding to term weight and
-document weight (e.g., \code{weight = c('count','idf')}), or it can be a string with term and
-document weights separated by any of \code{*-_, :;/\\\\} (e.g., \code{weight = 'count * idf'}).
+document weight (e.g., \code{c('count', 'idf')}), or it can be a string with term and
+document weights separated by any of \code{\*} (e.g., \code{'count \* idf'}).
 \code{'tf'} is also acceptable for \code{'count'}, and \code{'tfidf'} will be parsed as
-\code{c('count','idf')}, though this is a special case.
+\code{c('count', 'idf')}, though this is a special case.
 
 For \code{weight}, term or document weights can be entered individually; term weights alone will
 not apply any document weight, and document weights alone will apply a \code{'count'} term weight
@@ -87,19 +92,45 @@ instead of a weighted dtm).
 }
 \examples{
 # visualize term and document weights
-document_frequency = seq_len(20)
-op = list(y='term_frequency~document_frequency',line='connected',leg='outside')
 
-# term weights
-term_weights = c('binary','log','sqrt','count','amplify')
-term_frequency = sapply(term_weights,function(w)lma_weight(matrix(document_frequency,1),w,FALSE))
-if(require(splot)) splot(myl=c(0,25),options=op)
+## term weights
+term_weights = c('binary', 'log', 'sqrt', 'count', 'amplify')
+Weighted = sapply(term_weights, function(w) lma_weight(1:20, w, FALSE))
+if(require(splot)) splot(Weighted ~ 1:20, labx = 'Raw Count', lines = 'co')
 
-# document weights
-doc_weights = c('df','dfmax','idf','normal','poisson','ridf','entropy')
-term_frequency = sapply(doc_weights,function(w)
-  lma_weight(sapply(document_frequency,function(i)sample(0:i,5000,TRUE)),w,FALSE,doc.only=TRUE)
-)
-if(require(splot)) splot(myl=c(-3,3),mv.scale=TRUE,options=op)
+## document weights
+doc_weights = c('df', 'dflog', 'dfmax', 'dfmlog', 'idf', 'ridf',
+  'normal', 'dpois', 'ppois', 'entropy')
+weight_range = function(w, value = 1){
+  m = diag(20)
+  m[upper.tri(m, TRUE)] = if(is.numeric(value)) value else unlist(lapply(
+    1:20, function(v) rep(if(value == 'inverted') 21 - v else v, v)
+  ))
+  lma_weight(m, w, FALSE, doc.only = TRUE)
+}
+
+if(require(splot)){
+  category = rep(c('df', 'idf', 'normal', 'poisson', 'entropy'), c(4, 2, 1, 2, 1))
+  op = list(
+    laby = 'Relative (Scaled) Weight', labx = 'Document Frequency',
+    leg = 'outside', colorby = list(quote(category), grade = TRUE),
+    lines = 'connected', mv.scale = TRUE, note = FALSE
+  )
+  splot(
+    sapply(doc_weights, weight_range) ~ 1:20,
+    options = op, title = 'Same Term, Varying Document Frequencies',
+    sud = 'All term frequencies are 1.'
+  )
+  splot(
+    sapply(doc_weights, weight_range, value = 'sequence') ~ 1:20,
+    options = op, title = 'Term as Document Frequencies',
+    sud = 'Non-zero terms are the number of non-zero terms.'
+  )
+  splot(
+    sapply(doc_weights, weight_range, value = 'inverted') ~ 1:20,
+    options = op, title = 'Term Opposite of Document Frequencies',
+    sud = 'Non-zero terms are the number of zero terms + 1.'
+  )
+}
 
 }

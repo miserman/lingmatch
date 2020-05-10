@@ -32,8 +32,7 @@ text = c(
 
 ## Manual Processing
 
-We'll be taking a 'bag of words' approach to this text, meaning we don't care about sentence structure or the like,
-so we'll want to standardize the texts and split them into words.
+We'll be taking a 'bag of words' approach to this text, meaning we don't care about sentence structure or the like, so we'll want to standardize the texts and split them into words.
 
 The first step can be to convert all of the characters to lower case:
 ```{r}
@@ -44,9 +43,7 @@ words[1]
 
 Just to simplify things, we can also just remove punctuation, which will involve some regular expression.
 
-[Regular expression](https://en.wikipedia.org/wiki/Regular_expression) is a way to parse strings of characters
-in a refined way. Forms of regular expression are implemented in most programming languages. It can be tricky to
-think with, but offers a great deal of control when it comes to parsing text.
+[Regular expression](https://en.wikipedia.org/wiki/Regular_expression) is a way to parse strings of characters in a refined way. Forms of regular expression are implemented in most programming languages. It can be tricky to think with, but offers a great deal of control when it comes to parsing text.
 
 We can use the gsub function to replace all of the characters we specify with nothing.
 ```{r}
@@ -77,8 +74,7 @@ text[1]
 words[[1]]
 ```
 
-Now that we have all of our words separated, we can translate the original texts into numerical vectors,
-resulting in a document-term matrix (DTM).
+Now that we have all of our words separated, we can translate the original texts into numerical vectors, resulting in a document-term matrix (DTM).
 
 The first step can be to set up an empty matrix, with a row for each text, and a column for each unique word:
 ```{r}
@@ -91,10 +87,9 @@ dtm = matrix(0, length(text), length(unique_words), dimnames = list(NULL, unique
 dtm[, 1:10]
 ```
 
-Now we can fill the matrix with counts for each word for each text.
-We can count up all of the words at once, so we only have to loop through texts:
+Now we can fill the matrix with counts for each word for each text. We can count up all of the words at once, so we only have to loop through texts:
 ```{r}
-# this will perform whats inside the curly brackets as many times as there are texts
+# this will perform what's inside the curly brackets as many times as there are texts
 # i will be set to each number in the sequence, so i will equal 1 on the first run,
 # and so on the words and dtm objects all line up, so words[[i]] corresponds to dtm[i,]
 for(i in seq_along(words)){
@@ -115,8 +110,7 @@ dtm[, 1:10]
 
 ## Processing with lingmatch
 
-The lma_dtm function from the lingmatch package will do the same sort of processing
-we just walked through.
+The lma_dtm function from the lingmatch package will do the same sort of processing we just walked through.
 ```{r}
 # load in the lingmatch package
 library(lingmatch)
@@ -127,109 +121,145 @@ dtm[, 1:10]
 
 With even this simple level of processing, we can get some fun information:
 ```{r}
-# a count of words across documents, or document count
+# a count of words across documents (total/global term count; collection frequency)
 colSums(dtm)[1:5]
 
-# a count of words in each document, or word count
+# a count of words in each document (word counts; document length)
 rowSums(dtm)
 
-# correlation between words
+# correlation between words (word vector similarity)
 cor(dtm)[1:5, 1:5]
 
-# correlation between texts
-cor(t(dtm))
+# correlation between texts (document similarity)
+lma_simets(dtm, 'pearson')
 ```
 
-This is getting into the fundamentals of information extraction/retrieval,
-where, for example, term similarity can be used to enhance searches,
-and document similarity can be the search criteria.
-Document similarity is also secretly linguistic similarity.
+This is getting into the fundamentals of information extraction/retrieval, where, for example, term similarity can be used to enhance searches, and document similarity can be the search criteria. Document similarity is also secretly linguistic similarity.
 
 # Document/Term Weighting
 
-Using just raw word counts, common words have more weight -- potentially many times more.
-Often, we're more interested in less common words, as those tend to be more meaningful
-(they tend to be content words, as opposed to function words, and can better distinguish
-relevant texts to a search).
+Using just raw word counts, common words have more weight -- potentially many times more. Often, we're more interested in less common words, as those tend to be more meaningful (they tend to be content words, as opposed to function words, and can better distinguish relevant texts to a search).
 
-The most simple, straightforward way to adjust the weight of words is to transform their
-count values. For example, log transformations reduce the difference between values, and increase that
-reduction as values increase:
+The most simple, straightforward way to adjust the weight of words is to transform their count values. For example, log transformations reduce the difference between values, and increase that reduction as values increase:
 
 `log(2) - log(1)` = `r log(2) - log(1)`
 
 `log(5) - log(4)` = `r log(5) - log(4)`
 
-Another source of weighting can come from matrix-wide information, such as document or term counts.
-For example, dividing a term by its document frequency reduces the weight of higher frequency terms:
+Another source of weighting can come from matrix-wide information, such as document or term counts. For example, dividing a term by its document frequency reduces the weight of more frequent terms:
 
 `c(1, 1, 0) / sum(c(1, 1, 0))` = `r c(1, 1, 0) / sum(c(1, 1, 0))`
 
 `c(1, 1, 1) / sum(c(1, 1, 1))` = `r c(1, 1, 1) / sum(c(1, 1, 1))`
 
-Different weighting schemes work to either amplify or dampen difference in values or in document
-or term frequencies:
-```{r}
+Different weighting schemes work to either amplify or dampen difference in values or in document or term frequencies. See `?lma_weight` for more about available scheme.
+
+To get a better sense of the effects each scheme component might have, we can plot weighted by raw word counts across a range of document frequencies:
+```{r, fig.height=5, fig.width=10, dev='CairoSVG'}
 #load in the splot package
 library(splot)
 
-# set up plotting options
-op = list(y = 'term_frequency ~ document_frequency', line = 'connected', leg = 'outside')
-
-# and the range of document frequency
-document_frequency = seq_len(20)
-```
-
-Comparing term weights:
-```{r, fig.height=5, fig.width=10, dev='CairoSVG'}
+# available term weight types
 term_weights = c('binary', 'log', 'sqrt', 'count', 'amplify')
-term_frequency = sapply(term_weights, function(w)
-  lma_weight(matrix(document_frequency, 1), w, FALSE))
-splot(myl = c(0, 25), options = op)
+
+# apply each type of weighting to a 1:20 sequence
+Weighted = sapply(term_weights, function(w) lma_weight(1:20, w, FALSE))
+
+# plot weighted ~ raw term frequencies
+splot(Weighted ~ 1:20, labx = 'Raw Count', lines = 'connected')
 ```
 
-Comparing document weights (see `?lma_weight` for more about each scheme):
+And plot weighted by a range of variants of raw document frequencies. The y-axis shows relative values (z-scores), with positive being higher than the weight's mean. From this, you can see what types of terms the scheme gives more weight:
 ```{r, fig.height=5, fig.width=10, dev='CairoSVG'}
-doc_weights = c('df', 'dfmax', 'idf', 'normal', 'poisson', 'ridf', 'entropy')
-term_frequency = sapply(doc_weights,function(w)
-  lma_weight(sapply(document_frequency, function(i)
-    sample(0:i, 5000, TRUE)), w, FALSE, doc.only = TRUE)
+# available document weight types
+doc_weights = c('df', 'dflog', 'dfmax', 'dfmlog', 'normal',
+  'idf', 'ridf', 'dpois', 'ppois', 'entropy')
+
+# function to demonstrates weights over a range document frequencies
+weight_range = function(w, value = 1){
+  m = diag(20)
+  m[upper.tri(m, TRUE)] = if(is.numeric(value)) value else unlist(lapply(
+    1:20, function(v) rep(if(value == 'inverted') 21 - v else v, v)
+  ))
+  lma_weight(m, w, FALSE, doc.only = TRUE)
+}
+
+# categories of weightings for coloring
+category = rep(c('df', 'normal', 'idf', 'poisson', 'entropy'), c(4, 1, 2, 2, 1))
+
+# set up options for reuse
+op = list(
+  laby = 'Relative (Scaled) Weight', labx = 'Document Frequency',
+  leg = 'outside', colorby = list(quote(category), grade = TRUE),
+  lines = 'connected', mv.scale = TRUE, note = FALSE
 )
-splot(myl = c(-3, 3), mv.scale = TRUE, options = op)
+
+# then plot a few different examples
+splot(
+  sapply(doc_weights, weight_range) ~ 1:20,
+  options = op, title = 'Same Term, Varying Document Frequencies',
+  sud = 'All term frequencies are 1.'
+)
+```
+
+Some document weight types are sensitive to term frequency, so it can be interesting to see two extremes:
+```{r, fig.height=5, fig.width=10, dev='CairoSVG'}
+# here, counts increase from 1 to 20, and appear in 1 to 20 documents,
+# so less common terms also have lower term frequencies
+splot(
+  sapply(doc_weights, weight_range, value = 'sequence') ~ 1:20,
+  options = op, title = 'Term as Document Frequencies',
+  sud = 'Non-zero terms are the number of non-zero terms.'
+)
+
+# here, counts decrease from 20 to 1, while appearing in 1 to 20 documents,
+# so less common terms have higher term frequencies
+splot(
+  sapply(doc_weights, weight_range, value = 'inverted') ~ 1:20,
+  options = op, title = 'Term Opposite of Document Frequencies',
+  sud = 'Non-zero terms are the number of zero terms + 1.'
+)
 ```
 
 We can weight our example dtm and see how it affects the correlation between documents:
 ```{r}
-# idf dampens frequent words
-cor(t(lma_weight(dtm, 'idf')))
+# idf dampens common words
+lma_simets(lma_weight(dtm, 'idf'), 'pearson')
 
-# whereas entropy amplifies frequent words
-cor(t(lma_weight(dtm, 'entropy')))
+# whereas Poisson amplifies common words
+lma_simets(lma_weight(dtm, 'ppois'), 'pearson')
 ```
 
-For now, we'll just apply standard word count (frequency) weighting
+For now, we'll just apply standard word count (frequency) weighting, sometimes called normalization:
 ```{r}
 wdtm = lma_weight(dtm)
 ```
 
 # Dimension Reduction
 
-A more thorough way to change the dtm space is by reducing its dimensions.
-This is effectively what LIWC (or any dictionary-based approach) does --
-reducing the number of terms by throwing them into categories:
+A more thorough way to change the dtm space is by reducing its dimensions. This is effectively what LIWC (or any dictionary-based approach) does -- reducing the number of terms by combining them into categories:
 ```{r}
-cwdtm = lma_termcat(wdtm)
-cwdtm[, 1:6]
+rwdtm = lma_termcat(wdtm)
+rwdtm[, 1:6]
 ```
 
 # Language Style Matching
 
 The way we've set things up allows us to look at the standard LSM calculation:
 ```{r}
-lma_simets(cwdtm, metric = 'canberra')
+lma_simets(rwdtm, 'canberra')
 ```
 
-What makes language style matching "language style matching" (as opposed to, say, "document similarity" or "latent semantic similarity") is our choice of weighting, dimension reduction, and similarity metric.
+What makes language style matching "language style matching" is our choice of weighting, dimension reduction, and similarity metric.
+
+# Latent Semantic Similarity
+For example, if we were to exclude function words, weight by term frequency - inverse document frequency, use a latent semantic space to reduce dimensions, and cosine similarity to measure matching, it would be "latent semantic similarity":
+```{r}
+dtm = lma_dtm(text, 'function')
+wdtm = lma_weight(dtm, 'tf-idf')
+rwdtm = lma_lspace(wdtm, space = '100k')
+lma_simets(rwdtm, 'cosine')
+```
 
 ***
 <div style='text-align:center'>

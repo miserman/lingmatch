@@ -37,7 +37,7 @@ write.dic(dict, 'murder') # save it as a .dic file
 read.dic('murder.dic') # read it back in as a list
 
 # read in the Moral Foundations or LUSI dictionaries from urls
-moral_dict = read.dic('http://bit.ly/moral_foundations')
+moral_dict = read.dic('http://bit.ly/MoralFoundations2')
 lusi_dict = read.dic('http://bit.ly/lusi_dict')
 }
 }

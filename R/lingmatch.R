@@ -147,7 +147,7 @@
 #'
 #' @export
 #' @import methods Matrix
-#' @importFrom stats na.omit dpois
+#' @importFrom stats na.omit dpois ppois
 #' @importFrom Rcpp sourceCpp
 #' @importFrom RcppParallel RcppParallelLibs
 #' @useDynLib lingmatch, .registration = TRUE
@@ -816,57 +816,62 @@ lma_dtm = function(text, exclude = NULL, context = NULL, numbers = FALSE, punct 
 #'     \code{binary} \tab \code{(dtm > 0) * 1} \tab convert frequencies to 1s and 0s; remove
 #'       differences in frequencies\cr
 #'     \code{log} \tab \code{log(dtm + 1)} \tab log of frequencies\cr
-#'     \code{sqrt} \tab \code{dtm^.5} \tab square root of frequencies\cr
+#'     \code{sqrt} \tab \code{sqrt(dtm)} \tab square root of frequencies\cr
 #'     \code{count} \tab \code{dtm} \tab unaltered; sometimes called term frequencies (tf)\cr
-#'     \code{amplify} \tab \code{dtm^1.1} \tab amplify difference in frequencies\cr
+#'     \code{amplify} \tab \code{dtm ^ alpha} \tab amplify difference in frequencies\cr
 #'   }
 #'
 #'   \strong{Document weights} (applied by column)
 #'   \tabular{lll}{
+#'     \code{dflog} \tab \code{log(colSums(dtm > 0))} \tab log of binary term sum\cr
 #'     \code{entropy} \tab \code{1 - rowSums(x * log(x) / log(ncol(x)))} \tab where
 #'       \code{x = t(dtm) / colSums(dtm > 0)};
-#'       entropy of term-conditional document distribution; gives common words more weight\cr
-#'     \code{dfmax} \tab \code{log(apply(dtm, 2, max))} \tab log of maximum document
-#'       frequency\cr
-#'     \code{df} \tab \code{log(colSums(dtm > 0))} \tab log of binary document sum\cr
-#'     \code{poisson} \tab \code{1 - dpois(0, colSums(dtm) / nrow(dtm))} \tab Poisson-predicted
+#'       entropy of term-conditional term distribution\cr
+#'     \code{ppois} \tab \code{1 - ppois(alpha, colSums(dtm) / nrow(dtm))} \tab Poisson-predicted
 #'       term distribution\cr
-#'     \code{ridf} \tab \code{idf - log(poisson)} \tab residual inverse document frequency;
-#'       gives uncommon words more weight\cr
-#'     \code{normal} \tab \code{1 / colSums(dtm^2)^.5} \tab normalized document frequency\cr
+#'     \code{dpois} \tab \code{1 - dpois(alpha, colSums(dtm) / nrow(dtm))} \tab Poisson-predicted
+#'       term density\cr
+#'     \code{dfmlog} \tab \code{log(diag(x[max.col(t(x)),]))} \tab log of maximum term
+#'       frequency\cr
+#'     \code{dfmax} \tab \code{diag(x[max.col(t(x)),])} \tab maximum term frequency\cr
+#'     \code{df} \tab \code{colSums(dtm > 0)} \tab sum of binary term occurance across documents\cr
 #'     \code{idf} \tab \code{log(nrow(dtm) / colSums(dtm > 0))} \tab inverse document frequency\cr
+#'     \code{ridf} \tab \code{idf - log(poisson)} \tab residual inverse document frequency\cr
+#'     \code{normal} \tab \code{1 / colSums(dtm ^ 2) ^ .5} \tab normalized document frequency\cr
 #'   }
 #'
 #' Alternatively, \code{'pmi'} or \code{'ppmi'} will apply a pointwise mutual information weighting
 #' scheme (with \code{'ppmi'} setting negative values to 0).
-#' @param to.freq logical: if \code{FALSE}, the dtm is not divided by document word-count before
+#' @param normalize logical: if \code{FALSE}, the dtm is not divided by document word-count before
 #'   being weighted.
-#' @param freq.complete if the dtm was made with \code{\link{lma_dtm}} (has a \code{'WC'}
+#' @param wc.complete if the dtm was made with \code{\link{lma_dtm}} (has a \code{'WC'}
 #'   attribute), word counts for
-#'   frequencies can be based on the raw count (default; \code{freq.complete = TRUE}). If
-#'   \code{freq.complete = FALSE}, or the dtm does not have a \code{'WC'} attribute,
+#'   frequencies can be based on the raw count (default; \code{wc.complete = TRUE}). If
+#'   \code{wc.complete = FALSE}, or the dtm does not have a \code{'WC'} attribute,
 #'   \code{rowSums(dtm)} is used as word count.
 #' @param log.base the base of logs, applied to any weight using \code{\link[base]{log}}.
 #'   Default is 10.
 #' @param alpha a scaling factor applied to document frequency as part of pointwise mutual
-#'   information weighting.
+#'   information weighting, or amplify's power (\code{dtm ^ alpha}, which defaults to 1.1), or the
+#'   specified quantile of the poisson distribution (\code{dpois(alpha,}
+#'   \code{colSums(x, na.rm = TRUE) /} \code{nrow(x))}).
 #' @param doc.only logical: if \code{TRUE}, only document weights are returned (a single value for
 #'   each term).
 #' @param percent logical; if \code{TRUE}, frequencies are multiplied by 100.
 #' @note
-#' Term weights works to dampen differences in word count, with differences meaning increasingly less
-#' from \code{amplify} to \code{count} to \code{sqrt} to \code{log} to \code{binary}.
+#' Term weights works to adjust differences in counts within documents, with differences meaning
+#' increasingly more from \code{binary} to \code{log} to \code{sqrt} to \code{count} to \code{amplify}.
 #'
-#' Document weights work to treat words differently based on their frequency. \code{entropy},
-#' \code{dfmax}, \code{df}, and \code{poisson} (most to least intense over document frequencies of
-#' ~15) give more frequent words more weight, whereas \code{ridf}, \code{normal}, and \code{idf},
-#' give less frequent words more weight.
+#' Document weights work to treat words differently based on their between-document or overall frequency.
+#' When term frequencies are constant, \code{dpois}, \code{idf}, \code{ridf}, and \code{normal} give
+#' less common words increasingly more weight, and \code{ppois}, \code{df}, \code{dflog}, and
+#' \code{entropy} give less common words increasingly less weight.
 #'
 #' \code{weight} can either be a vector with two characters, corresponding to term weight and
-#' document weight (e.g., \code{weight = c('count','idf')}), or it can be a string with term and
-#' document weights separated by any of \code{*-_, :;/\\\\} (e.g., \code{weight = 'count * idf'}).
+#' document weight (e.g., \code{c('count', 'idf')}), or it can be a string with term and
+#' document weights separated by any of \code{\*} (e.g., \code{'count \* idf'}).
 #' \code{'tf'} is also acceptable for \code{'count'}, and \code{'tfidf'} will be parsed as
-#' \code{c('count','idf')}, though this is a special case.
+#' \code{c('count', 'idf')}, though this is a special case.
 #'
 #' For \code{weight}, term or document weights can be entered individually; term weights alone will
 #' not apply any document weight, and document weights alone will apply a \code{'count'} term weight
@@ -874,98 +879,144 @@ lma_dtm = function(text, exclude = NULL, context = NULL, numbers = FALSE, punct 
 #' instead of a weighted dtm).
 #' @examples
 #' # visualize term and document weights
-#' document_frequency = seq_len(20)
-#' op = list(y='term_frequency~document_frequency',line='connected',leg='outside')
 #'
-#' # term weights
-#' term_weights = c('binary','log','sqrt','count','amplify')
-#' term_frequency = sapply(term_weights,function(w)lma_weight(matrix(document_frequency,1),w,FALSE))
-#' if(require(splot)) splot(myl=c(0,25),options=op)
+#' ## term weights
+#' term_weights = c('binary', 'log', 'sqrt', 'count', 'amplify')
+#' Weighted = sapply(term_weights, function(w) lma_weight(1:20, w, FALSE))
+#' if(require(splot)) splot(Weighted ~ 1:20, labx = 'Raw Count', lines = 'co')
 #'
-#' # document weights
-#' doc_weights = c('df','dfmax','idf','normal','poisson','ridf','entropy')
-#' term_frequency = sapply(doc_weights,function(w)
-#'   lma_weight(sapply(document_frequency,function(i)sample(0:i,5000,TRUE)),w,FALSE,doc.only=TRUE)
-#' )
-#' if(require(splot)) splot(myl=c(-3,3),mv.scale=TRUE,options=op)
+#' ## document weights
+#' doc_weights = c('df', 'dflog', 'dfmax', 'dfmlog', 'idf', 'ridf',
+#'   'normal', 'dpois', 'ppois', 'entropy')
+#' weight_range = function(w, value = 1){
+#'   m = diag(20)
+#'   m[upper.tri(m, TRUE)] = if(is.numeric(value)) value else unlist(lapply(
+#'     1:20, function(v) rep(if(value == 'inverted') 21 - v else v, v)
+#'   ))
+#'   lma_weight(m, w, FALSE, doc.only = TRUE)
+#' }
+#'
+#' if(require(splot)){
+#'   category = rep(c('df', 'idf', 'normal', 'poisson', 'entropy'), c(4, 2, 1, 2, 1))
+#'   op = list(
+#'     laby = 'Relative (Scaled) Weight', labx = 'Document Frequency',
+#'     leg = 'outside', colorby = list(quote(category), grade = TRUE),
+#'     lines = 'connected', mv.scale = TRUE, note = FALSE
+#'   )
+#'   splot(
+#'     sapply(doc_weights, weight_range) ~ 1:20,
+#'     options = op, title = 'Same Term, Varying Document Frequencies',
+#'     sud = 'All term frequencies are 1.'
+#'   )
+#'   splot(
+#'     sapply(doc_weights, weight_range, value = 'sequence') ~ 1:20,
+#'     options = op, title = 'Term as Document Frequencies',
+#'     sud = 'Non-zero terms are the number of non-zero terms.'
+#'   )
+#'   splot(
+#'     sapply(doc_weights, weight_range, value = 'inverted') ~ 1:20,
+#'     options = op, title = 'Term Opposite of Document Frequencies',
+#'     sud = 'Non-zero terms are the number of zero terms + 1.'
+#'   )
+#' }
 #'
 #' @export
 
-lma_weight=function(dtm,weight='count',to.freq=TRUE,freq.complete=TRUE,log.base=10,alpha=1,
-  doc.only=FALSE,percent=FALSE){
-  ck=attr(dtm,'type')
-  if(!is.null(ck) && length(ck)==3 && (ck[1]=='TRUE' || ck[2]!='count' || ck[3]!='NA')){
-    message('the entered dtm appears to already be weighted (',paste(ck[2:3],collapse='*'),
+lma_weight = function(dtm, weight = 'count', normalize = TRUE, wc.complete = TRUE,
+  log.base = 10, alpha = 1, doc.only = FALSE, percent = FALSE){
+  if(is.null(dim(dtm))) dtm = matrix(dtm, 1)
+  ck = attr(dtm, 'type')
+  if(!is.null(ck) && length(ck) == 3 && (ck[1] == 'TRUE' || ck[2] != 'count' || ck[3] != 'NA')){
+    message('the entered dtm appears to already be weighted (', paste(ck[2:3], collapse = '*'),
       '), so it will not be altered')
     return(dtm)
   }
   weight = tolower(weight)
-  if(missing(to.freq) && any(grepl('pmi', weight))) to.freq = FALSE
-  if(to.freq){
+  if(missing(normalize) && any(grepl('pmi', weight))) normalize = FALSE
+  if(normalize){
     wc = attr(dtm, 'WC')
-    if(is.null(wc) || !freq.complete) wc = rowSums(dtm, na.rm = TRUE)
+    if(is.null(wc) || !wc.complete || nrow(dtm) != length(wc)) wc = rowSums(dtm, na.rm = TRUE)
+    adj = if(percent) 100 else 1
     if(.hasSlot(dtm, 'x')){
-      su = !is.na(dtm@x)
-      dtm@x[su] = dtm@x[su] / wc[dtm@i[su] + 1] * if(percent) 100 else 1
+      wc = wc[dtm@i + 1]
+      su = wc != 0
+      dtm@x[su] = dtm@x[su] / wc[su] * adj
     }else{
-      adj = if(percent) 100 else 1
-      for(r in seq_along(wc)[!is.na(wc)]) dtm[r,] = dtm[r,] / wc[r] * adj
+      su = wc != 0
+      dtm[su,] = dtm[su,] / wc[su] * adj
     }
   }
   nr = nrow(dtm)
   if(any(grepl('pmi', weight))){
     tw = dw = 'pmi'
     if(missing(log.base)) log.base = 2
-    twc = sum(dtm)
-    pc = colSums(dtm ^ alpha) / twc ^ alpha
-    dtm = log((dtm / twc) / (matrix(rep(pc, nr), nr, byrow = TRUE) *
-        matrix(rep(rowSums(dtm) / twc, ncol(dtm)), nr)), base = log.base)
-    dtm[!is.finite(dtm)] = 0
+    twc = sum(dtm, na.rm = TRUE)
+    pc = matrix(colSums(dtm ^ alpha, na.rm = TRUE) / twc ^ alpha, 1)
+    dtm = dtm / twc
+    dtm = dtm / rowSums(dtm, na.rm = TRUE) %*% pc
+    if(.hasSlot(dtm, 'x')){
+      dtm@x = log(dtm@x, base = log.base)
+      dtm@x[!is.finite(dtm@x)] = 0
+    }else{
+      dtm = log(dtm, base = log.base)
+      dtm[!is.finite(dtm)] = 0
+    }
     if(any(grepl('pp', weight))){
       tw = dw = 'ppmi'
       dtm[dtm < 0] = 0
     }
   }else{
-    term=function(x,type) switch(type,
-      binary=(x>0)*1,
-      log=log(x+1,base=log.base),
-      sqrt=x^.5,
-      count=x,
-      amplify=x^1.1
+    term = function(x, type) switch(type,
+      binary = (x > 0) * 1,
+      log = log(x + 1, base = log.base),
+      sqrt = sqrt(x),
+      count = x,
+      amplify = x ^ alpha
     )
-    doc=function(x,type) switch(type,
-      df=log(colSums(x>0,na.rm=TRUE),base=log.base),
-      dfmax=log(apply(x,2,max),base=log.base),
-      idf=log(nrow(x)/colSums(x>0,na.rm=TRUE),base=log.base),
-      normal=1/colSums(x^2,na.rm=TRUE)^.5,
-      poisson=1-dpois(0,colSums(x,na.rm=TRUE)/nrow(x)),
-      ridf=doc(x,'idf')-log(doc(x,'poisson'),base=log.base),
-      entropy={x=t(x)/colSums(x>0,na.rm=TRUE);1-rowSums(x*log(x,base=log.base)/log(ncol(x),
-        base=log.base), na.rm=TRUE)}
-    )
-    if(length(weight)==1){
-      weight=strsplit(weight,' *[-:\\*_/; ,] *')[[1]]
-      if(length(weight)==1 && weight=='tfidf') weight=c('count','idf')
+    doc = function(x, type){
+      d = switch(type,
+        df = colSums(x > 0, na.rm = TRUE),
+        dflog = log(colSums(x > 0, na.rm = TRUE), base = log.base),
+        dfmax = diag(x[max.col(t(x)),]),
+        dfmlog = log(diag(x[max.col(t(x)),]), base = log.base),
+        idf = log(nrow(x) / colSums(x > 0, na.rm = TRUE), base = log.base),
+        normal = sqrt(1 / colSums(x ^ 2, na.rm = TRUE)),
+        dpois = 1 - dpois(alpha, colSums(x, na.rm = TRUE) / nrow(x)),
+        ppois = 1 - ppois(alpha, colSums(x, na.rm = TRUE) / nrow(x)),
+        ridf = doc(x, 'idf') - log(doc(x, 'dpois'), base = log.base),
+        entropy = {
+          x = t(x) / colSums(x > 0, na.rm = TRUE)
+          1 - rowSums(x * log(x, base = log.base) /
+              log(ncol(x), base = log.base), na.rm = TRUE)
+        }
+      )
+      d[!is.finite(d)] = 0
+      d
     }
-    if(grepl('^t|^na|^non|^f',weight[1])) weight[1]='count'
-    tw=tryCatch(match.arg(weight[1],c('binary','log','sqrt','count','amplify')),
-      error=function(e)NULL)
-    pdw=TRUE
-    dws=c('df','dfmax','idf','normal','poisson','ridf','entropy')
-    if(is.null(tw)){
-      tw=tryCatch(match.arg(weight[1],dws),error=function(e)NULL)
-      if(!is.null(tw)){
+    if(length(weight) == 1){
+      weight = strsplit(weight, ' *[:\\*_/; ,-] *')[[1]]
+      if(length(weight) == 1 && weight == 'tfidf') weight = c('count', 'idf')
+    }
+    if(grepl('^(?:t|na|non|f)', weight[1])) weight[1] = 'count'
+    tws = c('binary', 'log', 'sqrt', 'count', 'amplify')
+    tw = grep(substr(weight[1], 0, 4), tws, value = TRUE)[1]
+    pdw = TRUE
+    dws = c('df', 'dflog', 'dfmax', 'dfmlog', 'idf', 'normal', 'dpois', 'ppois', 'ridf', 'entropy')
+    if(is.na(tw)){
+      tw = grep(substr(weight[1], 0, 4), dws, value = TRUE)[1]
+      if(!is.na(tw)){
         pdw=FALSE
         if(!doc.only){
-          dw=tw
-          tw='count'
-        }else return(doc(dtm,tw))
-      }else stop(paste(weight),' is not a recognized weight',call.=FALSE)
+          dw = tw
+          tw = 'count'
+        }else return(doc(dtm, tw))
+      }else stop(paste(weight), ' is not a recognized weight', call. = FALSE)
     }
-    if(pdw) dw=if(length(weight)>1) match.arg(weight[2],dws) else 'none'
-    dtm=if(dw=='none') term(dtm,tw) else term(dtm,tw) * matrix(rep(doc(dtm, dw), nr), nr, byrow = TRUE)
+    if(pdw) dw = if(length(weight) > 1) grep(substr(weight[2], 0, 4), dws, value = TRUE)[1] else 'none'
+    if(missing(alpha) && tw == 'amplify') alpha = 1.1
+    dtm = if(dw == 'none') term(dtm, tw) else term(dtm, tw) * rep(doc(dtm, dw), each = nr)
   }
-  attr(dtm, 'type') = c(freq = to.freq, term = tw, document = dw)
+  attr(dtm, 'type') = c(normalized = normalize, term = tw, document = dw)
   dtm
 }
 
@@ -1168,6 +1219,7 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, t
         }else stop('no matching terms in space ', space)
       }
     }else{
+      name = deparse(substitute(space))
       su = terms %in% rownames(space)
       if(sum(su)){
         ts = terms[su]
@@ -1184,6 +1236,7 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, t
         space = space[terms,]
       }
     }
+    attr(space, 'space') = name
     if(map.space){
       rep = length(ts) / ncol(dtm)
       if(rep < .2) warning(paste0(
@@ -1191,6 +1244,7 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, t
         'you might consider using a different source or cleaning/partial matching terms'
       ), call. = FALSE)
       dtm = dtm[, ts, drop = FALSE] %*% space
+      attr(dtm, 'space') = name
     }else return(space)
   }
   dtm
@@ -1217,7 +1271,7 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, t
 #'   \code{'a_DT'}), \code{'_.*'} would remove the tag.
 #' @param term.break If a category has more than \code{term.break} characters, it will be processed
 #'   in chunks. Reduce from 20000 if you get a PCRE compilation error.
-#' @seealso For applying patttern-based dictionaries (to raw text) see \code{\link{lma_patcat}}.
+#' @seealso For applying pattern-based dictionaries (to raw text) see \code{\link{lma_patcat}}.
 #' @examples
 #' # Score texts with the NRC Affect Intensity Lexicon
 #' \dontrun{
@@ -1430,8 +1484,11 @@ lma_simets=function(a, b = NULL, metric, group = NULL, agg = TRUE, agg.mean = TR
   metric = if(missing(metric)) mets else if(is.function(metric)){
     stop('only internal metrics are available: ', paste(mets, collapse = ', '))
   }else{
-    if(is.null(metric)) metric = 'cosine'
-    mets[if(is.numeric(metric)) metric else pmatch(substr(metric, 1, 2), mets)]
+    if(is.null(metric)) 'cosine' else if(is.numeric(metric)) mets[metric] else{
+      su = grepl('cor', metric)
+      if(any(su)) metric[su] = 'pearson'
+      grep(substr(metric, 1, 3), mets, fixed = TRUE, value = TRUE)
+    }
   }
   st = proc.time()[[3]]
   metric_arg = as.integer(mets %in% metric)

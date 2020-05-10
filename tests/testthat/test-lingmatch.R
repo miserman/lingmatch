@@ -10,57 +10,57 @@ texts = vapply(seq_len(50), function(d){
 dtm = lma_dtm(texts)
 
 test_that('different input formats have the same results', {
-  manual = lma_simets(dtm, metric = 'cosine')
-  expect_equivalent(lingmatch(texts)$sim, manual)
-  expect_equivalent(lingmatch(dtm)$sim, manual)
+  manual = as.numeric(lma_simets(dtm, metric = 'cosine'))
+  expect_equal(as.numeric(lingmatch(texts)$sim), manual)
+  expect_equal(as.numeric(lingmatch(dtm)$sim), manual)
 })
 
 test_that('different input formats have the same results (LSM)', {
   wdtm = lma_weight(dtm, percent = TRUE)
   cdtm = lma_termcat(wdtm)
-  manual = lma_simets(cdtm, 'canberra')
-  expect_equivalent(lingmatch(texts, type = 'lsm')$sim, manual)
-  expect_equivalent(lingmatch(dtm, type = 'lsm')$sim, manual)
-  expect_equivalent(lingmatch(wdtm, type = 'lsm')$sim, manual)
-  expect_equivalent(lingmatch(cdtm, type = 'lsm')$sim, manual)
+  manual = as.numeric(lma_simets(cdtm, 'canberra'))
+  expect_equal(as.numeric(lingmatch(texts, type = 'lsm')$sim), manual)
+  expect_equal(as.numeric(lingmatch(dtm, type = 'lsm')$sim), manual)
+  expect_equal(as.numeric(lingmatch(wdtm, type = 'lsm')$sim), manual)
+  expect_equal(as.numeric(lingmatch(cdtm, type = 'lsm')$sim), manual)
 })
 
 test_that('different input formats have the same results (LSA)', {
   space = lma_lspace(dtm)
   wdtm = lma_weight(dtm, 'tfidf')
   cdtm = lma_lspace(wdtm, space)
-  manual = lma_simets(cdtm, metric = 'cosine')
-  expect_equivalent(lingmatch(texts, space = space, type = 'lsa')$sim, manual)
-  expect_equivalent(lingmatch(dtm, space = space, type = 'lsa')$sim, manual)
-  expect_equivalent(lingmatch(wdtm, space = space, type = 'lsa')$sim, manual)
-  expect_equivalent(lingmatch(cdtm, type = 'lsa')$sim, manual)
+  manual = as.numeric(lma_simets(cdtm, metric = 'cosine'))
+  expect_equal(as.numeric(lingmatch(texts, space = space, type = 'lsa')$sim), manual)
+  expect_equal(as.numeric(lingmatch(dtm, space = space, type = 'lsa')$sim), manual)
+  expect_equal(as.numeric(lingmatch(wdtm, space = space, type = 'lsa')$sim), manual)
+  expect_equal(as.numeric(lingmatch(cdtm, type = 'lsa')$sim), manual)
 })
 
 test_that('comparison columns align (named)', {
   wdtm = lma_weight(dtm, percent = TRUE)
   cdtm = lma_termcat(wdtm)
-  manual = lma_simets(cdtm, cdtm[1:5,], 'canberra')
-  expect_equivalent(lingmatch(texts, cdtm[1:5,], type = 'lsm')$sim, manual)
-  expect_equivalent(lingmatch(dtm, cdtm[1:5,], type = 'lsm')$sim, manual)
-  expect_equivalent(lingmatch(wdtm, cdtm[1:5,], type = 'lsm')$sim, manual)
-  expect_equivalent(lingmatch(cdtm, cdtm[1:5,], type = 'lsm')$sim, manual)
+  manual = as.numeric(lma_simets(cdtm, cdtm[1:5,], 'canberra'))
+  expect_equal(as.numeric(lingmatch(texts, cdtm[1:5,], type = 'lsm')$sim), manual)
+  expect_equal(as.numeric(lingmatch(dtm, cdtm[1:5,], type = 'lsm')$sim), manual)
+  expect_equal(as.numeric(lingmatch(wdtm, cdtm[1:5,], type = 'lsm')$sim), manual)
+  expect_equal(as.numeric(lingmatch(cdtm, cdtm[1:5,], type = 'lsm')$sim), manual)
 })
 
 test_that('comparison columns align (unnamed)', {
   space = lma_lspace(dtm)
   wdtm = lma_weight(dtm, 'tfidf')
   cdtm = lma_lspace(wdtm, space)
-  manual = lma_simets(cdtm, cdtm[1:5,], metric = 'cosine')
-  expect_equivalent(lingmatch(texts, cdtm[1:5,], space = space, type = 'lsa')$sim, manual)
-  expect_equivalent(lingmatch(dtm, cdtm[1:5,], space = space, type = 'lsa')$sim, manual)
-  expect_equivalent(lingmatch(wdtm, cdtm[1:5,], space = space, type = 'lsa')$sim, manual)
-  expect_equivalent(lingmatch(cdtm, cdtm[1:5,], space = space, type = 'lsa')$sim, manual)
+  manual = as.numeric(lma_simets(cdtm, cdtm[1:5,], metric = 'cosine'))
+  expect_equal(as.numeric(lingmatch(texts, cdtm[1:5,], space = space, type = 'lsa')$sim), manual)
+  expect_equal(as.numeric(lingmatch(dtm, cdtm[1:5,], space = space, type = 'lsa')$sim), manual)
+  expect_equal(as.numeric(lingmatch(wdtm, cdtm[1:5,], space = space, type = 'lsa')$sim), manual)
+  expect_equal(as.numeric(lingmatch(cdtm, cdtm[1:5,], space = space, type = 'lsa')$sim), manual)
 })
 
 test_that('function comparisons work', {
-  expect_equivalent(
-    lingmatch(dtm, sum)$sim,
-    lingmatch(dtm, colSums(dtm))$sim
+  expect_equal(
+    as.numeric(lingmatch(dtm, sum)$sim),
+    as.numeric(lingmatch(dtm, colSums(dtm))$sim)
   )
 })
 
@@ -69,22 +69,22 @@ test_that('profile comparisons work', {
     ppron = 10.35, ipron = 4.79, article = 8.35, auxverb = 7.77, adverb = 4.17,
     prep = 14.27, conj = 6.28, negate = 1.68, quant = 1.8
   )
-  expect_equivalent(
-    lingmatch(dtm, 'novels', type = 'lsm')$sim,
-    lingmatch(dtm, novels, type = 'lsm')$sim
+  expect_equal(
+    as.numeric(lingmatch(dtm, 'novels', type = 'lsm')$sim),
+      as.numeric(lingmatch(dtm, novels, type = 'lsm')$sim)
   )
 })
 
 test_that('index/logical comparisons work', {
   ind = sample(nrow(dtm), 5)
   su = seq_len(nrow(dtm)) %in% ind
-  expect_equivalent(
-    lingmatch(dtm, ind)$sim,
-    lingmatch(dtm, dtm[ind,])$sim[-ind,]
+  expect_equal(
+    as.numeric(lingmatch(dtm, ind)$sim),
+      as.numeric(lingmatch(dtm, dtm[ind,])$sim[-ind,])
   )
-  expect_equivalent(
-    lingmatch(dtm, su)$sim,
-    lingmatch(dtm, dtm[su,])$sim[!su,]
+  expect_equal(
+    as.numeric(lingmatch(dtm, su)$sim),
+    as.numeric(lingmatch(dtm, dtm[su,])$sim[!su,])
   )
 })
 
@@ -96,7 +96,7 @@ test_that('group comparisons work', {
     a = colMeans(cdtm[groups == 'a',]),
     b = colMeans(cdtm[groups == 'b',])
   )
-  expect_equivalent(
+  expect_equal(
     lingmatch(dtm, group = groups, type = 'lsm')$sim[, 2],
     rowSums(lingmatch(dtm, group_means, type = 'lsm')$sim * rep(
       c(1, 0, 1), nrow(dtm) / c(2, 1, 2)

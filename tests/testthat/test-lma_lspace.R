@@ -22,10 +22,10 @@ space = matrix(scan(
 
 test_that('random reads align', {
   sel = sample(terms, 1000)
-  read_c = lma_lspace(sel, name)
+  read_c = as.numeric(lma_lspace(sel, name))
   read_r = lma_lspace(sel, name, use.scan = TRUE)
-  expect_equal(read_c, read_r)
-  expect_equal(read_c, space[sel,])
+  expect_equal(read_c, as.numeric(read_r))
+  expect_equal(read_c, as.numeric(space[sel,]))
 })
 
 texts = vapply(seq_len(50), function(d) paste0(c(sample(c('aaaa', 'bbbb'), 1), sample(
@@ -36,12 +36,12 @@ dtm = lma_dtm(texts)
 test_that('mapping works', {
   overlap = colnames(dtm)[colnames(dtm) %in% terms]
   mapped = lma_lspace(dtm, name)
-  expect_equal(mapped, dtm[, overlap] %*% space[overlap,])
-  mapped_sim = lma_simets(mapped, 'cosine')
-  expect_equivalent(mapped_sim, lingmatch(dtm, space = name)$sim)
-  expect_equivalent(mapped_sim, lingmatch(texts, space = space)$sim)
-  expect_equivalent(mapped_sim, lingmatch(dtm, space = space)$sim)
-  expect_equivalent(mapped_sim, lingmatch(mapped, space = space)$sim)
+  expect_equal(as.numeric(mapped), as.numeric(dtm[, overlap] %*% space[overlap,]))
+  mapped_sim = as.numeric(lma_simets(mapped, 'cosine'))
+  expect_equal(mapped_sim, as.numeric(lingmatch(dtm, space = name)$sim))
+  expect_equal(mapped_sim, as.numeric(lingmatch(texts, space = space)$sim))
+  expect_equal(mapped_sim, as.numeric(lingmatch(dtm, space = space)$sim))
+  expect_equal(mapped_sim, as.numeric(lingmatch(mapped, space = space)$sim))
 })
 
 test_that('fill.missing works', {
@@ -50,7 +50,7 @@ test_that('fill.missing works', {
   filled = lma_lspace(terms, name, fill.missing = TRUE)
   filled_map = lma_lspace(terms, name, term_map = spaces$term_map, fill.missing = TRUE)
   filled_scan = lma_lspace(terms, name, fill.missing = TRUE, use.scan = TRUE)
-  expect_equal(compact, filled[rownames(compact),])
+  expect_equal(as.numeric(compact), as.numeric(filled[rownames(compact),]))
   expect_equal(filled, filled_map)
   expect_equal(filled, filled_scan)
 })

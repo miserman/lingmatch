@@ -64,5 +64,5 @@ if(require('splot')) splot(emotion_scores ~ names(text), leg = 'out')
 }
 }
 \seealso{
-For applying patttern-based dictionaries (to raw text) see \code{\link{lma_patcat}}.
+For applying pattern-based dictionaries (to raw text) see \code{\link{lma_patcat}}.
 }

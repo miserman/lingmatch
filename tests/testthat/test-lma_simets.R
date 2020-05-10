@@ -1,19 +1,19 @@
 context('lma_simets')
 
-manual = function(a, b) c(
+manual = function(a, b) as.numeric(c(
   jaccard = sum(a & b) / sum(a | b),
   euclidean = 1 / (1 + sqrt(sum((a - b) ^ 2))),
   canberra = 1 - mean(abs(a - b) / (abs(a) + abs(b) + 1e-9)),
   cosine = sum(a * b) / sqrt(sum(a ^ 2 * sum(b ^ 2))),
   pearson = (mean(a * b) - (mean(a) * mean(b))) / sqrt(mean(a ^ 2) - mean(a) ^ 2) /
     sqrt(mean(b ^ 2) - mean(b) ^ 2)
-)
+))
 
 test_that('results align with r implementation', {
   lapply(seq_len(10), function(i){
     a = Matrix(rpois(20, 1), nrow = 1, sparse = TRUE)
     b = Matrix(rpois(20, 1), nrow = 1, sparse = TRUE)
-    expect_equivalent(lma_simets(a, b), manual(a, b), tolerance = 1e-7)
+    expect_equal(as.numeric(lma_simets(a, b)), manual(a, b), tolerance = 1e-7)
   })
 })
 
@@ -23,8 +23,8 @@ test_that('many a to one b comparisons work', {
   sims_ab = lma_simets(dtm, comp)
   sims_sq = vapply(lma_simets(rbind(comp, dtm)), function(r) r[-1, 1], numeric(5))
   sims_m = do.call(rbind, lapply(1:5, function(r) manual(dtm[r,], comp)))
-  expect_equivalent(sims_sq, sims_m)
-  expect_equivalent(sims_ab, as.data.frame(sims_m))
+  expect_equal(as.numeric(sims_sq), as.numeric(sims_m))
+  expect_equal(as.numeric(as.matrix(sims_ab)), as.numeric(sims_m))
 })
 
 test_that('a row to b row comparisons work', {
@@ -41,12 +41,12 @@ test_that('entry order is arbitrary for vector-matrix comparisons', {
   sims_ab = lma_simets(dtm, comp)
   sims_ba = lma_simets(comp, dtm)
   expect_true(all(dim(sims_ab) == c(10, 5) & dim(sims_ba) == c(10, 5)))
-  expect_equivalent(sims_ab, sims_ba)
+  expect_equal(sims_ab, sims_ba)
 })
 
 test_that('pearson aligns with cor', {
   a = matrix(rpois(500, 1), 20)
-  expect_equivalent(as.matrix(lma_simets(a, metric = 'pearson', symmetric = TRUE)), cor(t(a)))
+  expect_equal(as.numeric(lma_simets(a, metric = 'pearson', symmetric = TRUE)), as.numeric(cor(t(a))))
 })
 
 test_that('groups work as expected', {
