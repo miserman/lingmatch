@@ -16,10 +16,8 @@
 <h3>Usage</h3>
 
 <pre>
-read.folder(path = NULL, segment = NULL, subdir = FALSE, ext = ".txt",
-  fixed = TRUE, segment.size = NULL, bysentence = FALSE,
-  reader = readLines, readarg = list(warn = FALSE),
-  ncores = parallel::detectCores() - 2)
+read.folder(path = ".", segment = "\n", ext = ".txt", subdir = FALSE,
+  segment.size = -1, bysentence = FALSE, return.tokens = FALSE)
 </pre>
 
 
@@ -32,21 +30,16 @@ read.folder(path = NULL, segment = NULL, subdir = FALSE, ext = ".txt",
 </td></tr>
 <tr valign="top"><td><code>segment</code></td>
 <td>
-<p>Specifies how the text of each file should be segmented. If a number, texts will be broken into
-that many segments, each with a roughly equal number of words. If a character, texts will be broken at that character;
-for example, a string matching <code>join</code> will split texts on returns.</p>
-</td></tr>
-<tr valign="top"><td><code>subdir</code></td>
-<td>
-<p>If <code>TRUE</code> files in folders in <code>path</code> will also be included.</p>
+<p>Specifies how the text of each file should be segmented. If a character, split at that character;
+'\n' by default. If a number, texts will be broken into that many segments, each with a roughly equal number of words.</p>
 </td></tr>
 <tr valign="top"><td><code>ext</code></td>
 <td>
 <p>The extension of the files you want to read in. '.txt' by default.</p>
 </td></tr>
-<tr valign="top"><td><code>fixed</code></td>
+<tr valign="top"><td><code>subdir</code></td>
 <td>
-<p>If <code>FALSE</code>, and <code>segment</code> is a character, <code>segment</code> will be treated as a regular expression.</p>
+<p>If <code>TRUE</code> files in folders in <code>path</code> will also be included.</p>
 </td></tr>
 <tr valign="top"><td><code>segment.size</code></td>
 <td>
@@ -55,23 +48,54 @@ for example, a string matching <code>join</code> will split texts on returns.</p
 </td></tr>
 <tr valign="top"><td><code>bysentence</code></td>
 <td>
-<p>If <code>TRUE</code>, and <code>segment</code> is a number or <code>wordcount</code> is specified, sentences will be kept
-together, rather than being broken across segments.</p>
+<p>If <code>TRUE</code>, and <code>segment</code> is a number or <code>segment.size</code> is specified, sentences will be
+kept together, rather than potentially being broken across segments.</p>
 </td></tr>
-<tr valign="top"><td><code>reader</code></td>
+<tr valign="top"><td><code>return.tokens</code></td>
 <td>
-<p>The function used to read files. File paths are always passed as the first argument.
-<code>readLines</code> by default.</p>
-</td></tr>
-<tr valign="top"><td><code>readarg</code></td>
-<td>
-<p>A list of additional arguments to pass to <code>reader</code>, starting in the second position.</p>
-</td></tr>
-<tr valign="top"><td><code>ncores</code></td>
-<td>
-<p>Number of CPU cores to use; defaults to total number of cores minus 2.</p>
+<p>Logical; if <code>TRUE</code>, returns segments as token IDs, with an associated token vector.</p>
 </td></tr>
 </table>
+
+
+<h3>Value</h3>
+
+<p>If <code>return.tokens</code> is <code>FALSE</code>, a <code>data.frame</code> with columns for file names (<code>file</code>),
+segment number within file (<code>segment</code>), word count for each segment (<code>WC</code>), and the text of
+each segment (<code>text</code>). Otherwise, a list with vectors corresponding to columns, and additional
+entries for terms (<code>terms</code>) and a <code>list</code> of vectors of indices corresponding to those terms (<code>indices</code>).
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+# read in all files from the current directory
+dir = path.package('lingmatch')
+texts = read.folder(dir, ext = '')
+texts[1:3,]
+
+# return that as indices, and it can be converted to a
+# document-term matrix, though terms are minimally processed
+rawdtm = lma_dtm(read.folder(dir, ext = '', return.tokens = TRUE))
+
+## Not run: 
+
+# segment .txt files in 'path/to/files' in a few ways:
+## into 1 line segments
+texts_lines = read.folder('path/to/files')
+
+## into 5 even segments each
+texts_5segs = read.folder('path/to/files', 5)
+
+## into 50 word segments
+texts_50words = read.folder('path/to/files', segment.size = 50)
+
+## into 1 sentence segments
+texts_50words = read.folder('path/to/files', 1, bysentence = TRUE)
+
+## End(Not run)
+</pre>
 
 
 </body></html>

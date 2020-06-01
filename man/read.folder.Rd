@@ -4,37 +4,59 @@
 \alias{read.folder}
 \title{Process texts in a folder}
 \usage{
-read.folder(path = NULL, segment = NULL, subdir = FALSE, ext = ".txt",
-  fixed = TRUE, segment.size = NULL, bysentence = FALSE,
-  reader = readLines, readarg = list(warn = FALSE),
-  ncores = parallel::detectCores() - 2)
+read.folder(path = ".", segment = "\\n", ext = ".txt", subdir = FALSE,
+  segment.size = -1, bysentence = FALSE, return.tokens = FALSE)
 }
 \arguments{
 \item{path}{Path to a folder containing files, or a vector of paths to files.}
 
-\item{segment}{Specifies how the text of each file should be segmented. If a number, texts will be broken into
-that many segments, each with a roughly equal number of words. If a character, texts will be broken at that character;
-for example, a string matching \code{join} will split texts on returns.}
-
-\item{subdir}{If \code{TRUE} files in folders in \code{path} will also be included.}
+\item{segment}{Specifies how the text of each file should be segmented. If a character, split at that character;
+'\\n' by default. If a number, texts will be broken into that many segments, each with a roughly equal number of words.}
 
 \item{ext}{The extension of the files you want to read in. '.txt' by default.}
 
-\item{fixed}{If \code{FALSE}, and \code{segment} is a character, \code{segment} will be treated as a regular expression.}
+\item{subdir}{If \code{TRUE} files in folders in \code{path} will also be included.}
 
 \item{segment.size}{If specified, \code{segment} will be ignored, and texts will be broken into segments containing roughly
 \code{segment.size} number of words.}
 
-\item{bysentence}{If \code{TRUE}, and \code{segment} is a number or \code{wordcount} is specified, sentences will be kept
-together, rather than being broken across segments.}
+\item{bysentence}{If \code{TRUE}, and \code{segment} is a number or \code{segment.size} is specified, sentences will be
+kept together, rather than potentially being broken across segments.}
 
-\item{reader}{The function used to read files. File paths are always passed as the first argument.
-\code{\link[base]{readLines}} by default.}
-
-\item{readarg}{A list of additional arguments to pass to \code{reader}, starting in the second position.}
-
-\item{ncores}{Number of CPU cores to use; defaults to total number of cores minus 2.}
+\item{return.tokens}{Logical; if \code{TRUE}, returns segments as token IDs, with an associated token vector.}
+}
+\value{
+If \code{return.tokens} is \code{FALSE}, a \code{data.frame} with columns for file names (\code{file}),
+segment number within file (\code{segment}), word count for each segment (\code{WC}), and the text of
+each segment (\code{text}). Otherwise, a list with vectors corresponding to columns, and additional
+entries for terms (\code{terms}) and a \code{list} of vectors of indices corresponding to those terms (\code{indices}).
 }
 \description{
 Read in and optionally segment all texts within a folder.
+}
+\examples{
+# read in all files from the current directory
+dir = path.package('lingmatch')
+texts = read.folder(dir, ext = '')
+texts[1:3,]
+
+# return that as indices, and it can be converted to a
+# document-term matrix, though terms are minimally processed
+rawdtm = lma_dtm(read.folder(dir, ext = '', return.tokens = TRUE))
+
+\dontrun{
+
+# segment .txt files in 'path/to/files' in a few ways:
+## into 1 line segments
+texts_lines = read.folder('path/to/files')
+
+## into 5 even segments each
+texts_5segs = read.folder('path/to/files', 5)
+
+## into 50 word segments
+texts_50words = read.folder('path/to/files', segment.size = 50)
+
+## into 1 sentence segments
+texts_50words = read.folder('path/to/files', 1, bysentence = TRUE)
+}
 }

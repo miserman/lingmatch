@@ -25,3 +25,7 @@ extract_matches <- function(terms, file, sep = ' ') {
     .Call(`_lingmatch_extract_matches`, terms, file, sep)
 }
 
+read_segments <- function(files, nseg, segsize, split, bysentence, returntokens) {
+    .Call(`_lingmatch_read_segments`, files, nseg, segsize, split, bysentence, returntokens)
+}
+

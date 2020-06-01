@@ -280,7 +280,7 @@ void reformat_embedding(const std::string &infile, const std::string &outfile,
   int n, i, ln, cl = 0, ck = 1e3;
   const string num = "-.0123456789";
   bool start = true, filter = term_check != "";
-  regex ckterm(term_check), rm(remove);
+  regex ckterm(term_check, regex_constants::optimize), rm(remove, regex_constants::optimize);
   std::string line, term, value;
   for(; getline(d, line);){
     for(cl++, term = "", n = line.length(), i = 0; i < n; i++){
@@ -402,4 +402,101 @@ NumericVector extract_matches(const CharacterVector &terms, const std::string &f
   r.attr("colnames") = used;
   colnames(r) = used;
   return r;
+}
+
+// [[Rcpp::export]]
+List read_segments(const CharacterVector &files, const int &nseg, const int &segsize,
+  const std::string &split, const bool &bysentence, const bool &returntokens){
+  int ck = 1e4, lti = 1, ti = 0, si = 0, oi = 0, nf = files.length(), fid = 0, size = segsize;
+  long long unsigned int spm = 0, spl = split.length();
+  ifstream d;
+  char c;
+  regex ck_split(split, regex_constants::optimize), sentend_body(
+    "[a-z.]\\.[a-z.]*|[0-9]+|[iv]+|ans|govt|apt|etc|st|rd|ft|feat|dr|drs|mr|ms|mrs|messrs|jr|prof",
+    regex_constants::icase | regex_constants::optimize
+  );
+  std::string term = "", sentend_mark = ".?!";
+  unordered_map<String, int> dict;
+  NumericVector segment, fileid, wc, cinds;
+  CharacterVector terms, text;
+  vector<NumericVector> inds;
+  bool ck_inseg = false, ck_space = false, ck_size = nseg || size != -1, ck_end = true, ck_break = false,
+    insent = bysentence, rt = ck_size || returntokens;
+  for(lti = 1; fid < nf; fid++){
+    d.open(files[fid]);
+    if(nseg){
+      for(ti = 0; d.get(c);){
+        if(isspace(c)){
+          for(; d.get(c);) if(!isspace(c)) break;
+          ti++;
+        }
+      }
+      size = ti / nseg + 1;
+      d.close();
+      d.open(files[fid]);
+    }
+    for(ti = 0, si = 0; d.get(c);){
+      oi = segment.length();
+      ck_space = isspace(c);
+      if(!ck_size){
+        spm = c == split[spm] ? spm + 1 : 0;
+        ck_break = spm == spl;
+      }else{
+        ck_break = !insent && ck_space && (ck_inseg ? wc[oi] + (term != "") >= size : false);
+      }
+      if((ck_end = d.peek() == EOF) || ck_break || ck_space){
+        if(ck_end && !ck_space) term.push_back(c);
+        if(ck_break && !ck_size) term = term.length() < spl ? "" :
+          term.substr(0, term.length() + 1 - spl);
+        if(term != ""){
+          if(wc.length() <= oi){
+            ck_inseg = true;
+            wc.push_back(1);
+            if(!rt) text.push_back("");
+          }else{
+            wc[oi]++;
+          }
+          if(rt){
+            if(dict.find(term) != dict.end()){
+              ti = dict.at(term);
+            }else{
+              ti = lti++;
+              dict.insert({term, ti});
+              terms.push_back(term);
+            }
+            cinds.push_back(ti);
+          }else text[oi] += (text[oi] == "" ? "" : " ") + term;
+          if(ck_end || ck_break){
+            ck_inseg = false;
+            segment.push_back(++si);
+            fileid.push_back(fid + 1);
+            if(rt){
+              inds.push_back(cinds);
+              cinds = {};
+            }
+          }
+          term = "";
+        }
+      }else{
+        if(bysentence){
+          if(ck_size && sentend_mark.find(c) != string::npos){
+            insent = c == '.' && regex_match(term, sentend_body);
+          }else insent = true;
+        }
+        term.push_back(c);
+      }
+      if(!--ck){
+        checkUserInterrupt();
+        ck = 1e4;
+      }
+    }
+    d.close();
+  }
+  if(rt && !returntokens) for(nf = wc.length(), fid = 0; fid < nf; fid++){
+    text.push_back("");
+    for(lti = inds[fid].length(), ti = 0; ti < lti; ti++){
+      text[fid] += (ti ? " " : "") + terms[inds[fid][ti] - 1];
+    }
+  }
+  return List::create(terms, fileid, segment, wc, inds, text);
 }

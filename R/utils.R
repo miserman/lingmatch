@@ -7,30 +7,31 @@
 #'   (starts are marked with ^ and ends with $ when an * is present, and unmatched brackets/parens are escaped).
 #' @export
 
-read.dic=function(path,cats,to.regex=FALSE){
-  di=tryCatch(
-    readLines(if(missing(path))file.choose() else path,warn=FALSE)
-    ,error=function(e)stop('failed to read path: ',e$message,call.=FALSE)
+read.dic = function(path, cats, to.regex = FALSE){
+  if(missing(path)) path = file.choose()
+  di = if(length(path) != 1) path else tryCatch(
+    readLines(path, warn = FALSE),
+    error = function(e) stop('failed to read path: ', e$message, call. = FALSE)
   )
-  lst=grep('%',di)
-  if(length(lst)>1){
-    di=di[-seq_len(lst[1])]
-    lst=lst[2]-2
+  lst = grep('%', di, fixed = TRUE)
+  if(length(lst) > 1){
+    di = di[-seq_len(lst[1])]
+    lst = lst[2] - 2
   }else stop('file is not in the expected format')
-  ci=lapply(di[seq_len(lst)],function(l)strsplit(l,'[ \t]+')[[1]])
-  names(ci)=vapply(ci,'[[','',2)
-  if(missing(cats)) cats=names(ci)
-  ci=lapply(ci[names(ci)%in%cats],'[[',1)
-  di=strsplit(di[seq_along(di)[-(1:3)]],'[ \t]+(?=[0-9]|$)',perl=TRUE)
-  di=di[vapply(di,length,0)>1]
-  names(di)=vapply(di,'[','',1)
-  di=lapply(di,'[',-1)
-  wl=list()
+  ci = strsplit(di[seq_len(lst)], '\\s+')
+  names(ci) = vapply(ci, '[[', '', 2)
+  if(missing(cats)) cats = names(ci)
+  ci = lapply(ci[names(ci) %in% cats], '[[', 1)
+  di = strsplit(di[seq_along(di)[-(1:3)]], '[ \t]+(?=[0-9]|$)', perl = TRUE)
+  di = di[vapply(di, length, 0) > 1]
+  names(di) = vapply(di, '[', '', 1)
+  di = lapply(di, '[', -1)
+  wl = list()
   for(w in names(di)){
-    ck=ci%in%di[[w]]
+    ck = ci %in% di[[w]]
     if(any(ck)){
-      cm=names(ci[ck])
-      for(c in cm) wl[[c]]=c(wl[[c]],w)
+      cm = names(ci[ck])
+      for(c in cm) wl[[c]] = c(wl[[c]], w)
     }
   }
   if(to.regex) lapply(wl, function(l){
@@ -41,8 +42,10 @@ read.dic=function(path,cats,to.regex=FALSE){
 }
 
 #' @rdname read.dic
-#' @param x A list object with names of categories and a vector of their words.
+#' @param dict A list object with names of categories and a vector of their words.
 #' @param filename The name of the file to be saved.
+#' @param save Logical; if \code{FALSE}, does not write a file.
+#' @return a character vector
 #' @examples
 #' # make a small murder related dictionary
 #' dict = list(
@@ -61,16 +64,21 @@ read.dic=function(path,cats,to.regex=FALSE){
 #' }
 #' @export
 
-write.dic=function(x,filename='custom'){
-  filename=paste0(if(!grepl(':',filename,fixed=TRUE))paste0(getwd(),'/'),filename,'.dic')
-  fl=unique(as.character(unlist(x)))
-  lx=length(x)
-  m=matrix('',length(fl)+lx+2,lx+1)
-  m[,1]=c('%',seq_len(lx),'%',fl)
-  m[seq_len(lx)+1,2]=if(is.null(names(x))) seq_len(lx) else names(x)
-  for(l in seq_along(x)) m[which(m[-seq_len(lx+2),1]%in%x[[l]])+lx+2,l+1]=l
-  write(paste0(sub('\t+$','',apply(m,1,function(r)paste(r,collapse='\t'))),collapse='\n'),filename)
-  message('dictionary saved to ',filename)
+write.dic = function(dict, filename = 'custom', save = TRUE){
+  filename = paste0(if(!grepl(':', filename, fixed = TRUE)) paste0(getwd(), '/'), filename,
+    if(!grepl('\\.dic$', filename)) '.dic')
+  terms = unique(as.character(unlist(dict, use.names = FALSE)))
+  l = length(dict)
+  m = as.data.frame(matrix('', length(terms) + l + 2, l + 1))
+  m[, 1] = c('%', seq_len(l), '%', terms)
+  m[seq_len(l) + 1, 2] = if(is.null(names(dict))) seq_len(l) else names(dict)
+  for(i in seq_along(dict)) m[which(m[-seq_len(i + 2), 1] %in% dict[[i]]) + i + 2, i + 1] = i
+  o = gsub('\t{2,}', '\t', paste(sub('\t+$', '', do.call(paste, c(m, sep = '\t'))), collapse = '\n'))
+  if(save){
+    write(o, filename)
+    message('dictionary saved to ', filename)
+  }
+  invisible(o)
 }
 
 #' Process texts in a folder
@@ -78,68 +86,66 @@ write.dic=function(x,filename='custom'){
 #' Read in and optionally segment all texts within a folder.
 #'
 #' @param path Path to a folder containing files, or a vector of paths to files.
-#' @param segment Specifies how the text of each file should be segmented. If a number, texts will be broken into
-#'   that many segments, each with a roughly equal number of words. If a character, texts will be broken at that character;
-#'   for example, a string matching \code{join} will split texts on returns.
-#' @param subdir If \code{TRUE} files in folders in \code{path} will also be included.
+#' @param segment Specifies how the text of each file should be segmented. If a character, split at that character;
+#'   '\\n' by default. If a number, texts will be broken into that many segments, each with a roughly equal number of words.
 #' @param ext The extension of the files you want to read in. '.txt' by default.
-#' @param fixed If \code{FALSE}, and \code{segment} is a character, \code{segment} will be treated as a regular expression.
+#' @param subdir If \code{TRUE} files in folders in \code{path} will also be included.
 #' @param segment.size If specified, \code{segment} will be ignored, and texts will be broken into segments containing roughly
 #'   \code{segment.size} number of words.
-#' @param bysentence If \code{TRUE}, and \code{segment} is a number or \code{wordcount} is specified, sentences will be kept
-#'   together, rather than being broken across segments.
-#' @param reader The function used to read files. File paths are always passed as the first argument.
-#'   \code{\link[base]{readLines}} by default.
-#' @param readarg A list of additional arguments to pass to \code{reader}, starting in the second position.
-#' @param ncores Number of CPU cores to use; defaults to total number of cores minus 2.
+#' @param bysentence If \code{TRUE}, and \code{segment} is a number or \code{segment.size} is specified, sentences will be
+#'   kept together, rather than potentially being broken across segments.
+#' @param return.tokens Logical; if \code{TRUE}, returns segments as token IDs, with an associated token vector.
+#' @returns
+#' If \code{return.tokens} is \code{FALSE}, a \code{data.frame} with columns for file names (\code{file}),
+#' segment number within file (\code{segment}), word count for each segment (\code{WC}), and the text of
+#' each segment (\code{text}). Otherwise, a list with vectors corresponding to columns, and additional
+#' entries for terms (\code{terms}) and a \code{list} of vectors of indices corresponding to those terms (\code{indices}).
+#' @examples
+#' # read in all files from the current directory
+#' dir = path.package('lingmatch')
+#' texts = read.folder(dir, ext = '')
+#' texts[1:3,]
 #'
+#' # return that as indices, and it can be converted to a
+#' # document-term matrix, though terms are minimally processed
+#' rawdtm = lma_dtm(read.folder(dir, ext = '', return.tokens = TRUE))
+#'
+#' \dontrun{
+#'
+#' # segment .txt files in 'path/to/files' in a few ways:
+#' ## into 1 line segments
+#' texts_lines = read.folder('path/to/files')
+#'
+#' ## into 5 even segments each
+#' texts_5segs = read.folder('path/to/files', 5)
+#'
+#' ## into 50 word segments
+#' texts_50words = read.folder('path/to/files', segment.size = 50)
+#'
+#' ## into 1 sentence segments
+#' texts_50words = read.folder('path/to/files', 1, bysentence = TRUE)
+#' }
 #' @export
-#' @importFrom parallel detectCores makeCluster stopCluster
-#' @importFrom doParallel registerDoParallel
-#' @importFrom foreach foreach %dopar% registerDoSEQ
 
-read.folder=function(path=NULL,segment=NULL,subdir=FALSE,ext='.txt',fixed=TRUE,
-  segment.size=NULL,bysentence=FALSE,reader=readLines,readarg=list(warn=FALSE),ncores = parallel::detectCores() - 2){
-  if(missing(path)) stop("path must be specified; enter the path to a folder, e.g., read.folder('~/texts')")
-  fs=if(length(path)==1 && dir.exists(path)) fs=list.files(path,ext,recursive=subdir,full.names=TRUE) else path
-  fs=data.frame(rbind(fs,gsub('^.*[\\/]+','',fs)),stringsAsFactors=FALSE)
-  if(!missing(segment.size)) segment=NULL
-  if(ncores > 1 && (!missing(ncores) || length(fs) > 4)){
-    cl = makeCluster(ncores)
-    registerDoParallel(cl)
-    on.exit(stopCluster(cl))
-  }else registerDoSEQ()
-  i = 0
-  d = foreach(i = seq_along(fs), .combine = rbind) %dopar%{
-    f = fs[[i]]
-    txt=tryCatch(do.call(reader,c(f[1],readarg)),error=function(e)NULL)
-    if(!is.null(txt)){
-      txt=paste(txt,collapse='\r\n')
-      if(is.character(segment)){
-        txt=strsplit(txt,segment,fixed=fixed)[[1]]
-      }else if(is.numeric(segment) || !is.null(segment.size)){
-        txt=if(bysentence){
-          txt=gsub('(?<=st|rd|ft|feat|dr|drs|mr|ms|mrs|messrs|jr|prof)\\.','__PERIOD__',txt,TRUE,TRUE)
-          txt=strsplit(gsub('(?<=[.?!][ ")}\\]])','__BREAK__',txt,perl=TRUE),'__BREAK__',fixed=TRUE)[[1]]
-          lapply(txt,function(t)strsplit(sub('__PERIOD__','.',t,fixed=TRUE),' [^A-Za-z0-9]+ | +|\r\n',perl=TRUE)[[1]])
-        }else strsplit(txt,' [^A-Za-z0-9]+ | +|\r\n',perl=TRUE)[[1]]
-        ns=length(txt)
-        sls=vapply(txt,function(s)sum(s!=''),0)
-        wc=sum(sls)
-        seg=if(is.null(segment.size)) round(wc/segment+.49) else segment.size
-        txt = vapply(
-          unname(split(txt, cut(cumsum(sls), c(-Inf, seq_len(round(wc / seg + .49) - 1) * seg, Inf)))),
-          paste, '', collapse = ' '
-        )
-        txt = txt[grepl('\\w', txt)]
-      }
-      data.frame(file = f[2], segment = seq_along(txt), text = txt)
+read.folder = function(path = '.', segment = '\n', ext = '.txt', subdir = FALSE, segment.size = -1,
+  bysentence = FALSE, return.tokens = FALSE){
+  files = if(all(dir.exists(path))) unique(list.files(path, ext, recursive = subdir, full.names = TRUE)) else
+    path = if(any(path == '')){
+      path[path == ''] = '.'
+      path
+    }else{
+      path[file.exists(path)]
     }
-  }
-  rownames(d) = seq_len(nrow(d))
-  d
+  if(length(files)){
+    segs = read_segments(files, if(is.numeric(segment)) segment else 0, segment.size,
+      if(is.character(segment)) segment else '\n', bysentence, return.tokens)
+    segs[[2]] = files[segs[[2]]]
+    names(segs) = c('tokens', 'file', 'segment', 'WC', 'indices', 'text')
+    if(return.tokens || !length(segs[[6]])){
+      if(length(segs[[6]])) segs else segs[-6]
+    }else as.data.frame(segs[-c(1, 5)])
+  }else warning('no files found')
 }
-
 
 #' Select Latent Semantic Spaces
 #'
@@ -449,6 +455,9 @@ standardize.lsspace = function(infile, name, sep = ' ', digits = 9, dir = option
 #' lma_patcat(text, tempori)
 #' }
 #' @export
+#' @importFrom parallel detectCores makeCluster stopCluster
+#' @importFrom doParallel registerDoParallel
+#' @importFrom foreach foreach %dopar% registerDoSEQ
 
 lma_patcat = function(text, dict, term = 'term', category = 'category', weight = 'weight',
   to.lower = TRUE, to.percent = FALSE, bias = NULL, intname = '_intercept', return_dtm = FALSE,
@@ -573,6 +582,10 @@ lma_patcat = function(text, dict, term = 'term', category = 'category', weight =
 lma_meta = function(text){
   text = gsub('^\\s+|\\s+$', '', text)
   dtm = lma_dtm(text, numbers = TRUE, punct = TRUE, urls = FALSE)
+  text = gsub(paste0(
+    '((?:^|\\s)[a-z]+\\.[a-z.]+|\\d|(?:^|\\s)[a-z]|(?:^|\\s)[iv]+|',
+    'ans|govt|apt|etc|st|rd|ft|feat|dr|drs|mr|ms|mrs|messrs|jr|prof)\\.'
+  ), '', text, TRUE)
   terms = colnames(dtm)
   dwm = dtm[, grepl("^[a-z']", terms), drop = FALSE]
   words = colnames(dwm)
@@ -678,7 +691,7 @@ lma_dict=function(..., as.regex = TRUE, as.function = FALSE){
     article=c("^a$","^an$","^da$","^teh$","^the$"),
     adverb=c("^absolutely$","^actively$","^actually$","^afk$","^again$","^ago$","^ahead$","^almost$","^already$",
       "^altogether$","^always$","^angrily$","^anxiously$","^any$","^anymore$","^anyway$","^anywhere$","^apparently$",
-      "^automatically$","^away$","^awhile$","^back$","^badly$","^barely$","^basically$","^below$","^briefly$","^carefully$",
+      "^automatically$","^away$","^awhile$","^back$","^badly$","^barely$","^basically$","^below$","^brietermsy$","^carefully$",
       "^causiously$","^certainly$","^clearly$","^closely$","^coldly$","^commonly$","^completely$","^constantly$",
       "^continually$","^correctly$","^coz$","^currently$","^daily$","^deeply$","^definitely$","^definitly$","^deliberately$",
       "^desperately$","^differently$","^directly$","^early$","^easily$","^effectively$","^elsewhere$","^enough$","^entirely$",

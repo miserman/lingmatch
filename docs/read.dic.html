@@ -18,7 +18,7 @@
 <pre>
 read.dic(path, cats, to.regex = FALSE)
 
-write.dic(x, filename = "custom")
+write.dic(dict, filename = "custom", save = TRUE)
 </pre>
 
 
@@ -38,7 +38,7 @@ write.dic(x, filename = "custom")
 <p>Logical; if <code>TRUE</code>, each dictionary entry is converted to regular expression
 (starts are marked with ^ and ends with $ when an * is present, and unmatched brackets/parens are escaped).</p>
 </td></tr>
-<tr valign="top"><td><code>x</code></td>
+<tr valign="top"><td><code>dict</code></td>
 <td>
 <p>A list object with names of categories and a vector of their words.</p>
 </td></tr>
@@ -46,7 +46,17 @@ write.dic(x, filename = "custom")
 <td>
 <p>The name of the file to be saved.</p>
 </td></tr>
+<tr valign="top"><td><code>save</code></td>
+<td>
+<p>Logical; if <code>FALSE</code>, does not write a file.</p>
+</td></tr>
 </table>
+
+
+<h3>Value</h3>
+
+<p>a character vector
+</p>
 
 
 <h3>Examples</h3>

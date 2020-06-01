@@ -7,7 +7,7 @@
 \usage{
 read.dic(path, cats, to.regex = FALSE)
 
-write.dic(x, filename = "custom")
+write.dic(dict, filename = "custom", save = TRUE)
 }
 \arguments{
 \item{path}{Path to a .dic file.}
@@ -17,9 +17,14 @@ write.dic(x, filename = "custom")
 \item{to.regex}{Logical; if \code{TRUE}, each dictionary entry is converted to regular expression
 (starts are marked with ^ and ends with $ when an * is present, and unmatched brackets/parens are escaped).}
 
-\item{x}{A list object with names of categories and a vector of their words.}
+\item{dict}{A list object with names of categories and a vector of their words.}
 
 \item{filename}{The name of the file to be saved.}
+
+\item{save}{Logical; if \code{FALSE}, does not write a file.}
+}
+\value{
+a character vector
 }
 \description{
 Read in or write Linguistic Inquiry and Word Count dictionary (.dic) files.

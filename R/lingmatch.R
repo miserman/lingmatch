@@ -701,7 +701,8 @@ lma_dtm = function(text, exclude = NULL, context = NULL, numbers = FALSE, punct 
       inds = as.factor(text$indices[[i]])
       cbind(i, as.integer(levels(inds)), tabulate(inds))
     }))
-    dtm = sparseMatrix(m[, 1], m[, 2], x = m[, 3], dimnames = list(NULL, names(text$tokens)))
+    dtm = sparseMatrix(m[, 1], m[, 2], x = m[, 3], dimnames = list(NULL,
+      if(is.character(text$tokens)) text$tokens else names(text$tokens)))
     if(!sparse) dtm = as.matrix(dtm)
     attr(dtm, 'colsums') = text$frequencies
     attr(dtm, 'type') = 'count'
