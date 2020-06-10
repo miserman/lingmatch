@@ -2,36 +2,33 @@
 % Please edit documentation in R/utils.R
 \name{lma_patcat}
 \alias{lma_patcat}
-\title{Categorize raw texts using a pattern-based dictionary}
+\title{Text Categorization}
 \usage{
-lma_patcat(text, dict, term = "term", category = "category",
-  weight = "weight", to.lower = TRUE, to.percent = FALSE, bias = NULL,
-  intname = "_intercept", return_dtm = FALSE, exclusive = TRUE,
-  boundary = NULL, fixed = TRUE, perl = TRUE, ncores = detectCores() -
-  2)
+lma_patcat(text, dict, pattern.weights = "weight",
+  pattern.categories = "category", bias = NULL, to.lower = TRUE,
+  return.dtm = FALSE, exclusive = TRUE, boundary = NULL, fixed = TRUE,
+  name.map = c(intname = "_intercept", term = "term"))
 }
 \arguments{
-\item{text}{A vector of raw text to be categorized.}
+\item{text}{A vector of text to be categorized. Texts are padded by 2 spaces, and potentially lowercased.}
 
 \item{dict}{At least a vector of terms (patterns), usually a matrix-like object with columns for terms,
 categories, and weights.}
 
-\item{term, category, weight}{Strings specifying the relevant column names in \code{dict}.}
+\item{pattern.weights}{A vector of weights corresponding to terms in \code{dict}, or the column name of
+weights found in \code{dict}.}
 
-\item{to.lower}{Logical indicating whether \code{text} should be converted to lower case.}
-
-\item{to.percent}{Logical indicating whether term-counts should be divided by document-counts before
-being weighted (defaults to \code{FALSE}).}
+\item{pattern.categories}{A vector of category names corresponding to terms in \code{dict}, or the column name of
+category names found in \code{dict}.}
 
 \item{bias}{A constant to add to each category after weighting and summing. Can be a vector with names
-corresponding to the unique values in \code{dict[,category]}, but is usually extracted from dict based
-on the intercept included in each category (defined by \code{intname}).}
+corresponding to the unique values in \code{dict[, category]}, but is usually extracted from dict based
+on the intercept included in each category (defined by \code{name.map['intname']}).}
 
-\item{intname}{The term representing the intercept (bias) of a category, to be extracted from \code{dict}
-and used as \code{bias}.}
+\item{to.lower}{Logical indicating whether \code{text} should be converted to lowercase before processing.}
 
-\item{return_dtm}{Logical; if \code{TRUE}, only a document-term matrix will be returned, rather than the
-weighted, summed, and adjusted category value.}
+\item{return.dtm}{Logical; if \code{TRUE}, only a document-term matrix will be returned, rather than the
+summed and biased category value.}
 
 \item{exclusive}{Logical; if \code{FALSE}, each dictionary term is searched for in the original text.
 Otherwise (by default), terms are sorted by length (with longer terms being searched for first), and
@@ -41,20 +38,20 @@ matches are removed from the text (avoiding subsequent matches to matched patter
 \code{boundary} will be set to \code{' '}, avoiding pattern matches within words. By default, dictionary
 terms are left as entered.}
 
-\item{fixed}{Logical; if \code{FALSE}, patterns can be regular expressions.}
+\item{fixed}{Logical; if \code{FALSE}, patterns are treated as regular expressions.}
 
-\item{perl}{Logical; passed to \code{\link{strsplit}}. This is set to \code{FALSE} if \code{fixed} is
-\code{TRUE}.}
-
-\item{ncores}{Number of CPU cores to use. Default is number of cores - 2 if \code{text} has more than 100
-entries. Otherwise, if not specified, only 1 core will be used.}
+\item{name.map}{A named character vector:
+\tabular{ll}{
+  \code{intname} \tab term identifying category biases within the term list; defaults to \code{'_intercept'} \cr
+  \code{term} \tab name of the column containing terms in \code{dict}; defaults to \code{'term'} \cr
+}
+Missing names are added, so names can be specified positional (e.g., \code{c('_int', 'terms')}),
+or only some can be specified by name (e.g., \code{c(term = 'patterns')}), leaving the rest default.}
 }
 \description{
-Categorize raw texts using a pattern-based dictionary
+Categorize raw texts using a pattern-based dictionary.
 }
 \examples{
-\dontrun{
-
 # example text
 text = c(
   paste(
@@ -70,6 +67,26 @@ text = c(
     "Soon I will off to revert. Please wait."
   )
 )
+
+# make a document-term matrix with pre-specified terms only
+lma_patcat(text, c('bored?!', 'i lo', '. '), return.dtm = TRUE)
+
+# get counts of sets of letter
+lma_patcat(text, list(c('a', 'b', 'c'), c('d', 'e', 'f')))
+
+# same thing with regular expressions
+lma_patcat(text, list('[abc]', '[def]'), fixed = FALSE)
+
+# match only words
+lma_patcat(text, 'i', boundary = TRUE)
+
+# match only words, ignoring punctuation
+lma_patcat(
+  text, c('you', 'tomorrow', 'was'), fixed = FALSE,
+  boundary = '\\\\b', return.dtm = TRUE
+)
+
+\dontrun{
 
 # read in the temporal orientation lexicon from the World Well-Being Project
 tempori = read.csv('https://wwbp.org/downloads/public_data/temporalOrientationLexicon.csv')

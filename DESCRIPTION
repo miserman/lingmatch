@@ -8,9 +8,7 @@ Description: Aims to assimilate methods for, clarify, and ease the assessment of
 URL: https://github.com/miserman/lingmatch
 BugReports: https://github.com/miserman/lingmatch/issues
 Depends: R (>= 3.5), methods, Matrix
-Imports: 
-    doParallel,
-    foreach,
+Imports:
     Rcpp,
     RcppParallel
 License: GPL (>= 2)

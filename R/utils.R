@@ -123,7 +123,7 @@ write.dic = function(dict, filename = 'custom', save = TRUE){
 #' texts_50words = read.folder('path/to/files', segment.size = 50)
 #'
 #' ## into 1 sentence segments
-#' texts_50words = read.folder('path/to/files', 1, bysentence = TRUE)
+#' texts_1sent = read.folder('path/to/files', segment.size = 1, bysentence = TRUE)
 #' }
 #' @export
 
@@ -402,37 +402,39 @@ standardize.lsspace = function(infile, name, sep = ' ', digits = 9, dir = option
   message('created ', op, '.dat\nfrom ', ip)
 }
 
-#' Categorize raw texts using a pattern-based dictionary
+#' Text Categorization
 #'
-#' @param text A vector of raw text to be categorized.
+#' Categorize raw texts using a pattern-based dictionary.
+#'
+#' @param text A vector of text to be categorized. Texts are padded by 2 spaces, and potentially lowercased.
 #' @param dict At least a vector of terms (patterns), usually a matrix-like object with columns for terms,
 #'   categories, and weights.
-#' @param term,category,weight Strings specifying the relevant column names in \code{dict}.
-#' @param to.lower Logical indicating whether \code{text} should be converted to lower case.
-#' @param to.percent Logical indicating whether term-counts should be divided by document-counts before
-#'   being weighted (defaults to \code{FALSE}).
+#' @param pattern.weights A vector of weights corresponding to terms in \code{dict}, or the column name of
+#'   weights found in \code{dict}.
+#' @param pattern.categories A vector of category names corresponding to terms in \code{dict}, or the column name of
+#'   category names found in \code{dict}.
 #' @param bias A constant to add to each category after weighting and summing. Can be a vector with names
-#'   corresponding to the unique values in \code{dict[,category]}, but is usually extracted from dict based
-#'   on the intercept included in each category (defined by \code{intname}).
-#' @param intname The term representing the intercept (bias) of a category, to be extracted from \code{dict}
-#'   and used as \code{bias}.
-#' @param return_dtm Logical; if \code{TRUE}, only a document-term matrix will be returned, rather than the
-#'   weighted, summed, and adjusted category value.
+#'   corresponding to the unique values in \code{dict[, category]}, but is usually extracted from dict based
+#'   on the intercept included in each category (defined by \code{name.map['intname']}).
+#' @param to.lower Logical indicating whether \code{text} should be converted to lowercase before processing.
+#' @param return.dtm Logical; if \code{TRUE}, only a document-term matrix will be returned, rather than the
+#'   summed and biased category value.
 #' @param exclusive Logical; if \code{FALSE}, each dictionary term is searched for in the original text.
 #'   Otherwise (by default), terms are sorted by length (with longer terms being searched for first), and
 #'   matches are removed from the text (avoiding subsequent matches to matched patterns).
 #' @param boundary A string to add to the beginning and end of each dictionary term. If \code{TRUE},
 #'   \code{boundary} will be set to \code{' '}, avoiding pattern matches within words. By default, dictionary
 #'   terms are left as entered.
-#' @param fixed Logical; if \code{FALSE}, patterns can be regular expressions.
-#' @param perl Logical; passed to \code{\link{strsplit}}. This is set to \code{FALSE} if \code{fixed} is
-#'   \code{TRUE}.
-#' @param ncores Number of CPU cores to use. Default is number of cores - 2 if \code{text} has more than 100
-#'   entries. Otherwise, if not specified, only 1 core will be used.
+#' @param fixed Logical; if \code{FALSE}, patterns are treated as regular expressions.
+#' @param name.map A named character vector:
+#'   \tabular{ll}{
+#'     \code{intname} \tab term identifying category biases within the term list; defaults to \code{'_intercept'} \cr
+#'     \code{term} \tab name of the column containing terms in \code{dict}; defaults to \code{'term'} \cr
+#'   }
+#'   Missing names are added, so names can be specified positional (e.g., \code{c('_int', 'terms')}),
+#'   or only some can be specified by name (e.g., \code{c(term = 'patterns')}), leaving the rest default.
 #' @seealso For applying term-based dictionaries (to a document-term matrix) see \code{\link{lma_termcat}}.
 #' @examples
-#' \dontrun{
-#'
 #' # example text
 #' text = c(
 #'   paste(
@@ -449,92 +451,93 @@ standardize.lsspace = function(infile, name, sep = ' ', digits = 9, dir = option
 #'   )
 #' )
 #'
+#' # make a document-term matrix with pre-specified terms only
+#' lma_patcat(text, c('bored?!', 'i lo', '. '), return.dtm = TRUE)
+#'
+#' # get counts of sets of letter
+#' lma_patcat(text, list(c('a', 'b', 'c'), c('d', 'e', 'f')))
+#'
+#' # same thing with regular expressions
+#' lma_patcat(text, list('[abc]', '[def]'), fixed = FALSE)
+#'
+#' # match only words
+#' lma_patcat(text, 'i', boundary = TRUE)
+#'
+#' # match only words, ignoring punctuation
+#' lma_patcat(
+#'   text, c('you', 'tomorrow', 'was'), fixed = FALSE,
+#'   boundary = '\\b', return.dtm = TRUE
+#' )
+#'
+#' \dontrun{
+#'
 #' # read in the temporal orientation lexicon from the World Well-Being Project
 #' tempori = read.csv('https://wwbp.org/downloads/public_data/temporalOrientationLexicon.csv')
 #'
 #' lma_patcat(text, tempori)
 #' }
 #' @export
-#' @importFrom parallel detectCores makeCluster stopCluster
-#' @importFrom doParallel registerDoParallel
-#' @importFrom foreach foreach %dopar% registerDoSEQ
 
-lma_patcat = function(text, dict, term = 'term', category = 'category', weight = 'weight',
-  to.lower = TRUE, to.percent = FALSE, bias = NULL, intname = '_intercept', return_dtm = FALSE,
-  exclusive = TRUE, boundary = NULL, fixed = TRUE, perl = TRUE, ncores = detectCores() - 2){
+lma_patcat = function(text, dict, pattern.weights = 'weight', pattern.categories = 'category', bias = NULL, to.lower = TRUE,
+  return.dtm = FALSE, exclusive = TRUE, boundary = NULL, fixed = TRUE,
+  name.map = c(intname = '_intercept', term = 'term')){
   text = paste(' ', text, ' ')
   if(to.lower) text = tolower(text)
+  if(is.null(names(name.map)) && length(name.map) < 4) names(name.map) = c('intname', 'term', 'category')[seq_along(name.map)]
   if(is.null(colnames(dict))){
-    if(is.list(dict)){
-      if(is.null(names(dict))) names(dict) = seq_along(dict)
-      dict = lapply(dict, as.character)
-      dict = data.frame(
-        term = unlist(dict, use.names = FALSE),
-        category = unlist(lapply(names(dict), function(n) rep(n, length(dict[[n]]))))
-      )
-    }else dict = data.frame(term = dict)
-    term = 'term'
-    category = 'category'
+    if((is.numeric(dict) && is.null(names(dict))) || (is.list(dict) && is.numeric(dict[[1]]) && is.null(names(dict[[1]]))))
+      stop('could not recognize terms in dict')
+    n = length(dict)
+    lex = data.frame(
+      term = if(is.character(dict)) dict else if(is.numeric(dict)) names(dict) else if(is.list(dict) &&
+        is.numeric(dict[[1]])) unlist(lapply(dict, names), use.names = FALSE) else unlist(dict, use.names = FALSE),
+      category = if(length(pattern.categories) == n) pattern.categories else if(is.list(dict))
+        rep(if(!is.null(names(dict))) names(dict) else
+        paste0('cat', seq_along(dict)), vapply(dict, length, 0)) else 'cat1',
+      weights = if(is.numeric(dict)) unname(dict) else if(is.numeric(pattern.weights))
+        if(!is.null(names(pattern.weights)) && is.character(dict) && all(dict %in% names(pattern.weights)))
+          pattern.weights[dict] else pattern.weights else if(is.list(dict)) if(is.numeric(dict[[1]]))
+        unlist(dict, use.names = FALSE) else if(is.numeric(dict[[1]])) unlist(pattern.weights, use.names = FALSE) else 1 else 1
+    )
+  }else{
+    term = if('term' %in% names(name.map)) name.map[['term']] else 'term'
+    en = colnames(dict)
+    if(!term %in% en) stop('could not recognize terms in dict')
+    lex = data.frame(
+      term = dict[[term]],
+      category = if(length(pattern.categories) == nrow(dict)) pattern.categories else
+        if(pattern.categories %in% en) dict[[pattern.categories]] else 'cat1',
+      weights = if(length(pattern.weights) == nrow(dict)) pattern.weights else
+        if(pattern.weights %in% en) dict[[pattern.weights]] else 1
+    )
   }
-  if(!weight %in% names(dict)) dict[, weight] = 1
-  if((missing(bias) || (is.logical(bias) && bias)) && any(bs <- !is.na(dict[, term]) & dict[, term] == intname)){
-    bias = dict[bs,, drop = FALSE]
-    bias = if(sum(bs) != 1 && category %in% names(bias)){
-      rownames(bias) = bias[, category]
-      t(bias[, weight, drop = FALSE])[1, ]
-    }else bias[1, weight]
-    dict = dict[!bs, ]
-  }
-  terms = na.omit(as.character(unique(dict[, term])))
-  mfun = if(exclusive){
-    terms = terms[order(-nchar(terms))]
-    function(w){
-      if(txt == '') 0 else{
-        tt = strsplit(txt, w, fixed = fixed, perl = perl)[[1]]
-        txt <<- paste(tt, collapse = ' ')
-        length(tt) - 1
-      }
-    }
-  }else function(w) length(strsplit(txt, w, fixed = fixed, perl = perl)[[1]]) - 1
-  if(is.logical(boundary)) boundary = if(boundary) ' ' else NULL
-  if(!is.null(boundary)){
-    oterms = terms
-    terms = paste0(boundary, terms, boundary)
-  }
-  if(fixed) perl = FALSE
-  l = length(text)
-  if(ncores > 1 && (!missing(ncores) || l > 100)){
-    clust = makeCluster(ncores)
-    registerDoParallel(clust)
-    on.exit(stopCluster(clust))
-  }else registerDoSEQ()
-  txt = ''
-  dtm = foreach(txt = text, .combine = cbind) %dopar% Matrix(vapply(terms, mfun, 0), sparse = TRUE)
-  if(!is.null(boundary)) terms = oterms
-  dimnames(dtm) = list(terms, seq_len(l))
-  if(to.percent){
-    rs = colSums(dtm)
-    if(any(rs != 0)){
-      su = rs > 0
-      dtm[, su] = t(t(dtm[, su]) / rs[su]) * 100
+  if(is.null(bias)){
+    if(!'intname' %in% names(name.map)) name.map[['intname']] = '_intercept'
+    if(any(su <- lex$term == name.map[['intname']])){
+      bias = structure(lex[su, 'weights'], names = lex[su, 'category'])
+      lex = lex[!su,]
     }
   }
-  if(return_dtm) return(t(dtm))
-  if(category %in% names(dict)){
-    cats = unique(dict[, category])
-    terms = split(dict[, c(term, weight)], dict[, category])[cats]
-    if(!is.null(bias) && is.null(names(bias))){
-      bias = rep_len(bias, length(cats))
-      names(bias) = cats
-    }
-    om = matrix(0, l, length(cats), dimnames = list(NULL, cats))
-    for(cat in cats){
-      ct = na.omit(terms[[cat]])
-      if(nrow(ct)) om[, cat] = colSums(dtm[as.character(ct[, 1]),, drop = FALSE] * ct[, 2]) +
-        if(!is.null(bias) && cat %in% names(bias)) bias[cat] else 0
-    }
-  }else om = rowSums(dtm * dict[, weight]) + if(!is.null(bias)) bias else 0
-  om
+  if(exclusive) lex = lex[order(-nchar(lex$term)),]
+  lex$category = as.factor(lex$category)
+  categories = levels(lex$category)
+  if(length(bias)){
+    if(is.null(names(bias)) && length(bias) == length(categories)) names(bias) = categories
+    if(any(su <- !categories %in% names(bias))) bias[categories[su]] = 0
+  }else bias = structure(integer(length(categories)), names = categories)
+  bias = bias[categories]
+  if(is.logical(boundary) && boundary) boundary = ' '
+  st = proc.time()[[3]]
+  op = pattern_search(
+    text, if(is.character(boundary)) paste0(boundary, lex$term, boundary) else lex$term,
+    if(return.dtm) 0L else nlevels(lex$category),
+    (if(return.dtm) seq_along(lex$term) else as.integer(lex$category)) - 1L,
+    lex$weight, bias, fixed, exclusive
+  )
+  colnames(op[[1]]) = if(return.dtm) lex$term else categories
+  attr(op[[1]], 'WC') = op[[2]]
+  attr(op[[1]], 'time') = c(patcat = proc.time()[[3]] - st)
+  op[[1]]
 }
 
 #' Calculate Text-Based Metastatistics
