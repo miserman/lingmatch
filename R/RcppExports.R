@@ -25,10 +25,6 @@ extract_matches <- function(terms, file, sep = ' ') {
     .Call(`_lingmatch_extract_matches`, terms, file, sep)
 }
 
-read_segments <- function(files, nseg, segsize, split, bysentence, returntokens) {
-    .Call(`_lingmatch_read_segments`, files, nseg, segsize, split, bysentence, returntokens)
-}
-
 pattern_search <- function(texts, patterns, ncats, categories, weight, bias, fixed, exclusive) {
     .Call(`_lingmatch_pattern_search`, texts, patterns, ncats, categories, weight, bias, fixed, exclusive)
 }

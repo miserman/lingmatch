@@ -90,22 +90,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// read_segments
-List read_segments(const CharacterVector& files, const int& nseg, const int& segsize, const std::string& split, const bool& bysentence, const bool& returntokens);
-RcppExport SEXP _lingmatch_read_segments(SEXP filesSEXP, SEXP nsegSEXP, SEXP segsizeSEXP, SEXP splitSEXP, SEXP bysentenceSEXP, SEXP returntokensSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const CharacterVector& >::type files(filesSEXP);
-    Rcpp::traits::input_parameter< const int& >::type nseg(nsegSEXP);
-    Rcpp::traits::input_parameter< const int& >::type segsize(segsizeSEXP);
-    Rcpp::traits::input_parameter< const std::string& >::type split(splitSEXP);
-    Rcpp::traits::input_parameter< const bool& >::type bysentence(bysentenceSEXP);
-    Rcpp::traits::input_parameter< const bool& >::type returntokens(returntokensSEXP);
-    rcpp_result_gen = Rcpp::wrap(read_segments(files, nseg, segsize, split, bysentence, returntokens));
-    return rcpp_result_gen;
-END_RCPP
-}
 // pattern_search
 List pattern_search(const CharacterVector& texts, const CharacterVector& patterns, const int& ncats, const IntegerVector& categories, const NumericVector& weight, const NumericVector& bias, const bool& fixed, const bool& exclusive);
 RcppExport SEXP _lingmatch_pattern_search(SEXP textsSEXP, SEXP patternsSEXP, SEXP ncatsSEXP, SEXP categoriesSEXP, SEXP weightSEXP, SEXP biasSEXP, SEXP fixedSEXP, SEXP exclusiveSEXP) {
@@ -132,7 +116,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_lingmatch_reformat_embedding", (DL_FUNC) &_lingmatch_reformat_embedding, 7},
     {"_lingmatch_extract_indices", (DL_FUNC) &_lingmatch_extract_indices, 3},
     {"_lingmatch_extract_matches", (DL_FUNC) &_lingmatch_extract_matches, 3},
-    {"_lingmatch_read_segments", (DL_FUNC) &_lingmatch_read_segments, 6},
     {"_lingmatch_pattern_search", (DL_FUNC) &_lingmatch_pattern_search, 8},
     {NULL, NULL, 0}
 };

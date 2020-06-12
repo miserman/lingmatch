@@ -8,7 +8,8 @@ test_that('normalization work', {
   wc = rowSums(manual, na.rm = TRUE)
   su = wc != 0
   manual[, su] = manual[su,] / wc[su]
-  expect_equal(dtm[1,] / sum(dtm[1,]), manual[1,])
+  i = which(colSums(dtm, na.rm = TRUE) != 0)[1]
+  expect_equal(dtm[i,] / sum(dtm[i,]), manual[i,])
   manual = as.numeric(manual)
   wdtm = lma_weight(dtm)
   expect_equivalent(rowSums(wdtm, na.rm = TRUE), rep(1, nrow(dtm)))

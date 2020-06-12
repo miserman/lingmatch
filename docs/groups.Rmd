@@ -110,7 +110,7 @@ lsm$sim[1:10,]
 Here, the `group` argument is just pasting together the included variables, and using the resulting string to identify a single comparison for each text (acting as a condition ID).
 
 ## Participant ID
-Similarity, participants are only uniquely identified by pair ID and speaker ID (though this could just as well be a single column with unique IDs).
+Similarly, participants are only uniquely identified by pair ID and speaker ID (though this could just as well be a single column with unique IDs).
 ```{r}
 interlsm = lingmatch(data, group = c('pair', 'speaker'), type = 'lsm')
 interlsm$comp[1:10,]

@@ -81,11 +81,12 @@ write.dic = function(dict, filename = 'custom', save = TRUE){
   invisible(o)
 }
 
-#' Process texts in a folder
+#' Read and segment multiple texts
 #'
-#' Read in and optionally segment all texts within a folder.
+#' Split texts by word count or specific characters. Input texts directly, or read them in from files.
 #'
-#' @param path Path to a folder containing files, or a vector of paths to files.
+#' @param path Path to a folder containing files, or a vector of paths to files. If no folders or files are
+#'   recognized in \code{path}, it is treated as \code{text}.
 #' @param segment Specifies how the text of each file should be segmented. If a character, split at that character;
 #'   '\\n' by default. If a number, texts will be broken into that many segments, each with a roughly equal number of words.
 #' @param ext The extension of the files you want to read in. '.txt' by default.
@@ -94,57 +95,121 @@ write.dic = function(dict, filename = 'custom', save = TRUE){
 #'   \code{segment.size} number of words.
 #' @param bysentence If \code{TRUE}, and \code{segment} is a number or \code{segment.size} is specified, sentences will be
 #'   kept together, rather than potentially being broken across segments.
-#' @param return.tokens Logical; if \code{TRUE}, returns segments as token IDs, with an associated token vector.
+#' @param text A character vector with text to be split, used in place of \code{path}. Each entry is treates as a file.
 #' @returns
-#' If \code{return.tokens} is \code{FALSE}, a \code{data.frame} with columns for file names (\code{file}),
+#' A \code{data.frame} with columns for file names (\code{input}),
 #' segment number within file (\code{segment}), word count for each segment (\code{WC}), and the text of
-#' each segment (\code{text}). Otherwise, a list with vectors corresponding to columns, and additional
-#' entries for terms (\code{terms}) and a \code{list} of vectors of indices corresponding to those terms (\code{indices}).
+#' each segment (\code{text}).
 #' @examples
-#' # read in all files from the current directory
-#' dir = path.package('lingmatch')
-#' texts = read.folder(dir, ext = '')
-#' texts[1:3,]
+#' # split preloaded text
+#' read.segments('split this text into two segments', 2)
 #'
-#' # return that as indices, and it can be converted to a
-#' # document-term matrix, though terms are minimally processed
-#' rawdtm = lma_dtm(read.folder(dir, ext = '', return.tokens = TRUE))
+#' # read in all files from the package directory
+#' texts = read.segments(path.package('lingmatch'), ext = '')
+#' texts[, -4]
 #'
 #' \dontrun{
 #'
-#' # segment .txt files in 'path/to/files' in a few ways:
+#' # segment .txt files in dir in a few ways:
+#' dir = 'path/to/files'
+#'
 #' ## into 1 line segments
-#' texts_lines = read.folder('path/to/files')
+#' texts_lines = read.segments(dir)
 #'
 #' ## into 5 even segments each
-#' texts_5segs = read.folder('path/to/files', 5)
+#' texts_5segs = read.segments(dir, 5)
 #'
 #' ## into 50 word segments
-#' texts_50words = read.folder('path/to/files', segment.size = 50)
+#' texts_50words = read.segments(dir, segment.size = 50)
 #'
 #' ## into 1 sentence segments
-#' texts_1sent = read.folder('path/to/files', segment.size = 1, bysentence = TRUE)
+#' texts_1sent = read.segments(dir, segment.size = 1, bysentence = TRUE)
 #' }
 #' @export
 
-read.folder = function(path = '.', segment = '\n', ext = '.txt', subdir = FALSE, segment.size = -1,
-  bysentence = FALSE, return.tokens = FALSE){
-  files = if(all(dir.exists(path))) unique(list.files(path, ext, recursive = subdir, full.names = TRUE)) else
-    path = if(any(path == '')){
-      path[path == ''] = '.'
-      path
-    }else{
-      path[file.exists(path)]
+read.segments = function(path = '.', segment = NULL, ext = '.txt', subdir = FALSE, segment.size = -1,
+  bysentence = FALSE, text = NULL){
+  if(any(path == '')) path[path == ''] = '.'
+  if(!any(dir.exists(path) | file.exists(path))){
+    ck_text = TRUE
+    files = path
+  }else{
+    ck_text = !is.null(text)
+    files = if(ck_text) text else{
+      dirs = list.dirs(path, recursive = subdir)
+      files = if(any(dir.exists(path)))
+        unique(list.files(path, ext, recursive = subdir, full.names = TRUE)) else path[file.exists(path)]
+      files[!files %in% dirs]
     }
+  }
+  if(missing(segment) && missing(segment.size)) segment = 1
   if(length(files)){
-    segs = read_segments(files, if(is.numeric(segment)) segment else 0, segment.size,
-      if(is.character(segment)) segment else '\n', bysentence, return.tokens)
-    segs[[2]] = files[segs[[2]]]
-    names(segs) = c('tokens', 'file', 'segment', 'WC', 'indices', 'text')
-    if(return.tokens || !length(segs[[6]])){
-      if(length(segs[[6]])) segs else segs[-6]
-    }else as.data.frame(segs[-c(1, 5)])
-  }else warning('no files found')
+    err = function(e) NULL
+    args = list(what = character(), quote = '', na.strings = '', quiet = TRUE)
+    if(is.character(segment) && segment.size == -1) args$sep = segment
+    do.call(rbind, lapply(seq_along(files), function(fi){
+      f = files[fi]
+      args[[if(ck_text) 'text' else 'file']] = f
+      WC = NULL
+      if(is.numeric(segment) || segment.size > 0){
+        words = tryCatch(do.call(scan, args), error = err)
+        if(!length(words)) return(NULL)
+        TWC = length(words)
+        if(segment.size == -1) segment.size = ceiling(TWC / segment)
+        if(bysentence){
+          if(!is.null(segment)){
+            lines = character(segment)
+            WC = numeric(segment)
+          }else{
+            lines = NULL
+            WC = NULL
+          }
+          sentends = c(1, grep(paste0(
+            '(?!<^(?:[a-z]+\\.[a-z.]+|\\d+|[a-z]|[iv]+|ans|govt|apt|etc|',
+            'st|rd|ft|feat|dr|drs|mr|ms|mrs|messrs|jr|prof))[.?!]+$'
+          ), words, perl = TRUE))
+          nsents = length(sentends)
+          if(sentends[nsents] != TWC){
+            sentends = c(sentends, TWC)
+            nsents = nsents + 1
+          }
+          i = 1
+          s = 1
+          p = 2
+          while(p < nsents && sum(WC) < TWC){
+            WC[i] = 0
+            while(p < nsents && WC[i] < segment.size){
+              p = p + 1
+              WC[i] = (sentends[p] - s) + 1
+            }
+            lines[i] = paste(words[seq(s, sentends[p])], collapse = ' ')
+            s = sentends[p] + 1
+            i = i + 1
+          }
+        }else{
+          segment = ceiling(TWC / segment.size)
+          lines = character(segment)
+          WC = rep(segment.size, segment)
+          WCC = 0
+          for(i in seq_len(segment)){
+            if(WCC + WC[i] > TWC) WC[i] = TWC - WCC
+            lines[i] = paste(words[seq(WCC + 1, WCC + WC[i])], collapse = ' ')
+            WCC = WCC + WC[i]
+          }
+        }
+      }else{
+        lines = tryCatch(do.call(scan, args), error = err)
+        if(!length(lines)) return(NULL)
+      }
+      data.frame(
+        input = if(ck_text) fi else f, segment = seq_along(lines),
+        WC = if(is.null(WC)) vapply(strsplit(lines, '\\s+'), function(sp) sum(sp != ''), 0) else WC,
+        text = lines
+      )
+    }))
+  }else warning(
+    'no files found', if(!subdir) '; might try setting subdir to TRUE to include files in folders'
+  )
 }
 
 #' Select Latent Semantic Spaces
