@@ -5,7 +5,7 @@
 \title{Latent Semantic Space (Embeddings) Operations}
 \usage{
 lma_lspace(dtm = "", space, map.space = TRUE, fill.missing = FALSE,
-  term_map = NULL, dim.cutoff = 0.5, keep.dim = FALSE,
+  term.map = NULL, dim.cutoff = 0.5, keep.dim = FALSE,
   use.scan = FALSE, dir = getOption("lingmatch.lspace.dir"))
 }
 \arguments{
@@ -28,7 +28,7 @@ excluding uncommon columns of \code{dtm} and rows of \code{space}.}
 terms not found in the space as rows of 0s, such that the returned matrix will have a row
 for every requested term.}
 
-\item{term_map}{A matrix with \code{space} as a column name, terms as row names, and indices of
+\item{term.map}{A matrix with \code{space} as a column name, terms as row names, and indices of
 the terms in the given space as values, or a numeric vector of indices with terms as names, or
 a character vector or terms corresponding to rows of the space. This is used instead of reading
 in an "_terms.txt" file corresponding to a \code{space} entered as a character (the name of a

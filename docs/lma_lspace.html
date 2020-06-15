@@ -20,7 +20,7 @@ and <code>space</code> is missing).
 
 <pre>
 lma_lspace(dtm = "", space, map.space = TRUE, fill.missing = FALSE,
-  term_map = NULL, dim.cutoff = 0.5, keep.dim = FALSE,
+  term.map = NULL, dim.cutoff = 0.5, keep.dim = FALSE,
   use.scan = FALSE, dir = getOption("lingmatch.lspace.dir"))
 </pre>
 
@@ -55,7 +55,7 @@ excluding uncommon columns of <code>dtm</code> and rows of <code>space</code>.</
 terms not found in the space as rows of 0s, such that the returned matrix will have a row
 for every requested term.</p>
 </td></tr>
-<tr valign="top"><td><code>term_map</code></td>
+<tr valign="top"><td><code>term.map</code></td>
 <td>
 <p>A matrix with <code>space</code> as a column name, terms as row names, and indices of
 the terms in the given space as values, or a numeric vector of indices with terms as names, or

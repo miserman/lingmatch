@@ -106,7 +106,7 @@ test_that('group comparisons work', {
 
 test_that('groups work through data', {
   data = data.frame(
-    id = factor(rep(seq_len(nrow(dtm) / 2), 2)),
+    id = as.factor(rep(seq_len(nrow(dtm) / 2), 2)),
     group = as.factor(rep(c('a', 'b'), each = nrow(dtm) / 2)),
     lma_termcat(lma_weight(dtm, percent = TRUE))
   )
@@ -122,7 +122,10 @@ test_that('groups work through data', {
   id_means = t(vapply(split(data[, categories], data$id), colMeans, numeric(9)))
   expect_equal(
     lingmatch(data, group = id, type = 'lsm')$sim[, 2],
-    apply(data, 1, function(r) lma_simets(r[categories], id_means[r[[1]],], 'canberra'))
+    vapply(seq_len(nrow(data)), function(i){
+      r = data[i,]
+      lma_simets(r[categories], id_means[r[[1]],], 'canberra')
+    }, 0)
   )
 })
 

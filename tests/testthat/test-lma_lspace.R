@@ -48,7 +48,7 @@ test_that('fill.missing works', {
   terms = sample(c(rownames(spaces$term_map)[1:100], rep('xxxx', 100)), 100)
   compact = lma_lspace(terms, name)
   filled = lma_lspace(terms, name, fill.missing = TRUE)
-  filled_map = lma_lspace(terms, name, term_map = spaces$term_map, fill.missing = TRUE)
+  filled_map = lma_lspace(terms, name, term.map = spaces$term_map, fill.missing = TRUE)
   filled_scan = lma_lspace(terms, name, fill.missing = TRUE, use.scan = TRUE)
   expect_equal(as.numeric(compact), as.numeric(filled[rownames(compact),]))
   expect_equal(filled, filled_map)

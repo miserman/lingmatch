@@ -1,0 +1,79 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Process text using a combination of pre-processing steps</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for lma_process"><tr><td>lma_process</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Process text using a combination of pre-processing steps</h2>
+
+<h3>Description</h3>
+
+<p>A wrapper to other pre-processing functions, potentially from <code>read.segments</code>, to <code>lma_dtm</code>
+or <code>lma_patcat</code>, to <code>lma_weight</code>, then <code>lma_termcat</code> or <code>lma_lspace</code>,
+and potentially including <code>lma_meta</code> output.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+lma_process(input = NULL, ..., meta = TRUE)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>input</code></td>
+<td>
+<p>A vector of text, or path to a text file or folder.</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+<p>arguments to be passed to <code>lma_dtm</code>, <code>lma_patcat</code>, <code>lma_weight</code>,
+<code>lma_termcat</code>, and/or <code>lma_lspace</code>. All arguments must be named.</p>
+</td></tr>
+<tr valign="top"><td><code>meta</code></td>
+<td>
+<p>Logical; if <code>FALSE</code>, metastatistics are not included. Only applies when raw text is available.
+If included, meta categories are added as the last columns, with names starting with &quot;meta_&quot;.</p>
+</td></tr>
+</table>
+
+
+<h3>Value</h3>
+
+<p>A matrix with texts represented by rows, and features in columns.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>If you just want to compare texts, see the <code>lingmatch</code> function.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+# starting with some texts in a vector
+texts = c(
+ 'Firstly, I would like to say, and with all due respect...',
+ 'Please, proceed. I hope you feel you can speak freely...',
+ "Oh, of course, I just hope to be clear, and not cause offense...",
+ "Oh, no, don't monitor yourself on my account..."
+)
+
+# by default, term counts and metastatistics are returned
+lma_process(texts)
+
+# add dictionary and percent arguments for standard dictionary-based results
+lma_process(texts, dict = lma_dict(), percent = TRUE)
+
+# add space and weight arguments for standard word-centroid vectors
+lma_process(texts, space = lma_lspace(texts), weight = 'tfidf')
+</pre>
+
+
+</body></html>

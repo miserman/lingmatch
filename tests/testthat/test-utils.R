@@ -4,6 +4,38 @@ texts = c(
   "And there with it isn't I think anyone would.",
   "Command lands of a few I two of it is."
 )
+file = paste0(tempfile(), '.txt')
+
+test_that('lma_process works', {
+  dtm = as.data.frame(lma_dtm(texts, sparse = FALSE))
+  meta = lma_meta(texts)
+  colnames(meta) = paste0('meta_', colnames(meta))
+  manual = cbind(text = texts, dtm, meta)
+  expect_equal(lma_process(texts), manual)
+  write(texts, file)
+  expect_equal(lma_process(file), manual)
+  file.remove(file)
+  manual[, colnames(dtm)] = lma_weight(dtm, 'tfidf', normalize = FALSE)
+  expect_equal(lma_process(texts, weight = 'tfidf', normalize = FALSE), manual)
+  termcat = as.data.frame(lma_termcat(lma_weight(dtm)))
+  expect_equal(lma_process(texts, weight = 'count', dict = lma_dict(1:9), meta = FALSE)[, -1], termcat)
+  expect_equal(lma_process(dtm, weight = 'count', dict = lma_dict(1:9), meta = FALSE), termcat)
+})
+
+test_that('read/write.dic works', {
+  dict = list(
+    full = letters,
+    sub = letters[1:10],
+    partial = paste0(letters[11:21], '*'),
+    faces = c(': )', ':(', ':]', ': [', ': }', ':{')
+  )
+  write.dic(dict, file)
+  expect_equal(read.dic(file), dict)
+  expect_true(all(vapply(read.dic(file, to.regex = TRUE), function(cat){
+    sum(grepl(paste(cat, collapse = '|'), unlist(dict))) >= length(cat)
+  }, TRUE)))
+  file.remove(file)
+})
 
 test_that('lma_patcat variants works', {
   opts = expand.grid(exclusive = c(TRUE, FALSE), boundary = c(TRUE, FALSE))
@@ -55,20 +87,6 @@ test_that('lma_patcat parts work', {
   full = lma_patcat(texts, lex)
   expect_true(all(full == weighted_cat + rep(bias, each = 2)))
   expect_true(all(full == lma_patcat(texts, dict, bias = bias)))
-})
-
-test_that('read/write.dic works', {
-  dict = list(
-    full = letters,
-    sub = letters[1:10],
-    partial = paste0(letters[11:21], '*'),
-    faces = c(': )', ':(', ':]', ': [', ': }', ':{')
-  )
-  dict_lines = strsplit(write.dic(dict, save = FALSE), '\n', fixed = TRUE)[[1]]
-  expect_equal(read.dic(dict_lines), dict)
-  expect_true(all(vapply(read.dic(dict_lines, to.regex = TRUE), function(cat){
-    sum(grepl(paste(cat, collapse = '|'), unlist(dict))) >= length(cat)
-  }, TRUE)))
 })
 
 test_that('read.segments works', {

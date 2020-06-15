@@ -10,7 +10,8 @@ lma_termcat(dtm, dict, term.weights = NULL, bias = NULL, escape = FALSE,
 \arguments{
 \item{dtm}{A matrix with words as column names.}
 
-\item{dict}{A \code{list} object with named character vectors as word lists.}
+\item{dict}{A \code{list} object with named character vectors as word lists, or the path
+to a file to be read in by \code{\link{read.dic}}.}
 
 \item{term.weights}{A \code{list} object with named numeric vectors lining up with the character
 vectors in \code{dict}, used to weight the terms in each \code{dict} vector. If a category in

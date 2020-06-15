@@ -19,7 +19,7 @@ of conditional similarity (accounting for some base-rate or precedent; sometimes
 <h3>Usage</h3>
 
 <pre>
-lingmatch(x, comp = mean, data = NULL, group = NULL, ...,
+lingmatch(input = NULL, comp = mean, data = NULL, group = NULL, ...,
   comp.data = NULL, comp.group = NULL, order = NULL, drop = TRUE,
   all.levels = FALSE, type = "lsm")
 </pre>
@@ -28,7 +28,7 @@ lingmatch(x, comp = mean, data = NULL, group = NULL, ...,
 <h3>Arguments</h3>
 
 <table summary="R argblock">
-<tr valign="top"><td><code>x</code></td>
+<tr valign="top"><td><code>input</code></td>
 <td>
 <p>Texts to be compared; a vector, document-term matrix (dtm; with terms as column names),
 or path to a file (.txt or .csv, with texts separated by one or more lines/rows).</p>
@@ -204,6 +204,12 @@ analysis theory of acquisition, induction, and representation of knowledge.
 </p>
 <p>Niederhoffer, K. G., &amp; Pennebaker, J. W. (2002). Linguistic style matching in social interaction.
 <em>Journal of Language and Social Psychology, 21</em>, 337-360.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>For a general text processing function, see <code>lma_process</code>.
 </p>
 
 

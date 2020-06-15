@@ -4,12 +4,12 @@
 \alias{lingmatch}
 \title{Linguistic Matching and Accommodation}
 \usage{
-lingmatch(x, comp = mean, data = NULL, group = NULL, ...,
+lingmatch(input = NULL, comp = mean, data = NULL, group = NULL, ...,
   comp.data = NULL, comp.group = NULL, order = NULL, drop = TRUE,
   all.levels = FALSE, type = "lsm")
 }
 \arguments{
-\item{x}{Texts to be compared; a vector, document-term matrix (dtm; with terms as column names),
+\item{input}{Texts to be compared; a vector, document-term matrix (dtm; with terms as column names),
 or path to a file (.txt or .csv, with texts separated by one or more lines/rows).}
 
 \item{comp}{Defines the comparison to be made:
@@ -166,4 +166,7 @@ Landauer, T. K., & Dumais, S. T. (1997). A solution to Plato's problem: The late
 
 Niederhoffer, K. G., & Pennebaker, J. W. (2002). Linguistic style matching in social interaction.
   \emph{Journal of Language and Social Psychology, 21}, 337-360.
+}
+\seealso{
+For a general text processing function, see \code{\link{lma_process}}.
 }
