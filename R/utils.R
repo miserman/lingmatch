@@ -609,6 +609,8 @@ standardize.lsspace = function(infile, name, sep = ' ', digits = 9, dir = option
 #'   \code{boundary} will be set to \code{' '}, avoiding pattern matches within words. By default, dictionary
 #'   terms are left as entered.
 #' @param fixed Logical; if \code{FALSE}, patterns are treated as regular expressions.
+#' @param globtoregex Logical; if \code{TRUE}, initial and terminal asterisks are replaced with \code{\\\\b\\\\w`*`}
+#'   and \code{\\\\w`*`\\\\b} respectively. This will also set \code{fixed} to \code{FALSE} unless fixed is specified.
 #' @param name.map A named character vector:
 #'   \tabular{ll}{
 #'     \code{intname} \tab term identifying category biases within the term list; defaults to \code{'_intercept'} \cr
@@ -662,21 +664,59 @@ standardize.lsspace = function(infile, name, sep = ' ', digits = 9, dir = option
 #' @export
 
 lma_patcat = function(text, dict, pattern.weights = 'weight', pattern.categories = 'category', bias = NULL, to.lower = TRUE,
-  return.dtm = FALSE, exclusive = TRUE, boundary = NULL, fixed = TRUE,
+  return.dtm = FALSE, exclusive = TRUE, boundary = NULL, fixed = TRUE, globtoregex = FALSE,
   name.map = c(intname = '_intercept', term = 'term')){
+  if(is.factor(text)) text = as.character(text)
+  if(!is.character(text)) stop('enter a character vector as the first argument')
   text = paste(' ', text, ' ')
   if(to.lower) text = tolower(text)
-  if(is.null(names(name.map)) && length(name.map) < 4) names(name.map) = c('intname', 'term', 'category')[seq_along(name.map)]
-  if(is.null(colnames(dict))){
+  if(is.null(names(name.map)) && length(name.map) < 3) names(name.map) = c('intname', 'term')[seq_along(name.map)]
+  wide = FALSE
+  # independently entered wide weights
+  if(is.null(colnames(dict)) && (!is.null(ncol(pattern.weights)) || !is.null(ncol(pattern.categories)))){
+    weights = if(!is.null(ncol(pattern.weights))) pattern.weights else pattern.categories
+    if(length(dict) != nrow(weights)) stop('dict and wide weights do not align')
+    wide = TRUE
+    if(!missing(pattern.categories) && is.character(pattern.categories) && any(su <- pattern.categories %in% weights))
+      weights = weights[, pattern.categories[su], drop = FALSE]
+    weights = weights[, vapply(seq_len(ncol(weights)), function(col) is.numeric(weights[, col]), TRUE), drop = FALSE]
+    if(!ncol(weights)) stop('could not identify numeric weights in wide weights')
+    lex = list(terms = dict, weights = weights, category = colnames(weights))
+  # wide weights in dict
+  }else if(!is.null(colnames(dict)) && (
+      (length(pattern.weights) > 1 && is.character(pattern.weights)) ||
+      (length(pattern.categories) > 1 &&
+          (length(pattern.categories) != nrow(dict) || all(pattern.categories %in% colnames(dict)))) ||
+      (!any(pattern.weights %in% colnames(dict)) && !any(pattern.categories %in% colnames(dict)))
+    )){
+    if(any(su <- pattern.weights %in% colnames(dict))){
+      categories = pattern.weights[su]
+    }else if(any(su <- pattern.categories %in% colnames(dict))){
+      categories = pattern.categories
+    }else if(any(su <- vapply(colnames(dict), function(v) is.numeric(dict[, v]), TRUE))){
+      categories = colnames(dict)[su]
+    }else stop('could not find weights in dict column names')
+    wide = TRUE
+    if(!name.map[['term']] %in% colnames(dict)){
+      terms = colnames(dict)[vapply(colnames(dict), function(v) !is.numeric(dict[, v]), TRUE)]
+      if(!length(terms)) stop('could not find terms in dict')
+      name.map[['term']] = if(length(terms) > 1){
+        su = vapply(terms, function(v) !anyDuplicated(dict[, v]), TRUE)
+        if(any(su)) terms[which(su)[1]] else terms[1]
+      }else terms
+    }
+    lex = list(term = dict[, name.map[['term']]], weights = dict[, categories, drop = FALSE], category = categories)
+  # independently entered weights and categories
+  }else if(is.null(colnames(dict))){
     if((is.numeric(dict) && is.null(names(dict))) || (is.list(dict) && is.numeric(dict[[1]]) && is.null(names(dict[[1]]))))
       stop('could not recognize terms in dict')
     n = length(dict)
     lex = data.frame(
       term = if(is.character(dict)) dict else if(is.numeric(dict)) names(dict) else if(is.list(dict) &&
         is.numeric(dict[[1]])) unlist(lapply(dict, names), use.names = FALSE) else unlist(dict, use.names = FALSE),
-      category = if(length(pattern.categories) == n) pattern.categories else if(is.list(dict))
-        rep(if(!is.null(names(dict))) names(dict) else
-        paste0('cat', seq_along(dict)), vapply(dict, length, 0)) else 'cat1',
+      category = if(length(pattern.categories) == n) if(is.list(dict) && !is.null(names(dict)))
+        names(dict) else pattern.categories else if(is.list(dict)) rep(if(!is.null(names(dict))) names(dict) else
+          paste0('cat', seq_along(dict)), vapply(dict, length, 0)) else 'cat1',
       weights = if(is.numeric(dict)) unname(dict) else if(is.numeric(pattern.weights))
         if(!is.null(names(pattern.weights)) && is.character(dict) && all(dict %in% names(pattern.weights)))
           pattern.weights[dict] else pattern.weights else if(is.list(dict)) if(is.numeric(dict[[1]]))
@@ -685,24 +725,53 @@ lma_patcat = function(text, dict, pattern.weights = 'weight', pattern.categories
   }else{
     term = if('term' %in% names(name.map)) name.map[['term']] else 'term'
     en = colnames(dict)
-    if(!term %in% en) stop('could not recognize terms in dict')
+    if(!term %in% en){
+      su = vapply(en, function(v) !is.numeric(dict[, v]), TRUE)
+      if(any(su)){
+        term = en[which(su)[1]]
+        if(sum(su) > 1){
+          su = su & vapply(en, function(v) !anyDuplicated(dict[, v]), TRUE)
+          if(any(su)) term = en[which(su)[1]]
+        }
+      }else stop('could not recognize terms in dict')
+    }
     lex = data.frame(
       term = dict[[term]],
       category = if(length(pattern.categories) == nrow(dict)) pattern.categories else
         if(pattern.categories %in% en) dict[[pattern.categories]] else 'cat1',
       weights = if(length(pattern.weights) == nrow(dict)) pattern.weights else
-        if(pattern.weights %in% en) dict[[pattern.weights]] else 1
+        if(all(pattern.weights %in% en)) dict[[pattern.weights]] else 1
     )
+  }
+  if(globtoregex){
+    lex$term = sub('^\\*', '\\\\\\b\\\\\\w*', sub('\\*$', '\\\\\\w*\\\\\\b', lex$term, TRUE), TRUE)
+    if(missing(fixed)) fixed = FALSE
+  }
+  if(wide && return.dtm){
+    return.dtm = FALSE
+    warning('cannot return dtm when multiple weights are specified -- remove weights for a dtm')
   }
   if(is.null(bias)){
     if(!'intname' %in% names(name.map)) name.map[['intname']] = '_intercept'
     if(any(su <- lex$term == name.map[['intname']])){
-      bias = structure(lex[su, 'weights'], names = lex[su, 'category'])
-      lex = lex[!su,]
+      if(wide){
+        bias = structure(lex$weights[su,], names = lex$categories[su])
+        lex$term = lex$term[!su]
+        lex$weights = lex$weights[!su,]
+      }else{
+        bias = structure(lex[su, 'weights'], names = lex[su, 'category'])
+        lex = lex[!su,]
+      }
     }
   }
-  if(exclusive) lex = lex[order(-nchar(lex$term)),]
-  lex$category = as.factor(lex$category)
+  if(exclusive){
+    if(wide){
+      o = order(-nchar(lex$term))
+      lex$term = lex$term[o]
+      lex$weights = lex$weights[o,]
+    }else lex = lex[order(-nchar(lex$term)),]
+  }
+  lex$category = factor(lex$category, unique(lex$category))
   categories = levels(lex$category)
   if(length(bias)){
     if(is.null(names(bias)) && length(bias) == length(categories)) names(bias) = categories
@@ -715,7 +784,8 @@ lma_patcat = function(text, dict, pattern.weights = 'weight', pattern.categories
     text, if(is.character(boundary)) paste0(boundary, lex$term, boundary) else lex$term,
     if(return.dtm) 0L else nlevels(lex$category),
     (if(return.dtm) seq_along(lex$term) else as.integer(lex$category)) - 1L,
-    lex$weight, bias, fixed, exclusive
+    if(!is.data.frame(lex)) as.numeric(as.matrix(lex$weight)) else lex$weight, as.numeric(bias), fixed,
+    exclusive, if(wide) nlevels(lex$category) else 0
   )
   colnames(op[[1]]) = if(return.dtm) lex$term else categories
   if(return.dtm) attr(op[[1]], 'category') = lex$category

@@ -62,3 +62,49 @@ test_that('groups work as expected', {
     vapply(2:10, function(r) cor(agg[r, ], agg[r - 1, ]), 0)
   )
 })
+
+test_that('lag works', {
+  dtm = Matrix(rpois(200, 1), 10, sparse = TRUE)
+  dtm[2, c(1, 20)] = 1
+
+  # +1
+  expect_equal(
+    as.numeric(lma_simets(dtm[1,], dtm[2,], metric = 'pearson', lag = 1)),
+    cor(dtm[1,], c(0, dtm[2, -20]))
+  )
+  expect_equal(
+    as.numeric(lma_simets(dtm[1:5,], dtm[6:10,], metric = 'pearson', lag = 1)),
+    c(0, lma_simets(dtm[2:5,], dtm[6:9,], metric = 'pearson'))
+  )
+
+  # -1
+  expect_equal(
+    as.numeric(lma_simets(dtm[1,], dtm[2,], metric = 'pearson', lag = -1)),
+    cor(dtm[1,], c(dtm[2, -1], 0))
+  )
+  expect_equal(
+    as.numeric(lma_simets(dtm[1:5,], dtm[6:10,], metric = 'pearson', lag = -1)),
+    c(lma_simets(dtm[1:4,], dtm[7:10,], metric = 'pearson'), 0)
+  )
+
+  # +oversize
+  expect_equal(
+    as.numeric(lma_simets(dtm[1,], dtm[2,], metric = 'pearson', lag = 99)),
+    cor(dtm[1,], c(numeric(19), dtm[2, 1]))
+  )
+  expect_equal(
+    as.numeric(lma_simets(dtm[1:5,], dtm[6:10,], metric = 'pearson', lag = 99)),
+    c(numeric(4), unname(lma_simets(dtm[5,], dtm[6,], metric = 'pearson')))
+  )
+
+  # -oversize
+  expect_equal(
+    as.numeric(lma_simets(dtm[1,], dtm[2,], metric = 'pearson', lag = -99)),
+    cor(dtm[1,], c(dtm[2, 20], numeric(19)))
+  )
+  expect_equal(
+    as.numeric(lma_simets(dtm[1:5,], dtm[6:10,], metric = 'pearson', lag = -99)),
+    c(unname(lma_simets(dtm[1,], dtm[10,], metric = 'pearson')), numeric(4))
+  )
+})
+

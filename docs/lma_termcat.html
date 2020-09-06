@@ -16,8 +16,8 @@
 <h3>Usage</h3>
 
 <pre>
-lma_termcat(dtm, dict, term.weights = NULL, bias = NULL, escape = FALSE,
-  partial = FALSE, term.filter = NULL, term.break = 20000)
+lma_termcat(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
+  partial = FALSE, glob = TRUE, term.filter = NULL, term.break = 20000)
 </pre>
 
 
@@ -55,6 +55,11 @@ escaped. Set to <code>TRUE</code> if you get PCRE compilation errors.</p>
 <tr valign="top"><td><code>partial</code></td>
 <td>
 <p>Logical; if <code>TRUE</code> terms are partially matched (not padded by ^ and $).</p>
+</td></tr>
+<tr valign="top"><td><code>glob</code></td>
+<td>
+<p>Logical; if <code>TRUE</code> (default), will convert initial and terminal asterisks to
+partial matches.</p>
 </td></tr>
 <tr valign="top"><td><code>term.filter</code></td>
 <td>

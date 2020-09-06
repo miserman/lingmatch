@@ -7,7 +7,7 @@
 lma_patcat(text, dict, pattern.weights = "weight",
   pattern.categories = "category", bias = NULL, to.lower = TRUE,
   return.dtm = FALSE, exclusive = TRUE, boundary = NULL, fixed = TRUE,
-  name.map = c(intname = "_intercept", term = "term"))
+  globtoregex = FALSE, name.map = c(intname = "_intercept", term = "term"))
 }
 \arguments{
 \item{text}{A vector of text to be categorized. Texts are padded by 2 spaces, and potentially lowercased.}
@@ -39,6 +39,9 @@ matches are removed from the text (avoiding subsequent matches to matched patter
 terms are left as entered.}
 
 \item{fixed}{Logical; if \code{FALSE}, patterns are treated as regular expressions.}
+
+\item{globtoregex}{Logical; if \code{TRUE}, initial and terminal asterisks are replaced with \code{\\\\b\\\\w`*`}
+and \code{\\\\w`*`\\\\b} respectively. This will also set \code{fixed} to \code{FALSE} unless fixed is specified.}
 
 \item{name.map}{A named character vector:
 \tabular{ll}{

@@ -29,16 +29,18 @@ test_that('bias works', {
 
 test_that('escape works', {
   dtm = matrix(c(1, 0, 0, 1, 1, 0), 2, dimnames = list(NULL, c('aba', 'a.a', ':[')))
-  expect_equal(lma_termcat(dtm, 'a.a')[, 1], c(1, 1))
-  expect_equal(lma_termcat(dtm, 'a.a', escape = TRUE)[, 1], c(0, 1))
+  expect_equal(lma_termcat(dtm, 'a.a', escape = FALSE)[, 1], c(1, 1))
+  expect_equal(lma_termcat(dtm, 'a.a')[, 1], c(0, 1))
+  expect_equal(lma_termcat(dtm, ':[', escape = FALSE)[, 1], c(1, 0))
   expect_equal(lma_termcat(dtm, ':[')[, 1], c(1, 0))
-  expect_equal(lma_termcat(dtm, ':[', escape = TRUE)[, 1], c(1, 0))
 })
 
-test_that('partial works', {
-  dtm = matrix(c(1, 0, 0, 1), 2, dimnames = list(NULL, c('aba', 'abaaa')))
-  expect_equal(lma_termcat(dtm, 'aba')[, 1], c(1, 0))
+test_that('partial/glob works', {
+  dtm = matrix(c(1, 0, 0, 1), 2, dimnames = list(NULL, c('aba', 'ababb')))
+  expect_equal(as.numeric(lma_termcat(dtm, list('aba', 'aba*'))), c(1, 0, 1, 1))
+  expect_equal(lma_termcat(dtm, 'aba*', glob = FALSE)[, 1], c(0, 0))
   expect_equal(lma_termcat(dtm, 'aba', partial = TRUE)[, 1], c(1, 1))
+  expect_equal(as.numeric(lma_termcat(dtm, list('aba.*', 'aba[b]*', 'aba.?.?', 'aba.{0,2}'))), rep(1, 8))
 })
 
 test_that('term.filter works', {
@@ -54,4 +56,32 @@ test_that('term.break works', {
   expect_equivalent(full, lma_termcat(dtm, dict, term.break = 1e3))
   expect_equal(full[, 2], lma_termcat(dtm, dict$long, term.break = 1e3)[, 1])
   expect_equal(as.numeric(full), c(0, 1, 1, 0))
+})
+
+test_that('wide dict format works', {
+  dict = data.frame(term = c('a', 'b', 'c'), w1 = c(1, 2, 3), w2 = c(.1, .2, .3))
+  dtm = matrix(rep(1:5, 3), 5, 3, dimnames = list(NULL, c('a', 'b', 'c')))
+  manual = cbind(dtm %*% dict$w1, dtm %*% dict$w2)
+  expect_equivalent(lma_termcat(dtm, dict), manual)
+  expect_equivalent(lma_termcat(dtm, dict$term, dict), manual)
+  expect_equivalent(lma_termcat(dtm, dict$term, dict[, -1]), manual)
+})
+
+textdir = '../texts.txt'
+if(!file.exists(textdir)) textdir = paste0('../../', textdir)
+skip_if(!file.exists(textdir), paste('texts.txt not found at', normalizePath(textdir)))
+
+dicts = list.files(getOption('lingmatch.dict.dir'), '(csv|dic)$', full.names = TRUE)
+skip_if(!length(dicts), 'no .csv or .dic files in the dictionaries directory')
+
+test_that('applied dictionaries work', {
+  text = sample(readLines(textdir), 10)
+  dtm = lma_dtm(text)
+  for(d in dicts){
+    dict = (if(grepl('.csv', d, fixed = TRUE)) read.csv else read.dic)(d)
+    opt = lma_termcat(dtm, dict)
+    opp = lma_patcat(text, dict)
+    expect_equal(dim(opt), dim(opp))
+    expect_true(all(colnames(opt) %in% colnames(opp)))
+  }
 })

@@ -51,6 +51,14 @@ test_that('lma_patcat variants works', {
   }
 })
 
+test_that('lma_patcat globtoregex works', {
+  text = 'fishes befish the unbefished'
+  dict = list(prefish = '*fish', postfish = 'fish*', barefish = 'fish')
+  expect_equal(as.numeric(lma_patcat(text, dict)), c(0, 0, 3))
+  expect_equal(as.numeric(lma_patcat(text, dict, globtoregex = TRUE)), c(3, 0, 0))
+  expect_equal(as.numeric(lma_patcat(text, dict, globtoregex = TRUE, exclusive = FALSE)), c(3, 3, 3))
+})
+
 test_that('lma_patcat parts work', {
   dict = list(
     a = c('an' = .1, 'i t' = .2, "'t" = .4),
@@ -74,19 +82,31 @@ test_that('lma_patcat parts work', {
   expect_true(all(weighted_dtm == lma_patcat(texts, unlist(lapply(dict, names)), unlist(dict), return.dtm = TRUE)))
 
   manual_cat = manual_dtm %*% Matrix(c(0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0), 6)
-  base_cat = lma_patcat(texts, lapply(dict, names))
+  base_cat = lma_patcat(texts, lapply(dict, names))[, names(dict)]
   expect_true(all(base_cat == manual_cat))
   expect_true(all(base_cat == lma_patcat(texts, unlist(lapply(dict, names)),
-    pattern.categories = rep(names(dict), vapply(dict, length, 0)))))
+    pattern.categories = rep(names(dict), vapply(dict, length, 0)))[, names(dict)]))
 
-  weighted_cat = lma_patcat(texts, dict)
+  weighted_cat = lma_patcat(texts, dict)[, names(dict)]
   expect_true(all(weighted_cat == manual_dtm %*% Matrix(weights * c(0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0), 6)))
   expect_true(all(weighted_cat == lma_patcat(texts, unlist(lapply(dict, names)),
-    unlist(dict), rep(names(dict), vapply(dict, length, 0)))))
+    unlist(dict), rep(names(dict), vapply(dict, length, 0)))[, names(dict)]))
 
-  full = lma_patcat(texts, lex)
+  full = lma_patcat(texts, lex)[, names(dict)]
   expect_true(all(full == weighted_cat + rep(bias, each = 2)))
-  expect_true(all(full == lma_patcat(texts, dict, bias = bias)))
+  expect_true(all(full == lma_patcat(texts, dict, bias = bias)[, names(dict)]))
+})
+
+test_that('lma_patcat wide dict format works', {
+  dict = data.frame(term = c('a', 'b', 'c'), w1 = c(1, 2, 3), w2 = c(.1, .2, .3))
+  text = vapply(1:5, function(i) paste(rep('a b c', i), collapse = ' '), '')
+  dtm = lma_dtm(text)
+  manual = cbind(dtm %*% dict$w1, dtm %*% dict$w2)
+  expect_true(all(lma_patcat(text, dict) == manual))
+  expect_true(all(lma_patcat(text, dict, c('w1', 'w2')) == manual))
+  expect_true(all(lma_patcat(text, dict, pattern.categories = c('w1', 'w2')) == manual))
+  expect_true(all(lma_patcat(text, dict, dict) == manual))
+  expect_true(all(lma_patcat(text, dict, pattern.categories = dict) == manual))
 })
 
 test_that('read.segments works', {

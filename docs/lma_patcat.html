@@ -19,7 +19,7 @@
 lma_patcat(text, dict, pattern.weights = "weight",
   pattern.categories = "category", bias = NULL, to.lower = TRUE,
   return.dtm = FALSE, exclusive = TRUE, boundary = NULL, fixed = TRUE,
-  name.map = c(intname = "_intercept", term = "term"))
+  globtoregex = FALSE, name.map = c(intname = "_intercept", term = "term"))
 </pre>
 
 
@@ -75,6 +75,11 @@ terms are left as entered.</p>
 <tr valign="top"><td><code>fixed</code></td>
 <td>
 <p>Logical; if <code>FALSE</code>, patterns are treated as regular expressions.</p>
+</td></tr>
+<tr valign="top"><td><code>globtoregex</code></td>
+<td>
+<p>Logical; if <code>TRUE</code>, initial and terminal asterisks are replaced with <code>\\b\\w`*`</code>
+and <code>\\w`*`\\b</code> respectively. This will also set <code>fixed</code> to <code>FALSE</code> unless fixed is specified.</p>
 </td></tr>
 <tr valign="top"><td><code>name.map</code></td>
 <td>

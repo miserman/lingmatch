@@ -1,6 +1,6 @@
 .onLoad = function(lib, pkg){
-  if(is.null(getOption('lingmatch.lspace.dir')))
-    options(lingmatch.lspace.dir = path.expand('~/Latent Semantic Spaces'))
+  if(is.null(getOption('lingmatch.lspace.dir'))) options(lingmatch.lspace.dir = path.expand('~/Latent Semantic Spaces'))
+  if(is.null(getOption('lingmatch.dict.dir'))) options(lingmatch.dict.dir = path.expand('~/Dictionaries'))
 }
 
 #' Linguistic Matching and Accommodation
@@ -169,7 +169,7 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
     }
   }
   mets = c('jaccard', 'euclidean', 'canberra', 'cosine', 'pearson')
-  inp$metric=if(!is.null(inp$metric)) match.arg(as.character(inp$metric),mets,TRUE) else 'cosine'
+  inp$metric = if(!is.null(inp$metric)) match_metric(inp$metric)$selected else 'cosine'
   vs=c('input','comp','group','order','data','comp.data','comp.group')
   opt=as.list(match.call(expand.dots=FALSE))[vs]
   names(opt)=vs
@@ -221,7 +221,11 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
   # input
   if(missing(input)) input = file.choose()
   if(is.function(input)) stop('enter a character vector or matrix-like object as input')
-  if(!missing(data)) input = gd(opt$input, data) else if(!missing(group)) data = input
+  if(!missing(data)) input = gd(opt$input, data) else if(!missing(group)){
+    data = input
+    if(is.data.frame(input)) input = as.matrix(input[, vapply(input, function(col)
+      any(class(col) %in% c('numeric', 'integer')), TRUE)])
+  }
   rx=NROW(input)
   cx=NCOL(input)
   # comp
@@ -248,6 +252,7 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
     if(sum(ck)>6){
       if(missing(data)) data=input
       if(any(!ck)) dn=dn[ck]
+      cx = length(dn)
       input=input[,dn]
       do.wmc=FALSE
       if(!missing(comp)){
@@ -260,14 +265,18 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
       }
     }
   }
-  # if input looks like text, seeing if other text can be added, then converting to a dtm
-  if(!is.matrix(input) && (is.character(input) || is.factor(input))){
-    if(is.character(comp) && (length(comp)>1 ||  grepl(' ',comp,fixed=TRUE))){
-      input=c(comp,input)
-      comp=seq_along(comp)
-      opt$comp='text'
+  if(!is.matrix(input) && is.character(input)){
+    if(!any(grepl('[^[:digit:][:space:].-]', input))){
+      input = as.numeric(input)
+    }else{
+      # if input looks like text, seeing if other text can be added, then converting to a dtm
+      if(is.character(comp) && (length(comp)>1 ||  grepl(' ',comp,fixed=TRUE))){
+        input=c(comp,input)
+        comp=seq_along(comp)
+        opt$comp='text'
+      }
+      input=do.call(lma_dtm,c(list(input),dsp$p))
     }
-    input=do.call(lma_dtm,c(list(input),dsp$p))
   }
   if(is.data.frame(comp)) comp=as.matrix(comp)
   cc=if(is.numeric(comp) && (!is.null(comp.data) || is.null(dim(comp)))) 1 else if(is.character(comp)){
@@ -332,9 +341,8 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
     }else warning('length(order) != nrow(input), so order was not applied', call. = FALSE) else
       warning('failed to apply order', call. = FALSE)
   }
-  if(is.character(input) || (is.data.frame(input) && any(!vapply(input, class, '') %in% c('numeric', 'integer'))))
-    for(i in seq_len(ncol(input))) input[, i] = as.numeric(input[, i])
-  if('data.frame' %in% class(input) && any(ckvc <- !vapply(seq_len(ncol(input)), function(col)
+  if(is.character(input)) input = matrix(as.numeric(input), rx)
+  if('data.frame' %in% class(input) && any(ckvc <- !vapply(seq_len(cx), function(col)
     class(input[, col])[1], '') %in% c('numeric', 'integer'))){
     if(all(ckvc)){
       for(col in seq_along(ckvc)) input[, col] = as.numeric(input[, col])
@@ -1274,6 +1282,8 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, t
 #'   text (including asterisk wild cards). If \code{TRUE}, regular expression related characters are
 #'   escaped. Set to \code{TRUE} if you get PCRE compilation errors.
 #' @param partial Logical; if \code{TRUE} terms are partially matched (not padded by ^ and $).
+#' @param glob Logical; if \code{TRUE} (default), will convert initial and terminal asterisks to
+#'   partial matches.
 #' @param term.filter A regular expression string used to format the text of each term (passed to
 #'   \code{gsub}). For example, if terms are part-of-speech tagged (e.g.,
 #'   \code{'a_DT'}), \code{'_.*'} would remove the tag.
@@ -1307,10 +1317,38 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, t
 #' }
 #' @export
 
-lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = FALSE, partial = FALSE,
-  term.filter = NULL, term.break = 2e4){
+lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE, partial = FALSE,
+  glob = TRUE, term.filter = NULL, term.break = 2e4){
   st=proc.time()[[3]]
   if(missing(dict)) dict = lma_dict(1:9)
+  if(!is.null(ncol(dict))){
+    if(!is.null(term.weights)){
+      if(is.character(term.weights) && any(su <- term.weights %in% colnames(dict))){
+        term.weights = dict[, term.weights[su], drop = FALSE]
+      }
+      if(!is.null(ncol(term.weights))) term.weights = term.weights[, vapply(seq_len(ncol(term.weights)),
+        function(col) is.numeric(term.weights[, col]), TRUE)]
+    }else if(any(su <- vapply(seq_len(ncol(dict)), function(col) is.numeric(dict[, col]), TRUE))){
+      term.weights = dict[, su, drop = FALSE]
+    }
+    if(!is.null(rownames(dict)) && any(grepl('^[a-z]', rownames(dict), TRUE))){
+      dict = rownames(dict)
+    }else{
+      su = vapply(seq_len(ncol(dict)), function(col) !is.numeric(dict[, col]), TRUE)
+      if(!any(su)) stop('no terms found in dictionary')
+      dict = if(sum(su) > 1){
+        su = vapply(seq_len(ncol(dict)), function(col) anyDuplicated(dict[, col]) == 0, TRUE)
+        if(any(su)) dict[, which(su)[1]] else dict[, 1]
+      }else dict[, su]
+    }
+  }
+  if(!is.null(ncol(term.weights))){
+    term.weights = term.weights[, vapply(seq_len(ncol(term.weights)),
+      function(col) is.numeric(term.weights[, col]), TRUE), drop = FALSE]
+    if(!ncol(term.weights)) stop('no numeric columns in term.weights')
+    if(is.null(colnames(term.weights))) colnames(term.weights) = paste0('cat', seq_len(ncol(term.weights)))
+    if(!is.data.frame(term.weights)) term.weights = as.data.frame(term.weights)
+  }
   if(!is.list(dict)) dict = if(is.character(dict) && length(dict) == 1 && file.exists(dict))
     read.dic(dict) else list(dict)
   if(is.null(names(dict))) names(dict) = seq_along(dict)
@@ -1319,7 +1357,7 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = FALSE
       term.weights = dict
       dict = lapply(dict, names)
     }else term.weights = lapply(dict, function(cat) rep(1, length(cat)))
-  }else{
+  }else if(is.null(nrow(term.weights))){
     if(!is.list(term.weights)) term.weights = list(term.weights)
     dlen = length(dict)
     if(is.null(names(term.weights)))
@@ -1349,16 +1387,17 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = FALSE
       s = '^'
       e = '$'
     }else s = e = ''
-    rec = '([][)(}{*.^$+?-])'
+    rec = '([][)(}{*.^$+?\\|\\\\-])'
     if(length(lab)){
-      for(l in names(lab)) dict[[l]][lab[[l]]] = gsub('([][)(}{])', '\\\\\\1',
-        dict[[l]][lab[[l]]])
-      rec = '([*.^$+?-])'
+      for(l in names(lab)) dict[[l]][lab[[l]]] = gsub('([][)(}{])', '\\\\\\1', dict[[l]][lab[[l]]])
+      rec = '([*.^$+?\\|-])'
     }
-    if(!escape) lapply(dict, function(l) paste(paste0(s, l, e), collapse='|')) else
-      lapply(dict, function(l) gsub(paste0('\\*\\', e), '', paste(
-        paste0(s, gsub(rec, '\\\\\\1', l, perl = TRUE), e, collapse = '|')
-      )))
+    res = if(escape) lapply(dict, function(l)
+      paste0(s, gsub(rec, '\\\\\\1', l, perl = TRUE), e, collapse = '|')
+    ) else lapply(dict, function(l) paste(paste0(s, gsub('([+*])[+*]+', '\\\\\\1+', l), e), collapse='|'))
+    if(glob) lapply(res, function(l) gsub(paste0(
+      if(s == '^') '\\' else '', s, if(escape) '\\\\' else '', '\\*|', if(escape) '\\\\' else '', '\\*', if(e == '$') '\\' else '', e
+    ), '', paste(l))) else res
   }
   getweights = function(terms, cat){
     if(!cat %in% names(term.weights)) term.weights[[cat]] = rep(1, cls[[cat]])
@@ -1370,6 +1409,14 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = FALSE
   }
   ws = if(is.null(term.filter)) colnames(dtm) else gsub(term.filter, '', colnames(dtm), perl = TRUE)
   if('opts' %in% atsn && !ats$opts['to.lower']) ws = tolower(ws)
+  boundries = FALSE
+  for(l in dict){
+    if(!boundries) boundries = any(grepl('\\$$', l)) && any(grepl('^\\^', l))
+    if(missing(partial) && boundries) partial = TRUE
+    if(missing(glob) && any(grepl('[]).]\\*$', l))) glob = FALSE
+    if(missing(escape) && (boundries || any(grepl('[.])][+*]|[.+*]\\?|\\[\\^', l))) &&
+      !any(grepl('[({[][^])}]*$|^[^({[]*[])}]', l))) escape = FALSE
+  }
   if(any(cls > term.break)){
     br = function(l, e = term.break){
       f = ceiling(cls[[l]] / e)
@@ -1379,25 +1426,45 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = FALSE
       o[[f]] = o[[f]][o[[f]] <= l]
       o
     }
-    op = matrix(0, nrow(dtm), length(dict), dimnames = list(rownames(dtm), names(dict)))
-    for(cat in names(dict)){
-      matches = if(cls[[cat]] > term.break){
-        unique(unlist(lapply(br(cat), function(s)
-          grep(formatdict(list(dict[[cat]][s]))[[1]], ws, perl = TRUE))))
-      }else grep(formatdict(list(dict[[cat]])), ws, perl = TRUE)
-      op[, cat] = if(length(matches)){
-        weights = getweights(colnames(dtm)[matches], cat)
-        colSums(t(dtm[, matches, drop = FALSE]) * weights, na.rm = TRUE)
-      }else numeric(ncol(dtm))
+    if(is.null(ncol(term.weights))){
+      op = matrix(0, nrow(dtm), length(dict), dimnames = list(rownames(dtm), names(dict)))
+      for(cat in names(dict)){
+        matches = if(cls[[cat]] > term.break){
+          unique(unlist(lapply(br(cat), function(s)
+            grep(formatdict(list(dict[[cat]][s]))[[1]], ws, perl = TRUE))))
+        }else grep(formatdict(list(dict[[cat]])), ws, perl = TRUE)
+        op[, cat] = if(length(matches)){
+          weights = getweights(colnames(dtm)[matches], cat)
+          colSums(t(dtm[, matches, drop = FALSE]) * weights, na.rm = TRUE)
+        }else numeric(nrow(dtm))
+      }
+    }else{
+      op = matrix(0, nrow(dtm), ncol(term.weights), dimnames = list(rownames(dtm), colnames(term.weights)))
+      matches = unique(unlist(lapply(br(names(dict)[[1]]), function(s)
+        grep(formatdict(list(dict[[1]][s]))[[1]], ws, perl = TRUE))))
+      for(cat in colnames(term.weights)){
+        op[, cat] = if(length(matches)){
+          colSums(t(dtm[, matches, drop = FALSE]) * term.weights[matches, cat], na.rm = TRUE)
+        }else numeric(ncol(dtm))
+      }
     }
   }else{
     dict = formatdict(dict)
     op = if(!is.null(term.weights)){
-      vapply(names(dict), function(cat){
-        su = dtm[, grep(dict[[cat]], ws, perl = TRUE), drop = FALSE]
-        weights = getweights(colnames(su), cat)
-        if(!ncol(su)) numeric(nrow(su)) else colSums(t(su) * weights, na.rm = TRUE)
-      }, numeric(nrow(dtm)))
+      if(is.null(ncol(term.weights))){
+        vapply(names(dict), function(cat){
+          su = dtm[, grep(dict[[cat]], ws, perl = TRUE), drop = FALSE]
+          weights = getweights(colnames(su), cat)
+          if(!ncol(su)) numeric(nrow(su)) else colSums(t(su) * weights, na.rm = TRUE)
+        }, numeric(nrow(dtm)))
+      }else{
+        ssu = grep(dict[[1]], ws, perl = TRUE)
+        su = dtm[, ssu, drop = FALSE]
+        vapply(colnames(term.weights), function(cat){
+          weights = term.weights[ssu, cat]
+          if(!ncol(su)) numeric(nrow(su)) else colSums(t(su) * weights, na.rm = TRUE)
+        }, numeric(nrow(dtm)))
+      }
     }else{
       vapply(names(dict), function(cat) rowSums(dtm[, grep(dict[[cat]], ws, perl = TRUE),
         drop = FALSE], na.rm = TRUE), numeric(nrow(dtm)))
@@ -1410,6 +1477,21 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = FALSE
   op
 }
 
+match_metric = function(x){
+  mets = c('jaccard', 'euclidean', 'canberra', 'cosine', 'pearson')
+  sel = if(is.null(x) || length(x) == 1 && grepl(tolower(substr(x, 1, 1)), 'a', fixed = TRUE))
+    mets else if(is.function(x)){
+      stop('only internal metrics are available: ', paste(mets, collapse = ', '), call. = FALSE)
+    }else{
+      if(is.null(x)) 'cosine' else if(is.numeric(x)) mets[x] else{
+        su = grepl('cor', x)
+        if(any(su)) metric[su] = 'pearson'
+        unique(unlist(lapply(substr(x, 1, 3), grep, mets, fixed = TRUE, value = TRUE)))
+      }
+    }
+  list(all = mets, selected = sel, dummy = as.integer(mets %in% sel))
+}
+
 #' Calculate similarity between vectors
 #'
 #' @param a vector or matrix. If a vector, \code{b} must also be provided. If a matrix and \code{b}
@@ -1417,7 +1499,8 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = FALSE
 #'   be compared with \code{b} or each row of \code{b}.
 #' @param b vector or matrix to be compared with \code{a} or rows of \code{a}.
 #' @param metric a character or vector of characters at least partially matching one of the
-#'   available metric names, or a number or vector of numbers indicating the metric by index:
+#'   available metric names (or 'all' to explicitly include all metrics),
+#'   or a number or vector of numbers indicating the metric by index:
 #'   \tabular{ll}{
 #'     \code{jaccard} \tab \code{sum(a & b) / sum(a | b)} \cr
 #'     \code{euclidean} \tab \code{1 / (1 + sqrt(sum((a - b) ^ 2)))} \cr
@@ -1427,7 +1510,10 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = FALSE
 #'       sqrt(mean(b ^ 2) - mean(b) ^ 2)} \cr
 #'   }
 #' @param group if \code{b} is missing and \code{a} has multiple rows, this will be used to make
-#'   comparisons between rows of \code{a}, as modified by \code{agg} and \code{add.mean}.
+#'   comparisons between rows of \code{a}, as modified by \code{agg} and \code{agg.mean}.
+#' @param lag Amount to adjust the \code{b} index; either rows if \code{b} has multiple rows (e.g.,
+#'   for \code{lag = 1}, \code{a[1,]} is compared with \code{b[2,]}), or values otherwise (e.g.,
+#'   for \code{lag = 1}, \code{a[1]} is compared with \code{b[2]})
 #' @param agg logical; if \code{FALSE}, only the boundary rows between groups will be compared, see
 #'   example.
 #' @param agg.mean logical; if \code{FALSE} aggregated rows are summed instead of averaged.
@@ -1482,35 +1568,28 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = FALSE
 #' lma_simets(dtm, group = speaker, agg = FALSE)
 #' @export
 
-lma_simets=function(a, b = NULL, metric, group = NULL, agg = TRUE, agg.mean = TRUE,
+lma_simets=function(a, b = NULL, metric = NULL, group = NULL, lag = 0, agg = TRUE, agg.mean = TRUE,
   pairwise = TRUE, symmetrical = FALSE, mean = FALSE, return.list = FALSE){
   cf = NULL
   mets = c('jaccard', 'euclidean', 'canberra', 'cosine', 'pearson')
-  if(missing(metric) && length(b) == 1){
+  if(missing(metric) && length(b) == 1 && !grepl(' ', b) &&
+    any(grepl(tolower(substr(b, 1, 3)), mets, fixed = TRUE))){
     metric = b
     b = NULL
   }
-  metric = if(missing(metric)) mets else if(is.function(metric)){
-    stop('only internal metrics are available: ', paste(mets, collapse = ', '))
-  }else{
-    if(is.null(metric)) 'cosine' else if(is.numeric(metric)) mets[metric] else{
-      su = grepl('cor', metric)
-      if(any(su)) metric[su] = 'pearson'
-      grep(substr(metric, 1, 3), mets, fixed = TRUE, value = TRUE)
-    }
-  }
+  met = match_metric(metric)
   st = proc.time()[[3]]
-  metric_arg = as.integer(mets %in% metric)
   slots = c('i', 'p', 'x', 'Dim')
   if((is.character(a) || is.factor(a)) && any(grepl('[a-zA-Z]', a))) a = lma_dtm(a) else
     if(is.data.frame(a)) a = Matrix(as.matrix(a), sparse = TRUE)
+  if(is.null(b) && !missing(lag) && is.null(dim(a))) b = a
   if(is.null(b)){
     n = dim(a)[1]
     if(is.null(n) || n < 2) stop('a must have more than 1 row when b is not provided', call. = FALSE)
     if(is.null(group)){
       if(!all(slots %in% slotNames(a))) a = as(a, 'dgCMatrix')
-      res = calculate_similarities(a, NULL, 2, metric_arg)
-      for(i in seq_along(res)) attr(res[[i]], 'metric') = mets[metric_arg == 1][i]
+      res = calculate_similarities(a, NULL, 2, met$dummy)
+      for(i in seq_along(res)) attr(res[[i]], 'metric') = met$selected[i]
     }else{
       if(length(group) != n) stop('group is not the same length as a or columns in a')
       ager = if(agg.mean) colMeans else colSums
@@ -1526,7 +1605,7 @@ lma_simets=function(a, b = NULL, metric, group = NULL, agg = TRUE, agg.mean = TR
       }
       if(!any(chunks[[length(chunks)]] == l)) chunks = c(chunks, list(l))
       rows = character(length(chunks) - 1)
-      res = NULL
+      res = as.data.frame(matrix(0, length(chunks) - 1, sum(met$dummy), dimnames = list(NULL, met$selected)))
       for(i in seq_len(length(chunks) - 1)){
         s = chunks[[i]]
         sa = if(agg) s else s[length(s)]
@@ -1534,16 +1613,20 @@ lma_simets=function(a, b = NULL, metric, group = NULL, agg = TRUE, agg.mean = TR
         s = chunks[[i + 1]]
         sb = if(agg) s else s[1]
         tb = ager(a[sb,, drop = FALSE])
-        res = rbind(res, vector_similarity(ta, tb, metric_arg))
+        res[i,] = vector_similarity(ta, tb, met$dummy)
         rows[i] = paste(paste(sa, collapse = ', '), '<->', paste(sb, collapse = ', '))
       }
-      res = as.data.frame(res, rows)
+      rownames(res) = rows
     }
   }else{
     if((is.character(b) || is.factor(b)) && any(grepl('[a-zA-Z]', b))) b = lma_dtm(b) else
       if(is.data.frame(b)) b = Matrix(as.matrix(b), sparse = TRUE)
-    res = if((is.null(dim(a)) || any(dim(a) == 1)) && (length(a) == length(b))){
-      vector_similarity(as.numeric(a), as.numeric(b), metric_arg)
+    bn = if(is.null(dim(b))) length(b) else dim(b)[1]
+    if(lag && abs(lag) >= bn) lag = if(lag < 0) -bn + 1 else bn - 1
+    res = if((is.null(dim(a)) || any(dim(a) == 1)) && (length(a) == bn)){
+      b = as.numeric(b)
+      if(lag) b = if(lag < 0) c(b[-seq_len(-lag)], numeric(-lag)) else c(numeric(lag), b)[seq_len(bn)]
+      vector_similarity(as.numeric(a), b, met$dummy)
     }else{
       if(is.null(dim(a))) a = Matrix(a, 1, dimnames = list(NULL, names(a)), sparse = TRUE)
       if(!all(slots %in% slotNames(a))) a = as(a, 'dgCMatrix')
@@ -1563,8 +1646,12 @@ lma_simets=function(a, b = NULL, metric, group = NULL, agg = TRUE, agg.mean = TR
         if(d[2] != d[4])
           stop('a and b have a different number of columns, which could not be aligned by name')
       }
+      if(lag){
+        b = if(lag > 0) rbind(Matrix(0, lag, d[4], sparse = TRUE), b[-(seq_len(lag) + d[3] - lag),]) else
+          rbind(b[-seq_len(-lag),], Matrix(0, -lag, d[4], sparse = TRUE))
+      }
       calculate_similarities(a, b, if(((missing(pairwise) || !pairwise) && d[1] == d[3]) ||
-          d[3] == 1) 1 else 3, metric_arg)
+          d[3] == 1) 1 else 3, met$dummy)
     }
   }
   if('list' %in% class(res)){
@@ -1576,14 +1663,14 @@ lma_simets=function(a, b = NULL, metric, group = NULL, agg = TRUE, agg.mean = TR
     if(is.null(dim(res[[1]]))){
       rn = if(!is.na(nd <- which(d == length(res[[1]]))[1]) && !is.null(rownames(if(nd == 1) a else b)))
         rownames(if(nd == 1) a else b) else NULL
-      if(length(metric) == 1){
+      if(length(met$selected) == 1){
         if(length(rn) == length(res[[1]])) names(res[[1]]) = rn
       }else{
         attr(res, 'row.names') = if(length(rn) == length(res[[1]])) rn else seq_along(res[[1]])
         attr(res, 'class') = 'data.frame'
       }
     }
-    if(!return.list && length(metric) == 1) res = res[[1]]
+    if(!return.list && length(met$selected) == 1) res = res[[1]]
   }
   attr(res, 'time') = c(simets = proc.time()[[3]] - st)
   res

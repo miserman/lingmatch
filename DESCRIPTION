@@ -13,7 +13,7 @@ Imports:
     RcppParallel
 License: GPL (>= 2)
 LazyData: TRUE
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 Roxygen: list(old_usage = TRUE)
 Suggests: 
     knitr,

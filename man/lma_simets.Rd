@@ -4,9 +4,9 @@
 \alias{lma_simets}
 \title{Calculate similarity between vectors}
 \usage{
-lma_simets(a, b = NULL, metric, group = NULL, agg = TRUE,
-  agg.mean = TRUE, pairwise = TRUE, symmetrical = FALSE, mean = FALSE,
-  return.list = FALSE)
+lma_simets(a, b = NULL, metric = NULL, group = NULL, lag = 0,
+  agg = TRUE, agg.mean = TRUE, pairwise = TRUE, symmetrical = FALSE,
+  mean = FALSE, return.list = FALSE)
 }
 \arguments{
 \item{a}{vector or matrix. If a vector, \code{b} must also be provided. If a matrix and \code{b}
@@ -16,7 +16,8 @@ be compared with \code{b} or each row of \code{b}.}
 \item{b}{vector or matrix to be compared with \code{a} or rows of \code{a}.}
 
 \item{metric}{a character or vector of characters at least partially matching one of the
-available metric names, or a number or vector of numbers indicating the metric by index:
+available metric names (or 'all' to explicitly include all metrics),
+or a number or vector of numbers indicating the metric by index:
 \tabular{ll}{
   \code{jaccard} \tab \code{sum(a & b) / sum(a | b)} \cr
   \code{euclidean} \tab \code{1 / (1 + sqrt(sum((a - b) ^ 2)))} \cr
@@ -27,7 +28,11 @@ available metric names, or a number or vector of numbers indicating the metric b
 }}
 
 \item{group}{if \code{b} is missing and \code{a} has multiple rows, this will be used to make
-comparisons between rows of \code{a}, as modified by \code{agg} and \code{add.mean}.}
+comparisons between rows of \code{a}, as modified by \code{agg} and \code{agg.mean}.}
+
+\item{lag}{Amount to adjust the \code{b} index; either rows if \code{b} has multiple rows (e.g.,
+for \code{lag = 1}, \code{a[1,]} is compared with \code{b[2,]}), or values otherwise (e.g.,
+for \code{lag = 1}, \code{a[1]} is compared with \code{b[2]})}
 
 \item{agg}{logical; if \code{FALSE}, only the boundary rows between groups will be compared, see
 example.}

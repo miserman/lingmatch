@@ -16,9 +16,9 @@
 <h3>Usage</h3>
 
 <pre>
-lma_simets(a, b = NULL, metric, group = NULL, agg = TRUE,
-  agg.mean = TRUE, pairwise = TRUE, symmetrical = FALSE, mean = FALSE,
-  return.list = FALSE)
+lma_simets(a, b = NULL, metric = NULL, group = NULL, lag = 0,
+  agg = TRUE, agg.mean = TRUE, pairwise = TRUE, symmetrical = FALSE,
+  mean = FALSE, return.list = FALSE)
 </pre>
 
 
@@ -38,7 +38,8 @@ be compared with <code>b</code> or each row of <code>b</code>.</p>
 <tr valign="top"><td><code>metric</code></td>
 <td>
 <p>a character or vector of characters at least partially matching one of the
-available metric names, or a number or vector of numbers indicating the metric by index:
+available metric names (or 'all' to explicitly include all metrics),
+or a number or vector of numbers indicating the metric by index:
 </p>
 
 <table summary="Rd table">
@@ -73,7 +74,13 @@ available metric names, or a number or vector of numbers indicating the metric b
 <tr valign="top"><td><code>group</code></td>
 <td>
 <p>if <code>b</code> is missing and <code>a</code> has multiple rows, this will be used to make
-comparisons between rows of <code>a</code>, as modified by <code>agg</code> and <code>add.mean</code>.</p>
+comparisons between rows of <code>a</code>, as modified by <code>agg</code> and <code>agg.mean</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>lag</code></td>
+<td>
+<p>Amount to adjust the <code>b</code> index; either rows if <code>b</code> has multiple rows (e.g.,
+for <code>lag = 1</code>, <code>a[1,]</code> is compared with <code>b[2,]</code>), or values otherwise (e.g.,
+for <code>lag = 1</code>, <code>a[1]</code> is compared with <code>b[2]</code>)</p>
 </td></tr>
 <tr valign="top"><td><code>agg</code></td>
 <td>

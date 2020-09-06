@@ -91,8 +91,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // pattern_search
-List pattern_search(const CharacterVector& texts, const CharacterVector& patterns, const int& ncats, const IntegerVector& categories, const NumericVector& weight, const NumericVector& bias, const bool& fixed, const bool& exclusive);
-RcppExport SEXP _lingmatch_pattern_search(SEXP textsSEXP, SEXP patternsSEXP, SEXP ncatsSEXP, SEXP categoriesSEXP, SEXP weightSEXP, SEXP biasSEXP, SEXP fixedSEXP, SEXP exclusiveSEXP) {
+List pattern_search(const CharacterVector& texts, const CharacterVector& patterns, const int& ncats, const IntegerVector& categories, const NumericVector& weight, const NumericVector& bias, const bool& fixed, const bool& exclusive, const int& weight_cols);
+RcppExport SEXP _lingmatch_pattern_search(SEXP textsSEXP, SEXP patternsSEXP, SEXP ncatsSEXP, SEXP categoriesSEXP, SEXP weightSEXP, SEXP biasSEXP, SEXP fixedSEXP, SEXP exclusiveSEXP, SEXP weight_colsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -104,7 +104,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const NumericVector& >::type bias(biasSEXP);
     Rcpp::traits::input_parameter< const bool& >::type fixed(fixedSEXP);
     Rcpp::traits::input_parameter< const bool& >::type exclusive(exclusiveSEXP);
-    rcpp_result_gen = Rcpp::wrap(pattern_search(texts, patterns, ncats, categories, weight, bias, fixed, exclusive));
+    Rcpp::traits::input_parameter< const int& >::type weight_cols(weight_colsSEXP);
+    rcpp_result_gen = Rcpp::wrap(pattern_search(texts, patterns, ncats, categories, weight, bias, fixed, exclusive, weight_cols));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -116,7 +117,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_lingmatch_reformat_embedding", (DL_FUNC) &_lingmatch_reformat_embedding, 7},
     {"_lingmatch_extract_indices", (DL_FUNC) &_lingmatch_extract_indices, 3},
     {"_lingmatch_extract_matches", (DL_FUNC) &_lingmatch_extract_matches, 3},
-    {"_lingmatch_pattern_search", (DL_FUNC) &_lingmatch_pattern_search, 8},
+    {"_lingmatch_pattern_search", (DL_FUNC) &_lingmatch_pattern_search, 9},
     {NULL, NULL, 0}
 };
 

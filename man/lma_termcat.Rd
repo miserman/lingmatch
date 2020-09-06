@@ -4,8 +4,8 @@
 \alias{lma_termcat}
 \title{Document-Term Matrix Categorization}
 \usage{
-lma_termcat(dtm, dict, term.weights = NULL, bias = NULL, escape = FALSE,
-  partial = FALSE, term.filter = NULL, term.break = 20000)
+lma_termcat(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
+  partial = FALSE, glob = TRUE, term.filter = NULL, term.break = 20000)
 }
 \arguments{
 \item{dtm}{A matrix with words as column names.}
@@ -27,6 +27,9 @@ text (including asterisk wild cards). If \code{TRUE}, regular expression related
 escaped. Set to \code{TRUE} if you get PCRE compilation errors.}
 
 \item{partial}{Logical; if \code{TRUE} terms are partially matched (not padded by ^ and $).}
+
+\item{glob}{Logical; if \code{TRUE} (default), will convert initial and terminal asterisks to
+partial matches.}
 
 \item{term.filter}{A regular expression string used to format the text of each term (passed to
 \code{gsub}). For example, if terms are part-of-speech tagged (e.g.,
