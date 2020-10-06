@@ -17,6 +17,22 @@ test_that('results align with r implementation', {
   })
 })
 
+test_that('vectors and rows are the same', {
+  a = b = matrix(0, 2, 10)
+  a[2,] = rpois(10, 1)
+  b[2,] = rnorm(10)
+  pa = lma_simets(rbind(a, b))
+  al = lma_simets(a, b)
+  expect_equal(as.numeric(al[1,]), unname(vapply(pa, '[', 0, 3)))
+  expect_equal(as.numeric(al[2,]), unname(vapply(pa, '[', 0, 8)))
+  cr = rbind(lma_simets(a[1,], b[2,]), lma_simets(a[2,], b[1,]))
+  cr[is.na(cr)] = 0
+  mcr = rbind(manual(a[1,], b[2,]), manual(a[2,], b[1,]))
+  mcr[is.nan(mcr)] = 0
+  expect_equivalent(cr, mcr)
+  expect_equal(cr, vapply(pa, '[', numeric(2), c(4, 7)))
+})
+
 test_that('many a to one b comparisons work', {
   dtm = Matrix(rpois(500, .5), 5, sparse = TRUE)
   comp = rpois(100, .5)

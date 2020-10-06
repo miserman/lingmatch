@@ -5,13 +5,16 @@
 \title{Document-Term Matrix Categorization}
 \usage{
 lma_termcat(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
-  partial = FALSE, glob = TRUE, term.filter = NULL, term.break = 20000)
+  partial = FALSE, glob = TRUE, term.filter = NULL, term.break = 20000,
+  dir = getOption("lingmatch.dict.dir"))
 }
 \arguments{
 \item{dtm}{A matrix with words as column names.}
 
-\item{dict}{A \code{list} object with named character vectors as word lists, or the path
-to a file to be read in by \code{\link{read.dic}}.}
+\item{dict}{The name of a provided dictionary
+(\href{https://osf.io/y6g5b/wiki/home}{osf.io/y6g5b/wiki}) or of a file found in
+\code{dir}, or a \code{list} object with named character vectors as word lists,
+or the path to a file to be read in by \code{\link{read.dic}}.}
 
 \item{term.weights}{A \code{list} object with named numeric vectors lining up with the character
 vectors in \code{dict}, used to weight the terms in each \code{dict} vector. If a category in
@@ -37,6 +40,9 @@ partial matches.}
 
 \item{term.break}{If a category has more than \code{term.break} characters, it will be processed
 in chunks. Reduce from 20000 if you get a PCRE compilation error.}
+
+\item{dir}{Path to a folder in which to look for \code{dict}; defaults to
+\code{getOption('lingmatch.dict.dir')}.}
 }
 \description{
 Reduces the dimensions of a document-term matrix by dictionary-based categorization.
@@ -58,7 +64,7 @@ text = c(
   ),
   fearful = 'The horrific torture of that terrorist was tantamount to the terrorism of terrorists.',
   joyous = 'I am jubilant to be celebrating the bliss of this happiest happiness.',
-  sad = 'They are nearly suicidal in their mourning of the tragic and heartbreaking holocaust.'
+  sad = 'They are nearly suicidal in their mourning after the tragic and heartbreaking holocaust.'
 )
 
 emotion_scores = lma_termcat(
@@ -69,4 +75,11 @@ if(require('splot')) splot(emotion_scores ~ names(text), leg = 'out')
 }
 \seealso{
 For applying pattern-based dictionaries (to raw text) see \code{\link{lma_patcat}}.
+
+Other Dictionary functions: 
+\code{\link{download.dict}()},
+\code{\link{lma_patcat}()},
+\code{\link{read.dic}()},
+\code{\link{select.dict}()}
 }
+\concept{Dictionary functions}

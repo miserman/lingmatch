@@ -71,7 +71,7 @@ textdir = '../texts.txt'
 if(!file.exists(textdir)) textdir = paste0('../../', textdir)
 skip_if(!file.exists(textdir), paste('texts.txt not found at', normalizePath(textdir)))
 
-dicts = list.files(getOption('lingmatch.dict.dir'), '(csv|dic)$', full.names = TRUE)
+dicts = list.files(getOption('lingmatch.dict.dir'), '(?:csv|dic)$', full.names = TRUE)
 skip_if(!length(dicts), 'no .csv or .dic files in the dictionaries directory')
 
 test_that('applied dictionaries work', {

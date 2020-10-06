@@ -13,6 +13,7 @@ An all-in-one R package for the assessment of linguistic matching and/or accommo
   * [Introduction](https://miserman.github.io/lingmatch/#introduction)
   * [Comparisons](https://miserman.github.io/lingmatch/#comparisons)
   * [Word vectors](https://miserman.github.io/lingmatch/#word_vectors)
+* Dictionary repository: [osf.io/y6g5b](https://osf.io/y6g5b/wiki/home/)
 * Latent semantic space repository: [osf.io/489he](https://osf.io/489he/wiki/home/)
 
 ## installation

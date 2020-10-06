@@ -17,7 +17,8 @@
 
 <pre>
 lma_termcat(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
-  partial = FALSE, glob = TRUE, term.filter = NULL, term.break = 20000)
+  partial = FALSE, glob = TRUE, term.filter = NULL, term.break = 20000,
+  dir = getOption("lingmatch.dict.dir"))
 </pre>
 
 
@@ -30,8 +31,10 @@ lma_termcat(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
 </td></tr>
 <tr valign="top"><td><code>dict</code></td>
 <td>
-<p>A <code>list</code> object with named character vectors as word lists, or the path
-to a file to be read in by <code>read.dic</code>.</p>
+<p>The name of a provided dictionary
+(<a href="https://osf.io/y6g5b/wiki/home">osf.io/y6g5b/wiki</a>) or of a file found in
+<code>dir</code>, or a <code>list</code> object with named character vectors as word lists,
+or the path to a file to be read in by <code>read.dic</code>.</p>
 </td></tr>
 <tr valign="top"><td><code>term.weights</code></td>
 <td>
@@ -72,12 +75,23 @@ partial matches.</p>
 <p>If a category has more than <code>term.break</code> characters, it will be processed
 in chunks. Reduce from 20000 if you get a PCRE compilation error.</p>
 </td></tr>
+<tr valign="top"><td><code>dir</code></td>
+<td>
+<p>Path to a folder in which to look for <code>dict</code>; defaults to
+<code>getOption('lingmatch.dict.dir')</code>.</p>
+</td></tr>
 </table>
 
 
 <h3>See Also</h3>
 
 <p>For applying pattern-based dictionaries (to raw text) see <code>lma_patcat</code>.
+</p>
+<p>Other Dictionary functions: 
+<code>download.dict()</code>,
+<code>lma_patcat()</code>,
+<code>read.dic()</code>,
+<code>select.dict()</code>
 </p>
 
 
@@ -100,7 +114,7 @@ text = c(
   ),
   fearful = 'The horrific torture of that terrorist was tantamount to the terrorism of terrorists.',
   joyous = 'I am jubilant to be celebrating the bliss of this happiest happiness.',
-  sad = 'They are nearly suicidal in their mourning of the tragic and heartbreaking holocaust.'
+  sad = 'They are nearly suicidal in their mourning after the tragic and heartbreaking holocaust.'
 )
 
 emotion_scores = lma_termcat(

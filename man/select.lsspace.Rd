@@ -40,10 +40,11 @@ a list with varying entries:
           \code{osf_terms} \tab OSF id for the \code{_terms.txt} files; the URL would be
             https://osf.io/{osf_terms} \cr
           \code{wiki} \tab link to the wiki for the space \cr
-          \code{downloaded} \tab indicates whether the space's files are found in \code{dir} \cr
+          \code{downloaded} \tab path to the \code{.dat} file if downloaded,
+            and \code{''} otherwise. \cr
         }
       \cr
-    selected \tab A subset of \code{spaces} selected by \code{query}. \cr
+    selected \tab A subset of \code{info} selected by \code{query}. \cr
     term_map \tab If \code{get.map} is \code{TRUE} or \code{lma_term_map.rda} is found in
       \code{dir}, a copy of \href{https://osf.io/xr7jv}{osf.io/xr7jv}, which has space names as
       column names, terms as row names, and indices as values, with 0 indicating the term is not

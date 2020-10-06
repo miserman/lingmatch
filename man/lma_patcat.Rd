@@ -99,4 +99,11 @@ lma_patcat(text, tempori)
 }
 \seealso{
 For applying term-based dictionaries (to a document-term matrix) see \code{\link{lma_termcat}}.
+
+Other Dictionary functions: 
+\code{\link{download.dict}()},
+\code{\link{lma_termcat}()},
+\code{\link{read.dic}()},
+\code{\link{select.dict}()}
 }
+\concept{Dictionary functions}

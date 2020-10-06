@@ -115,47 +115,161 @@ lma_process = function(input = NULL, ..., meta = TRUE){
   op
 }
 
-#' Read/write LIWC dictionary files
-#'
-#' Read in or write Linguistic Inquiry and Word Count dictionary (.dic) files.
-#' @param path Path to a .dic file.
-#' @param cats A character vector of category names to be returned. All categories are returned by default.
-#' @param to.regex Logical; if \code{TRUE}, each dictionary entry is converted to regular expression
-#'   (starts are marked with ^ and ends with $ when an * is present, and unmatched brackets/parens are escaped).
-#' @export
-
-read.dic = function(path, cats, to.regex = FALSE){
-  if(missing(path)) path = file.choose()
-  di = if(length(path) != 1) path else tryCatch(
-    readLines(path, warn = FALSE),
-    error = function(e) stop('failed to read path: ', e$message, call. = FALSE)
-  )
-  lst = grep('%', di, fixed = TRUE)
-  if(length(lst) > 1){
-    di = di[-seq_len(lst[1])]
-    lst = lst[2] - 2
-  }else stop('file is not in the expected format')
-  ci = strsplit(di[seq_len(lst)], '\\s+')
-  names(ci) = vapply(ci, '[[', '', 2)
-  if(missing(cats)) cats = names(ci)
-  ci = lapply(ci[names(ci) %in% cats], '[[', 1)
-  di = strsplit(di[seq_along(di)[-(1:3)]], '[ \t]+(?=[0-9]|$)', perl = TRUE)
-  di = di[vapply(di, length, 0) > 1]
-  names(di) = vapply(di, '[', '', 1)
-  di = lapply(di, '[', -1)
-  wl = list()
-  for(w in names(di)){
-    ck = ci %in% di[[w]]
-    if(any(ck)){
-      cm = names(ci[ck])
-      for(c in cm) wl[[c]] = c(wl[[c]], w)
-    }
-  }
-  if(to.regex) lapply(wl, function(l){
+to_regex = function(dict, intext = FALSE){
+  lapply(dict, function(l){
+    l = gsub('([+*])[+*]+', '\\\\\\1+', l)
     if(any(ck <- grepl('[[({]', l) + grepl('[})]|\\]', l) == 1))
       l[ck] = gsub('([([{}\\])])', '\\\\\\1', l[ck], perl = TRUE)
-    gsub('\\^\\*|\\*\\$', '', paste0('^', l, '$'))
-  }) else wl
+    if(intext){
+      sub('^\\*', '\\\\\\b\\\\\\w*', sub('\\*$', '\\\\\\w*\\\\\\b', l, TRUE), TRUE)
+    }else{
+      gsub('\\^\\*|\\*\\$', '', paste0('^', l, '$'))
+    }
+  })
+}
+
+#' Read/write dictionary files
+#'
+#' Read in or write dictionary files in Comma-Separated Values (.csv; weighted) or
+#' Linguistic Inquiry and Word Count (.dic; non-weighted) format.
+#' @param path Path to a file, a name corresponding to a file in \code{getOption('lingmatch.dict.dir')} or
+#'   one of the dictionaries available at \href{https://osf.io/y6g5b}{osf.io/y6g5b}, a matrix-like object
+#'   to be categorized, or a list to be formatted.
+#' @param cats A character vector of category names to be returned. All categories are returned by default.
+#' @param type A character indicating whether and how terms should be altered. Unspecified or matching 'asis'
+#'   leaves terms as they are. Other options change wildcards to regular expressions:
+#'   \code{'pattern'} (\code{'^[poi]'}) replaces initial asterisks with \code{'\\\\b\\\\w*'},
+#'   and terminal asterisks with \code{'\\\\w*\\\\b'}, to match terms within raw text;
+#'   for anything else, terms are padded with '^' and '$', then those bounding marks are removed
+#'   when an asterisk is present, to match tokenized terms.
+#' @param as.weighted Logical; if \code{TRUE}, converts to a binary weighted dictionary -- a
+#'   data.frame with a "term" column of unique terms, and a column for each category.
+#' @family Dictionary functions
+#' @importFrom utils read.csv write.csv
+#' @export
+
+read.dic = function(path, cats, type = 'asis', as.weighted = FALSE){
+  if(missing(path)) path = file.choose()
+  if(length(path) == 1 && !file.exists(path)){
+    tp = select.dict(path)
+    if(nrow(tp$selected)) path = if(any(tp$selected$downloaded != ''))
+      tp$selected$downloaded[which(tp$selected$downloaded != '')] else{
+        download.dict(rownames(tp$selected)[1])
+        paste0(sub('/*$', '/', getOption('lingmatch.dict.dir')), rownames(tp$selected)[1],
+          if(tp$selected[1, 'weighted']) '.csv' else '.dic')
+    }
+  }
+  if(!is.null(dim(path))){
+    if(anyNA(path)) path[is.na(path)] = 0
+    cats = colnames(path)
+    if('term' %in% cats){
+      terms = path[, 'term']
+      cats = cats[cats != 'term']
+    }else if(!is.null(rownames(path)) && any(grepl('[a-z]', rownames(path), TRUE))){
+      terms = rownames(path)
+    }else{
+      su = which(vapply(cats, function(cat) !is.numeric(path[, cat]), TRUE))
+      if(!length(su)) stop('no non-numeric columns found in path')
+      if(length(su) > 1){
+        ssu = vapply(su, function(col) !anyDuplicated(path[, col]), TRUE)
+        if(any(!ssu)) cats = path[, su[which(!ssu)[[1]]]]
+        su = if(any(ssu)) su[which(ssu)[[1]]] else su[[1]]
+      }
+      terms = path[, su]
+    }
+    if('category' %in% colnames(path)) cats = path[, 'category']
+    if(length(cats) == nrow(path)){
+      wl = split(terms, cats)
+    }else{
+      su = vapply(colnames(path), function(col) !is.numeric(path[, col]) && anyDuplicated(path[, col]), TRUE)
+      wl = if(any(su)){
+        split(terms, path[, which(su)[[1]]])
+      }else{
+        cats = cats[vapply(cats, function(cat) is.numeric(path[, cat]), TRUE)]
+        if(!length(cats)) stop('no numeric columns found in path')
+        if(length(cats) == 1){
+          weights = path[, cats]
+          if(any(weights < 0) && any(weights > 0)){
+            Filter(length, list(
+              positive = terms[weights > 0],
+              neutral = terms[weights == 0],
+              negative = terms[weights < 0]
+            ))
+          }else if(anyDuplicated(weights)) split(terms, weights) else list(category = terms)
+        }else{
+          weights = as.data.frame(path[, cats])
+          lvs = sort(unique(unlist(weights)))
+          if(length(lvs) == 3 && all(lvs == c(-1, 0, 1))){
+            for(cat in cats){
+              if(any(weights[, cat] == -1)){
+                weights[, paste0(cat, '_positive')] = as.integer(weights[, cat] == 1)
+                weights[, paste0(cat, '_negative')] = as.integer(weights[, cat] == -1)
+                weights = weights[, colnames(weights) != cat]
+              }
+            }
+            cats = sort(colnames(weights))
+            lvs = c(0, 1)
+          }
+          if(length(lvs) == 2 && all(lvs == c(0, 1))){
+            wl = lapply(cats, function(cat) terms[weights[, cat] == 1])
+            names(wl) = cats
+            wl = Filter(length, wl)
+          }else{
+            wl = list()
+            for(r in seq_len(nrow(path))){
+              m = max(weights[r,])
+              if(m != 0) for(cat in cats[weights[r,] == m]) wl[[cat]] = c(wl[[cat]], terms[r])
+            }
+          }
+          wl
+        }
+      }
+    }
+  }else if(is.list(path)){
+    wl = path
+    if(is.null(names(wl))) names(wl) = paste0('cat', seq_along(wl))
+    if(!missing(cats)){
+      wl = wl[names(wl) %in% cats]
+      if(!length(wl)) stop('no cats were found in path')
+    }
+  }else{
+    di = if(length(path) != 1) path else tryCatch(
+      readLines(path, warn = FALSE),
+      error = function(e) stop('failed to read path: ', e$message, call. = FALSE)
+    )
+    lst = grep('%', di, fixed = TRUE)
+    if(length(lst) > 1 && !grepl(',', di[lst[1]], fixed = TRUE)){
+      if(length(lst) < 2) stop('could not identify the end of the header -- ',
+        'this should be the second percent sign (%) following the last category name.')
+      lst = lst[2]
+      h = grep('^\\d', gsub('^\\s+|\\s*%+\\s*|\\s+$', '', di[seq_len(lst)]), value = TRUE)
+      ci = character()
+      for(cat in h) ci[sub('\\s.*$', '', cat)] = sub('^[^\\s]+\\s+', '', cat)
+      if(missing(cats)) cats = ci
+      wl = list()
+      for(e in strsplit(di[-seq_len(lst - 1)], paste0(if(grepl('\t',
+        di[lst + 1], fixed = TRUE)) '\t' else '\\s', '+(?=\\d|$)'), perl = TRUE)){
+        if(length(e) > 1){
+          w = e[1]
+          if(w != '') for(l in e[-1]) if(l %in% names(ci) && !w %in% wl[[ci[[l]]]])
+            wl[[ci[[l]]]] = c(wl[[ci[[l]]]], w)
+        }
+      }
+      wl = wl[cats[cats %in% names(wl)]]
+    }else{
+      wl = tryCatch(
+        read.dic(read.csv(text = di, sep = if(grepl('\t', di[[1]])) '\t' else ',')),
+        error = function(e) NULL
+      )
+      if(is.null(wl)) stop('file is not in the expected format')
+    }
+  }
+  if(!missing(type) && !grepl('^[Aa]', type)) wl = to_regex(wl, grepl('^[poi]', type, TRUE))
+  if(as.weighted){
+    op = data.frame(term = unique(unlist(wl)))
+    for(cat in names(wl)) op[, cat] = as.integer(op$term %in% wl[[cat]])
+    op
+  }else wl
 }
 
 #' @rdname read.dic
@@ -170,10 +284,19 @@ read.dic = function(path, cats, to.regex = FALSE){
 #'   death = c('death*', 'dying', 'die*', 'kill*')
 #' )
 #'
+#' # convert it to a weighted format
+#' dict_weighted = read.dic(dict, as.weighted = TRUE)
+#'
+#' # categorize it back
+#' read.dic(dict_weighted)
+#'
 #' \dontrun{
 #'
-#' write.dic(dict, 'murder') # save it as a .dic file
-#' read.dic('murder.dic') # read it back in as a list
+#' # save it as a .dic file
+#' write.dic(dict, 'murder')
+#'
+#' # read it back in as a list
+#' read.dic('murder.dic')
 #'
 #' # read in the Moral Foundations or LUSI dictionaries from urls
 #' moral_dict = read.dic('http://bit.ly/MoralFoundations2')
@@ -181,19 +304,28 @@ read.dic = function(path, cats, to.regex = FALSE){
 #' }
 #' @export
 
-write.dic = function(dict, filename = 'custom', save = TRUE){
-  filename = filename[[1]]
-  filename = paste0(if(!grepl(':', filename, fixed = TRUE)) paste0(getwd(), '/'), filename,
-    if(!grepl('\\.[a-zA-Z0-9]+$', filename)) '.dic')
+write.dic = function(dict, filename = 'custom', type = 'asis', as.weighted = FALSE, save = TRUE){
+  if(!is.list(dict) || is.data.frame(dict)) dict = read.dic(dict)
   terms = unique(as.character(unlist(dict, use.names = FALSE)))
-  l = length(dict)
-  m = as.data.frame(matrix('', length(terms) + l + 2, l + 1))
-  m[, 1] = c('%', seq_len(l), '%', terms)
-  m[seq_len(l) + 1, 2] = if(is.null(names(dict))) seq_len(l) else names(dict)
-  for(i in seq_along(dict)) m[which(m[-seq_len(i + 2), 1] %in% dict[[i]]) + i + 2, i + 1] = i
-  o = gsub('\t{2,}', '\t', paste(sub('\t+$', '', do.call(paste, c(m, sep = '\t'))), collapse = '\n'))
+  terms = terms[terms != '']
+  if(!missing(type) && !grepl('^[Aa]', type)) dict = to_regex(dict, grepl('^[poi]', type, TRUE))
+  if(as.weighted){
+    o = data.frame(term = terms)
+    for(cat in names(dict)) o[, cat] = as.integer(o$term %in% dict[[cat]])
+    o
+  }else{
+    l = length(dict)
+    m = as.data.frame(matrix('', length(terms) + l + 2, l + 1))
+    m[, 1] = c('%', seq_len(l), '%', terms)
+    m[seq_len(l) + 1, 2] = if(is.null(names(dict))) seq_len(l) else names(dict)
+    for(i in seq_along(dict)) m[which(m[-seq_len(l + 2), 1] %in% dict[[i]]) + l + 2, i + 1] = i
+    o = gsub('\t{2,}', '\t', paste(sub('\t+$', '', do.call(paste, c(m, sep = '\t'))), collapse = '\n'))
+  }
   if(save){
-    write(o, filename)
+    filename = filename[[1]]
+    filename = paste0(if(!grepl(':', filename, fixed = TRUE)) paste0(getwd(), '/'), filename,
+      if(!grepl('\\.[a-zA-Z0-9]+$', filename)) if(as.weighted) '.csv' else '.dic')
+    if(as.weighted) write.csv(o, filename, row.names = FALSE) else write(o, filename)
     message('dictionary saved to ', filename)
   }
   invisible(o)
@@ -362,10 +494,11 @@ read.segments = function(path = '.', segment = NULL, ext = '.txt', subdir = FALS
 #'           \code{osf_terms} \tab OSF id for the \code{_terms.txt} files; the URL would be
 #'             https://osf.io/{osf_terms} \cr
 #'           \code{wiki} \tab link to the wiki for the space \cr
-#'           \code{downloaded} \tab indicates whether the space's files are found in \code{dir} \cr
+#'           \code{downloaded} \tab path to the \code{.dat} file if downloaded,
+#'             and \code{''} otherwise. \cr
 #'         }
 #'       \cr
-#'     selected \tab A subset of \code{spaces} selected by \code{query}. \cr
+#'     selected \tab A subset of \code{info} selected by \code{query}. \cr
 #'     term_map \tab If \code{get.map} is \code{TRUE} or \code{lma_term_map.rda} is found in
 #'       \code{dir}, a copy of \href{https://osf.io/xr7jv}{osf.io/xr7jv}, which has space names as
 #'       column names, terms as row names, and indices as values, with 0 indicating the term is not
@@ -390,8 +523,8 @@ read.segments = function(path = '.', segment = NULL, ext = '.txt', subdir = FALS
 
 select.lsspace = function(query = NULL, dir = getOption('lingmatch.lspace.dir'),
   get.map = FALSE, check.md5 = TRUE, mode = 'wb'){
-  dir = sub('/+$', '', path.expand(dir))
-  map_path = paste0(dir, '/lma_term_map.rda')
+  dir = sub('/*$', '/', path.expand(dir))
+  map_path = paste0(dir, 'lma_term_map.rda')
   if(!missing(query) && length(query) > 1) get.map = TRUE
   if(!exists('lma_term_map')) lma_term_map = NULL
   if(get.map && !(file.exists(map_path) || !is.null(lma_term_map))){
@@ -406,15 +539,15 @@ select.lsspace = function(query = NULL, dir = getOption('lingmatch.lspace.dir'),
           save(lma_term_map, file = map_path, compress = FALSE)
         }else warning(paste0(
           "The term map's MD5 (", ck, ') does not seem to match the one on record;\n',
-          'double check and try manually downloading at https://osf.io/9yzca/?show=revision'
+          'double check and try manually downloading at https://osf.io/xr7jv/?show=revision'
         ))
       }
     }
   }
   r = list(info = lss_info, selected = lss_info[NULL,])
   r$info[, 'wiki'] = paste0('https://osf.io/489he/wiki/', rownames(lss_info))
-  r$info[, 'downloaded'] = grepl(paste(sub('\\..*$', '', list.files(dir, '\\.dat')), collapse = '|'),
-    rownames(r$info), TRUE)
+  r$info[, 'downloaded'] = paste0(dir, rownames(r$info), '.dat')
+  r$info[!r$info[, 'downloaded'] %in% list.files(dir, '\\.dat'), 'downloaded'] = ''
   if(get.map || missing(query)) if(!is.null(lma_term_map)){
     r$term_map = lma_term_map
   }else if(file.exists(map_path) && is.null(lma_term_map)){
@@ -431,13 +564,13 @@ select.lsspace = function(query = NULL, dir = getOption('lingmatch.lspace.dir'),
         r$info$coverage = colMeans(r$term_map[overlap,] != 0)
         r$selected = r$info[order(r$info$coverage, decreasing = TRUE)[1:5],]
         r$space_terms = overlap
-      }else warning('query was treated as terms, but non were found')
+      }else warning('query was treated as terms, but none were found')
     }else{
       if(!length(sel <- grep(query, rownames(lss_info), TRUE))){
         collapsed = vapply(seq_len(nrow(lss_info)),
           function(r) paste(c(rownames(lss_info)[r], lss_info[r,]), collapse = ' '), '')
         if(!length(sel <- grep(query, collapsed, TRUE)))
-          sel <- grep(paste(strsplit(query, '[ ,]+')[[1]], collapse = '|'), collapsed, TRUE)
+          sel <- grep(paste(strsplit(query, '[[:space:],|]+')[[1]], collapse = '|'), collapsed, TRUE)
       }
       if(length(sel)) r$selected = r$info[sel,]
     }
@@ -465,6 +598,7 @@ select.lsspace = function(query = NULL, dir = getOption('lingmatch.lspace.dir'),
 #' @param dir Directory in which to save the space; default is
 #'  \code{getOption('lingmatch.lspace.dir')}.
 #' @family Latent Semantic Space functions
+#' @return A character vector with paths to the [1] data and [2] term files.
 #' @examples
 #' \dontrun{
 #'
@@ -476,12 +610,22 @@ select.lsspace = function(query = NULL, dir = getOption('lingmatch.lspace.dir'),
 
 download.lsspace = function(space = '100k', include.terms = TRUE, decompress = TRUE,
   check.md5 = TRUE, mode = 'wb', dir = getOption('lingmatch.lspace.dir')){
+  if(space == 'all') space = rownames(select.lsspace()$info)
+  if(length(space) > 1){
+    res = lapply(space, function(d){
+      m = tryCatch(download.lsspace(d, include.terms = include.terms, decompress = decompress,
+        check.md5 = check.md5, mode = mode, dir = dir), error = function(e) e$message)
+      if(is.null(m)) 'downloaded' else paste('failed: ', m)
+    })
+    names(res) = space
+    return(res)
+  }
   dir = sub('/+$', '', path.expand(dir))
   if(space == 'default') space = '100k'
-  name = grep(sub('\\..*$', '', space), rownames(lss_info), value = TRUE, fixed = TRUE)
-  if(!length(name)) name = grep(substr(space, 1, 4), rownames(lss_info), TRUE, value = TRUE)
+  name = grep(paste0('^', sub('\\..*$', '', space)), rownames(lss_info), value = TRUE)
+  if(!length(name)) name = grep(paste0('^', substr(space, 1, 4)), rownames(lss_info), TRUE, value = TRUE)
   if(!length(name)){
-    stop('space ', space, ' not recognized; see https://osf.io/489he/wiki/home for available spaces')
+    stop('space ', space, ' not recognized; see https://osf.io/489he/wiki for available spaces')
   }else name = name[1]
   urls = list(
     info = function(id) paste0('https://api.osf.io/v2/files/', id),
@@ -518,8 +662,196 @@ download.lsspace = function(space = '100k', include.terms = TRUE, decompress = T
       )
     }
   }
-  message('downloaded ', name, ':\n  ', paste0(dir, '/', name, c(if(!status && decompress) '.dat' else
+  dir = paste0(dir, '/', name, c(if(!status && decompress) '.dat' else
+    '.dat.bz2', '_terms.txt'), collapse = '\n  ')
+  message('downloaded ', name, ' space:\n  ', paste0(dir, '/', name, c(if(!status && decompress) '.dat' else
     '.dat.bz2', '_terms.txt'), collapse = '\n  '))
+  invisible(dir)
+}
+
+#' Select Dictionaries
+#'
+#' Retrieve information and links to dictionaries
+#' (lexicons/word lists) available at \href{https://osf.io/y6g5b}{osf.io/y6g5b}.
+#'
+#' @param query A character matching a space name, or a set of keywords to search for in
+#'   dictionary information.
+#' @param dir Path to a folder containing dictionaries, or where you want them to be saved
+#' @param check.md5 Logical; if \code{TRUE} (default), retrieves the MD5 checksum from OSF,
+#'   and compares it with that calculated from the downloaded file to check its integrity.
+#' @param mode Passed to \code{\link{download.file}} when downloading files.
+#' @return a list with varying entries:
+#'   \tabular{ll}{
+#'     info \tab The version of \href{https://osf.io/kjqb8}{osf.io/kjqb8} stored internally; a
+#'       \code{data.frame}  with spaces as row names, and information about each space in columns.
+#'         Also described at
+#'         \href{https://osf.io/y6g5b/wiki/dict_variables}{osf.io/y6g5b/wiki/dict_variables},
+#'         here \code{short} (corresponding to the file name [\code{{short}.(csv|dic)}] and
+#'         wiki urls [\code{https://osf.io/y6g5b/wiki/{short}}]) is set as row names, and removed:
+#'         \tabular{ll}{
+#'           \code{name} \tab Full name of the dictionary. \cr
+#'           \code{description} \tab Description of the dictionary, relating to its purpose and
+#'             development. \cr
+#'           \code{note} \tab Notes about processing decisions that additionally alter the original. \cr
+#'           \code{constructor} \tab How the dictionary was constructed:
+#'             \tabular{ll}{
+#'               \code{algorithm} \tab Terms were selected by some automated process, potentially
+#'                 learned from data or other resources. \cr
+#'               \code{crowd} \tab Several individuals rated the terms, and in aggregate, those ratings
+#'                 translate to categories and weights. \cr
+#'               \code{mixed} \tab Some combination of the other methods, usually in some iterative
+#'                 process. \cr
+#'               \code{team} \tab One of more individuals make decisions about term inclusions,
+#'                 categories, and weights. \cr
+#'             } \cr
+#'           \code{subject} \tab Broad, rough subject or purpose of the dictionary:
+#'             \tabular{ll}{
+#'               \code{emotion} \tab Terms relate to emotions, potentially exemplifying or expressing
+#'                 them. \cr
+#'               \code{general} \tab A large range of categories, aiming to capture the content of the
+#'                 text. \cr
+#'               \code{impression} \tab Terms are categorized and weighted based on the impression they
+#'                 might give. \cr
+#'               \code{language} \tab Terms are categorized or weighted based on their linguistic
+#'                 features, such as part of speech, specificity, or area of use. \cr
+#'               \code{social} \tab Terms relate to social phenomena, such as characteristics or concerns
+#'                 of social entities. \cr
+#'             } \cr
+#'           \code{terms} \tab Number of unique terms across categories. \cr
+#'           \code{term_type} \tab Format of the terms:
+#'             \tabular{ll}{
+#'               \code{glob} \tab Include asterisks which denote acceptance of any characters until a
+#'                 word boundary. \cr
+#'               \code{glob+} \tab Glob-style asterisks with regular expressions within terms. \cr
+#'               \code{ngram} \tab Includes any number of words as a term, separated by spaces. \cr
+#'               \code{pattern} \tab A string of characters, potentially within or between words, or
+#'                 spanning words. \cr
+#'               \code{regex} \tab Regular expressions. \cr
+#'               \code{stem} \tab Unigrams with common endings removed. \cr
+#'               \code{unigram} \tab Complete single words. \cr
+#'             } \cr
+#'           \code{weighted} \tab Indicates whether weights are associated with terms. This
+#'             determines the file type of the dictionary: dictionaries with weights are stored
+#'             as .csv, and those without are stored as .dic files. \cr
+#'           \code{regex_characters} \tab Logical indicating whether special regular expression
+#'             characters are present in any term, which might need to be escaped if the terms are used
+#'             in regular expressions. Glob type terms allow complete parens (at least one open and one
+#'             closed, indicating preceding or following words), and initial and terminal asterisks. For
+#'             all other terms, \code{[](){}*.^$+?\|} are counted as regex characters. These could be
+#'             escaped in R with \code{gsub('([][)(}{*.^$+?\\\\|])', '\\\\\\1', terms)} if \code{terms}
+#'             is a character vector, and in Python with (importing re)
+#'             \code{[re.sub(r'([][(){}*.^$+?\|])', r'\\\1', term) for term in terms]} if \code{terms}
+#'             is a list. \cr
+#'           \code{categories} \tab Category names in the order in which they appear in the dictionary
+#'             file, separated by commas. \cr
+#'           \code{ncategories} \tab Number of categories.\cr
+#'           \code{original_max} \tab Maximum value of the original dictionary before standardization:
+#'             \code{original values / max(original values) * 100}. Dictionaries with no weights are
+#'             considered to have a max of \code{1}. \cr
+#'           \code{osf} \tab ID of the file on OSF, translating to the file's URL:
+#'             https://osf.io/\code{osf} \cr
+#'           \code{wiki} \tab URL of the dictionary's wiki. \cr
+#'           \code{downloaded} \tab Path to the file if downloaded, and \code{''} otherwise. \cr
+#'         }
+#'       \cr
+#'     selected \tab A subset of \code{info} selected by \code{query}. \cr
+#'   }
+#' @family Dictionary functions
+#' @examples
+#' # just retrieve information about available dictionaries
+#' dicts = select.dict()
+#'
+#' # select all dictionaries mentioning sentiment or emotion
+#' sentiment_dicts = select.dict('sentiment emotion')$selected
+#' @export
+
+select.dict = function(query = NULL, dir = getOption('lingmatch.dict.dir'),
+  check.md5 = TRUE, mode = 'wb'){
+  dir = sub('/+$', '', path.expand(dir))
+  r = list(info = dict_info, selected = dict_info[NULL,])
+  r$info[, 'wiki'] = paste0('https://osf.io/y6g5b/wiki/', rownames(dict_info))
+  r$info[, 'downloaded'] = paste0(sub('/+$', '', dir), '/', rownames(r$info),
+    ifelse(r$info$weighted, '.csv', '.dic'))
+  r$info[!r$info[, 'downloaded'] %in% list.files(dir, full.names = TRUE), 'downloaded'] = ''
+  if(!missing(query)){
+    if(!length(sel <- grep(query, rownames(dict_info), TRUE))){
+      collapsed = vapply(seq_len(nrow(dict_info)),
+        function(r) paste(c(rownames(dict_info)[r], dict_info[r,]), collapse = ' '), '')
+      if(!length(sel <- grep(query, collapsed, TRUE)))
+        sel <- grep(paste(strsplit(query, '[[:space:],|]+')[[1]], collapse = '|'), collapsed, TRUE)
+    }
+    if(length(sel)) r$selected = r$info[sel,]
+  }
+  r
+}
+
+#' Download Dictionaries
+#'
+#' Downloads the specified dictionaries from \href{https://osf.io/y6g5b}{osf.io/y6g5b}.
+#'
+#' @param dict One or more names of dictionaries to download.
+#'  See \href{https://osf.io/y6g5b/wiki/home}{osf.io/y6g5b/wiki} for more information, and a
+#'  list of available dictionaries.
+#' @param check.md5 Logical; if \code{TRUE} (default), retrieves the MD5 checksum from OSF,
+#'  and compares it with that calculated from the downloaded file to check its integrity.
+#' @param mode A character specifying the file write mode; default is 'wb'. See
+#'  \code{\link{download.file}}.
+#' @param dir Directory in which to save the dictionary; default is
+#'  \code{getOption('lingmatch.dict.dir')}.
+#' @return Path to the downloaded dictionary, or a list of such if multiple were downloaded.
+#' @family Dictionary functions
+#' @examples
+#' \dontrun{
+#'
+#' download.dict('lusi')
+#' }
+#' @export
+
+download.dict = function(dict = 'collected', check.md5 = TRUE, mode = 'wb',
+  dir = getOption('lingmatch.dict.dir')){
+  if(dict == 'all') dict = rownames(select.dict()$info)
+  if(length(dict) > 1){
+    res = lapply(dict, function(d) tryCatch(
+      download.dict(d, check.md5 = check.md5, mode = mode, dir = dir),
+      error = function(e) paste('failed:', e$message)
+    ))
+    names(res) = dict
+    return(res)
+  }
+  dir = sub('/+$', '', path.expand(dir))
+  if(dict == 'default') dict = 'collected'
+  name = grep(paste0('^', sub('\\.[^.]*$', '', dict)), rownames(dict_info), value = TRUE)
+  if(!length(name)) name = grep(paste0('^', substr(dict, 1, 6)), rownames(dict_info), TRUE, value = TRUE)
+  if(!length(name)){
+    stop('dictionary ', dict, ' not recognized; see https://osf.io/y6g5b/wiki for available dictionaries')
+  }else name = name[1]
+  urls = list(
+    info = function(id) paste0('https://api.osf.io/v2/files/', id),
+    dl = function(id) paste0('https://osf.io/download/', id),
+    versions = function(id) paste0('https://osf.io/', id, '/?show=revision')
+  )
+  dir = path.expand(dir)
+  if(!dir.exists(dir)) dir.create(dir)
+  dl = function(id, ext, ck){
+    s = urls$dl(id)
+    o = paste0(dir, '/', name, ext)
+    status = tryCatch(download.file(s, o, mode = mode), error = function(e) 1)
+    if(!status && check.md5){
+      fi = strsplit(readLines(urls$info(id), 1, TRUE, FALSE, 'utf-8'), '[:,{}"]+')[[1]]
+      ck = md5sum(o)
+      if(fi[which(fi == 'md5') + 1] != ck) warning(paste0(
+        'MD5 (', ck, ') does not seem to match the one on record;\n',
+        'double check and try manually downloading at ', urls$versions(id)
+      ))
+    }
+    if(status) warning('failed to download file from ', s, call. = FALSE)
+    status
+  }
+  type = if(dict_info[name, 'weighted']) '.csv' else '.dic'
+  status = dl(dict_info[name, 'osf'], type, check.md5)
+  dir = paste0(dir, '/', name, type, collapse = '\n  ')
+  message('downloaded ', name, ' dictionary:\n  ', dir)
+  invisible(dir)
 }
 
 #' Standardize a Latent Semantic Space
@@ -585,6 +917,8 @@ standardize.lsspace = function(infile, name, sep = ' ', digits = 9, dir = option
   message('created ', op, '.dat\nfrom ', ip)
 }
 
+
+
 #' Text Categorization
 #'
 #' Categorize raw texts using a pattern-based dictionary.
@@ -619,6 +953,7 @@ standardize.lsspace = function(infile, name, sep = ' ', digits = 9, dir = option
 #'   Missing names are added, so names can be specified positional (e.g., \code{c('_int', 'terms')}),
 #'   or only some can be specified by name (e.g., \code{c(term = 'patterns')}), leaving the rest default.
 #' @seealso For applying term-based dictionaries (to a document-term matrix) see \code{\link{lma_termcat}}.
+#' @family Dictionary functions
 #' @examples
 #' # example text
 #' text = c(
@@ -672,6 +1007,9 @@ lma_patcat = function(text, dict, pattern.weights = 'weight', pattern.categories
   if(to.lower) text = tolower(text)
   if(is.null(names(name.map)) && length(name.map) < 3) names(name.map) = c('intname', 'term')[seq_along(name.map)]
   wide = FALSE
+  if(length(dict) == 1 && is.character(dict) && (grepl('\\.(?:csv|dic|txt)$', dict) ||
+      sub('\\.[^.]+$', '', dict) %in% c(rownames(select.dict()$info),
+        sub('\\.[^.]+$', '', list.files(getOption('lingmatch.dict.dir')))))) dict = read.dic(dict)
   # independently entered wide weights
   if(is.null(colnames(dict)) && (!is.null(ncol(pattern.weights)) || !is.null(ncol(pattern.categories)))){
     weights = if(!is.null(ncol(pattern.weights))) pattern.weights else pattern.categories
@@ -744,7 +1082,7 @@ lma_patcat = function(text, dict, pattern.weights = 'weight', pattern.categories
     )
   }
   if(globtoregex){
-    lex$term = sub('^\\*', '\\\\\\b\\\\\\w*', sub('\\*$', '\\\\\\w*\\\\\\b', lex$term, TRUE), TRUE)
+    lex$term = to_regex(list(lex$term), TRUE)[[1]]
     if(missing(fixed)) fixed = FALSE
   }
   if(wide && return.dtm){

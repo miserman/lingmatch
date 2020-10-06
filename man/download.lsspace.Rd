@@ -29,6 +29,9 @@ and compares it with that calculated from the downloaded file to check its integ
 \item{dir}{Directory in which to save the space; default is
 \code{getOption('lingmatch.lspace.dir')}.}
 }
+\value{
+A character vector with paths to the [1] data and [2] term files.
+}
 \description{
 Downloads the specified semantic space from \href{https://osf.io/489he}{osf.io/489he}.
 }

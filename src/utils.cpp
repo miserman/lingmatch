@@ -146,13 +146,19 @@ struct Compare : public Worker{
       x = bx = sa = sb = sdif = sadif = sse = sne = cp = asq = bsq = sj = si = 0;
       for(l = ncol; l--;){
         col = c;
-        if(i == -1 || (bc != -1 && c > bc)) x = 0; else{
+        if(i == -1 || (bc != -1 && c > bc)){
+          x = 0;
+          if(i == -1) c = -1;
+        }else{
           x = a.values[i];
           i = a.row_maps[i];
           c = i == -1 ? -1 : a.columns[i];
           if(NumericVector::is_na(x)) continue;
         }
-        if(bi == -1 || (col != -1 && bc > col)) bx = 0; else{
+        if(bi == -1 || (col != -1 && bc > col)){
+          bx = 0;
+          if(bi == -1) bc = -1;
+        }else{
           bx = b.values[bi];
           bi = b.row_maps[bi];
           bc = bi == -1 ? -1 : b.columns[bi];
@@ -174,10 +180,10 @@ struct Compare : public Worker{
       }
       ma = sa / ncol;
       mb = sb / ncol;
+      if(si && metrics[0]) jaccard[p] = sj / si;
+      if(metrics[1]) euclidean[p] = 1 / (1 + sqrt(sse));
+      if(metrics[2]) canberra[p] = 1 - sne / ncol;
       if(sa && sb){
-        if(metrics[0]) jaccard[p] = sj / si;
-        if(metrics[1]) euclidean[p] = 1 / (1 + sqrt(sse));
-        if(metrics[2]) canberra[p] = 1 - sne / ncol;
         if(metrics[3] && asq && bsq) cosine[p] = cp / sqrt(asq) / sqrt(bsq);
         if(metrics[4]){
           x = (cp / ncol - ma * mb) / sqrt(asq / ncol - pow(ma, 2)) / sqrt(bsq / ncol - pow(mb, 2));

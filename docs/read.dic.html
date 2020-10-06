@@ -1,24 +1,26 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Read/write LIWC dictionary files</title>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Read/write dictionary files</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <link rel="stylesheet" type="text/css" href="R.css" />
 </head><body>
 
 <table width="100%" summary="page for read.dic"><tr><td>read.dic</td><td style="text-align: right;">R Documentation</td></tr></table>
 
-<h2>Read/write LIWC dictionary files</h2>
+<h2>Read/write dictionary files</h2>
 
 <h3>Description</h3>
 
-<p>Read in or write Linguistic Inquiry and Word Count dictionary (.dic) files.
+<p>Read in or write dictionary files in Comma-Separated Values (.csv; weighted) or
+Linguistic Inquiry and Word Count (.dic; non-weighted) format.
 </p>
 
 
 <h3>Usage</h3>
 
 <pre>
-read.dic(path, cats, to.regex = FALSE)
+read.dic(path, cats, type = "asis", as.weighted = FALSE)
 
-write.dic(dict, filename = "custom", save = TRUE)
+write.dic(dict, filename = "custom", type = "asis", as.weighted = FALSE,
+  save = TRUE)
 </pre>
 
 
@@ -27,16 +29,27 @@ write.dic(dict, filename = "custom", save = TRUE)
 <table summary="R argblock">
 <tr valign="top"><td><code>path</code></td>
 <td>
-<p>Path to a .dic file.</p>
+<p>Path to a file, a name corresponding to a file in <code>getOption('lingmatch.dict.dir')</code> or
+one of the dictionaries available at <a href="https://osf.io/y6g5b">osf.io/y6g5b</a>, a matrix-like object
+to be categorized, or a list to be formatted.</p>
 </td></tr>
 <tr valign="top"><td><code>cats</code></td>
 <td>
 <p>A character vector of category names to be returned. All categories are returned by default.</p>
 </td></tr>
-<tr valign="top"><td><code>to.regex</code></td>
+<tr valign="top"><td><code>type</code></td>
 <td>
-<p>Logical; if <code>TRUE</code>, each dictionary entry is converted to regular expression
-(starts are marked with ^ and ends with $ when an * is present, and unmatched brackets/parens are escaped).</p>
+<p>A character indicating whether and how terms should be altered. Unspecified or matching 'asis'
+leaves terms as they are. Other options change wildcards to regular expressions:
+<code>'pattern'</code> (<code>'^[poi]'</code>) replaces initial asterisks with <code>'\\b\\w*'</code>,
+and terminal asterisks with <code>'\\w*\\b'</code>, to match terms within raw text;
+for anything else, terms are padded with '^' and '$', then those bounding marks are removed
+when an asterisk is present, to match tokenized terms.</p>
+</td></tr>
+<tr valign="top"><td><code>as.weighted</code></td>
+<td>
+<p>Logical; if <code>TRUE</code>, converts to a binary weighted dictionary &ndash; a
+data.frame with a &quot;term&quot; column of unique terms, and a column for each category.</p>
 </td></tr>
 <tr valign="top"><td><code>dict</code></td>
 <td>
@@ -59,6 +72,16 @@ write.dic(dict, filename = "custom", save = TRUE)
 </p>
 
 
+<h3>See Also</h3>
+
+<p>Other Dictionary functions: 
+<code>download.dict()</code>,
+<code>lma_patcat()</code>,
+<code>lma_termcat()</code>,
+<code>select.dict()</code>
+</p>
+
+
 <h3>Examples</h3>
 
 <pre>
@@ -68,10 +91,19 @@ dict = list(
   death = c('death*', 'dying', 'die*', 'kill*')
 )
 
+# convert it to a weighted format
+dict_weighted = read.dic(dict, as.weighted = TRUE)
+
+# categorize it back
+read.dic(dict_weighted)
+
 ## Not run: 
 
-write.dic(dict, 'murder') # save it as a .dic file
-read.dic('murder.dic') # read it back in as a list
+# save it as a .dic file
+write.dic(dict, 'murder')
+
+# read it back in as a list
+read.dic('murder.dic')
 
 # read in the Moral Foundations or LUSI dictionaries from urls
 moral_dict = read.dic('http://bit.ly/MoralFoundations2')

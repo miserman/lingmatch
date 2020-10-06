@@ -1159,7 +1159,7 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, t
       if(!length(ts)){
         ts = rownames(select.lsspace(name)$selected)[1]
         if(!is.na(ts) && grepl('^$|^[yt1]|^ent', readline(paste0(
-          'would you like to download the ', ts, ' space? (press Enter or type yes): ')))){
+          'would you like to download the ', ts, ' space? (press Enter for yes): ')))){
           download.lsspace(ts, dir = dir)
           ts = paste0(ts, '.dat')
         }else stop('space (', space, ') not found in dir (', dir, ')', call. = FALSE)
@@ -1269,8 +1269,10 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, t
 #'
 #' Reduces the dimensions of a document-term matrix by dictionary-based categorization.
 #' @param dtm A matrix with words as column names.
-#' @param dict A \code{list} object with named character vectors as word lists, or the path
-#'   to a file to be read in by \code{\link{read.dic}}.
+#' @param dict The name of a provided dictionary
+#'   (\href{https://osf.io/y6g5b/wiki/home}{osf.io/y6g5b/wiki}) or of a file found in
+#'   \code{dir}, or a \code{list} object with named character vectors as word lists,
+#'   or the path to a file to be read in by \code{\link{read.dic}}.
 #' @param term.weights A \code{list} object with named numeric vectors lining up with the character
 #'   vectors in \code{dict}, used to weight the terms in each \code{dict} vector. If a category in
 #'   \code{dict} is not specified in \code{term.weights}, or the \code{dict} and \code{term.weights}
@@ -1289,7 +1291,10 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, t
 #'   \code{'a_DT'}), \code{'_.*'} would remove the tag.
 #' @param term.break If a category has more than \code{term.break} characters, it will be processed
 #'   in chunks. Reduce from 20000 if you get a PCRE compilation error.
+#' @param dir Path to a folder in which to look for \code{dict}; defaults to
+#'   \code{getOption('lingmatch.dict.dir')}.
 #' @seealso For applying pattern-based dictionaries (to raw text) see \code{\link{lma_patcat}}.
+#' @family Dictionary functions
 #' @examples
 #' # Score texts with the NRC Affect Intensity Lexicon
 #' \dontrun{
@@ -1307,7 +1312,7 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, t
 #'   ),
 #'   fearful = 'The horrific torture of that terrorist was tantamount to the terrorism of terrorists.',
 #'   joyous = 'I am jubilant to be celebrating the bliss of this happiest happiness.',
-#'   sad = 'They are nearly suicidal in their mourning of the tragic and heartbreaking holocaust.'
+#'   sad = 'They are nearly suicidal in their mourning after the tragic and heartbreaking holocaust.'
 #' )
 #'
 #' emotion_scores = lma_termcat(
@@ -1318,9 +1323,24 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, t
 #' @export
 
 lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE, partial = FALSE,
-  glob = TRUE, term.filter = NULL, term.break = 2e4){
+  glob = TRUE, term.filter = NULL, term.break = 2e4, dir = getOption('lingmatch.dict.dir')){
   st=proc.time()[[3]]
   if(missing(dict)) dict = lma_dict(1:9)
+  if(is.character(dict) && length(dict) == 1 && !grepl('[^a-z]', dict, TRUE)){
+    if(dict == 'default') dict = 'collected'
+    name = sub('\\.[^.]*$', '', dict)[1]
+    dicts = list.files(dir, full.names = TRUE)
+    ts = dicts[grepl(dict, sub('^.*/', '', dicts), fixed = TRUE)][1]
+    if(is.na(ts)){
+      ts = rownames(select.dict(paste0('^', name))$selected)[1]
+      if(!is.na(ts) && grepl('^$|^[yt1]|^ent', readline(paste0(
+        'would you like to download the ', ts, ' dictionary? (press Enter for yes): ')))){
+        ts = download.dict(ts, dir = dir)
+      }else if(grepl('\\.[a-z]{2,4}$', dict)) stop('dictionary (', dict,
+        ') not found in dir (', dir, ')', call. = FALSE)
+    }
+    if(!is.na(ts)) dict = ts
+  }
   if(!is.null(ncol(dict))){
     if(!is.null(term.weights)){
       if(is.character(term.weights) && any(su <- term.weights %in% colnames(dict))){
@@ -1349,7 +1369,8 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
     if(is.null(colnames(term.weights))) colnames(term.weights) = paste0('cat', seq_len(ncol(term.weights)))
     if(!is.data.frame(term.weights)) term.weights = as.data.frame(term.weights)
   }
-  if(!is.list(dict)) dict = if(is.character(dict) && length(dict) == 1 && file.exists(dict))
+  if(!is.list(dict)) dict = if(length(dict) == 1 && is.character(dict) && (file.exists(dict) ||
+      dict %in% rownames(select.dict()$info)))
     read.dic(dict) else list(dict)
   if(is.null(names(dict))) names(dict) = seq_along(dict)
   if(is.null(term.weights)){
@@ -1387,17 +1408,17 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
       s = '^'
       e = '$'
     }else s = e = ''
-    rec = '([][)(}{*.^$+?\\|\\\\-])'
+    rec = '([][)(}{*.^$+?\\|\\\\])'
     if(length(lab)){
       for(l in names(lab)) dict[[l]][lab[[l]]] = gsub('([][)(}{])', '\\\\\\1', dict[[l]][lab[[l]]])
-      rec = '([*.^$+?\\|-])'
+      rec = '([*.^$+?\\|])'
     }
     res = if(escape) lapply(dict, function(l)
       paste0(s, gsub(rec, '\\\\\\1', l, perl = TRUE), e, collapse = '|')
     ) else lapply(dict, function(l) paste(paste0(s, gsub('([+*])[+*]+', '\\\\\\1+', l), e), collapse='|'))
     if(glob) lapply(res, function(l) gsub(paste0(
       if(s == '^') '\\' else '', s, if(escape) '\\\\' else '', '\\*|', if(escape) '\\\\' else '', '\\*', if(e == '$') '\\' else '', e
-    ), '', paste(l))) else res
+    ), '', l)) else res
   }
   getweights = function(terms, cat){
     if(!cat %in% names(term.weights)) term.weights[[cat]] = rep(1, cls[[cat]])
@@ -1411,9 +1432,9 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
   if('opts' %in% atsn && !ats$opts['to.lower']) ws = tolower(ws)
   boundries = FALSE
   for(l in dict){
-    if(!boundries) boundries = any(grepl('\\$$', l)) && any(grepl('^\\^', l))
+    if(!boundries) boundries = !any(grepl('^\\*|\\*$', l)) && any(grepl('^\\^|\\$$', l))
     if(missing(partial) && boundries) partial = TRUE
-    if(missing(glob) && any(grepl('[]).]\\*$', l))) glob = FALSE
+    if(missing(glob) && (any(grepl('([][}{.^$+?\\|\\\\])', l)) || any(grepl('\\w\\*\\w', l)))) glob = FALSE
     if(missing(escape) && (boundries || any(grepl('[.])][+*]|[.+*]\\?|\\[\\^', l))) &&
       !any(grepl('[({[][^])}]*$|^[^({[]*[])}]', l))) escape = FALSE
   }
@@ -1485,7 +1506,7 @@ match_metric = function(x){
     }else{
       if(is.null(x)) 'cosine' else if(is.numeric(x)) mets[x] else{
         su = grepl('cor', x)
-        if(any(su)) metric[su] = 'pearson'
+        if(any(su)) x[su] = 'pearson'
         unique(unlist(lapply(substr(x, 1, 3), grep, mets, fixed = TRUE, value = TRUE)))
       }
     }

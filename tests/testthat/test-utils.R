@@ -31,10 +31,24 @@ test_that('read/write.dic works', {
   )
   write.dic(dict, file)
   expect_equal(read.dic(file), dict)
-  expect_true(all(vapply(read.dic(file, to.regex = TRUE), function(cat){
+  expect_true(all(vapply(read.dic(file, type = 'term'), function(cat){
     sum(grepl(paste(cat, collapse = '|'), unlist(dict))) >= length(cat)
   }, TRUE)))
+  dict_weighted = read.dic(dict, as.weighted = TRUE)
+  expect_equal(dim(dict_weighted), c(length(unique(unlist(dict))), length(dict) + 1))
+  expect_equal(write.dic(dict, file, as.weighted = TRUE), dict_weighted)
+  expect_equal(read.dic(file), dict)
+  expect_equal(read.dic(file, as.weighted = TRUE), dict_weighted)
   file.remove(file)
+  dict = list(
+    positive = c('good', 'great'),
+    neutral = c('what', 'hey'),
+    negative = c('bad', 'horrible')
+  )
+  expect_equal(dict, read.dic(data.frame(unlist(dict, use.names = FALSE),
+    c(1, 1.5, 0, 0, -1, -1.5))))
+  expect_equal(dict[c(1, 3)], read.dic(data.frame(unlist(dict[c(1, 3)], use.names = FALSE),
+    c(1, 1.5, -1, -1.5))))
 })
 
 test_that('lma_patcat variants works', {

@@ -3,19 +3,29 @@
 \name{read.dic}
 \alias{read.dic}
 \alias{write.dic}
-\title{Read/write LIWC dictionary files}
+\title{Read/write dictionary files}
 \usage{
-read.dic(path, cats, to.regex = FALSE)
+read.dic(path, cats, type = "asis", as.weighted = FALSE)
 
-write.dic(dict, filename = "custom", save = TRUE)
+write.dic(dict, filename = "custom", type = "asis", as.weighted = FALSE,
+  save = TRUE)
 }
 \arguments{
-\item{path}{Path to a .dic file.}
+\item{path}{Path to a file, a name corresponding to a file in \code{getOption('lingmatch.dict.dir')} or
+one of the dictionaries available at \href{https://osf.io/y6g5b}{osf.io/y6g5b}, a matrix-like object
+to be categorized, or a list to be formatted.}
 
 \item{cats}{A character vector of category names to be returned. All categories are returned by default.}
 
-\item{to.regex}{Logical; if \code{TRUE}, each dictionary entry is converted to regular expression
-(starts are marked with ^ and ends with $ when an * is present, and unmatched brackets/parens are escaped).}
+\item{type}{A character indicating whether and how terms should be altered. Unspecified or matching 'asis'
+leaves terms as they are. Other options change wildcards to regular expressions:
+\code{'pattern'} (\code{'^[poi]'}) replaces initial asterisks with \code{'\\\\b\\\\w*'},
+and terminal asterisks with \code{'\\\\w*\\\\b'}, to match terms within raw text;
+for anything else, terms are padded with '^' and '$', then those bounding marks are removed
+when an asterisk is present, to match tokenized terms.}
+
+\item{as.weighted}{Logical; if \code{TRUE}, converts to a binary weighted dictionary -- a
+data.frame with a "term" column of unique terms, and a column for each category.}
 
 \item{dict}{A list object with names of categories and a vector of their words.}
 
@@ -27,7 +37,8 @@ write.dic(dict, filename = "custom", save = TRUE)
 a character vector
 }
 \description{
-Read in or write Linguistic Inquiry and Word Count dictionary (.dic) files.
+Read in or write dictionary files in Comma-Separated Values (.csv; weighted) or
+Linguistic Inquiry and Word Count (.dic; non-weighted) format.
 }
 \examples{
 # make a small murder related dictionary
@@ -36,13 +47,30 @@ dict = list(
   death = c('death*', 'dying', 'die*', 'kill*')
 )
 
+# convert it to a weighted format
+dict_weighted = read.dic(dict, as.weighted = TRUE)
+
+# categorize it back
+read.dic(dict_weighted)
+
 \dontrun{
 
-write.dic(dict, 'murder') # save it as a .dic file
-read.dic('murder.dic') # read it back in as a list
+# save it as a .dic file
+write.dic(dict, 'murder')
+
+# read it back in as a list
+read.dic('murder.dic')
 
 # read in the Moral Foundations or LUSI dictionaries from urls
 moral_dict = read.dic('http://bit.ly/MoralFoundations2')
 lusi_dict = read.dic('http://bit.ly/lusi_dict')
 }
 }
+\seealso{
+Other Dictionary functions: 
+\code{\link{download.dict}()},
+\code{\link{lma_patcat}()},
+\code{\link{lma_termcat}()},
+\code{\link{select.dict}()}
+}
+\concept{Dictionary functions}

@@ -90,8 +90,8 @@ dtm[, 1:10]
 Now we can fill the matrix with counts for each word for each text. We can count up all of the words at once, so we only have to loop through texts:
 ```{r}
 # this will perform what's inside the curly brackets as many times as there are texts
-# i will be set to each number in the sequence, so i will equal 1 on the first run,
-# and so on the words and dtm objects all line up, so words[[i]] corresponds to dtm[i,]
+# i will be set to each number in the sequence, so i will equal 1 on the first run
+# the words and dtm objects all line up, so words[[i]] corresponds to dtm[i,]
 for(i in seq_along(words)){
   
   # we can use the table function to count the words in a text
@@ -152,7 +152,7 @@ Another source of weighting can come from matrix-wide information, such as docum
 
 `c(1, 1, 1) / sum(c(1, 1, 1))` = `r c(1, 1, 1) / sum(c(1, 1, 1))`
 
-Different weighting schemes work to either amplify or dampen difference in values or in document or term frequencies. See `?lma_weight` for more about available scheme.
+Different weighting schemes work to either amplify or dampen difference in values or in document or term frequencies. See `?lma_weight` for more about available schemes.
 
 To get a better sense of the effects each scheme component might have, we can plot weighted by raw word counts across a range of document frequencies:
 ```{r, fig.height=5, fig.width=10, dev='CairoSVG'}
