@@ -17,7 +17,7 @@ Linguistic Inquiry and Word Count (.dic; non-weighted) format.
 <h3>Usage</h3>
 
 <pre>
-read.dic(path, cats, type = "asis", as.weighted = FALSE)
+read.dic(path, cats, type = "asis", as.weighted = FALSE, ...)
 
 write.dic(dict, filename = "custom", type = "asis", as.weighted = FALSE,
   save = TRUE)
@@ -48,12 +48,18 @@ when an asterisk is present, to match tokenized terms.</p>
 </td></tr>
 <tr valign="top"><td><code>as.weighted</code></td>
 <td>
-<p>Logical; if <code>TRUE</code>, converts to a binary weighted dictionary &ndash; a
-data.frame with a &quot;term&quot; column of unique terms, and a column for each category.</p>
+<p>Logical; if <code>TRUE</code>, prevents weighted dictionaries from being converted to
+unweighted versions, or converts unweighted dictionaries to a binary weighted version
+&ndash; a data.frame with a &quot;term&quot; column of unique terms, and a column for each category.</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+<p>Passes arguments to <code>readLines</code>.</p>
 </td></tr>
 <tr valign="top"><td><code>dict</code></td>
 <td>
-<p>A list object with names of categories and a vector of their words.</p>
+<p>A <code>list</code> with a named entry of terms for each category, or a <code>data.frame</code>
+with terms in one column, and categories or weights in the rest.</p>
 </td></tr>
 <tr valign="top"><td><code>filename</code></td>
 <td>
@@ -68,7 +74,12 @@ data.frame with a &quot;term&quot; column of unique terms, and a column for each
 
 <h3>Value</h3>
 
-<p>a character vector
+<p><code>read.dic</code>: A <code>list</code> (unweighted) with an entry for each category containing
+character vectors of terms, or a <code>data.frame</code> (weighted) with columns for terms (first, &quot;term&quot;) and
+weights (all subsequent, with category labels as names).
+</p>
+<p><code>write.dic</code>: A version of the written dictionary (write.dic; a raw character vector for
+unweighted dictionaries, or a <code>data.frame</code> for weighted dictionaries).
 </p>
 
 
@@ -108,6 +119,9 @@ read.dic('murder.dic')
 # read in the Moral Foundations or LUSI dictionaries from urls
 moral_dict = read.dic('http://bit.ly/MoralFoundations2')
 lusi_dict = read.dic('http://bit.ly/lusi_dict')
+
+# save and read in a version of the General Inquirer dictionary
+inquirer = read.dic('inquirer')
 
 ## End(Not run)
 </pre>

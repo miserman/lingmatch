@@ -57,7 +57,7 @@ test_that('entry order is arbitrary for vector-matrix comparisons', {
   sims_ab = lma_simets(dtm, comp)
   sims_ba = lma_simets(comp, dtm)
   expect_true(all(dim(sims_ab) == c(10, 5) & dim(sims_ba) == c(10, 5)))
-  expect_equal(sims_ab, sims_ba)
+  expect_equivalent(sims_ab, sims_ba)
 })
 
 test_that('pearson aligns with cor', {

@@ -67,15 +67,15 @@ test_that('wide dict format works', {
   expect_equivalent(lma_termcat(dtm, dict$term, dict[, -1]), manual)
 })
 
-textdir = '../texts.txt'
-if(!file.exists(textdir)) textdir = paste0('../../', textdir)
-skip_if(!file.exists(textdir), paste('texts.txt not found at', normalizePath(textdir)))
+textdir = '../'
+if(!file.exists(paste0(textdir, 'texts.txt'))) textdir = paste0('../../', textdir)
+skip_if(!file.exists(paste0(textdir, 'texts.txt')), paste('texts.txt not found in', normalizePath(textdir)))
 
 dicts = list.files(getOption('lingmatch.dict.dir'), '(?:csv|dic)$', full.names = TRUE)
 skip_if(!length(dicts), 'no .csv or .dic files in the dictionaries directory')
 
 test_that('applied dictionaries work', {
-  text = sample(readLines(textdir), 10)
+  text = sample(readLines(paste0(textdir, 'texts.txt')), 10)
   dtm = lma_dtm(text)
   for(d in dicts){
     dict = (if(grepl('.csv', d, fixed = TRUE)) read.csv else read.dic)(d)

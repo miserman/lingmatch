@@ -142,13 +142,18 @@ to_regex = function(dict, intext = FALSE){
 #'   and terminal asterisks with \code{'\\\\w*\\\\b'}, to match terms within raw text;
 #'   for anything else, terms are padded with '^' and '$', then those bounding marks are removed
 #'   when an asterisk is present, to match tokenized terms.
-#' @param as.weighted Logical; if \code{TRUE}, converts to a binary weighted dictionary -- a
-#'   data.frame with a "term" column of unique terms, and a column for each category.
+#' @param as.weighted Logical; if \code{TRUE}, prevents weighted dictionaries from being converted to
+#'   unweighted versions, or converts unweighted dictionaries to a binary weighted version
+#'   -- a data.frame with a "term" column of unique terms, and a column for each category.
+#' @param ... Passes arguments to \code{\link{readLines}}.
+#' @return \code{read.dic}: A \code{list} (unweighted) with an entry for each category containing
+#'   character vectors of terms, or a \code{data.frame} (weighted) with columns for terms (first, "term") and
+#'   weights (all subsequent, with category labels as names).
 #' @family Dictionary functions
-#' @importFrom utils read.csv write.csv
+#' @importFrom utils read.table write.table
 #' @export
 
-read.dic = function(path, cats, type = 'asis', as.weighted = FALSE){
+read.dic = function(path, cats, type = 'asis', as.weighted = FALSE, ...){
   if(missing(path)) path = file.choose()
   if(length(path) == 1 && !file.exists(path)){
     tp = select.dict(path)
@@ -181,47 +186,51 @@ read.dic = function(path, cats, type = 'asis', as.weighted = FALSE){
     if(length(cats) == nrow(path)){
       wl = split(terms, cats)
     }else{
-      su = vapply(colnames(path), function(col) !is.numeric(path[, col]) && anyDuplicated(path[, col]), TRUE)
+      su = vapply(cats, function(col) !is.numeric(path[, col]) && anyDuplicated(path[, col]), TRUE)
       wl = if(any(su)){
-        split(terms, path[, which(su)[[1]]])
+        split(terms, path[, names(which(su))[[1]]])
       }else{
         cats = cats[vapply(cats, function(cat) is.numeric(path[, cat]), TRUE)]
         if(!length(cats)) stop('no numeric columns found in path')
-        if(length(cats) == 1){
-          weights = path[, cats]
-          if(any(weights < 0) && any(weights > 0)){
-            Filter(length, list(
-              positive = terms[weights > 0],
-              neutral = terms[weights == 0],
-              negative = terms[weights < 0]
-            ))
-          }else if(anyDuplicated(weights)) split(terms, weights) else list(category = terms)
+        if(as.weighted){
+          cbind(term = terms, path[, cats, drop = FALSE])
         }else{
-          weights = as.data.frame(path[, cats])
-          lvs = sort(unique(unlist(weights)))
-          if(length(lvs) == 3 && all(lvs == c(-1, 0, 1))){
-            for(cat in cats){
-              if(any(weights[, cat] == -1)){
-                weights[, paste0(cat, '_positive')] = as.integer(weights[, cat] == 1)
-                weights[, paste0(cat, '_negative')] = as.integer(weights[, cat] == -1)
-                weights = weights[, colnames(weights) != cat]
+          if(length(cats) == 1){
+            weights = path[, cats]
+            if(any(weights < 0) && any(weights > 0)){
+              Filter(length, list(
+                positive = terms[weights > 0],
+                neutral = terms[weights == 0],
+                negative = terms[weights < 0]
+              ))
+            }else if(anyDuplicated(weights)) split(terms, weights) else list(category = terms)
+          }else{
+            weights = as.data.frame(path[, cats])
+            lvs = sort(unique(unlist(weights)))
+            if(length(lvs) == 3 && all(lvs == c(-1, 0, 1))){
+              for(cat in cats){
+                if(any(weights[, cat] == -1)){
+                  weights[, paste0(cat, '_positive')] = as.integer(weights[, cat] == 1)
+                  weights[, paste0(cat, '_negative')] = as.integer(weights[, cat] == -1)
+                  weights = weights[, colnames(weights) != cat]
+                }
+              }
+              cats = sort(colnames(weights))
+              lvs = c(0, 1)
+            }
+            if(length(lvs) == 2 && all(lvs == c(0, 1))){
+              wl = lapply(cats, function(cat) terms[weights[, cat] == 1])
+              names(wl) = cats
+              wl = Filter(length, wl)
+            }else{
+              wl = list()
+              for(r in seq_len(nrow(path))){
+                m = max(weights[r,])
+                if(m != 0) for(cat in cats[weights[r,] == m]) wl[[cat]] = c(wl[[cat]], terms[r])
               }
             }
-            cats = sort(colnames(weights))
-            lvs = c(0, 1)
+            wl
           }
-          if(length(lvs) == 2 && all(lvs == c(0, 1))){
-            wl = lapply(cats, function(cat) terms[weights[, cat] == 1])
-            names(wl) = cats
-            wl = Filter(length, wl)
-          }else{
-            wl = list()
-            for(r in seq_len(nrow(path))){
-              m = max(weights[r,])
-              if(m != 0) for(cat in cats[weights[r,] == m]) wl[[cat]] = c(wl[[cat]], terms[r])
-            }
-          }
-          wl
         }
       }
     }
@@ -234,7 +243,7 @@ read.dic = function(path, cats, type = 'asis', as.weighted = FALSE){
     }
   }else{
     di = if(length(path) != 1) path else tryCatch(
-      readLines(path, warn = FALSE),
+      readLines(path, warn = FALSE, ...),
       error = function(e) stop('failed to read path: ', e$message, call. = FALSE)
     )
     lst = grep('%', di, fixed = TRUE)
@@ -246,26 +255,25 @@ read.dic = function(path, cats, type = 'asis', as.weighted = FALSE){
       ci = character()
       for(cat in h) ci[sub('\\s.*$', '', cat)] = sub('^[^\\s]+\\s+', '', cat)
       if(missing(cats)) cats = ci
-      wl = list()
-      for(e in strsplit(di[-seq_len(lst - 1)], paste0(if(grepl('\t',
-        di[lst + 1], fixed = TRUE)) '\t' else '\\s', '+(?=\\d|$)'), perl = TRUE)){
-        if(length(e) > 1){
-          w = e[1]
-          if(w != '') for(l in e[-1]) if(l %in% names(ci) && !w %in% wl[[ci[[l]]]])
-            wl[[ci[[l]]]] = c(wl[[ci[[l]]]], w)
-        }
-      }
+      sep = if(grepl('\t', di[lst + 1], fixed = TRUE)) '\t' else '\\s'
+      cb = paste0('(?:', sep, '+(?:', paste(names(ci), collapse = '|'), ')(?=', sep, '|$))*$')
+      di = di[-seq_len(lst - 1)]
+      wl = lapply(structure(names(ci), names = ci), function(cat){
+        unique(sub(cb, '', di[grep(paste0(sep, cat, cb), di, perl = TRUE)], perl = TRUE))
+      })
       wl = wl[cats[cats %in% names(wl)]]
     }else{
-      wl = tryCatch(
-        read.dic(read.csv(text = di, sep = if(grepl('\t', di[[1]])) '\t' else ',')),
-        error = function(e) NULL
-      )
-      if(is.null(wl)) stop('file is not in the expected format')
+      if(missing(as.weighted) && length(path) == 1) as.weighted = TRUE
+      wl = tryCatch(read.dic(
+        read.table(text = di, header = TRUE, sep = if(grepl('\t', di[[1]])) '\t' else ',',
+          quote = '"', comment.char = ''), cats = cats, type = type, as.weighted = as.weighted
+      ), error = function(e) e$message)
+      if(length(wl) == 1 && is.character(wl))
+        stop('assuming path is to a comma separated values file, but failed to read it in:\n', wl)
     }
   }
   if(!missing(type) && !grepl('^[Aa]', type)) wl = to_regex(wl, grepl('^[poi]', type, TRUE))
-  if(as.weighted){
+  if(as.weighted && is.null(dim(wl))){
     op = data.frame(term = unique(unlist(wl)))
     for(cat in names(wl)) op[, cat] = as.integer(op$term %in% wl[[cat]])
     op
@@ -273,10 +281,12 @@ read.dic = function(path, cats, type = 'asis', as.weighted = FALSE){
 }
 
 #' @rdname read.dic
-#' @param dict A list object with names of categories and a vector of their words.
+#' @param dict A \code{list} with a named entry of terms for each category, or a \code{data.frame}
+#'   with terms in one column, and categories or weights in the rest.
 #' @param filename The name of the file to be saved.
 #' @param save Logical; if \code{FALSE}, does not write a file.
-#' @return a character vector
+#' @return \code{write.dic}: A version of the written dictionary (write.dic; a raw character vector for
+#'   unweighted dictionaries, or a \code{data.frame} for weighted dictionaries).
 #' @examples
 #' # make a small murder related dictionary
 #' dict = list(
@@ -301,6 +311,9 @@ read.dic = function(path, cats, type = 'asis', as.weighted = FALSE){
 #' # read in the Moral Foundations or LUSI dictionaries from urls
 #' moral_dict = read.dic('http://bit.ly/MoralFoundations2')
 #' lusi_dict = read.dic('http://bit.ly/lusi_dict')
+#'
+#' # save and read in a version of the General Inquirer dictionary
+#' inquirer = read.dic('inquirer')
 #' }
 #' @export
 
@@ -323,9 +336,9 @@ write.dic = function(dict, filename = 'custom', type = 'asis', as.weighted = FAL
   }
   if(save){
     filename = filename[[1]]
-    filename = paste0(if(!grepl(':', filename, fixed = TRUE)) paste0(getwd(), '/'), filename,
-      if(!grepl('\\.[a-zA-Z0-9]+$', filename)) if(as.weighted) '.csv' else '.dic')
-    if(as.weighted) write.csv(o, filename, row.names = FALSE) else write(o, filename)
+    filename = paste0(filename, if(!grepl('\\.[^.]+$', filename)) if(as.weighted) '.csv' else '.dic')
+    if(as.weighted) write.table(o, filename, sep = ',', row.names = FALSE, qmethod = 'double') else
+      write(o, filename)
     message('dictionary saved to ', filename)
   }
   invisible(o)
@@ -1103,11 +1116,18 @@ lma_patcat = function(text, dict, pattern.weights = 'weight', pattern.categories
     }
   }
   if(exclusive){
+    cls = tryCatch(-nchar(lex$term), error = function(e) NULL)
+    if(is.null(cls)){
+      warning('dict appears to be miss-encoded, so results may not be as expected;\n',
+        'might try reading the dictionary in with encoding = "ISO-8859-1"')
+      lex$term = iconv(lex$term, sub = '#')
+      cls = -nchar(lex$term)
+    }
     if(wide){
-      o = order(-nchar(lex$term))
+      o = order(cls)
       lex$term = lex$term[o]
       lex$weights = lex$weights[o,]
-    }else lex = lex[order(-nchar(lex$term)),]
+    }else lex = lex[order(cls),]
   }
   lex$category = factor(lex$category, unique(lex$category))
   categories = levels(lex$category)
@@ -1230,8 +1250,9 @@ lma_meta = function(text){
 #' See examples.
 #' @note
 #' The \code{special} category is not returned unless specifically requested. It is a list of regular expression
-#' strings attempting to capture special things like ellipses and emojis. If \code{special} is part of the returned list,
-#' \code{as.regex} is set to \code{TRUE}.
+#' strings attempting to capture special things like ellipses and emojis, or sets of special characters (those outside
+#' of the Basic Latin range; \code{[^\\u0020-\\u007F]}), which can be used for character conversions.
+#' If \code{special} is part of the returned list, \code{as.regex} is set to \code{TRUE}.
 #'
 #' The \code{special} list is always used by both \code{\link{lma_dtm}} and \code{\link{lma_termcat}}. When creating a dtm,
 #' \code{special} is used to clean the original input (so that, by default, the punctuation involved in ellipses and emojis
@@ -1264,6 +1285,12 @@ lma_meta = function(text){
 #' dtm = lma_dtm('Most of these words might not be all that relevant.')
 #' dtm[, !is.stopword(colnames(dtm))]
 #'
+#' ## use to replace special characters
+#' clean = lma_dict(special, as.function = gsub)
+#' clean(c(
+#'   "\u201Ccurly quotes\u201D", 'na\u00EFve', 'typographer\u2019s apostrophe',
+#'   'en\u2013dash', 'em\u2014dash'
+#' ))
 #' @export
 
 lma_dict=function(..., as.regex = TRUE, as.function = FALSE){
@@ -1364,6 +1391,59 @@ lma_dict=function(..., as.regex = TRUE, as.function = FALSE){
         '(?<=don\'t) like[ .,?!:;/"\']','(?<=i) like[^ /-]*','(?<=should not) like[ .,?!:;/"\']',
         '(?<=they) like[^ /-]*','(?<=we) like[^ /-]*','(?<=will not) like[ .,?!:;/"\']','(?<=will) like[ .,?!:;/"\']',
         '(?<=won\'t) like[ .,?!:;/"\']','(?<=would not) like[ .,?!:;/"\']','(?<=you) like[^ /-]*'
+      ),
+      CHARACTERS = c(
+        ` ` = '\\s',
+        `'` = paste0('[\u00B4\u2018-\u201B\u2032\u0235\u02B9\u02BB-\u02BF\u02C8\u02CA\u02CB\u02F4\u0300\u0301',
+          '\u020D\u0312-\u0315\u031B\u0321\u0322\u0326\u0328\u0329\u0340\u0341\u0343\u0351\u0357]'),
+        `"` = '[\u201C-\u201F\u2033\u2034\u2036\u2037\u2057\u02BA\u02DD\u02EE\u02F5\u02F6\u030B\u030F]',
+        `...` = '\u2026',
+        `-` = '[\u05BE\u1806\u2010\u2011\u2013\uFE58\uFE63\uFF0D]',
+        ` - ` = '[\u2012\u2014\u2015\u2E3A\u2E3B]|--+',
+        a = paste0('[\u00C0-\u00C5\u00E0-\u00E5\u0100-\u105\u0200-\u0203\u0226\u0227\u0245\u0250-\u0252',
+          '\u0255\u0363\u0386\u0391\u0410\u0430]'),
+        ae = '[\u00C6\u00E6\u0152\u0153\u0276]',
+        b = '[\u00DF\u0180-\u018C\u0243\u0253\u0299\u0411\u0412\u0431\u0432\u0462\u0463\u0494\u0495\u212C]',
+        c = '[\u00C7\u00E7\u0106-\u0109\u0186-\u0188\u0254\u0297\u0368\u0421\u0441\u2102\u2103]',
+        d = '[\u00D0\u00DE\u00FE\u010D-\u0111\u0189\u0221\u0256\u0256\u0257\u0369\u0392\u0434\u0500\u2145\u2146]',
+        e = paste0('[\u00C8-\u00CB\u00E8-\u00EB\u0112-\u011B\u018E-\u0190\u0204-\u0207\u0228\u0229\u0246\u0247',
+          '\u0258\u0259\u0364\u0388\u0395\u0400\u0401\u0404\u0415\u0417\u0435\u0437\u0450\u0451\u0454',
+          '\u0498\u0499\u2107\u2108\u2128\u212E-\u2130\u2147]'),
+        f = '[\u0191\u0192\u0492\u0493\u2109\u2231\u2132\u214E]',
+        g = '[\u011C-\u0123\u0193\u0222\u0260-\u0262\u210A\u2141]',
+        h = '[\u0124-\u0127\u0195\u0266\u0267\u0389\u0397\u0452\u210B-\u210F]',
+        i = '[\u00CC-\u00CF\u00EC-\u00EF\u0128-\u0131\u0169\u0197\u019A\u0208\u0209\u0365\u0390\u0399\u0406\u0407\u0456\u0457]',
+        j = '[\u0135\u0136\u0237\u0248\u0249\u0408\u0458\u2129\u2139\u2149]',
+        k = '[\u0137\u0138\u0198\u0199\u212A]',
+        l = '[\u0139-\u0142\u0234]',
+        m = '[\u0271\u0460\u2133]',
+        n = '[\u00D1\u00F1\u0143-\u014B\u0220\u0235\u0272-\u0274\u0376\u0377\u0418\u0419\u0438\u0439\u2115\u2135]',
+        h = '\u0149',
+        o = paste0('[\u00D2-\u00D6\u00D8\u00F0\u00F2-\u00F6\u00F8\u014C-\u0151\u0150\u0151\u0230\u0231\u0275\u0298\u0366\u0398\u0424',
+          '\u0444\u0472\u0473\u2134]'),
+        p = '[\u0420\u0440\u2117-\u2119]',
+        q = '[\u018D\u211A\u213A]',
+        r = '[\u0154-\u0159\u0211-\u0213\u0279-\u0281\u0433\u0453\u0490\u0491\u211B-\u211D\u211F\u213E]',
+        s = '[\u015A-\u0161\u0160\u0161\u0218\u0219\u0405\u0455]',
+        t = '[\u0162-\u0167\u0371\u0373\u0422\u0442]',
+        u = '[\u00D9-\u00DC\u00F9-\u00FC\u0168-\u0173\u01D3-\u01DC\u0214\u0217\u0244\u0289\u0367\u0426\u0446]',
+        v = '[\u0474-\u0477]',
+        w = '[\u0174\u0175\u0270\u0428\u0429\u0448\u0449\u0461]',
+        y = '[\u00DD\u00FD\u00FF\u0176-\u0178\u0232\u0233\u0423\u0427\u0443\u0447]',
+        z = '[\u0179-\u017E\u0224\u0225\u0240\u0290\u0291\u039\u0396\u2124]',
+        x = '[\u00D7\u0416\u0425\u0436\u0445\u0496\u0497]'
+      ),
+      SYMBOLS = c(
+        `(cc)` = '\u00A9',
+        number = '\u2116',
+        sm = '\u2120',
+        tel = '\u2121',
+        `(tm)` = '\u2122',
+        omega = '\u2126',
+        alpha = '\u2127',
+        fax = '\u213B',
+        pi = '[\u213C\u213F]',
+        sigma = '\u2140'
       )
     )
   )
@@ -1377,17 +1457,32 @@ lma_dict=function(..., as.regex = TRUE, as.function = FALSE){
     '\n  enter numbers between 1 and ',length(dict)-1,
     ', or letters matching a category:\n  ',paste(names(dict),collapse=', ')
   )
-  if('special'%in%names(cats)) as.regex=TRUE
+  if('special' %in% cats) as.regex = TRUE
   if(as.regex){
     if(!missing(as.function)){
-      dict = paste(unlist(dict[cats]), collapse = '|')
-      fun = if(is.function(as.function)) as.function else grepl
-      function(terms, ...){
-        args = list(...)
-        args$pattern = dict
-        args$x = terms
-        if(!is.function(as.function) && !'perl' %in% names(args)) args$perl = TRUE
-        do.call(fun, args)
+      if('special' %in% cats && is.function(as.function) && grepl('sub', substitute(as.function))){
+        dict = c(dict$special$CHARACTERS, dict$special$SYMBOLS)
+        fun = as.function
+        function(terms, ...){
+          args = list(...)
+          args$x = terms
+          for(s in names(dict)){
+            args$pattern = dict[s]
+            args$replacement = s
+            args$x = do.call(fun, args)
+          }
+          args$x
+        }
+      }else{
+        dict = paste(unlist(dict[cats]), collapse = '|')
+        fun = if(is.function(as.function)) as.function else grepl
+        function(terms, ...){
+          args = list(...)
+          args$pattern = dict
+          args$x = terms
+          if(!is.function(as.function) && !'perl' %in% names(args)) args$perl = TRUE
+          do.call(fun, args)
+        }
       }
     }else dict[cats]
   }else lapply(dict[cats],function(l)gsub('\\^|\\$','',sub('(?<=[^$])$','*',l,perl=TRUE)))

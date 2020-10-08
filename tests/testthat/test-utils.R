@@ -4,7 +4,7 @@ texts = c(
   "And there with it isn't I think anyone would.",
   "Command lands of a few I two of it is."
 )
-file = paste0(tempfile(), '.txt')
+file = tempfile(fileext = '.txt')
 
 test_that('lma_process works', {
   dtm = as.data.frame(lma_dtm(texts, sparse = FALSE))
@@ -37,8 +37,8 @@ test_that('read/write.dic works', {
   dict_weighted = read.dic(dict, as.weighted = TRUE)
   expect_equal(dim(dict_weighted), c(length(unique(unlist(dict))), length(dict) + 1))
   expect_equal(write.dic(dict, file, as.weighted = TRUE), dict_weighted)
-  expect_equal(read.dic(file), dict)
-  expect_equal(read.dic(file, as.weighted = TRUE), dict_weighted)
+  expect_equal(read.dic(file, as.weighted = FALSE), dict)
+  expect_equal(read.dic(file), dict_weighted)
   file.remove(file)
   dict = list(
     positive = c('good', 'great'),
@@ -156,3 +156,4 @@ test_that('read.segments works', {
   expect_true(sum(segs50w$WC) == wc)
   expect_true(all(tapply(segs50w$text, segs50w$input, paste, collapse = ' ') == manual))
 })
+

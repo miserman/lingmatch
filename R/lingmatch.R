@@ -1399,7 +1399,17 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
   ats = attributes(dtm)[c('opts', 'WC', 'type')]
   ats = ats[!vapply(ats, is.null, TRUE)]
   atsn = names(ats)
-  cls = vapply(dict, function(cat) nchar(paste(cat, collapse = '')), 0)
+  cls = structure(numeric(length(dict)), names = names(dict))
+  for(cat in seq_along(dict)){
+    ccls = tryCatch(nchar(dict[[cat]]), error = function(e) NULL)
+    if(is.null(ccls)){
+      warning('dict appears to be miss-encoded, so results may not be as expected;\n',
+        'might try reading the dictionary in with encoding = "ISO-8859-1"')
+      dict[[cat]] = iconv(dict[[cat]], sub = '#')
+      ccls = nchar(dict[[cat]])
+    }
+    cls[cat] = sum(ccls)
+  }
   odict = dict
   formatdict = function(dict){
     lab = lapply(dict, function(l) grepl('[{([]', l) + grepl('[])}]', l) == 1)

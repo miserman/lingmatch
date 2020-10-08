@@ -5,7 +5,7 @@
 \alias{write.dic}
 \title{Read/write dictionary files}
 \usage{
-read.dic(path, cats, type = "asis", as.weighted = FALSE)
+read.dic(path, cats, type = "asis", as.weighted = FALSE, ...)
 
 write.dic(dict, filename = "custom", type = "asis", as.weighted = FALSE,
   save = TRUE)
@@ -24,17 +24,26 @@ and terminal asterisks with \code{'\\\\w*\\\\b'}, to match terms within raw text
 for anything else, terms are padded with '^' and '$', then those bounding marks are removed
 when an asterisk is present, to match tokenized terms.}
 
-\item{as.weighted}{Logical; if \code{TRUE}, converts to a binary weighted dictionary -- a
-data.frame with a "term" column of unique terms, and a column for each category.}
+\item{as.weighted}{Logical; if \code{TRUE}, prevents weighted dictionaries from being converted to
+unweighted versions, or converts unweighted dictionaries to a binary weighted version
+-- a data.frame with a "term" column of unique terms, and a column for each category.}
 
-\item{dict}{A list object with names of categories and a vector of their words.}
+\item{...}{Passes arguments to \code{\link{readLines}}.}
+
+\item{dict}{A \code{list} with a named entry of terms for each category, or a \code{data.frame}
+with terms in one column, and categories or weights in the rest.}
 
 \item{filename}{The name of the file to be saved.}
 
 \item{save}{Logical; if \code{FALSE}, does not write a file.}
 }
 \value{
-a character vector
+\code{read.dic}: A \code{list} (unweighted) with an entry for each category containing
+  character vectors of terms, or a \code{data.frame} (weighted) with columns for terms (first, "term") and
+  weights (all subsequent, with category labels as names).
+
+\code{write.dic}: A version of the written dictionary (write.dic; a raw character vector for
+  unweighted dictionaries, or a \code{data.frame} for weighted dictionaries).
 }
 \description{
 Read in or write dictionary files in Comma-Separated Values (.csv; weighted) or
@@ -64,6 +73,9 @@ read.dic('murder.dic')
 # read in the Moral Foundations or LUSI dictionaries from urls
 moral_dict = read.dic('http://bit.ly/MoralFoundations2')
 lusi_dict = read.dic('http://bit.ly/lusi_dict')
+
+# save and read in a version of the General Inquirer dictionary
+inquirer = read.dic('inquirer')
 }
 }
 \seealso{

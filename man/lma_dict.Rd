@@ -24,8 +24,9 @@ Returns a list of function words based on the Linguistic Inquiry and Word Count 
 }
 \note{
 The \code{special} category is not returned unless specifically requested. It is a list of regular expression
-strings attempting to capture special things like ellipses and emojis. If \code{special} is part of the returned list,
-\code{as.regex} is set to \code{TRUE}.
+strings attempting to capture special things like ellipses and emojis, or sets of special characters (those outside
+of the Basic Latin range; \code{[^\\u0020-\\u007F]}), which can be used for character conversions.
+If \code{special} is part of the returned list, \code{as.regex} is set to \code{TRUE}.
 
 The \code{special} list is always used by both \code{\link{lma_dtm}} and \code{\link{lma_termcat}}. When creating a dtm,
 \code{special} is used to clean the original input (so that, by default, the punctuation involved in ellipses and emojis
@@ -58,6 +59,12 @@ is.stopword = lma_dict(as.function = TRUE)
 dtm = lma_dtm('Most of these words might not be all that relevant.')
 dtm[, !is.stopword(colnames(dtm))]
 
+## use to replace special characters
+clean = lma_dict(special, as.function = gsub)
+clean(c(
+  "\u201Ccurly quotes\u201D", 'na\u00EFve', 'typographer\u2019s apostrophe',
+  'en\u2013dash', 'em\u2014dash'
+))
 }
 \seealso{
 To score texts with these categories, use \code{\link{lma_termcat}}.
