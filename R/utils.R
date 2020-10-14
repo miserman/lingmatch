@@ -242,10 +242,8 @@ read.dic = function(path, cats, type = 'asis', as.weighted = FALSE, ...){
       if(!length(wl)) stop('no cats were found in path')
     }
   }else{
-    di = if(length(path) != 1) path else tryCatch(
-      readLines(path, warn = FALSE, ...),
-      error = function(e) stop('failed to read path: ', e$message, call. = FALSE)
-    )
+    di = if(length(path) != 1) path else if(file.exists(path)) readLines(path, warn = FALSE, ...) else
+      stop('assumed path is to a file, but ', path, ' it does not exist', call. = FALSE)
     lst = grep('%', di, fixed = TRUE)
     if(length(lst) > 1 && !grepl(',', di[lst[1]], fixed = TRUE)){
       if(length(lst) < 2) stop('could not identify the end of the header -- ',
@@ -351,13 +349,14 @@ write.dic = function(dict, filename = 'custom', type = 'asis', as.weighted = FAL
 #' @param path Path to a folder containing files, or a vector of paths to files. If no folders or files are
 #'   recognized in \code{path}, it is treated as \code{text}.
 #' @param segment Specifies how the text of each file should be segmented. If a character, split at that character;
-#'   '\\n' by default. If a number, texts will be broken into that many segments, each with a roughly equal number of words.
+#'   '\\n' by default. If a number, texts will be broken into that many segments, each with a roughly equal number of
+#'   words.
 #' @param ext The extension of the files you want to read in. '.txt' by default.
 #' @param subdir If \code{TRUE} files in folders in \code{path} will also be included.
-#' @param segment.size If specified, \code{segment} will be ignored, and texts will be broken into segments containing roughly
-#'   \code{segment.size} number of words.
-#' @param bysentence If \code{TRUE}, and \code{segment} is a number or \code{segment.size} is specified, sentences will be
-#'   kept together, rather than potentially being broken across segments.
+#' @param segment.size If specified, \code{segment} will be ignored, and texts will be broken into segments containing
+#'   roughly \code{segment.size} number of words.
+#' @param bysentence If \code{TRUE}, and \code{segment} is a number or \code{segment.size} is specified, sentences will
+#'   be kept together, rather than potentially being broken across segments.
 #' @param text A character vector with text to be split, used in place of \code{path}. Each entry is treates as a file.
 #' @returns
 #' A \code{data.frame} with columns for file names (\code{input}),
@@ -393,7 +392,7 @@ write.dic = function(dict, filename = 'custom', type = 'asis', as.weighted = FAL
 read.segments = function(path = '.', segment = NULL, ext = '.txt', subdir = FALSE, segment.size = -1,
   bysentence = FALSE, text = NULL){
   if(any(path == '')) path[path == ''] = '.'
-  if(!any(dir.exists(path) | file.exists(path))){
+  if(!any(file.exists(sub('[\\/]+$', '', path)))){
     ck_text = TRUE
     files = path
   }else{
@@ -405,7 +404,8 @@ read.segments = function(path = '.', segment = NULL, ext = '.txt', subdir = FALS
       files[!files %in% dirs]
     }
   }
-  if(missing(segment) && missing(segment.size)) segment = 1
+  if(missing(segment) && missing(segment.size))
+    segment = if(length(path) == 1 && (ck_text || !dir.exists(path))) '\n' else 1
   if(length(files)){
     err = function(e) NULL
     args = list(what = character(), quote = '', na.strings = '', quiet = TRUE)
@@ -595,10 +595,9 @@ select.lsspace = function(query = NULL, dir = getOption('lingmatch.lspace.dir'),
 #'
 #' Downloads the specified semantic space from \href{https://osf.io/489he}{osf.io/489he}.
 #'
-#' @param space Name of the space you want to download. '100k' is the default, and
-#'  some other common options might be 'google', 'facebook', or 'glove'. See
-#'  \href{https://osf.io/489he/wiki/home}{osf.io/489he/wiki} for more information, and a full
-#'  list of spaces.
+#' @param space Name of one or more spaces you want to download, or \code{'all'} for all available. \code{'100k'} is
+#'  the default, and some other common options might be \code{'google'}, \code{'facebook'}, or \code{'glove'}.
+#'  See \href{https://osf.io/489he/wiki/home}{osf.io/489he/wiki} for more information, and a full list of spaces.
 #' @param include.terms Logical; if \code{FALSE}, only the \code{.dat.bz2} file is downloaded
 #'  (which only has numeric vectors).
 #' @param decompress Logical; if \code{TRUE} (default), decompresses the downloaded file
@@ -623,7 +622,7 @@ select.lsspace = function(query = NULL, dir = getOption('lingmatch.lspace.dir'),
 
 download.lsspace = function(space = '100k', include.terms = TRUE, decompress = TRUE,
   check.md5 = TRUE, mode = 'wb', dir = getOption('lingmatch.lspace.dir')){
-  if(space == 'all') space = rownames(select.lsspace()$info)
+  if(length(space) == 1 && space == 'all') space = rownames(select.lsspace()$info)
   if(length(space) > 1){
     res = lapply(space, function(d){
       m = tryCatch(download.lsspace(d, include.terms = include.terms, decompress = decompress,
@@ -802,9 +801,8 @@ select.dict = function(query = NULL, dir = getOption('lingmatch.dict.dir'),
 #'
 #' Downloads the specified dictionaries from \href{https://osf.io/y6g5b}{osf.io/y6g5b}.
 #'
-#' @param dict One or more names of dictionaries to download.
-#'  See \href{https://osf.io/y6g5b/wiki/home}{osf.io/y6g5b/wiki} for more information, and a
-#'  list of available dictionaries.
+#' @param dict One or more names of dictionaries to download, or \code{'all'} for all available. See
+#'  \href{https://osf.io/y6g5b/wiki/home}{osf.io/y6g5b/wiki} for more information, and a list of available dictionaries.
 #' @param check.md5 Logical; if \code{TRUE} (default), retrieves the MD5 checksum from OSF,
 #'  and compares it with that calculated from the downloaded file to check its integrity.
 #' @param mode A character specifying the file write mode; default is 'wb'. See
@@ -820,9 +818,8 @@ select.dict = function(query = NULL, dir = getOption('lingmatch.dict.dir'),
 #' }
 #' @export
 
-download.dict = function(dict = 'collected', check.md5 = TRUE, mode = 'wb',
-  dir = getOption('lingmatch.dict.dir')){
-  if(dict == 'all') dict = rownames(select.dict()$info)
+download.dict = function(dict = 'lusi', check.md5 = TRUE, mode = 'wb', dir = getOption('lingmatch.dict.dir')){
+  if(length(dict) == 1 && dict == 'all') dict = rownames(select.dict()$info)
   if(length(dict) > 1){
     res = lapply(dict, function(d) tryCatch(
       download.dict(d, check.md5 = check.md5, mode = mode, dir = dir),
@@ -832,7 +829,6 @@ download.dict = function(dict = 'collected', check.md5 = TRUE, mode = 'wb',
     return(res)
   }
   dir = sub('/+$', '', path.expand(dir))
-  if(dict == 'default') dict = 'collected'
   name = grep(paste0('^', sub('\\.[^.]*$', '', dict)), rownames(dict_info), value = TRUE)
   if(!length(name)) name = grep(paste0('^', substr(dict, 1, 6)), rownames(dict_info), TRUE, value = TRUE)
   if(!length(name)){
@@ -1011,8 +1007,8 @@ standardize.lsspace = function(infile, name, sep = ' ', digits = 9, dir = option
 #' }
 #' @export
 
-lma_patcat = function(text, dict, pattern.weights = 'weight', pattern.categories = 'category', bias = NULL, to.lower = TRUE,
-  return.dtm = FALSE, exclusive = TRUE, boundary = NULL, fixed = TRUE, globtoregex = FALSE,
+lma_patcat = function(text, dict, pattern.weights = 'weight', pattern.categories = 'category', bias = NULL,
+  to.lower = TRUE, return.dtm = FALSE, exclusive = TRUE, boundary = NULL, fixed = TRUE, globtoregex = FALSE,
   name.map = c(intname = '_intercept', term = 'term')){
   if(is.factor(text)) text = as.character(text)
   if(!is.character(text)) stop('enter a character vector as the first argument')
@@ -1059,8 +1055,8 @@ lma_patcat = function(text, dict, pattern.weights = 'weight', pattern.categories
     lex = list(term = dict[, name.map[['term']]], weights = dict[, categories, drop = FALSE], category = categories)
   # independently entered weights and categories
   }else if(is.null(colnames(dict))){
-    if((is.numeric(dict) && is.null(names(dict))) || (is.list(dict) && is.numeric(dict[[1]]) && is.null(names(dict[[1]]))))
-      stop('could not recognize terms in dict')
+    if((is.numeric(dict) && is.null(names(dict))) || (is.list(dict) && is.numeric(dict[[1]]) &&
+        is.null(names(dict[[1]])))) stop('could not recognize terms in dict')
     n = length(dict)
     lex = data.frame(
       term = if(is.character(dict)) dict else if(is.numeric(dict)) names(dict) else if(is.list(dict) &&
@@ -1071,7 +1067,8 @@ lma_patcat = function(text, dict, pattern.weights = 'weight', pattern.categories
       weights = if(is.numeric(dict)) unname(dict) else if(is.numeric(pattern.weights))
         if(!is.null(names(pattern.weights)) && is.character(dict) && all(dict %in% names(pattern.weights)))
           pattern.weights[dict] else pattern.weights else if(is.list(dict)) if(is.numeric(dict[[1]]))
-        unlist(dict, use.names = FALSE) else if(is.numeric(dict[[1]])) unlist(pattern.weights, use.names = FALSE) else 1 else 1
+        unlist(dict, use.names = FALSE) else if(is.numeric(dict[[1]]))
+          unlist(pattern.weights, use.names = FALSE) else 1 else 1
     )
   }else{
     term = if('term' %in% names(name.map)) name.map[['term']] else 'term'
@@ -1254,11 +1251,11 @@ lma_meta = function(text){
 #' of the Basic Latin range; \code{[^\\u0020-\\u007F]}), which can be used for character conversions.
 #' If \code{special} is part of the returned list, \code{as.regex} is set to \code{TRUE}.
 #'
-#' The \code{special} list is always used by both \code{\link{lma_dtm}} and \code{\link{lma_termcat}}. When creating a dtm,
-#' \code{special} is used to clean the original input (so that, by default, the punctuation involved in ellipses and emojis
-#' are treated as different -- as ellipses and emojis rather than as periods and parens and colons and such). When categorizing
-#' a dtm, the input dictionary is passed by the special lists to be sure the terms in the dtm match up with the dictionary
-#' (so, for example, ": (" would be replaced with "FROWN" in both the text and dictionary).
+#' The \code{special} list is always used by both \code{\link{lma_dtm}} and \code{\link{lma_termcat}}. When creating a
+#' dtm, \code{special} is used to clean the original input (so that, by default, the punctuation involved in ellipses
+#' and emojis are treated as different -- as ellipses and emojis rather than as periods and parens and colons and such).
+#' When categorizing a dtm, the input dictionary is passed by the special lists to be sure the terms in the dtm match up
+#' with the dictionary (so, for example, ": (" would be replaced with "FROWN" in both the text and dictionary).
 #' @seealso To score texts with these categories, use \code{\link{lma_termcat}}.
 #' @examples
 #' # return the full dictionary (excluding special)
@@ -1293,105 +1290,113 @@ lma_meta = function(text){
 #' ))
 #' @export
 
-lma_dict=function(..., as.regex = TRUE, as.function = FALSE){
+lma_dict = function(..., as.regex = TRUE, as.function = FALSE){
   cats = as.character(substitute(...()))
-  dict=list(
-    ppron=c("^dae$","^dem$","^eir$","^eirself$","^em$","^he$","^he'","^her$","^hers$","^herself$","^hes$","^him$","^himself$",
-      "^hir$","^hirs$","^hirself$","^his$","^hisself$","^i$","^i'","^id$","^idc$","^idgaf$","^idk$","^idontknow$","^idve$",
-      "^iirc$","^iknow$","^ikr$","^ill$","^ily$","^im$","^ima$","^imean$","^imma$","^ive$","^lets$","^let's$","^me$",
-      "^methinks$","^mine$","^my$","^myself$","^omfg$","^omg$","^oneself$","^our$","^ours","^she$","^she'","^shes$","^thee$",
-      "^their$","^their'","^theirs","^them$","^thems","^they$","^they'","^theyd$","^theyll$","^theyve$","^thine$","^thou$",
-      "^thoust$","^thy$","^thyself$","^u$","^u'","^ud$","^ull$","^ur$","^ure$","^us$","^we$","^we'","^weve$","^y'","^ya'",
-      "^yall","^yins$","^yinz$","^you$","^you'","^youd$","^youll$","^your$","^youre$","^yours$","^yourself$","^yourselves$",
-      "^youve$","^zer$","^zir$","^zirs$","^zirself$","^zis$"),
-    ipron=c("^another$","^anybo","^anyone","^anything","^dat$","^de+z$","^dis$","^everyb","^everyone","^everything","^few$",
-      "^it$","^it'$","^it'","^itd$","^itll$","^its$","^itself$","^many$","^nobod","^nothing$","^other$","^others$","^same$",
-      "^somebo","^somebody'","^someone","^something","^stuff$","^that$","^that'","^thatd$","^thatll$","^thats$","^these$",
-      "^these'","^thesed$","^thesell$","^thesere$","^thing","^this$","^this'","^thisd$","^thisll$","^those$","^those'",
-      "^thosed$","^thosell$","^thosere$","^what$","^what'","^whatd$","^whatever$","^whatll$","^whats$","^which","^who$",
-      "^who'","^whod$","^whoever$","^wholl$","^whom$","^whomever$","^whos$","^whose$","^whosever$","^whosoever$"),
-    article=c("^a$","^an$","^da$","^teh$","^the$"),
-    adverb=c("^absolutely$","^actively$","^actually$","^afk$","^again$","^ago$","^ahead$","^almost$","^already$",
-      "^altogether$","^always$","^angrily$","^anxiously$","^any$","^anymore$","^anyway$","^anywhere$","^apparently$",
-      "^automatically$","^away$","^awhile$","^back$","^badly$","^barely$","^basically$","^below$","^brietermsy$","^carefully$",
-      "^causiously$","^certainly$","^clearly$","^closely$","^coldly$","^commonly$","^completely$","^constantly$",
-      "^continually$","^correctly$","^coz$","^currently$","^daily$","^deeply$","^definitely$","^definitly$","^deliberately$",
-      "^desperately$","^differently$","^directly$","^early$","^easily$","^effectively$","^elsewhere$","^enough$","^entirely$",
-      "^equally$","^especially$","^essentially$","^etc$","^even$","^eventually$","^ever$","^every$","^everyday$","^everywhere",
-      "^exactly$","^exclusively$","^extremely$","^fairly$","^far$","^finally$","^fortunately$","^frequently$","^fully$",
-      "^further$","^generally$","^gently$","^genuinely$","^good$","^greatly$","^hardly$","^heavily$","^hence$","^henceforth$",
-      "^hereafter$","^herein$","^heretofore$","^hesitantly$","^highly$","^hither$","^hopefully$","^hotly$","^however$",
-      "^immediately$","^importantly$","^increasingly$","^incredibly$","^indeed$","^initially$","^instead$","^intensely$",
-      "^jus$","^just$","^largely$","^lately$","^least$","^legitimately$","^less$","^lightly$","^likely$","^literally$",
-      "^loudly$","^luckily$","^mainly$","^maybe$","^meanwhile$","^merely$","^more$","^moreover$","^most$","^mostly$","^much$",
-      "^namely$","^naturally$","^nearly$","^necessarily$","^nervously$","^never$","^nevertheless$","^no$","^nonetheless$",
-      "^normally$","^not$","^notwithstanding$","^obviously$","^occasionally$","^often$","^once$","^only$","^originally$",
-      "^otherwise$","^overall$","^particularly$","^passionately$","^perfectly$","^perhaps$","^personally$","^physically$",
-      "^please$","^possibly$","^potentially$","^practically$","^presently$","^previously$","^primarily$","^probability$",
-      "^probably$","^profoundly$","^prolly$","^properly$","^quickly$","^quietly$","^quite$","^randomly$","^rarely$","^rather$",
-      "^readily$","^really$","^recently$","^regularly$","^relatively$","^respectively$","^right$","^roughly$","^sadly$",
-      "^seldomly$","^seriously$","^shortly$","^significantly$","^similarly$","^simply$","^slightly$","^slowly$","^so$",
-      "^some$","^somehow$","^sometimes$","^somewhat$","^somewhere$","^soon$","^specifically$","^still$","^strongly$",
-      "^subsequently$","^successfully$","^such$","^suddenly$","^supposedly$","^surely$","^surprisingly$","^technically$",
-      "^terribly$","^thence$","^thereafter$","^therefor$","^therefore$","^thither$","^thoroughly$","^thus$","^thusfar$",
-      "^thusly$","^together$","^too$","^totally$","^truly$","^typically$","^ultimately$","^uncommonly$","^unfortunately$",
-      "^unfortunatly$","^usually$","^vastly$","^very$","^virtually$","^well$","^whence$","^where","^wherefor","^whither$",
-      "^wholly$","^why$","^why'","^whyd$","^whys$","^widely$","^wither$","^yet$"),
-    conj=c("^also$","^altho$","^although$","^and$","^b/c$","^bc$","^because$","^besides$","^both$","^but$","^'cause$","^cos$",
-      "^cuz$","^either$","^else$","^except$","^for$","^how$","^how'","^howd$","^howll$","^hows$","^if$","^neither$","^nor$",
-      "^or$","^than$","^tho$","^though$","^unless$","^unlike$","^versus$","^vs$","^when$","^when'","^whenever$","^whereas$",
-      "^whether$","^while$","^whilst$"),
-    prep=c("^about$","^above$","^abt$","^across$","^acrost$","^afk$","^after$","^against$","^along$","^amid","^among",
-      "^around$","^as$","^at$","^atop$","^before$","^behind$","^beneath$","^beside$","^betwe","^beyond$","^by$","^despite$",
-      "^down$","^during$","^excluding$","^from$","^here$","^here'","^heres$","^in$","^including$","^inside$","^into$",
-      "^minus$","^near$","^now$","^of$","^off$","^on$","^onto$","^out$","^outside$","^over$","^plus$","^regarding$","^sans$",
-      "^since$","^then$","^there$","^there'","^thered$","^therell$","^theres$","^through$","^throughout$","^thru$","^til$",
-      "^till$","^to$","^toward","^under$","^underneath$","^until$","^untill$","^unto$","^up$","^upon$","^via$","^with$",
-      "^within$","^without$","^worth$"),
-    auxverb=c("^am$","^are$","^arent$","^aren't$","^be$","^been$","^bein$","^being$","^brb$","^can$","^could$","^could'",
-      "^couldnt$","^couldn't$","^couldve$","^did$","^didnt$","^didn't$","^do$","^does$","^doesnt$","^doesn't$","^doing$",
-      "^dont$","^don't$","^had$","^hadnt$","^hadn't$","^has$","^hasnt$","^hasn't$","^have$","^havent$","^haven't$","^having$",
-      "^is$","^isnt$","^isn't$","^may$","^might$","^might'","^mightnt$","^mightn't$","^mightve$","^must$","^mustnt$",
-      "^mustn't$","^mustve$","^ought","^shant$","^shan't$","^sha'nt$","^shall$","^should$","^shouldnt$","^shouldn't$",
-      "^shouldve$","^was$","^wasnt$","^wasn't$","^were$","^werent$","^weren't$","^will$","^would$","^would'","^wouldnt",
-      "^wouldn't","^wouldve$"),
-    negate=c("^ain't$","^aint$","^aren't$","^arent$","^can't$","^cannot$","^cant$","^couldn't$","^couldnt$","^didn't$",
-      "^didnt$","^doesn't$","^doesnt$","^don't$","^dont$","^hadn't$","^hadnt$","^hasn't$","^hasnt$","^haven't$","^havent$",
-      "^idk$","^isn't$","^isnt$","^must'nt$","^mustn't$","^mustnt$","^nah","^need'nt$","^needn't$","^neednt$","^negat",
-      "^neither$","^never$","^no$","^nobod","^noes$","^none$","^nope$","^nor$","^not$","^nothing$","^nowhere$","^np$",
-      "^ought'nt$","^oughtn't$","^oughtnt$","^shant$","^shan't$","^sha'nt$","^should'nt$","^shouldn't$","^shouldnt$","^uh-uh$",
-      "^wasn't$","^wasnt$","^weren't$","^werent$","^without$","^won't$","^wont$","^wouldn't$","^wouldnt$"),
-    quant=c("^add$","^added$","^adding$","^adds$","^all$","^allot$","^alot$","^amount$","^amounts$","^another$","^any$",
-      "^approximat","^average$","^bit$","^bits$","^both$","^bunch$","^chapter$","^couple$","^doubl","^each$","^either$",
-      "^entire","^equal","^every$","^extra$","^few$","^fewer$","^fewest$","^group","^inequal","^least$","^less$","^lot$",
-      "^lotof$","^lots$","^lotsa$","^lotta$","^majority$","^many$","^mo$","^mo'","^more$","^most$","^much$","^mucho$",
-      "^multiple$","^nada$","^none$","^part$","^partly$","^percent","^piece$","^pieces$","^plenty$","^remaining$","^sampl",
-      "^scarce$","^scarcer$","^scarcest$","^section$","^segment","^series$","^several","^single$","^singles$","^singly$",
-      "^some$","^somewhat$","^ton$","^tons$","^total$","^triple","^tripling$","^variety$","^various$","^whole$"),
-    interrog=c("^how$","^how'd$","^how're$","^how's$","^howd$","^howre$","^hows$","^wat$","^wattt","^what$","^what'd$",
-      "^what'll$","^what're$","^what's$","^whatd$","^whatever$","^whatll$","^whatre$","^whatt","^when$","^when'","^whence$",
-      "^whenever$","^where$","^where'd$","^where's$","^wherefore$","^wherever$","^whether$","^which$","^whichever$",
-      "^whither$","^who$","^who'd$","^who'll$","^who's$","^whoever$","^wholl$","^whom$","^whomever$","^whos$","^whose$",
-      "^whosever$","^whoso","^why$","^why'","^whyever$","^wut$"),
-    number=c("^billion","^doubl","^dozen","^eight","^eleven$","^fift","^first$","^firstly$","^firsts$","^five$","^four",
-      "^half$","^hundred","^infinit","^million","^nine","^once$","^one$","^quarter","^second$","^seven","^single$","^six",
-      "^ten$","^tenth$","^third$","^thirt","^thousand","^three$","^trillion","^twel","^twent","^twice$","^two$","^zero$",
-      "^zillion"),
-    interjection=c("^a+h+$","^a+w+$","^allas$","^alright","^anyhoo$","^anyway[ysz]","^bl[eh]+$","^g+[eah]+$","^h[ah]+$",
-      "^h[hu]+$","^h[mh]+$","^l[ol]+$","^m[hm]+$","^meh$","^o+h+$","^o+k+$","^okie","^oo+f+$","^soo+$","^u[uh]+$","^u+g+h+$",
-      "^w[ow]+$","^wee+ll+$","^y[aes]+$","^ya+h+$","^yeah$","^yus+$"),
-    special=list(
-      ELLIPSIS='\\.{3,}|\\. +\\. +[. ]+',
-      SMILE='[([{q][ <-]+[;:8=]|[([{q][;:8=]|[;:8=][ >-][p3)}D]|[:;8=][ >-]\\]|[:;8=][p3)}D]|[:;8=]\\]',
-      FROWN='\\][ <.,-]+[;:8=]|[)}D/\\>][ <.,-]+[;:8=]|\\][:;8=]|[)}D/\\>][;:8=]|[;:8=][ >.,-][([{/\\<]|[:;8=][([{/\\<]',
-      LIKE=c(
-        '(?<=could not) like[ .,?!:;/"\']','(?<=did not) like[ .,?!:;/"\']','(?<=did) like[ .,?!:;/"\']',
-        '(?<=didn\'t) like[ .,?!:;/"\']','(?<=do not) like[ .,?!:;/"\']','(?<=do) like[ .,?!:;/"\']',
-        '(?<=does not) like[ .,?!:;/"\']','(?<=does) like[ .,?!:;/"\']','(?<=doesn\'t) like[ .,?!:;/"\']',
-        '(?<=don\'t) like[ .,?!:;/"\']','(?<=i) like[^ /-]*','(?<=should not) like[ .,?!:;/"\']',
-        '(?<=they) like[^ /-]*','(?<=we) like[^ /-]*','(?<=will not) like[ .,?!:;/"\']','(?<=will) like[ .,?!:;/"\']',
-        '(?<=won\'t) like[ .,?!:;/"\']','(?<=would not) like[ .,?!:;/"\']','(?<=you) like[^ /-]*'
-      ),
+  dict = list(
+    ppron = c("^dae$", "^dem$", "^eir$", "^eirself$", "^em$", "^he$", "^he'", "^her$", "^hers$", "^herself$", "^hes$",
+      "^him$", "^himself$", "^hir$", "^hirs$", "^hirself$", "^his$", "^hisself$", "^i$", "^i'", "^id$", "^idc$",
+      "^idgaf$", "^idk$", "^idontknow$", "^idve$", "^iirc$", "^iknow$", "^ikr$", "^ill$", "^ily$", "^im$", "^ima$",
+      "^imean$", "^imma$", "^ive$", "^lets$", "^let's$", "^me$", "^methinks$", "^mine$", "^my$", "^myself$", "^omfg$",
+      "^omg$", "^oneself$", "^our$", "^ours", "^she$", "^she'", "^shes$", "^thee$", "^their$", "^their'", "^theirs",
+      "^them$", "^thems", "^they$", "^they'", "^theyd$", "^theyll$", "^theyve$", "^thine$", "^thou$", "^thoust$",
+      "^thy$", "^thyself$", "^u$", "^u'", "^ud$", "^ull$", "^ur$", "^ure$", "^us$", "^we$", "^we'", "^weve$", "^y'",
+      "^ya'", "^yall", "^yins$", "^yinz$", "^you$", "^you'", "^youd$", "^youll$", "^your$", "^youre$", "^yours$",
+      "^yourself$", "^yourselves$", "^youve$", "^zer$", "^zir$", "^zirs$", "^zirself$", "^zis$"),
+    ipron = c("^another$", "^anybo", "^anyone", "^anything", "^dat$", "^de+z$", "^dis$", "^everyb", "^everyone",
+      "^everything", "^few$", "^it$", "^it'$", "^it'", "^itd$", "^itll$", "^its$", "^itself$", "^many$", "^nobod",
+      "^nothing$", "^other$", "^others$", "^same$", "^somebo", "^somebody'", "^someone", "^something", "^stuff$",
+      "^that$", "^that'", "^thatd$", "^thatll$", "^thats$", "^these$", "^these'", "^thesed$", "^thesell$", "^thesere$",
+      "^thing", "^this$", "^this'", "^thisd$", "^thisll$", "^those$", "^those'", "^thosed$", "^thosell$", "^thosere$",
+      "^what$", "^what'", "^whatd$", "^whatever$", "^whatll$", "^whats$", "^which", "^who$", "^who'", "^whod$",
+      "^whoever$", "^wholl$", "^whom$", "^whomever$", "^whos$", "^whose$", "^whosever$", "^whosoever$"),
+    article = c("^a$", "^an$", "^da$", "^teh$", "^the$"),
+    adverb = c("^absolutely$", "^actively$", "^actually$", "^afk$", "^again$", "^ago$", "^ahead$", "^almost$",
+      "^already$", "^altogether$", "^always$", "^angrily$", "^anxiously$", "^any$", "^anymore$", "^anyway$",
+      "^anywhere$", "^apparently$", "^automatically$", "^away$", "^awhile$", "^back$", "^badly$", "^barely$",
+      "^basically$", "^below$", "^brietermsy$", "^carefully$", "^causiously$", "^certainly$", "^clearly$", "^closely$",
+      "^coldly$", "^commonly$", "^completely$", "^constantly$", "^continually$", "^correctly$", "^coz$", "^currently$",
+      "^daily$", "^deeply$", "^definitely$", "^definitly$", "^deliberately$", "^desperately$", "^differently$",
+      "^directly$", "^early$", "^easily$", "^effectively$", "^elsewhere$", "^enough$", "^entirely$", "^equally$",
+      "^especially$", "^essentially$", "^etc$", "^even$", "^eventually$", "^ever$", "^every$", "^everyday$",
+      "^everywhere", "^exactly$", "^exclusively$", "^extremely$", "^fairly$", "^far$", "^finally$", "^fortunately$",
+      "^frequently$", "^fully$", "^further$", "^generally$", "^gently$", "^genuinely$", "^good$", "^greatly$",
+      "^hardly$", "^heavily$", "^hence$", "^henceforth$", "^hereafter$", "^herein$", "^heretofore$", "^hesitantly$",
+      "^highly$", "^hither$", "^hopefully$", "^hotly$", "^however$", "^immediately$", "^importantly$", "^increasingly$",
+      "^incredibly$", "^indeed$", "^initially$", "^instead$", "^intensely$", "^jus$", "^just$", "^largely$", "^lately$",
+      "^least$", "^legitimately$", "^less$", "^lightly$", "^likely$", "^literally$", "^loudly$", "^luckily$",
+      "^mainly$", "^maybe$", "^meanwhile$", "^merely$", "^more$", "^moreover$", "^most$", "^mostly$", "^much$",
+      "^namely$", "^naturally$", "^nearly$", "^necessarily$", "^nervously$", "^never$", "^nevertheless$", "^no$",
+      "^nonetheless$", "^normally$", "^not$", "^notwithstanding$", "^obviously$", "^occasionally$", "^often$", "^once$",
+      "^only$", "^originally$", "^otherwise$", "^overall$", "^particularly$", "^passionately$", "^perfectly$",
+      "^perhaps$", "^personally$", "^physically$", "^please$", "^possibly$", "^potentially$", "^practically$",
+      "^presently$", "^previously$", "^primarily$", "^probability$", "^probably$", "^profoundly$", "^prolly$",
+      "^properly$", "^quickly$", "^quietly$", "^quite$", "^randomly$", "^rarely$", "^rather$", "^readily$", "^really$",
+      "^recently$", "^regularly$", "^relatively$", "^respectively$", "^right$", "^roughly$", "^sadly$", "^seldomly$",
+      "^seriously$", "^shortly$", "^significantly$", "^similarly$", "^simply$", "^slightly$", "^slowly$", "^so$",
+      "^some$", "^somehow$", "^sometimes$", "^somewhat$", "^somewhere$", "^soon$", "^specifically$", "^still$",
+      "^strongly$", "^subsequently$", "^successfully$", "^such$", "^suddenly$", "^supposedly$", "^surely$",
+      "^surprisingly$", "^technically$", "^terribly$", "^thence$", "^thereafter$", "^therefor$", "^therefore$",
+      "^thither$", "^thoroughly$", "^thus$", "^thusfar$", "^thusly$", "^together$", "^too$", "^totally$", "^truly$",
+      "^typically$", "^ultimately$", "^uncommonly$", "^unfortunately$", "^unfortunatly$", "^usually$", "^vastly$",
+      "^very$", "^virtually$", "^well$", "^whence$", "^where", "^wherefor", "^whither$", "^wholly$", "^why$", "^why'",
+      "^whyd$", "^whys$", "^widely$", "^wither$", "^yet$"),
+    conj = c("^also$", "^altho$", "^although$", "^and$", "^b/c$", "^bc$", "^because$", "^besides$", "^both$", "^but$",
+      "^'cause$", "^cos$", "^cuz$", "^either$", "^else$", "^except$", "^for$", "^how$", "^how'", "^howd$", "^howll$",
+      "^hows$", "^if$", "^neither$", "^nor$", "^or$", "^than$", "^tho$", "^though$", "^unless$", "^unlike$", "^versus$",
+      "^vs$", "^when$", "^when'", "^whenever$", "^whereas$", "^whether$", "^while$", "^whilst$"),
+    prep = c("^about$", "^above$", "^abt$", "^across$", "^acrost$", "^afk$", "^after$", "^against$", "^along$", "^amid",
+      "^among", "^around$", "^as$", "^at$", "^atop$", "^before$", "^behind$", "^beneath$", "^beside$", "^betwe",
+      "^beyond$", "^by$", "^despite$", "^down$", "^during$", "^excluding$", "^from$", "^here$", "^here'", "^heres$",
+      "^in$", "^including$", "^inside$", "^into$", "^minus$", "^near$", "^now$", "^of$", "^off$", "^on$", "^onto$",
+      "^out$", "^outside$", "^over$", "^plus$", "^regarding$", "^sans$", "^since$", "^then$", "^there$", "^there'",
+      "^thered$", "^therell$", "^theres$", "^through$", "^throughout$", "^thru$", "^til$", "^till$", "^to$", "^toward",
+      "^under$", "^underneath$", "^until$", "^untill$", "^unto$", "^up$", "^upon$", "^via$", "^with$", "^within$",
+      "^without$", "^worth$"),
+    auxverb = c("^am$", "^are$", "^arent$", "^aren't$", "^be$", "^been$", "^bein$", "^being$", "^brb$", "^can$",
+      "^could$", "^could'", "^couldnt$", "^couldn't$", "^couldve$", "^did$", "^didnt$", "^didn't$", "^do$", "^does$",
+      "^doesnt$", "^doesn't$", "^doing$", "^dont$", "^don't$", "^had$", "^hadnt$", "^hadn't$", "^has$", "^hasnt$",
+      "^hasn't$", "^have$", "^havent$", "^haven't$", "^having$", "^is$", "^isnt$", "^isn't$", "^may$", "^might$",
+      "^might'", "^mightnt$", "^mightn't$", "^mightve$", "^must$", "^mustnt$", "^mustn't$", "^mustve$", "^ought",
+      "^shant$", "^shan't$", "^sha'nt$", "^shall$", "^should$", "^shouldnt$", "^shouldn't$", "^shouldve$", "^was$",
+      "^wasnt$", "^wasn't$", "^were$", "^werent$", "^weren't$", "^will$", "^would$", "^would'", "^wouldnt", "^wouldn't",
+      "^wouldve$"),
+    negate = c("^ain't$", "^aint$", "^aren't$", "^arent$", "^can't$", "^cannot$", "^cant$", "^couldn't$", "^couldnt$",
+      "^didn't$", "^didnt$", "^doesn't$", "^doesnt$", "^don't$", "^dont$", "^hadn't$", "^hadnt$", "^hasn't$", "^hasnt$",
+      "^haven't$", "^havent$", "^idk$", "^isn't$", "^isnt$", "^must'nt$", "^mustn't$", "^mustnt$", "^nah", "^need'nt$",
+      "^needn't$", "^neednt$", "^negat", "^neither$", "^never$", "^no$", "^nobod", "^noes$", "^none$", "^nope$",
+      "^nor$", "^not$", "^nothing$", "^nowhere$", "^np$", "^ought'nt$", "^oughtn't$", "^oughtnt$", "^shant$",
+      "^shan't$", "^sha'nt$", "^should'nt$", "^shouldn't$", "^shouldnt$", "^uh-uh$", "^wasn't$", "^wasnt$", "^weren't$",
+      "^werent$", "^without$", "^won't$", "^wont$", "^wouldn't$", "^wouldnt$"),
+    quant = c("^add$", "^added$", "^adding$", "^adds$", "^all$", "^allot$", "^alot$", "^amount$", "^amounts$",
+      "^another$", "^any$", "^approximat", "^average$", "^bit$", "^bits$", "^both$", "^bunch$", "^chapter$", "^couple$",
+      "^doubl", "^each$", "^either$", "^entire", "^equal", "^every$", "^extra$", "^few$", "^fewer$", "^fewest$",
+      "^group", "^inequal", "^least$", "^less$", "^lot$", "^lotof$", "^lots$", "^lotsa$", "^lotta$", "^majority$",
+      "^many$", "^mo$", "^mo'", "^more$", "^most$", "^much$", "^mucho$", "^multiple$", "^nada$", "^none$", "^part$",
+      "^partly$", "^percent", "^piece$", "^pieces$", "^plenty$", "^remaining$", "^sampl", "^scarce$", "^scarcer$",
+      "^scarcest$", "^section$", "^segment", "^series$", "^several", "^single$", "^singles$", "^singly$", "^some$",
+      "^somewhat$", "^ton$", "^tons$", "^total$", "^triple", "^tripling$", "^variety$", "^various$", "^whole$"),
+    interrog = c("^how$", "^how'd$", "^how're$", "^how's$", "^howd$", "^howre$", "^hows$", "^wat$", "^wattt", "^what$",
+      "^what'd$", "^what'll$", "^what're$", "^what's$", "^whatd$", "^whatever$", "^whatll$", "^whatre$", "^whatt",
+      "^when$", "^when'", "^whence$", "^whenever$", "^where$", "^where'd$", "^where's$", "^wherefore$", "^wherever$",
+      "^whether$", "^which$", "^whichever$", "^whither$", "^who$", "^who'd$", "^who'll$", "^who's$", "^whoever$",
+      "^wholl$", "^whom$", "^whomever$", "^whos$", "^whose$", "^whosever$", "^whoso", "^why$", "^why'", "^whyever$",
+      "^wut$"),
+    number = c("^billion", "^doubl", "^dozen", "^eight", "^eleven$", "^fift", "^first$", "^firstly$", "^firsts$",
+      "^five$", "^four", "^half$", "^hundred", "^infinit", "^million", "^nine", "^once$", "^one$", "^quarter",
+      "^second$", "^seven", "^single$", "^six", "^ten$", "^tenth$", "^third$", "^thirt", "^thousand", "^three$",
+      "^trillion", "^twel", "^twent", "^twice$", "^two$", "^zero$", "^zillion"),
+    interjection = c("^a+h+$", "^a+w+$", "^allas$", "^alright", "^anyhoo$", "^anyway[ysz]", "^bl[eh]+$", "^g+[eah]+$",
+      "^h[ah]+$", "^h[hu]+$", "^h[mh]+$", "^l[ol]+$", "^m[hm]+$", "^meh$", "^o+h+$", "^o+k+$", "^okie", "^oo+f+$",
+      "^soo+$", "^u[uh]+$", "^u+g+h+$", "^w[ow]+$", "^wee+ll+$", "^y[aes]+$", "^ya+h+$", "^yeah$", "^yus+$"),
+    special = list(
+      ELLIPSIS = '\\.{3, }|\\. +\\. +[. ]+',
+      SMILE = '\\s(?:[[{(<qd]+[\\s<-]*[;:8=]|[;:8=][\\s>-]*[]})>Dpb]+|[uUnwWmM^=+-]_[uUnwWmM^=+-])(?=\\s)',
+      FROWN = '\\s(?:[]D)}>]+[\\s.,<-]*[;:8=]|[;:8=][\\s.,>-]*[[{(<]+|[Tt:;]_[Tt;:]|[uUtT;:][mMn][uUtT;:])(?=\\s)',
+      LIKE = c('(?<=could not) like\\b', '(?<=did not) like\\b', '(?<=did) like\\b','(?<=didn\'t) like\\b',
+        '(?<=do not) like\\b', '(?<=do) like\\b', '(?<=does not) like\\b', '(?<=does) like\\b', '(?<=doesn\'t) like\\b',
+        '(?<=don\'t) like\\b', '(?<=i) like\\b', '(?<=should not) like\\b', '(?<=they) like\\b', '(?<=we) like\\b',
+        '(?<=will not) like\\b', '(?<=will) like\\b', '(?<=won\'t) like\\b', '(?<=would not) like\\b',
+        '(?<=you) like\\b'),
       CHARACTERS = c(
         ` ` = '\\s',
         `'` = paste0('[\u00B4\u2018-\u201B\u2032\u0235\u02B9\u02BB-\u02BF\u02C8\u02CA\u02CB\u02F4\u0300\u0301',
@@ -1412,15 +1417,16 @@ lma_dict=function(..., as.regex = TRUE, as.function = FALSE){
         f = '[\u0191\u0192\u0492\u0493\u2109\u2231\u2132\u214E]',
         g = '[\u011C-\u0123\u0193\u0222\u0260-\u0262\u210A\u2141]',
         h = '[\u0124-\u0127\u0195\u0266\u0267\u0389\u0397\u0452\u210B-\u210F]',
-        i = '[\u00CC-\u00CF\u00EC-\u00EF\u0128-\u0131\u0169\u0197\u019A\u0208\u0209\u0365\u0390\u0399\u0406\u0407\u0456\u0457]',
+        i = paste0('[\u00CC-\u00CF\u00EC-\u00EF\u0128-\u0131\u0169\u0197\u019A\u0208\u0209\u0365\u0390\u0399\u0406',
+          '\u0407\u0456\u0457]'),
         j = '[\u0135\u0136\u0237\u0248\u0249\u0408\u0458\u2129\u2139\u2149]',
         k = '[\u0137\u0138\u0198\u0199\u212A]',
         l = '[\u0139-\u0142\u0234]',
         m = '[\u0271\u0460\u2133]',
         n = '[\u00D1\u00F1\u0143-\u014B\u0220\u0235\u0272-\u0274\u0376\u0377\u0418\u0419\u0438\u0439\u2115\u2135]',
         h = '\u0149',
-        o = paste0('[\u00D2-\u00D6\u00D8\u00F0\u00F2-\u00F6\u00F8\u014C-\u0151\u0150\u0151\u0230\u0231\u0275\u0298\u0366\u0398\u0424',
-          '\u0444\u0472\u0473\u2134]'),
+        o = paste0('[\u00D2-\u00D6\u00D8\u00F0\u00F2-\u00F6\u00F8\u014C-\u0151\u0150\u0151\u0230\u0231\u0275\u0298',
+          '\u0366\u0398\u0424\u0444\u0472\u0473\u2134]'),
         p = '[\u0420\u0440\u2117-\u2119]',
         q = '[\u018D\u211A\u213A]',
         r = '[\u0154-\u0159\u0211-\u0213\u0279-\u0281\u0433\u0453\u0490\u0491\u211B-\u211D\u211F\u213E]',
@@ -1447,15 +1453,15 @@ lma_dict=function(..., as.regex = TRUE, as.function = FALSE){
       )
     )
   )
-  if(length(cats)==0) cats=names(dict)[-length(dict)]
-  if(length(cats)==1 && grepl('\\(|\\[',cats)) cats=eval(parse(text=cats))
-  if(any(grepl('[0-9]|seq',cats))) cats=if(length(cats)>1) as.numeric(cats) else eval(parse(text=cats))
+  if(length(cats) == 0) cats = names(dict)[-length(dict)]
+  if(length(cats) == 1 && grepl('\\(|\\[', cats)) cats = eval(parse(text = cats))
+  if(any(grepl('[0-9]|seq', cats))) cats = if(length(cats) > 1) as.numeric(cats) else eval(parse(text = cats))
   if(is.numeric(cats)){
-    cats=cats[cats<length(dict)]
-  }else if(any(!cats%in%names(dict))) cats=grep(paste(paste0('^',cats),collapse='|'),names(dict),value=TRUE)
-  if(length(cats)==0) stop(
-    '\n  enter numbers between 1 and ',length(dict)-1,
-    ', or letters matching a category:\n  ',paste(names(dict),collapse=', ')
+    cats = cats[cats < length(dict)]
+  }else if(any(!cats %in% names(dict))) cats = grep(paste(paste0('^', cats), collapse = '|'), names(dict), value = TRUE)
+  if(length(cats) == 0) stop(
+    '\n  enter numbers between 1 and ', length(dict) - 1,
+    ', or letters matching a category:\n  ', paste(names(dict), collapse = ', ')
   )
   if('special' %in% cats) as.regex = TRUE
   if(as.regex){
@@ -1485,5 +1491,5 @@ lma_dict=function(..., as.regex = TRUE, as.function = FALSE){
         }
       }
     }else dict[cats]
-  }else lapply(dict[cats],function(l)gsub('\\^|\\$','',sub('(?<=[^$])$','*',l,perl=TRUE)))
+  }else lapply(dict[cats], function(l) gsub('\\^|\\$', '', sub('(?<=[^$])$', '*', l, perl = TRUE)))
 }

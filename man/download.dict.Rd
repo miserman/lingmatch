@@ -4,13 +4,12 @@
 \alias{download.dict}
 \title{Download Dictionaries}
 \usage{
-download.dict(dict = "collected", check.md5 = TRUE, mode = "wb",
+download.dict(dict = "lusi", check.md5 = TRUE, mode = "wb",
   dir = getOption("lingmatch.dict.dir"))
 }
 \arguments{
-\item{dict}{One or more names of dictionaries to download.
-See \href{https://osf.io/y6g5b/wiki/home}{osf.io/y6g5b/wiki} for more information, and a
-list of available dictionaries.}
+\item{dict}{One or more names of dictionaries to download, or \code{'all'} for all available. See
+\href{https://osf.io/y6g5b/wiki/home}{osf.io/y6g5b/wiki} for more information, and a list of available dictionaries.}
 
 \item{check.md5}{Logical; if \code{TRUE} (default), retrieves the MD5 checksum from OSF,
 and compares it with that calculated from the downloaded file to check its integrity.}

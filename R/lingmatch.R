@@ -200,12 +200,18 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
     if(is.null(ta)) stop('could not find ', deparse(a), call. = FALSE)
     ta
   }
-  gd=function(a,data=NULL){
-    r=if(is.character(a) && length(a)==1 && grepl('\\.txt$|\\.csv$',a,TRUE)){
-      r=readLines(a,warn=FALSE)
-      r[r!='']
+  gd = function(a,data=NULL){
+    r = if(is.character(a) && length(a) == 1 && grepl('\\.(?:csv|txt|tsv|tab)$', a, TRUE)){
+      if(file.exists(a)){
+        r = if(grepl('txt$', a)) readLines(a, warn = FALSE) else{
+          r = read.table(a, TRUE, if(grepl('csv$', a)) ',' else '\t', '"', comment.char = '')
+          r[, which(!vapply(r, is.numeric, TRUE))[1]]
+        }
+        r[r != '']
+      }else stop(a, ' does not exist', call. = FALSE)
     }else if(is.character(a)) a else gv(a,data)
     if(is.factor(r)) r=as.character(r)
+    if(is.character(r) && length(r) == 1 && grepl('\\.(?:csv|txt|tsv|tab)$', r, TRUE)) r = gd(r)
     r
   }
   # weight, categorize, and/or map
@@ -221,11 +227,11 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
   # input
   if(missing(input)) input = file.choose()
   if(is.function(input)) stop('enter a character vector or matrix-like object as input')
-  if(!missing(data)) input = gd(opt$input, data) else if(!missing(group)){
-    data = input
-    if(is.data.frame(input)) input = as.matrix(input[, vapply(input, function(col)
-      any(class(col) %in% c('numeric', 'integer')), TRUE)])
-  }
+  if(missing(data)) data = input
+  input = if(!missing(data) && is.character(input) && all(input %in% colnames(data))) data[, input] else
+    gd(opt$input, data)
+  if(missing(data) && !missing(group) && is.data.frame(input))
+    input = as.matrix(input[, vapply(input, is.numeric, TRUE)])
   rx=NROW(input)
   cx=NCOL(input)
   # comp
@@ -237,19 +243,21 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
     opt$comp = comp = 'pairwise'
   }else opt$comp='mean'
   if(is.factor(input)) input=as.character(input)
-  if(is.factor(comp)) comp=as.character(comp) else if(is.data.frame(comp))
-    comp=comp[,!vapply(comp,function(c)is.factor(c)||is.character(c),TRUE)]
+  if(is.factor(comp)) comp = as.character(comp) else if(is.data.frame(comp))
+    comp = comp[, vapply(comp, is.numeric, TRUE)]
   do.wmc=TRUE
-  if(any(class(input)%in%c('matrix','data.frame')) && is.null(attr(input,'Type'))){
-    dn=if('dict'%in%names(inp)) eval(inp$dict) else names(lma_dict(1:9))
-    if(is.list(dn)) dn=names(dn)
-    cn=colnames(input)
-    if(any(!(ck<-dn%in%cn))){
-      if('preps'%in%cn) colnames(input)=sub('preps','prep',cn,fixed=TRUE)
-      if('articles'%in%cn) colnames(input)=sub('articles','article',cn,fixed=TRUE)
-      ck=dn%in%colnames(input)
+  if('dict' %in% names(inp) && any(class(input) %in% c('matrix', 'data.frame')) &&
+      is.null(attr(input, 'Type'))){
+    cn = colnames(input)
+    dn = gv(inp$dict)
+    if(is.list(dn)) dn = names(dn)
+    if(any(!(ck <- dn %in% cn))){
+      if('prep' %in% dn && !'prep' %in% cn) colnames(input)[cn == 'preps'] = 'prep'
+      if('article' %in% dn && !'article' %in% cn) colnames(input)[cn == 'articles'] = 'article'
+      ck = dn %in% colnames(input)
     }
-    if(sum(ck)>6){
+    if(all(ck)){
+      inp$dict = NULL
       if(missing(data)) data=input
       if(any(!ck)) dn=dn[ck]
       cx = length(dn)
@@ -342,7 +350,7 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
       warning('failed to apply order', call. = FALSE)
   }
   if(is.character(input)) input = matrix(as.numeric(input), rx)
-  if('data.frame' %in% class(input) && any(ckvc <- !vapply(seq_len(cx), function(col)
+  if(is.data.frame(input) && any(ckvc <- !vapply(seq_len(cx), function(col)
     class(input[, col])[1], '') %in% c('numeric', 'integer'))){
     if(all(ckvc)){
       for(col in seq_along(ckvc)) input[, col] = as.numeric(input[, col])
@@ -354,11 +362,6 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
   dtm = Matrix(if(is.data.frame(input)) as.matrix(input) else input, sparse = TRUE)
   if(do.wmc) input=wmc(input)
   if(is.null(nrow(input))) input=t(as.matrix(input))
-  if(drop){
-    if(sum(su<-colSums(input,na.rm=TRUE)!=0)!=0) input=input[,su,drop=FALSE] else
-      stop('input is all 0s after processing')
-  }
-  nc=ncol(input)
   if(cc==2 && (length(comp)>1 || any(grepl(' ',comp,fixed=TRUE)))){
     comp=do.call(lma_dtm,c(list(comp),dsp$p))
     cc=1
@@ -367,13 +370,19 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
   if(cc==1 && !is.null(names(comp))) comp=t(as.matrix(comp))
   cr=nrow(comp)
   cn=colnames(comp)
-  if(cc==1 && !is.null(cr) && !is.null(cn) && any(vapply(dsp[-1],length,0)>0)){
-    nn=cn[!cn%in%colnames(input)]
-    if(length(nn)!=0) input=cbind(input,matrix(0,nrow(input),length(nn),dimnames=list(c(),nn)))
-    input=rbind(matrix(0,cr,ncol(input),dimnames=list(c(),colnames(input))),input)
-    input[seq_len(cr),cn]=comp
-    comp=seq_len(cr)
+  if(!is.null(cn)){
+    cc = 1
+    nn = cn[!cn %in% colnames(input)]
+    if(length(nn) != 0) input = cbind(input, matrix(0, nrow(input), length(nn), dimnames = list(NULL, nn)))
+    input = rbind(matrix(0, cr, ncol(input), dimnames = list(NULL, colnames(input))), input)
+    input[seq_len(cr), cn] = comp
+    comp = seq_len(cr)
   }
+  if(drop){
+    if(sum(su <- colSums(input, na.rm = TRUE) != 0) != 0) input = input[, su, drop = FALSE] else
+      stop('input is all 0s after processing')
+  }
+  nc=ncol(input)
   # finalizing comp
   if(cc==1 || opt$comp=='text'){
     comp.data=input[comp,,drop=FALSE]
@@ -405,8 +414,8 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
     if(ckp){
       if(any(ckp<-!(cn<-colnames(input))%in%(bn<-colnames(comp.data)))){
         if(all(ckp)) stop('input and comp have no columns in common')
-        if('articles'%in%cn) bn[bn=='article']='articles'
-        if('preps'%in%cn) bn[bn=='prep']='preps'
+        if('articles' %in% cn && !'articles' %in% bn) bn[bn == 'article'] = 'articles'
+        if('preps' %in% cn && !'preps' %in% bn) bn[bn == 'prep'] = 'preps'
         colnames(comp.data)=bn
         if(any(ckp<-!cn%in%bn)){
           warning('input columns were not found in comp: ',paste(cn[ckp],collapse=', '), call. = FALSE)
@@ -721,6 +730,9 @@ lma_dtm = function(text, exclude = NULL, context = NULL, numbers = FALSE, punct 
     return(dtm)
   }
   if(is.null(text)) stop(substitute(text),' not found')
+  if(is.character(text) && all(file.exists(text))){
+    text = if(length(text) != 1 || dir.exists(text)) read.segments(text) else readLines(text)
+  }
   text = paste(' ', text, ' ')
   st = proc.time()[[3]]
   text = gsub('[\u05be\u1806\u2010\u2011\u2013\uFE58\uFE63\uFF0D]', '-', text)
@@ -728,8 +740,8 @@ lma_dtm = function(text, exclude = NULL, context = NULL, numbers = FALSE, punct 
   text = gsub('[\u2032\u2035\u2018\u2019]', "'", text)
   text = gsub("[\u2033\u2036\u201C\u201D\u201F]|(?<=[^a-z0-9])'|'(?=[^a-z0-9])", '"', text, TRUE, TRUE)
   if(!urls){
-    text = gsub('\\s[a-z]+://[^\\s]*|www\\.[^\\s]*|\\s[a-z_~-]+\\.[a-z_~-]{2,}[^\\s]*|\\s[a-z_~-]+\\.(?:io|com|net|org|gov|edu)\\s',
-      ' url ', text, TRUE, TRUE)
+    text = gsub(paste0('\\s[a-z]+://[^\\s]*|www\\.[^\\s]*|\\s[a-z_~-]+\\.[a-z_~-]{2,}[^\\s]*|\\s[a-z_~-]+\\.',
+      '(?:io|com|net|org|gov|edu)\\s'), ' url ', text, TRUE, TRUE)
     text = gsub('(?<=[A-Z])\\.\\s', ' ', text, perl = TRUE)
   }
   text = gsub('[\\n\\t\\r]+', ' ', text, perl = TRUE)
@@ -740,18 +752,20 @@ lma_dtm = function(text, exclude = NULL, context = NULL, numbers = FALSE, punct 
     if(!missing(context) && length(context) == 1 && grepl('like', context, TRUE))
       context = special[['LIKE']]
     if(punct) text = gsub(special[['ELLIPSIS']], ' repellipsis ', text)
-    if(emojis) for(type in c('SMILE', 'FROWN')) text = gsub(special[[type]], paste0(' rep', tolower(type), ' '), text)
+    if(emojis) for(type in c('SMILE', 'FROWN')) text = gsub(
+      special[[type]], paste0(' rep', tolower(type), ' '), text, perl = TRUE
+    )
     if(!missing(context)){
       if(!any(grepl('[?=]', context))){
         context = gsub('^\\(','(?<=', context)
         context = gsub('\\((?!\\?)','(?=', context, perl = TRUE)
-        context = gsub('(?<![)*])$','[\\\\s.,?!:;/"\']', context, perl = TRUE)
-        context = gsub('\\*','[^\\\\s/-]*', context, perl = TRUE)
+        context = gsub('(?<![)*])$','\\\\b', context, perl = TRUE)
+        context = gsub('\\*','\\\\w*', context, perl = TRUE)
       }
       context = structure(
         as.list(context),
         names = paste('', gsub('--+', '-', gsub('[\\s^[]|\\\\s]', '-',
-          gsub('[^a-z0-9\\s]', '', context, TRUE, TRUE), perl = TRUE)), '')
+          gsub("[^a-z0-9\\s\\\\']|\\\\[wbs]", '', context, TRUE, TRUE), perl = TRUE)), '')
       )
       for(rn in names(context)) text = gsub(context[[rn]], rn, text, perl = TRUE)
     }
@@ -763,8 +777,8 @@ lma_dtm = function(text, exclude = NULL, context = NULL, numbers = FALSE, punct 
     }else if(is.list(exclude)) exclude = unlist(exclude, use.names = FALSE)
   }
   if(!numbers) text = gsub('[[:punct:]]*[0-9][0-9,.el-]*', ' ', text, TRUE, TRUE)
-  text = gsub("([^a-z0-9.,':/?=#\\s-]|[:/?=#](?=\\s)|(?:(?<=\\s)[:/=-]|,)(?=[a-z])|(?<=[^a-z0-9])(,(?=[a-z0-9])|[.-](?=[a-z]))|[.,'-](?=[^0-9a-z]|[.,'-]))",
-    ' \\1 ', text, TRUE, TRUE)
+  text = gsub(paste0("([^a-z0-9.,':/?=#\\s-]|[:/?=#](?=\\s)|(?:(?<=\\s)[:/=-]|,)(?=[a-z])|(?<=[^a-z0-9])",
+    "(,(?=[a-z0-9])|[.-](?=[a-z]))|[.,'-](?=[^0-9a-z]|[.,'-]))"), ' \\1 ', text, TRUE, TRUE)
   text = gsub("(\\s[a-z]+)/([a-z]+\\s)", ' \\1 / \\2 ', text, TRUE, TRUE)
   text = gsub("([a-z0-9.,'-].*[^a-z0-9])", ' \\1 ', text, TRUE, TRUE)
   text = gsub("(?<=[a-z])\\s['\u00E7\u00ED]\\s(?=[a-z])", "'", text, TRUE, TRUE)
@@ -1124,14 +1138,17 @@ lma_weight = function(dtm, weight = 'count', normalize = TRUE, wc.complete = TRU
 lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, term.map = NULL,
   dim.cutoff = .5, keep.dim = FALSE, use.scan = FALSE, dir = getOption('lingmatch.lspace.dir')){
   dir = path.expand(dir)
-  if(is.character(dtm) && length(dtm) == 1 && dtm != ''){
-    if(missing(use.scan)) use.scan = TRUE
-    space = dtm
-    dtm = ''
+  if(is.character(dtm) || is.factor(dtm)){
+    if(length(dtm) > 1 && missing(space)){
+      dtm = lma_dtm(dtm)
+    }else if(length(dtm) == 1 && dtm != ''){
+      if(missing(use.scan)) use.scan = TRUE
+      space = dtm
+      dtm = ''
+    }
   }
   if(is.data.frame(dtm)) dtm = as.matrix(dtm)
   if(missing(space)){
-    if(is.factor(dtm) || is.character(dtm) && (length(dtm) > 1 || dtm != '')) dtm = lma_dtm(dtm)
     nr = nrow(dtm)
     if(is.null(nr)) stop('enter a matrix for dtm, or specify a space')
     nc = ncol(dtm)
@@ -1427,7 +1444,8 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
       paste0(s, gsub(rec, '\\\\\\1', l, perl = TRUE), e, collapse = '|')
     ) else lapply(dict, function(l) paste(paste0(s, gsub('([+*])[+*]+', '\\\\\\1+', l), e), collapse='|'))
     if(glob) lapply(res, function(l) gsub(paste0(
-      if(s == '^') '\\' else '', s, if(escape) '\\\\' else '', '\\*|', if(escape) '\\\\' else '', '\\*', if(e == '$') '\\' else '', e
+      if(s == '^') '\\' else '', s, if(escape) '\\\\' else '', '\\*|', if(escape) '\\\\' else '', '\\*', if(e == '$')
+        '\\' else '', e
     ), '', l)) else res
   }
   getweights = function(terms, cat){

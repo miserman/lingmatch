@@ -7,12 +7,27 @@ words = c(
 texts = vapply(seq_len(50), function(d){
   paste0(sample(words, sample(100, 1), TRUE), collapse = ' ')
 }, '')
+textsfile = tempfile(fileext = '.csv')
+write(do.call(paste, list(c('id', seq_along(texts)), c('text', texts), sep = ',')), textsfile, sep = ',')
 dtm = lma_dtm(texts)
 
 test_that('different input formats have the same results', {
   manual = as.numeric(lma_simets(dtm, metric = 'cosine'))
+  expect_equal(as.numeric(lingmatch(textsfile)$sim), manual)
   expect_equal(as.numeric(lingmatch(texts)$sim), manual)
   expect_equal(as.numeric(lingmatch(dtm)$sim), manual)
+  expect_equal(as.numeric(lingmatch(as.data.frame(as.matrix(dtm)))$sim), manual)
+})
+
+test_that('different input formats have the same results (comp)', {
+  manual = as.numeric(lma_simets(dtm[-(1:10),], dtm[1:10,], metric = 'cosine'))
+  expect_equal(as.numeric(lingmatch(textsfile, 1:10, drop = FALSE)$sim), manual)
+  expect_equal(as.numeric(lingmatch(texts[-(1:10)], texts[1:10], drop = FALSE)$sim), manual)
+  expect_equal(as.numeric(lingmatch(dtm[-(1:10),], dtm[1:10,], drop = FALSE)$sim), manual)
+  expect_equal(as.numeric(lingmatch(
+    as.data.frame(as.matrix(dtm[-(1:10),])),
+    as.data.frame(as.matrix(dtm[1:10,])), drop = FALSE
+  )$sim), manual)
 })
 
 test_that('different input formats have the same results (LSM)', {
@@ -140,13 +155,14 @@ test_that('sequential comparisons work', {
     su = data$pair == p
     data$phase[su] = sort(sample(1:3, sum(su), TRUE))
   }
+  cats = names(lma_dict(1:9))
   h = list(
-    lingmatch(data, 'seq', group = speaker)$sim,
-    lingmatch(data, 'seq', group = 'speaker', agg = FALSE)$sim,
-    lingmatch(data, 'seq', group = c('pair', 'speaker'))$sim,
-    lingmatch(data, 'seq', group = data[, c('pair', 'speaker')], agg = FALSE)$sim,
-    lingmatch(data, 'seq', group = data[, c('pair', 'phase', 'speaker')])$sim,
-    lingmatch(data, 'seq', group = c('pair', 'phase', 'speaker'), agg = FALSE)$sim
+    lingmatch(data, 'seq', dict = cats, group = speaker)$sim,
+    lingmatch(data, 'seq', dict = cats, group = 'speaker', agg = FALSE)$sim,
+    lingmatch(data, 'seq', dict = cats, group = c('pair', 'speaker'))$sim,
+    lingmatch(data, 'seq', dict = cats, group = data[, c('pair', 'speaker')], agg = FALSE)$sim,
+    lingmatch(data, 'seq', dict = cats, group = data[, c('pair', 'phase', 'speaker')])$sim,
+    lingmatch(data, 'seq', dict = cats, group = c('pair', 'phase', 'speaker'), agg = FALSE)$sim
   )
   expect_true(any(h[[1]][, 'cosine'] - h[[2]][, 'cosine'] > .01))
   expect_true(any(h[[3]][, 'cosine'] - h[[4]][, 'cosine'] > .01))

@@ -29,3 +29,8 @@ build.R
 .Rproj.user
 *.csl
 *.bib
+src-*
+debug*
+*.o
+*.so
+*.dll

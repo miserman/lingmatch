@@ -28,11 +28,11 @@ strings attempting to capture special things like ellipses and emojis, or sets o
 of the Basic Latin range; \code{[^\\u0020-\\u007F]}), which can be used for character conversions.
 If \code{special} is part of the returned list, \code{as.regex} is set to \code{TRUE}.
 
-The \code{special} list is always used by both \code{\link{lma_dtm}} and \code{\link{lma_termcat}}. When creating a dtm,
-\code{special} is used to clean the original input (so that, by default, the punctuation involved in ellipses and emojis
-are treated as different -- as ellipses and emojis rather than as periods and parens and colons and such). When categorizing
-a dtm, the input dictionary is passed by the special lists to be sure the terms in the dtm match up with the dictionary
-(so, for example, ": (" would be replaced with "FROWN" in both the text and dictionary).
+The \code{special} list is always used by both \code{\link{lma_dtm}} and \code{\link{lma_termcat}}. When creating a
+dtm, \code{special} is used to clean the original input (so that, by default, the punctuation involved in ellipses
+and emojis are treated as different -- as ellipses and emojis rather than as periods and parens and colons and such).
+When categorizing a dtm, the input dictionary is passed by the special lists to be sure the terms in the dtm match up
+with the dictionary (so, for example, ": (" would be replaced with "FROWN" in both the text and dictionary).
 }
 \examples{
 # return the full dictionary (excluding special)

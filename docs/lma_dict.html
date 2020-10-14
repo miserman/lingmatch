@@ -51,11 +51,11 @@ strings attempting to capture special things like ellipses and emojis, or sets o
 of the Basic Latin range; <code>[^\u0020-\u007F]</code>), which can be used for character conversions.
 If <code>special</code> is part of the returned list, <code>as.regex</code> is set to <code>TRUE</code>.
 </p>
-<p>The <code>special</code> list is always used by both <code>lma_dtm</code> and <code>lma_termcat</code>. When creating a dtm,
-<code>special</code> is used to clean the original input (so that, by default, the punctuation involved in ellipses and emojis
-are treated as different &ndash; as ellipses and emojis rather than as periods and parens and colons and such). When categorizing
-a dtm, the input dictionary is passed by the special lists to be sure the terms in the dtm match up with the dictionary
-(so, for example, &quot;: (&quot; would be replaced with &quot;FROWN&quot; in both the text and dictionary).
+<p>The <code>special</code> list is always used by both <code>lma_dtm</code> and <code>lma_termcat</code>. When creating a
+dtm, <code>special</code> is used to clean the original input (so that, by default, the punctuation involved in ellipses
+and emojis are treated as different &ndash; as ellipses and emojis rather than as periods and parens and colons and such).
+When categorizing a dtm, the input dictionary is passed by the special lists to be sure the terms in the dtm match up
+with the dictionary (so, for example, &quot;: (&quot; would be replaced with &quot;FROWN&quot; in both the text and dictionary).
 </p>
 
 

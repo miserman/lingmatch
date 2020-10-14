@@ -2,7 +2,6 @@
 title: "Introduction to Text Analysis"
 output: rmarkdown::html_document
 vignette: >
-  %\VignetteIndexEntry{Exploring Data with splot}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

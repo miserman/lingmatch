@@ -12,17 +12,18 @@ read.segments(path = ".", segment = NULL, ext = ".txt", subdir = FALSE,
 recognized in \code{path}, it is treated as \code{text}.}
 
 \item{segment}{Specifies how the text of each file should be segmented. If a character, split at that character;
-'\\n' by default. If a number, texts will be broken into that many segments, each with a roughly equal number of words.}
+'\\n' by default. If a number, texts will be broken into that many segments, each with a roughly equal number of
+words.}
 
 \item{ext}{The extension of the files you want to read in. '.txt' by default.}
 
 \item{subdir}{If \code{TRUE} files in folders in \code{path} will also be included.}
 
-\item{segment.size}{If specified, \code{segment} will be ignored, and texts will be broken into segments containing roughly
-\code{segment.size} number of words.}
+\item{segment.size}{If specified, \code{segment} will be ignored, and texts will be broken into segments containing
+roughly \code{segment.size} number of words.}
 
-\item{bysentence}{If \code{TRUE}, and \code{segment} is a number or \code{segment.size} is specified, sentences will be
-kept together, rather than potentially being broken across segments.}
+\item{bysentence}{If \code{TRUE}, and \code{segment} is a number or \code{segment.size} is specified, sentences will
+be kept together, rather than potentially being broken across segments.}
 
 \item{text}{A character vector with text to be split, used in place of \code{path}. Each entry is treates as a file.}
 }

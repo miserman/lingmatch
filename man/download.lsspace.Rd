@@ -8,10 +8,9 @@ download.lsspace(space = "100k", include.terms = TRUE, decompress = TRUE,
   check.md5 = TRUE, mode = "wb", dir = getOption("lingmatch.lspace.dir"))
 }
 \arguments{
-\item{space}{Name of the space you want to download. '100k' is the default, and
-some other common options might be 'google', 'facebook', or 'glove'. See
-\href{https://osf.io/489he/wiki/home}{osf.io/489he/wiki} for more information, and a full
-list of spaces.}
+\item{space}{Name of one or more spaces you want to download, or \code{'all'} for all available. \code{'100k'} is
+the default, and some other common options might be \code{'google'}, \code{'facebook'}, or \code{'glove'}.
+See \href{https://osf.io/489he/wiki/home}{osf.io/489he/wiki} for more information, and a full list of spaces.}
 
 \item{include.terms}{Logical; if \code{FALSE}, only the \code{.dat.bz2} file is downloaded
 (which only has numeric vectors).}

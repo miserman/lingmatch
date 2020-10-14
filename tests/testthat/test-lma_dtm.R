@@ -1,7 +1,7 @@
 context('lma_dtm')
 
 test_that('exclude works', {
-  text = c('That would be what of the and word of the place name.')
+  text = 'That would be what of the and word of the place name.'
   dtm = lma_dtm(text, 'function')
   expect_equal(dtm[1,], c(name = 1, place = 1, word = 1))
 })
@@ -13,30 +13,31 @@ test_that('context works', {
 })
 
 test_that('numbers works', {
-  text = c('word 21 word .231 word 23.302%, word word 1e54 word 1e-5.')
+  text = 'word 21 word .231 word 23.302%, word word 1e54 word 1e-5.'
   expect_equal(colnames(lma_dtm(text)), 'word')
   expect_equal(ncol(lma_dtm(text, numbers = TRUE)), 6)
 })
 
 test_that('punct works', {
-  text = c("word, word word. Word's word-word 'word' word? Word word: word; word!")
+  text = "word, word word. Word's word-word 'word' word? Word word: word; word!"
   expect_equal(colnames(lma_dtm(text)), c('word', "word's", 'word-word'))
   expect_equal(colnames(lma_dtm(text, punct = TRUE)),
     c('!', '"', ',', '.', ':', ';', '?', 'word', "word's", 'word-word'))
 })
 
 test_that('urls works', {
-  text = c('click here: https://www.site.com/page, or try www.that.net?q=term or even dhji.gov#tag')
-  expect_true(all(c('https://www.site.com/page', 'www.that.net?q=term', 'dhji.gov#tag') %in% colnames(lma_dtm(text, punct = TRUE))))
+  text = 'click here: https://www.site.com/page, or try www.that.net?q=term or even dhji.gov#tag'
+  expect_true(all(c('https://www.site.com/page', 'www.that.net?q=term', 'dhji.gov#tag') %in%
+    colnames(lma_dtm(text, punct = TRUE))))
   expect_true(all(c('www.site.com', 'www.that.net', 'dhji.gov') %in% colnames(lma_dtm(text))))
   expect_true(lma_dtm(text, urls = FALSE)[, 'url'] == 3)
 })
 
 test_that('emojis works', {
-  text = c(':) word! ( : word: :( ... :...( > D: + :>( word :p')
+  text = ':) word! ( : word: :( ... :...( > D: + :>( word :p ^_^ word :[ word [-:'
   expect_equal(colnames(lma_dtm(text)), c('d', 'p', 'word'))
   expect_equal(colnames(lma_dtm(text, emojis = TRUE)), c('repfrown', 'repsmile', 'word'))
-  expect_true(all(lma_dtm(text, emojis = TRUE) == 3))
+  expect_true(all(lma_dtm(text, emojis = TRUE) == 5))
 })
 
 test_that('tokens.only lines up', {
