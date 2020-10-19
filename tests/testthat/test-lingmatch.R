@@ -86,7 +86,7 @@ test_that('profile comparisons work', {
   )
   expect_equal(
     as.numeric(lingmatch(dtm, 'novels', type = 'lsm')$sim),
-      as.numeric(lingmatch(dtm, novels, type = 'lsm')$sim)
+    as.numeric(lingmatch(dtm, novels, type = 'lsm')$sim)
   )
 })
 
@@ -111,12 +111,28 @@ test_that('group comparisons work', {
     a = colMeans(cdtm[groups == 'a',]),
     b = colMeans(cdtm[groups == 'b',])
   )
-  expect_equal(
-    lingmatch(dtm, group = groups, type = 'lsm')$sim[, 2],
-    rowSums(lingmatch(dtm, group_means, type = 'lsm')$sim * rep(
-      c(1, 0, 1), nrow(dtm) / c(2, 1, 2)
-    ))
+  g1 = lingmatch(dtm, group = groups, type = 'lsm')$sim[, 2]
+  expect_equal(g1, rowSums(lingmatch(dtm, group_means, type = 'lsm')$sim * rep(
+      c(1, 0, 1), nrow(dtm) / c(2, 1, 2))))
+  pw = lingmatch(dtm, type = 'lsm', symmetrical = TRUE)$sim
+  expect_true(
+    all(lingmatch(dtm, 'pairwise', mean = FALSE, group = groups, type = 'lsm')$sim$a -
+    pw[groups == 'a', groups == 'a']) < 1e-9
   )
+  expect_equal(
+    lingmatch(dtm, 'pairwise', group = groups, type = 'lsm')$sim[, 2],
+    (c(
+      rowSums(pw[groups == 'a', groups == 'a']),
+      rowSums(pw[groups == 'b', groups == 'b'])
+    ) - 1) / (nrow(dtm) / 2 - 1)
+  )
+  subgroups = sample(c('x', 'y'), nrow(dtm), TRUE)
+  sg = paste(groups, subgroups)
+  sgmeans = t(vapply(split(as.data.frame(cdtm), sg), colMeans, numeric(9)))
+  g1_2 = lingmatch(dtm, group = cbind(groups, subgroups), type = 'lsm', all.levels = TRUE)$sim
+  expect_equal(g1, g1_2$g1_canberra)
+  expect_equal(g1_2$g1_g2_canberra, vapply(seq_along(sg), function(i)
+    lma_simets(cdtm[i,], sgmeans[sg[i],], 'can'), 0))
 })
 
 test_that('groups work through data', {
@@ -127,6 +143,10 @@ test_that('groups work through data', {
   )
   categories = colnames(data)[-(1:2)]
   group_means = t(vapply(split(data[, categories], data$group), colMeans, numeric(9)))
+  manual = as.numeric(c(
+    lma_simets(data[data$group == 'a', categories], group_means['a',], 'canberra'),
+    lma_simets(data[data$group == 'b', categories], group_means['b',], 'canberra')
+  ))
   expect_equal(
     lingmatch(data, group = group, type = 'lsm')$sim[, 2],
     as.numeric(c(
@@ -141,6 +161,31 @@ test_that('groups work through data', {
       r = data[i,]
       lma_simets(r[categories], id_means[r[[1]],], 'canberra')
     }, 0)
+  )
+})
+
+test_that('comp.group and comp.data work', {
+  data = data.frame(
+    id = as.factor(rep(seq_len(nrow(dtm) / 2), 2)),
+    condition = rbinom(nrow(dtm), 1, .5),
+    group = as.factor(rep(c('a', 'b'), each = nrow(dtm) / 2)),
+    lma_termcat(lma_weight(dtm, percent = TRUE))
+  )
+  cats = names(lma_dict(1:9))
+  sdat = split(data[, cats], paste0(data$group, data$condition))
+  pairs = list(a = lma_simets(sdat$a0, sdat$a1, metric = 'can'), b = lma_simets(sdat$b0, sdat$b1, metric = 'can'))
+  expect_equal(as.numeric(rowMeans(pairs$a)), as.numeric(lma_simets(sdat$a0, sdat$a1, metric = 'can', mean = TRUE)))
+  c1mean = list(
+    a = lma_simets(sdat$a0, colMeans(sdat$a1), metric = 'can'),
+    b = lma_simets(sdat$b0, colMeans(sdat$b1), metric = 'can')
+  )
+  tt = lingmatch(
+    data[data$condition == 0,], data[data$condition == 1,],
+    group = group, comp.group = group, type = 'lsm'
+  )
+  expect_equal(
+    tt$sim$canberra,
+    as.numeric(unlist(c1mean))
   )
 })
 

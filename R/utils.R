@@ -9,7 +9,9 @@
 #'   \code{\link{lma_termcat}}, and/or \code{\link{lma_lspace}}. All arguments must be named.
 #' @param meta Logical; if \code{FALSE}, metastatistics are not included. Only applies when raw text is available.
 #'  If included, meta categories are added as the last columns, with names starting with "meta_".
-#' @return A matrix with texts represented by rows, and features in columns.
+#' @return A matrix with texts represented by rows, and features in columns, unless there are multiple rows per output
+#'  (e.g., when a latent semantic space is applied without terms being mapped) in which case only the special output
+#'  is returned (e.g., a matrix with terms as rows and latent dimensions in columns).
 #' @seealso If you just want to compare texts, see the \code{\link{lingmatch}} function.
 #' @examples
 #' # starting with some texts in a vector
@@ -41,6 +43,7 @@ lma_process = function(input = NULL, ..., meta = TRUE){
   names(arg_matches) = funs
   # identify input
   op = NULL
+  if(is.function(input)) stop('enter a character vector or matrix-like object as input')
   if(is.character(input) || is.factor(input)){
     ck_paths = length(input) != 1 && all(file.exists(input))
     op = if(length(arg_matches$read.segments) || ck_paths){
@@ -90,9 +93,11 @@ lma_process = function(input = NULL, ..., meta = TRUE){
     ck_changed = TRUE
   }
   if(length(arg_matches$lma_lspace)){
+    nr = NROW(x)
     arg_matches$lma_lspace$dtm = x
     x = do.call(lma_lspace, arg_matches$lma_lspace)
     colnames(x) = paste0('dim', seq_len(ncol(x)))
+    if(nrow(x) != nr) return(x)
     ck_changed = TRUE
   }
   if(any(grepl('Matrix', class(x), fixed = TRUE))) x = as.matrix(x)
@@ -420,7 +425,7 @@ read.segments = function(path = '.', segment = NULL, ext = '.txt', subdir = FALS
         TWC = length(words)
         if(segment.size == -1) segment.size = ceiling(TWC / segment)
         if(bysentence){
-          if(!is.null(segment)){
+          if(!is.null(segment) && is.numeric(segment)){
             lines = character(segment)
             WC = numeric(segment)
           }else{
@@ -436,9 +441,7 @@ read.segments = function(path = '.', segment = NULL, ext = '.txt', subdir = FALS
             sentends = c(sentends, TWC)
             nsents = nsents + 1
           }
-          i = 1
-          s = 1
-          p = 2
+          i = s = p = 1
           while(p < nsents && sum(WC) < TWC){
             WC[i] = 0
             while(p < nsents && WC[i] < segment.size){
@@ -574,12 +577,12 @@ select.lsspace = function(query = NULL, dir = getOption('lingmatch.lspace.dir'),
       query = tolower(query)
       overlap = query[query %in% rownames(r$term_map)]
       if(length(overlap)){
-        r$info$coverage = colMeans(r$term_map[overlap,] != 0)
+        r$info$coverage = colSums(r$term_map[overlap,, drop = FALSE] != 0) / length(query)
         r$selected = r$info[order(r$info$coverage, decreasing = TRUE)[1:5],]
         r$space_terms = overlap
       }else warning('query was treated as terms, but none were found')
     }else{
-      if(!length(sel <- grep(query, rownames(lss_info), TRUE))){
+      if(!length(sel <- grep(paste0(query, collapse = '|'), rownames(lss_info), TRUE))){
         collapsed = vapply(seq_len(nrow(lss_info)),
           function(r) paste(c(rownames(lss_info)[r], lss_info[r,]), collapse = ' '), '')
         if(!length(sel <- grep(query, collapsed, TRUE)))
@@ -786,7 +789,7 @@ select.dict = function(query = NULL, dir = getOption('lingmatch.dict.dir'),
     ifelse(r$info$weighted, '.csv', '.dic'))
   r$info[!r$info[, 'downloaded'] %in% list.files(dir, full.names = TRUE), 'downloaded'] = ''
   if(!missing(query)){
-    if(!length(sel <- grep(query, rownames(dict_info), TRUE))){
+    if(!length(sel <- grep(paste0(query, collapse = '|'), rownames(dict_info), TRUE))){
       collapsed = vapply(seq_len(nrow(dict_info)),
         function(r) paste(c(rownames(dict_info)[r], dict_info[r,]), collapse = ' '), '')
       if(!length(sel <- grep(query, collapsed, TRUE)))
@@ -898,7 +901,7 @@ download.dict = function(dict = 'lusi', check.md5 = TRUE, mode = 'wb', dir = get
 #' }
 #' @export
 
-standardize.lsspace = function(infile, name, sep = ' ', digits = 9, dir = options('lingmatch.lspace.dir'),
+standardize.lsspace = function(infile, name, sep = ' ', digits = 9, dir = getOption('lingmatch.lspace.dir'),
   outdir = dir, remove = '', term_check = "^[a-zA-Z]+$|^['a-zA-Z][a-zA-Z.'\\/-]*[a-zA-Z.]$", verbose = FALSE){
   if(!is.character(term_check)) term_check = ''
   ip = paste0(sub('/+$', '', path.expand(dir)), '/', infile)
@@ -922,7 +925,12 @@ standardize.lsspace = function(infile, name, sep = ' ', digits = 9, dir = option
     writeLines(ot, paste0(op, '_terms.txt'))
     write(o, paste0(op, '.dat'), ncol(o))
     if(is.character(infile)) rm(f, 'o')
-  }else reformat_embedding(ip, op, sep, digits, remove, term_check, verbose)
+  }else{
+    if(!file.exists(ip)) stop('infile does not exist: ', ip)
+    if(!grepl(term_check, scan(ip, '', 1, sep = sep, quiet = TRUE)))
+      stop('infile does not appear to start with a term: ', ip)
+    reformat_embedding(ip, op, sep, digits, remove, term_check, verbose)
+  }
   message('created ', op, '.dat\nfrom ', ip)
 }
 

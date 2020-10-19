@@ -55,17 +55,14 @@ for each metric, even when only one metric is requested.}
 Output varies based on the dimensions of \code{a} and \code{b}:
   \tabular{ll}{
     \strong{output} \tab \strong{input} \cr
-    a vector with a value per metric \tab only when \code{a} and \code{b} are both vectors \cr
-    a vector with a value per row \tab any time a single value is expected per row:
-      \code{a} or \code{b} is a vector, \code{a} and \code{b} are matrices with the same number of rows
-      and \code{pairwise = FALSE}, a group is specified, or \code{mean = TRUE}, and only one metric is
-      requested \cr
-    a data.frame with a column per metric \tab when multiple metrics are requested in the previous
-      case\cr
-    sparse matrix \tab pairwise comparisons within an \code{a} matrix or between
-      an \code{a} and \code{b} matrix, when only 1 metric is requested\cr
-    a list with a sparse matrix per metric \tab when multiple metrics are requested in the previous
-      case\cr
+    vector with a value per metric \tab Only when \code{a} and \code{b} are both vectors.\cr
+    vector with a value per row \tab Any time a single value is expected per row: \code{a} or \code{b} is a vector,
+      \code{a} and \code{b} are matrices with the same number of rows and \code{pairwise = FALSE}, a group is
+      specified, or \code{mean = TRUE}, and only one metric is requested.\cr
+    data.frame with a column per metric \tab When multiple metrics are requested in the previous case.\cr
+    sparse matrix \tab Pairwise comparisons within an \code{a} matrix or between
+      an \code{a} and \code{b} matrix, when only 1 metric is requested.\cr
+    list with a sparse matrix per metric \tab When multiple metrics are requested in the previous case.\cr
   }
 }
 \description{

@@ -5,7 +5,7 @@
 \title{Standardize a Latent Semantic Space}
 \usage{
 standardize.lsspace(infile, name, sep = " ", digits = 9,
-  dir = options("lingmatch.lspace.dir"), outdir = dir, remove = "",
+  dir = getOption("lingmatch.lspace.dir"), outdir = dir, remove = "",
   term_check = "^[a-zA-Z]+$|^['a-zA-Z][a-zA-Z.'\\\\/-]*[a-zA-Z.]$",
   verbose = FALSE)
 }

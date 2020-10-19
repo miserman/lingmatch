@@ -1,5 +1,19 @@
 context('lma_lspace')
 
+test_that('svd works', {
+  dtm = matrix(rpois(100, 1), 10)
+  colnames(dtm) = letters[1:10]
+  lss = lma_lspace(dtm)
+  expect_equal(
+    lma_simets(lma_lspace(dtm, lma_lspace(dtm)), 'cos'),
+    lma_simets(lma_lspace(dtm, keep.dim = TRUE), 'cos')
+  )
+  expect_equal(
+    lma_simets(lma_lspace(dtm, lma_lspace(dtm, dim.cutoff = .1)), 'can'),
+    lma_simets(lma_lspace(dtm, dim.cutoff = .1, keep.dim = TRUE), 'can')
+  )
+})
+
 dir = getOption('lingmatch.lspace.dir')
 map = paste0(dir, '/lma_term_map.rda')
 files = list.files(dir, '\\.dat$', full.names = TRUE)

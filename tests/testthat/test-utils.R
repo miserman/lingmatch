@@ -4,25 +4,43 @@ texts = c(
   "And there with it isn't I think anyone would.",
   "Command lands of a few I two of it is."
 )
-file = tempfile(fileext = '.txt')
 
 test_that('lma_process works', {
+  files = c(tempfile(fileext = '.txt'), tempfile(fileext = '.txt'))
   dtm = as.data.frame(lma_dtm(texts, sparse = FALSE))
   meta = lma_meta(texts)
   colnames(meta) = paste0('meta_', colnames(meta))
   manual = cbind(text = texts, dtm, meta)
   expect_equal(lma_process(texts), manual)
-  write(texts, file)
-  expect_equal(lma_process(file), manual)
-  file.remove(file)
+  pr = lma_process(lma_patcat(
+    texts, dict = lma_dict(as.regex = FALSE), return.dtm = TRUE, fixed = FALSE, globtoregex = TRUE
+  ))
+  expect_equal(pr, lma_process(texts, dict = lma_dict(as.regex = FALSE), return.dtm = TRUE, fixed = FALSE,
+    globtoregex = TRUE)[, names(pr)])
+  write(texts[1], files[1])
+  write(texts[2], files[2])
+  expect_equal(lma_process(files)[, -(1:3)], manual)
+  expect_equal(lma_process(read.segments(files))[, -(1:3)], manual)
+  file.remove(files)
   manual[, colnames(dtm)] = lma_weight(dtm, 'tfidf', normalize = FALSE)
   expect_equal(lma_process(texts, weight = 'tfidf', normalize = FALSE), manual)
+  wmeta = meta
+  wmeta[, c(9, 14:23)] = wmeta[, c(9, 14:23)] / wmeta$meta_words
+  expect_equal(lma_process(texts, weight = 'count')[, colnames(meta)], wmeta)
   termcat = as.data.frame(lma_termcat(lma_weight(dtm)))
   expect_equal(lma_process(texts, weight = 'count', dict = lma_dict(1:9), meta = FALSE)[, -1], termcat)
   expect_equal(lma_process(dtm, weight = 'count', dict = lma_dict(1:9), meta = FALSE), termcat)
+  expect_equal(as.numeric(lma_process(dtm, dim.cutoff = .1)[, 1]), as.numeric(lma_lspace(dtm, dim.cutoff = .1)))
+})
+
+test_that('lma_dict works', {
+  expect_equal(names(lma_dict(c('ppron', 'adv'))), c('ppron', 'adverb'))
+  expect_equal(lma_dict(as.function = TRUE)(c('fefe', 'and', 'sksk')), c(FALSE, TRUE, FALSE))
+  expect_equal('wdk kdls loe (cc)', lma_dict(special, as.function = gsub)('wdk \u0137dls lo\u00cb \u00A9'))
 })
 
 test_that('read/write.dic works', {
+  file = tempfile(fileext = '.txt')
   dict = list(
     full = letters,
     sub = letters[1:10],
@@ -127,6 +145,8 @@ test_that('read.segments works', {
   dir = path.package('lingmatch')
   files = grep('[DNRAE]{2}', list.files(dir, full.names = TRUE), value = TRUE)
 
+  expect_equal(read.segments(texts, segment.size = 5, bysentence = TRUE)$WC, c(9, 10))
+
   segs = read.segments(files, ext = '')
   wc = sum(segs$WC)
   expect_equal(unique(segs$input), files)
@@ -157,3 +177,17 @@ test_that('read.segments works', {
   expect_true(all(tapply(segs50w$text, segs50w$input, paste, collapse = ' ') == manual))
 })
 
+test_that('select dict and lsspace work', {
+  expect_equal(nrow(select.dict(c('inq', 'sent'))$selected), 5)
+  expect_equal(nrow(select.lsspace(c('goo'))$selected), 1)
+  skip_if_not(file.exists(paste0(getOption('lingmatch.lspace.dir'), '/lma_term_map.rda')))
+  expect_equal(select.lsspace(c('cenepa', "didn't", 'pansear', 'xenops'))$selected$coverage, c(1, 1, .75, .5, .5))
+  dir = getOption('lingmatch.lspace.dir')
+  f = paste0(dir, '/stdtest.txt')
+  skip_if_not(file.exists(f))
+  standardize.lsspace('stdtest.txt', 'stdtest')
+  o = read.table(f, sep = ' ', quote = '', row.names = 1)
+  o = as.matrix(o[!grepl('[^a-z]', rownames(o)),])
+  expect_equal(o, matrix(scan(paste0(dir, '/stdtest.dat'), quiet = TRUE),
+    nrow(o), 300, TRUE, dimnames = list(readLines(paste0(dir, '/stdtest_terms.txt')), colnames(o))))
+})

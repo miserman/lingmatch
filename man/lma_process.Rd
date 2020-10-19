@@ -16,7 +16,9 @@ lma_process(input = NULL, ..., meta = TRUE)
 If included, meta categories are added as the last columns, with names starting with "meta_".}
 }
 \value{
-A matrix with texts represented by rows, and features in columns.
+A matrix with texts represented by rows, and features in columns, unless there are multiple rows per output
+ (e.g., when a latent semantic space is applied without terms being mapped) in which case only the special output
+ is returned (e.g., a matrix with terms as rows and latent dimensions in columns).
 }
 \description{
 A wrapper to other pre-processing functions, potentially from \code{\link{read.segments}}, to \code{\link{lma_dtm}}

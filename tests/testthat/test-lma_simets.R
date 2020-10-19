@@ -51,6 +51,19 @@ test_that('a row to b row comparisons work', {
   expect_equivalent(sims_ab, sims_m, tolerance = 1e-7)
 })
 
+test_that('text inputs and differing a-b columns works', {
+  words = vapply(1:50, function(i) paste(sample(letters, sample(7), TRUE), collapse = ''), '')
+  text = vapply(1:10, function(i) paste(sample(words[seq(1, if(i < 5) 50 else 40)], 50, TRUE), collapse = ' '), '')
+  dtm = lma_dtm(text[1:5])
+  expect_equal(as.numeric(lma_simets(text[1:5], 'cos')), as.numeric(lma_simets(dtm, 'cos')))
+  comp = lma_dtm(text[5:10])
+  sims_ab = lma_simets(dtm, comp, 'cos')
+  expect_equal(
+    as.numeric(lma_simets(text[1:5], text[5:10], 'cos')),
+    as.numeric(lma_simets(dtm, comp, 'cos'))
+  )
+})
+
 test_that('entry order is arbitrary for vector-matrix comparisons', {
   dtm = Matrix(rpois(1000, .5), 10, sparse = TRUE)
   comp = Matrix(rpois(100, .5), nrow = 1, sparse = TRUE)
@@ -61,6 +74,8 @@ test_that('entry order is arbitrary for vector-matrix comparisons', {
 })
 
 test_that('pearson aligns with cor', {
+  a = matrix(rnorm(500), 20)
+  expect_equal(as.numeric(lma_simets(a, metric = 'pearson', symmetric = TRUE)), as.numeric(cor(t(a))))
   a = matrix(rpois(500, 1), 20)
   expect_equal(as.numeric(lma_simets(a, metric = 'pearson', symmetric = TRUE)), as.numeric(cor(t(a))))
 })
@@ -83,7 +98,12 @@ test_that('lag works', {
   dtm = Matrix(rpois(200, 1), 10, sparse = TRUE)
   dtm[2, c(1, 20)] = 1
 
+
   # +1
+  expect_equal(
+    as.numeric(lma_simets(dtm[1,], metric = 'pearson', lag = 1)),
+    cor(dtm[1,], c(0, dtm[1, -20]))
+  )
   expect_equal(
     as.numeric(lma_simets(dtm[1,], dtm[2,], metric = 'pearson', lag = 1)),
     cor(dtm[1,], c(0, dtm[2, -20]))

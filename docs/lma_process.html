@@ -44,7 +44,9 @@ If included, meta categories are added as the last columns, with names starting 
 
 <h3>Value</h3>
 
-<p>A matrix with texts represented by rows, and features in columns.
+<p>A matrix with texts represented by rows, and features in columns, unless there are multiple rows per output
+(e.g., when a latent semantic space is applied without terms being mapped) in which case only the special output
+is returned (e.g., a matrix with terms as rows and latent dimensions in columns).
 </p>
 
 

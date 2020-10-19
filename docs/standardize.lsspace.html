@@ -19,7 +19,7 @@ are processed line-by-line, so large spaces can be reformatted RAM-conservativel
 
 <pre>
 standardize.lsspace(infile, name, sep = " ", digits = 9,
-  dir = options("lingmatch.lspace.dir"), outdir = dir, remove = "",
+  dir = getOption("lingmatch.lspace.dir"), outdir = dir, remove = "",
   term_check = "^[a-zA-Z]+$|^['a-zA-Z][a-zA-Z.'\\/-]*[a-zA-Z.]$",
   verbose = FALSE)
 </pre>

@@ -12,6 +12,7 @@ test_that('term.weights work', {
   expect_equal(lma_termcat(dtm, category)[, 1], score)
   expect_equal(lma_termcat(dtm, list(a = category), list(a = category))[, 1], score)
   expect_equal(lma_termcat(dtm, sepcat$terms, sepcat$weights)[, 1], score)
+  expect_equal(lma_termcat(dtm, as.data.frame(sepcat), 'weights')[, 1], score)
 })
 
 test_that('bias works', {

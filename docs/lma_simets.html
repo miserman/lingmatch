@@ -134,29 +134,26 @@ threads to 4.
 </tr>
 <tr>
  <td style="text-align: left;">
-    a vector with a value per metric </td><td style="text-align: left;"> only when <code>a</code> and <code>b</code> are both vectors </td>
+    vector with a value per metric </td><td style="text-align: left;"> Only when <code>a</code> and <code>b</code> are both vectors.</td>
 </tr>
 <tr>
  <td style="text-align: left;">
-    a vector with a value per row </td><td style="text-align: left;"> any time a single value is expected per row:
-      <code>a</code> or <code>b</code> is a vector, <code>a</code> and <code>b</code> are matrices with the same number of rows
-      and <code>pairwise = FALSE</code>, a group is specified, or <code>mean = TRUE</code>, and only one metric is
-      requested </td>
+    vector with a value per row </td><td style="text-align: left;"> Any time a single value is expected per row: <code>a</code> or <code>b</code> is a vector,
+      <code>a</code> and <code>b</code> are matrices with the same number of rows and <code>pairwise = FALSE</code>, a group is
+      specified, or <code>mean = TRUE</code>, and only one metric is requested.</td>
 </tr>
 <tr>
  <td style="text-align: left;">
-    a data.frame with a column per metric </td><td style="text-align: left;"> when multiple metrics are requested in the previous
-      case</td>
+    data.frame with a column per metric </td><td style="text-align: left;"> When multiple metrics are requested in the previous case.</td>
 </tr>
 <tr>
  <td style="text-align: left;">
-    sparse matrix </td><td style="text-align: left;"> pairwise comparisons within an <code>a</code> matrix or between
-      an <code>a</code> and <code>b</code> matrix, when only 1 metric is requested</td>
+    sparse matrix </td><td style="text-align: left;"> Pairwise comparisons within an <code>a</code> matrix or between
+      an <code>a</code> and <code>b</code> matrix, when only 1 metric is requested.</td>
 </tr>
 <tr>
  <td style="text-align: left;">
-    a list with a sparse matrix per metric </td><td style="text-align: left;"> when multiple metrics are requested in the previous
-      case</td>
+    list with a sparse matrix per metric </td><td style="text-align: left;"> When multiple metrics are requested in the previous case.</td>
 </tr>
 <tr>
  <td style="text-align: left;">

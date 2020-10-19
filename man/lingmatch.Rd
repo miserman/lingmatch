@@ -14,8 +14,8 @@ or path to a file (.txt or .csv, with texts separated by one or more lines/rows)
 
 \item{comp}{Defines the comparison to be made:
 \itemize{
-  \item If a function, this will be applied to \code{x} within each group (overall if there is
-    no group; i.e., \code{apply(x,2,comp)}; e.g., \code{comp = mean} would compare each text to
+  \item If a function, this will be applied to \code{input} within each group (overall if there is
+    no group; i.e., \code{apply(input, 2, comp)}; e.g., \code{comp = mean} would compare each text to
     the mean profile of its group.)
   \item If a character with a length of 1 and no spaces, if it partially matches one of
     \code{lsm_profiles}'s rownames, that row will be used as the comparison; if it partially
@@ -23,16 +23,16 @@ or path to a file (.txt or .csv, with texts separated by one or more lines/rows)
     partially matches \code{'pairwise'}, each text will be compared to one another; if it
     partially matches \code{'sequential'}, the last variable in \code{group} will be treated as
     a speaker ID (see the grouping and comparisons section).
-  \item If a character vector, this will be processed in the same way as \code{x}.
-  \item If a vector, either of the same length as \code{x} has rows and logical or factor-like
-    (having  n levels < length), or a numeric range or logical of length less than \code{nrow(x)}
+  \item If a character vector, this will be processed in the same way as \code{input}.
+  \item If a vector, either of the same length as \code{input} has rows and logical or factor-like
+    (having  n levels < length), or a numeric range or logical of length less than \code{nrow(input)}
     , this will be used to select a subset of
-    \code{x} (e.g., \code{comp = 1:10} would treat the first 10 rows of x as the comparison;
+    \code{input} (e.g., \code{comp = 1:10} would treat the first 10 rows of \code{input} as the comparison;
     \code{comp = type=='prompt'} would make a logical vector identifying prompts, assuming
     "type" was the name of a column in \code{data}, or a variable in the global environment,
     and the value "prompt" marked the prompts).
   \item If a matrix-like object (having multiple rows and columns), or a named vector, this will
-    be treated as a sort of dtm, assuming there are common (column) names between \code{x} and
+    be treated as a sort of dtm, assuming there are common (column) names between \code{input} and
     \code{comp} (e.g., if you had prompt and response texts that were already processed separately).
 }}
 
@@ -40,20 +40,20 @@ or path to a file (.txt or .csv, with texts separated by one or more lines/rows)
 other arguments (e.g., \code{lingmatch(text, data=data)} would be the same as
 \code{lingmatch(data$text)}.}
 
-\item{group}{A logical or factor-like vector the same length as \code{nrow(x)}, used to defined
+\item{group}{A logical or factor-like vector the same length as \code{NROW(input)}, used to defined
 groups.}
 
 \item{...}{Passes arguments to \code{\link{lma_dtm}}, \code{\link{lma_weight}},
 \code{\link{lma_termcat}}, and/or \code{\link{lma_lspace}},
-depending on \code{x} and \code{comp}, and \code{\link{lma_simets}}.}
+depending on \code{input} and \code{comp}, and \code{\link{lma_simets}}.}
 
 \item{comp.data}{A matrix-like object as a reference to \code{comp} variables.}
 
-\item{comp.group}{The Column name of the grouping variable(s) in \code{comp.data}; if
+\item{comp.group}{The column name of the grouping variable(s) in \code{comp.data}; if
 \code{group} contains references to column names, and \code{comp.group} is not specified,
 \code{group} variables will be looked for in \code{comp.data}.}
 
-\item{order}{A numeric vector the same length as \code{nrow(x)} indicating the order of the
+\item{order}{A numeric vector the same length as \code{nrow(input)} indicating the order of the
 texts and grouping variables if the type of comparison is sequential. Only necessary if the
 texts are not already ordered as desired.}
 
@@ -101,7 +101,7 @@ specific knowledge, so it can't always (readily) be done automatically. Variable
     or preexisting standards (i.e., the profile of the current data, or a precalculated profile,
     respectively).}
   \item{Comparison ID}{When comparison data is identified in \code{comp}, groups are assumed
-    to apply to both \code{x} and \code{comp} (either both in \code{data}, or separately
+    to apply to both \code{input} and \code{comp} (either both in \code{data}, or separately
     between \code{data} and \code{comp.data}, in which case \code{comp.group} may be needed if
     the same grouping variable have different names between \code{data} and \code{comp.data}).
     In this case, multiple grouping variables are combined into a single factor assumed to
