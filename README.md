@@ -10,8 +10,8 @@ An all-in-one R package for the assessment of linguistic matching and/or accommo
 
 ## resources
 * Documentation and guides: [miserman.github.io/lingmatch](https://miserman.github.io/lingmatch/)
-  * [Quick start](https://miserman.github.io/lingmatch/#quickstart)
-  * [Introduction to text analysis](https://miserman.github.io/lingmatch/#introduction)
+  * [Quick start](https://miserman.github.io/lingmatch/#quick_start)
+  * [Introduction to text analysis](https://miserman.github.io/lingmatch/#text_analysis)
   * [Comparisons](https://miserman.github.io/lingmatch/#comparisons)
   * [Word vectors](https://miserman.github.io/lingmatch/#word_vectors)
 * Dictionary repository: [osf.io/y6g5b](https://osf.io/y6g5b/wiki/home/)

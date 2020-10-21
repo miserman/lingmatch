@@ -541,7 +541,7 @@ select.lsspace = function(query = NULL, dir = getOption('lingmatch.lspace.dir'),
   get.map = FALSE, check.md5 = TRUE, mode = 'wb'){
   dir = sub('/*$', '/', path.expand(dir))
   map_path = paste0(dir, 'lma_term_map.rda')
-  if(!missing(query) && length(query) > 1) get.map = TRUE
+  if(missing(get.map) && !missing(query) && length(query) > 1) get.map = TRUE
   if(!exists('lma_term_map')) lma_term_map = NULL
   if(get.map && !(file.exists(map_path) || !is.null(lma_term_map))){
     if(!file.exists(map_path)){
@@ -906,24 +906,21 @@ standardize.lsspace = function(infile, name, sep = ' ', digits = 9, dir = getOpt
   if(!is.character(term_check)) term_check = ''
   ip = paste0(sub('/+$', '', path.expand(dir)), '/', infile)
   op = paste0(sub('/+$', '', path.expand(outdir)), '/', name)
-  cop = options(scipen = digits + 1)
-  on.exit(options(cop))
   if(!is.character(infile) || grepl('\\.rda$', infile)){
     if(is.character(infile)){
       f = load(ip)
       o = get(f)
     }else o = infile
-    m = max(o)
     o = round(o, digits)
     ot = rownames(o)
+    if(remove != '') ot = gsub(remove, '', ot)
     if(term_check != ''){
       su = grepl(term_check, ot)
       o = o[su,]
       ot = ot[su]
     }
-    if(remove != '') ot = gsub(remove, '', ot)
     writeLines(ot, paste0(op, '_terms.txt'))
-    write(o, paste0(op, '.dat'), ncol(o))
+    write(formatC(t(o), digits, 0, 'f'), paste0(op, '.dat'), ncol(o))
     if(is.character(infile)) rm(f, 'o')
   }else{
     if(!file.exists(ip)) stop('infile does not exist: ', ip)
@@ -1027,8 +1024,9 @@ lma_patcat = function(text, dict, pattern.weights = 'weight', pattern.categories
   if(length(dict) == 1 && is.character(dict) && (grepl('\\.(?:csv|dic|txt)$', dict) ||
       sub('\\.[^.]+$', '', dict) %in% c(rownames(select.dict()$info),
         sub('\\.[^.]+$', '', list.files(getOption('lingmatch.dict.dir')))))) dict = read.dic(dict)
+  if(!is.null(dim(dict)) && is.null(colnames(dict))) colnames(dict) = paste0('X', seq_len(ncol(dict)))
   # independently entered wide weights
-  if(is.null(colnames(dict)) && (!is.null(ncol(pattern.weights)) || !is.null(ncol(pattern.categories)))){
+  if(is.null(dim(dict)) && (!is.null(ncol(pattern.weights)) || !is.null(ncol(pattern.categories)))){
     weights = if(!is.null(ncol(pattern.weights))) pattern.weights else pattern.categories
     if(length(dict) != nrow(weights)) stop('dict and wide weights do not align')
     wide = TRUE
@@ -1038,7 +1036,7 @@ lma_patcat = function(text, dict, pattern.weights = 'weight', pattern.categories
     if(!ncol(weights)) stop('could not identify numeric weights in wide weights')
     lex = list(terms = dict, weights = weights, category = colnames(weights))
   # wide weights in dict
-  }else if(!is.null(colnames(dict)) && (
+  }else if(!is.null(dim(dict)) && (
       (length(pattern.weights) > 1 && is.character(pattern.weights)) ||
       (length(pattern.categories) > 1 &&
           (length(pattern.categories) != nrow(dict) || all(pattern.categories %in% colnames(dict)))) ||
@@ -1062,7 +1060,7 @@ lma_patcat = function(text, dict, pattern.weights = 'weight', pattern.categories
     }
     lex = list(term = dict[, name.map[['term']]], weights = dict[, categories, drop = FALSE], category = categories)
   # independently entered weights and categories
-  }else if(is.null(colnames(dict))){
+  }else if(is.null(dim(dict))){
     if((is.numeric(dict) && is.null(names(dict))) || (is.list(dict) && is.numeric(dict[[1]]) &&
         is.null(names(dict[[1]])))) stop('could not recognize terms in dict')
     n = length(dict)

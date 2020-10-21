@@ -3,7 +3,7 @@ context('lma_simets')
 manual = function(a, b) as.numeric(c(
   jaccard = sum(a & b) / sum(a | b),
   euclidean = 1 / (1 + sqrt(sum((a - b) ^ 2))),
-  canberra = 1 - mean(abs(a - b) / (abs(a) + abs(b) + 1e-9)),
+  canberra = 1 - mean(abs(a - b) / (abs(a) + abs(b) + 1e-13)),
   cosine = sum(a * b) / sqrt(sum(a ^ 2 * sum(b ^ 2))),
   pearson = (mean(a * b) - (mean(a) * mean(b))) / sqrt(mean(a ^ 2) - mean(a) ^ 2) /
     sqrt(mean(b ^ 2) - mean(b) ^ 2)

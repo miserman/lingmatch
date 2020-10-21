@@ -1,18 +1,23 @@
 context('lma_termcat')
 
 words = vapply(seq_len(5e3), function(w)
-  paste0(sample(letters, sample(9, 1)), collapse = ''), '')
+  paste0(sample(letters, 5), collapse = ''), '')
 
 test_that('term.weights work', {
   category = structure(rnorm(100), names = sample(words, 100))
-  sepcat = list(terms = names(category), weights = as.numeric(category))
   dtm = matrix(rpois(100 * 10, 1), 100,
     dimnames = list(NULL, sample(names(category), 10)))
   score = (dtm %*% category[colnames(dtm)])[, 1]
+  names(category) = sub('\\w$', '*', names(category))
+  sepcat = list(terms = names(category), weights = as.numeric(category))
   expect_equal(lma_termcat(dtm, category)[, 1], score)
   expect_equal(lma_termcat(dtm, list(a = category), list(a = category))[, 1], score)
   expect_equal(lma_termcat(dtm, sepcat$terms, sepcat$weights)[, 1], score)
+  expect_equal(lma_termcat(dtm, as.data.frame(sepcat))[, 1], score)
   expect_equal(lma_termcat(dtm, as.data.frame(sepcat), 'weights')[, 1], score)
+  s2 = lma_termcat(dtm, sepcat$terms, data.frame(a = sepcat$weights, b = sepcat$weights))
+  expect_equal(s2[, 1], score)
+  expect_equal(s2[, 1], s2[, 2])
 })
 
 test_that('bias works', {

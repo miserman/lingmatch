@@ -67,6 +67,16 @@ test_that('read/write.dic works', {
     c(1, 1.5, 0, 0, -1, -1.5))))
   expect_equal(dict[c(1, 3)], read.dic(data.frame(unlist(dict[c(1, 3)], use.names = FALSE),
     c(1, 1.5, -1, -1.5))))
+  expect_equal(read.dic(data.frame(
+    term = unlist(dict, use.names = FALSE), sentiment = rep(c(1, 0, -1), each = 2)
+  )), dict)
+  expect_equal(read.dic(data.frame(
+    term = unlist(dict, use.names = FALSE), category = rep(names(dict), each = 2)
+  ))[names(dict)], dict)
+  dicts = select.dict()$info
+  if(!is.na(d <- which(dicts$downloaded != '')[1])) expect_equal(
+    read.dic(rownames(dicts)[d]), read.dic(dicts[d, 'downloaded'])
+  )
 })
 
 test_that('lma_patcat variants works', {
@@ -135,10 +145,13 @@ test_that('lma_patcat wide dict format works', {
   dtm = lma_dtm(text)
   manual = cbind(dtm %*% dict$w1, dtm %*% dict$w2)
   expect_true(all(lma_patcat(text, dict) == manual))
+  expect_true(all(lma_patcat(text, unname(dict)) == manual))
   expect_true(all(lma_patcat(text, dict, c('w1', 'w2')) == manual))
   expect_true(all(lma_patcat(text, dict, pattern.categories = c('w1', 'w2')) == manual))
   expect_true(all(lma_patcat(text, dict, dict) == manual))
   expect_true(all(lma_patcat(text, dict, pattern.categories = dict) == manual))
+  expect_true(all(lma_patcat(text, dict$term, dict) == manual))
+  expect_true(all(lma_patcat(text, dict$term, pattern.categories = dict) == manual))
 })
 
 test_that('read.segments works', {
@@ -180,14 +193,41 @@ test_that('read.segments works', {
 test_that('select dict and lsspace work', {
   expect_equal(nrow(select.dict(c('inq', 'sent'))$selected), 5)
   expect_equal(nrow(select.lsspace(c('goo'))$selected), 1)
-  skip_if_not(file.exists(paste0(getOption('lingmatch.lspace.dir'), '/lma_term_map.rda')))
+  expect_equal(nrow(select.lsspace(c('goo', 'glove'), dir = '', get.map = FALSE)$selected), 4)
+  skip_if_not(file.exists(paste0(getOption('lingmatch.lspace.dir'), '/lma_term_map.rda')), 'term map not present')
   expect_equal(select.lsspace(c('cenepa', "didn't", 'pansear', 'xenops'))$selected$coverage, c(1, 1, .75, .5, .5))
+})
+
+test_that('standardize.lsspace works', {
   dir = getOption('lingmatch.lspace.dir')
-  f = paste0(dir, '/stdtest.txt')
-  skip_if_not(file.exists(f))
+  f = paste0(dir, '/stdtest.', c('txt', 'rda'))
+  skip_if_not(all(file.exists(f)), 'raw embeddings test files not present')
   standardize.lsspace('stdtest.txt', 'stdtest')
-  o = read.table(f, sep = ' ', quote = '', row.names = 1)
+  o = read.table(f[1], sep = ' ', quote = '', row.names = 1)
   o = as.matrix(o[!grepl('[^a-z]', rownames(o)),])
   expect_equal(o, matrix(scan(paste0(dir, '/stdtest.dat'), quiet = TRUE),
     nrow(o), 300, TRUE, dimnames = list(readLines(paste0(dir, '/stdtest_terms.txt')), colnames(o))))
+  standardize.lsspace('stdtest.rda', 'stdtest')
+  expect_equal(o, matrix(scan(paste0(dir, '/stdtest.dat'), quiet = TRUE),
+    nrow(o), 300, TRUE, dimnames = list(readLines(paste0(dir, '/stdtest_terms.txt')), colnames(o))))
+})
+
+dir = '~/../Downloads/'
+skip_if(TRUE || !dir.exists(dir), 'not downloading dictionary or embeddings files')
+
+test_that('select.lsspace can download term_map', {
+  skip_if(file.exists(paste0(dir, 'lma_term_map.rda')), 'term map already downloaded')
+  expect_true('term_map' %in% names(select.lsspace(get.map = TRUE, dir = dir)))
+})
+
+test_that('download.dict works', {
+  skip_if(file.exists(paste0(dir, 'lusi.dic')), 'dictionary already downloaded')
+  download.dict('lusi', dir = dir)
+  expect_true(file.exists(paste0(dir, 'lusi.dic')))
+})
+
+test_that('download.lsspace works', {
+  skip_if(file.exists(paste0(dir, 'senna.dat')), 'embeddings set already downloaded')
+  download.lsspace('senna', dir = dir)
+  expect_true(all(file.exists(paste0(dir, 'senna', c('.dat', '_terms.txt')))))
 })

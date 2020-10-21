@@ -307,7 +307,7 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
         group=gv(opt$group,data)
         if(is.factor(group)) group=as.character(group) else if(is.matrix(group))
           group = as.data.frame(group,row.names=FALSE)
-        if(is.null(ncol(group))) list(group) else lapply(group,as.character)
+        if(is.null(dim(group))) list(group) else lapply(group,as.character)
       }
     }
   if(!missing(comp.group) || (!is.null(comp.data) && !missing(group))){
@@ -322,7 +322,7 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
       }else{
         list(gv(cg, comp.data))
       }
-      if(is.list(cg) && length(cg) == 1 && !is.null(nrow(cg[[1]]))) cg = as.data.frame(cg[[1]])
+      if(is.list(cg) && length(cg) == 1 && !is.null(dim(cg[[1]]))) cg = as.data.frame(cg[[1]])
       if(cc!=1) if(NROW(comp)!=length(cg[[1]]) || NROW(input)!=length(group[[1]]))
         stop('data and comp.data mismatch',call.=FALSE)
       if(all.levels){
@@ -363,7 +363,7 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
   }
   dtm = Matrix(if(is.data.frame(input)) as.matrix(input) else input, sparse = TRUE)
   if(do.wmc) input=wmc(input)
-  if(is.null(nrow(input))) input=t(as.matrix(input))
+  if(is.null(dim(input))) input=t(as.matrix(input))
   if(cc==2 && (length(comp)>1 || any(grepl(' ',comp,fixed=TRUE)))){
     comp=do.call(lma_dtm,c(list(comp),dsp$p))
     cc=1
@@ -471,7 +471,7 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
     if(!is.null(comp.data)){
       if(ckf){
         opt$comp=paste(opt$comp.data,opt$comp)
-        sal$b=comp.data=if(is.null(nrow(comp.data))) comp.data else
+        sal$b=comp.data=if(is.null(dim(comp.data))) comp.data else
           if(compmeanck) colMeans(comp.data,na.rm=TRUE) else apply(na.omit(comp.data),2,comp)
       }else sal$b=comp.data
     }else if(ckf) sal$b=comp.data=if(compmeanck) colMeans(input,na.rm=TRUE) else
@@ -540,7 +540,7 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
             sal$b = input[i,]
             r = if(sum(su) != 0) do.call(lma_simets, c(list(input[su,]), sal)) else
               numeric(length(sal$metric)) + 1
-            if(is.null(nrow(r))) r else if(nrow(r) == 1) as.numeric(r) else
+            if(is.null(dim(r))) r else if(nrow(r) == 1) as.numeric(r) else
               if(ncol(r) != 1) colMeans(r, TRUE) else mean(r, na.rm = TRUE)
           }, numeric(length(sal$metric)))
           sim = data.frame(group[[1]], if(is.matrix(sim)) t(sim) else sim)
@@ -1361,12 +1361,12 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
     }
     if(!is.na(ts)) dict = ts
   }
-  if(!is.null(ncol(dict))){
+  if(!is.null(dim(dict))){
     if(!is.null(term.weights)){
       if(is.character(term.weights) && any(su <- term.weights %in% colnames(dict))){
         term.weights = dict[, term.weights[su], drop = FALSE]
       }
-      if(!is.null(ncol(term.weights))) term.weights = term.weights[, vapply(seq_len(ncol(term.weights)),
+      if(!is.null(dim(term.weights))) term.weights = term.weights[, vapply(seq_len(ncol(term.weights)),
         function(col) is.numeric(term.weights[, col]), TRUE)]
     }else if(any(su <- vapply(seq_len(ncol(dict)), function(col) is.numeric(dict[, col]), TRUE))){
       term.weights = dict[, su, drop = FALSE]
@@ -1382,23 +1382,72 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
       }else dict[, su]
     }
   }
-  if(!is.null(ncol(term.weights))){
-    term.weights = term.weights[, vapply(seq_len(ncol(term.weights)),
-      function(col) is.numeric(term.weights[, col]), TRUE), drop = FALSE]
-    if(!ncol(term.weights)) stop('no numeric columns in term.weights')
+  if(is.numeric(dict) && is.null(term.weights)){
+    term.weights = dict
+    dict = names(dict)
+  }
+  if(!is.null(dim(term.weights))){
     if(is.null(colnames(term.weights))) colnames(term.weights) = paste0('cat', seq_len(ncol(term.weights)))
     if(!is.data.frame(term.weights)) term.weights = as.data.frame(term.weights)
+    su = vapply(term.weights, is.numeric, TRUE)
+    if(any(!su)){
+      if(any(ssu <- !su & vapply(term.weights, anyDuplicated, 0) == 0))
+        rownames(term.weights) = term.weights[, which(ssu)[1]]
+      term.weights = term.weights[, su]
+    }
+    if(!length(term.weights)) stop('no numeric columns in term.weights')
   }
-  if(!is.list(dict)) dict = if(length(dict) == 1 && is.character(dict) && (file.exists(dict) ||
-      dict %in% rownames(select.dict()$info)))
-    read.dic(dict) else list(dict)
-  if(is.null(names(dict))) names(dict) = seq_along(dict)
-  if(is.null(term.weights)){
-    if(is.numeric(dict[[1]]) && !is.null(names(dict[[1]]))){
-      term.weights = dict
-      dict = lapply(dict, names)
-    }else term.weights = lapply(dict, function(cat) rep(1, length(cat)))
-  }else if(is.null(nrow(term.weights))){
+  if(!is.list(dict)) dict = if(is.matrix(dict)) as.data.frame(dict) else if(length(dict) == 1 && is.character(dict) &&
+      (file.exists(dict) || dict %in% rownames(select.dict()$info))) read.dic(dict) else list(dict)
+  if(is.list(dict) && is.null(names(dict))) names(dict) = paste0('cat', seq_along(dict))
+  if(is.data.frame(dict)){
+    su = vapply(dict, is.numeric, TRUE)
+    if(is.null(term.weights) && any(su)) term.weights = dict[, su]
+    dict = if(sum(!su) == 1) dict[, !su] else if(all(su) && any(grepl('[^0-9]', rownames(dict)))) rownames(dict) else{
+      if(all(su)) stop('could not identify terms in dict')
+      ssu = !su & vapply(dict, function(v) anyDuplicated(v) == 0, TRUE)
+      dict = if(any(!su & !ssu) && any(ssu)) split(dict[, which(ssu)[1]], do.call(paste,
+        dict[, !su & !ssu])) else if(any(ssu)) dict[, which(ssu)[1]] else dict[, which(su)[1]]
+    }
+  }
+  if(!is.null(term.weights)){
+    if(is.null(dim(term.weights))){
+      if(is.list(term.weights)){
+        if(length(dict) != length(term.weights) && !is.null(names(term.weights[[1]]))) dict = term.weights
+        if(length(dict) == length(term.weights) && !all(names(dict) %in% names(term.weights))){
+          if(is.null(names(term.weights)) || !any(names(term.weights) %in% names(dict))){
+            names(term.weights) = names(dict)
+          }else for(cat in names(dict)[!names(dict) %in% names(term.weights)]){
+            term.weights[cat] = structure(rep(1, length(dict[[cat]])), names = dict[[cat]])
+          }
+        }
+        for(cat in names(dict)) if(is.null(names(term.weights[[cat]])))
+          if(length(term.weights[[cat]]) == length(dict[[cat]])) names(term.weights[[cat]]) = dict[[cat]] else
+            term.weights[[cat]] = structure(rep(1, length(dict[[cat]])), names = dict[[cat]])
+      }else{
+        if(is.null(names(term.weights))){
+          if(is.list(dict)){
+            if(length(dict[[1]]) == length(term.weights)){
+              term.weights = list(term.weights)
+              names(term.weights) = names(dict)
+              names(term.weights[[1]]) = dict[[1]]
+            }else{
+              term.weights = NULL
+              warning('term.weights were dropped as they could not be aligned with dict')
+            }
+          }else if(length(term.weights) == length(dict)) names(term.weights) = dict else{
+            if(length(term.weights) != 1) warning('term.weights were adjusted to match the length of dict')
+            term.weights = rep_len(term.weights)
+            names(term.weights) = dict
+          }
+        }
+      }
+    }else{
+      if(length(dict) == 1 && length(dict[[1]]) == nrow(term.weights) && !any(rownames(term.weights) %in% dict[[1]])){
+        rownames(term.weights) = dict[[1]]
+      }
+    }
+
     if(!is.list(term.weights)) term.weights = list(term.weights)
     dlen = length(dict)
     if(is.null(names(term.weights)))
@@ -1419,21 +1468,20 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
   ats = attributes(dtm)[c('opts', 'WC', 'type')]
   ats = ats[!vapply(ats, is.null, TRUE)]
   atsn = names(ats)
-  cls = structure(numeric(length(dict)), names = names(dict))
-  for(cat in seq_along(dict)){
-    ccls = tryCatch(nchar(dict[[cat]]), error = function(e) NULL)
-    if(is.null(ccls)){
-      warning('dict appears to be miss-encoded, so results may not be as expected;\n',
-        'might try reading the dictionary in with encoding = "ISO-8859-1"')
-      dict[[cat]] = iconv(dict[[cat]], sub = '#')
-      ccls = nchar(dict[[cat]])
-    }
-    cls[cat] = sum(ccls)
-  }
   odict = dict
-  formatdict = function(dict){
-    lab = lapply(dict, function(l) grepl('[{([]', l) + grepl('[])}]', l) == 1)
-    lab = lab[names(lab)[vapply(lab, any, TRUE)]]
+  formatdict = function(dict, collapse = '|'){
+    lab = if(!escape){
+      lab = lapply(dict, function(l){
+        if(!any(grepl('[][)(}{]', l))) return(FALSE)
+        sl = strsplit(l, '')
+        !any(grepl('\\[.+\\]|\\(.+\\)|\\{.+\\}', l)) || any(vapply(sl, function(cs)
+          sum(sl == '[') != sum(sl == ']') &
+          sum(sl == '{') != sum(sl == '}') &
+          sum(sl == '(') != sum(sl == ')')
+        , TRUE))
+      })
+      Filter(isTRUE, lab)
+    }else logical()
     if(!partial){
       s = '^'
       e = '$'
@@ -1444,20 +1492,12 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
       rec = '([*.^$+?\\|])'
     }
     res = if(escape) lapply(dict, function(l)
-      paste0(s, gsub(rec, '\\\\\\1', l, perl = TRUE), e, collapse = '|')
-    ) else lapply(dict, function(l) paste(paste0(s, gsub('([+*])[+*]+', '\\\\\\1+', l), e), collapse='|'))
+      paste0(s, gsub(rec, '\\\\\\1', l, perl = TRUE), e, collapse = collapse)
+    ) else lapply(dict, function(l) paste(paste0(s, gsub('([+*])[+*]+', '\\\\\\1+', l), e), collapse = collapse))
     if(glob) lapply(res, function(l) gsub(paste0(
       if(s == '^') '\\' else '', s, if(escape) '\\\\' else '', '\\*|', if(escape) '\\\\' else '', '\\*', if(e == '$')
         '\\' else '', e
     ), '', l)) else res
-  }
-  getweights = function(terms, cat){
-    if(!cat %in% names(term.weights)) term.weights[[cat]] = rep(1, cls[[cat]])
-    if(is.null(names(term.weights[[cat]])) && length(term.weights[[cat]]) == length(odict[[cat]]))
-      names(term.weights[[cat]]) = odict[[cat]]
-    if(any(mcn <- !terms %in% names(term.weights[[cat]])))
-      term.weights[[cat]][terms[mcn]] = 1
-    term.weights[[cat]][terms]
   }
   ws = if(is.null(term.filter)) colnames(dtm) else gsub(term.filter, '', colnames(dtm), perl = TRUE)
   if('opts' %in% atsn && !ats$opts['to.lower']) ws = tolower(ws)
@@ -1469,6 +1509,20 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
     if(missing(escape) && (boundries || any(grepl('[.])][+*]|[.+*]\\?|\\[\\^', l))) &&
       !any(grepl('[({[][^])}]*$|^[^({[]*[])}]', l))) escape = FALSE
   }
+  cls = 0
+  if(is.null(term.weights)){
+    cls = structure(numeric(length(dict)), names = names(dict))
+    for(cat in seq_along(dict)){
+      ccls = tryCatch(nchar(dict[[cat]]), error = function(e) NULL)
+      if(is.null(ccls)){
+        warning('dict appears to be miss-encoded, so results may not be as expected;\n',
+          'might try reading the dictionary in with encoding = "ISO-8859-1"')
+        dict[[cat]] = iconv(dict[[cat]], sub = '#')
+        ccls = nchar(dict[[cat]])
+      }
+      cls[cat] = sum(ccls)
+    }
+  }
   if(any(cls > term.break)){
     br = function(l, e = term.break){
       f = ceiling(cls[[l]] / e)
@@ -1478,47 +1532,44 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
       o[[f]] = o[[f]][o[[f]] <= l]
       o
     }
-    if(is.null(ncol(term.weights))){
-      op = matrix(0, nrow(dtm), length(dict), dimnames = list(rownames(dtm), names(dict)))
-      for(cat in names(dict)){
-        matches = if(cls[[cat]] > term.break){
-          unique(unlist(lapply(br(cat), function(s)
-            grep(formatdict(list(dict[[cat]][s]))[[1]], ws, perl = TRUE))))
-        }else grep(formatdict(list(dict[[cat]])), ws, perl = TRUE)
-        op[, cat] = if(length(matches)){
-          weights = getweights(colnames(dtm)[matches], cat)
-          colSums(t(dtm[, matches, drop = FALSE]) * weights, na.rm = TRUE)
-        }else numeric(nrow(dtm))
-      }
-    }else{
-      op = matrix(0, nrow(dtm), ncol(term.weights), dimnames = list(rownames(dtm), colnames(term.weights)))
-      matches = unique(unlist(lapply(br(names(dict)[[1]]), function(s)
-        grep(formatdict(list(dict[[1]][s]))[[1]], ws, perl = TRUE))))
-      for(cat in colnames(term.weights)){
-        op[, cat] = if(length(matches)){
-          colSums(t(dtm[, matches, drop = FALSE]) * term.weights[matches, cat], na.rm = TRUE)
-        }else numeric(ncol(dtm))
+    op = matrix(0, nrow(dtm), length(dict), dimnames = list(rownames(dtm), names(dict)))
+    for(cat in names(dict)){
+      matches = if(cls[[cat]] > term.break){
+        unique(unlist(lapply(br(cat), function(s)
+          grep(formatdict(list(dict[[cat]][s]))[[1]], ws, perl = TRUE))))
+      }else grep(formatdict(list(dict[[cat]])), ws, perl = TRUE)
+      if(length(matches)){
+        op[, cat] = rowSums(dtm[, matches, drop = FALSE], na.rm = TRUE)
       }
     }
   }else{
-    dict = formatdict(dict)
-    op = if(!is.null(term.weights)){
-      if(is.null(ncol(term.weights))){
-        vapply(names(dict), function(cat){
-          su = dtm[, grep(dict[[cat]], ws, perl = TRUE), drop = FALSE]
-          weights = getweights(colnames(su), cat)
-          if(!ncol(su)) numeric(nrow(su)) else colSums(t(su) * weights, na.rm = TRUE)
-        }, numeric(nrow(dtm)))
-      }else{
-        ssu = grep(dict[[1]], ws, perl = TRUE)
-        su = dtm[, ssu, drop = FALSE]
-        vapply(colnames(term.weights), function(cat){
-          weights = term.weights[ssu, cat]
-          if(!ncol(su)) numeric(nrow(su)) else colSums(t(su) * weights, na.rm = TRUE)
-        }, numeric(nrow(dtm)))
+    if(!is.null(term.weights)){
+      dict = formatdict(dict, NULL)
+      terms = unique(unlist(dict))
+      termmap = lapply(terms, grep, ws, perl = TRUE, value = TRUE)
+      names(termmap) = unique(unlist(odict))
+      termmap = Filter(length, termmap)
+      if(length(termmap)){
+        if(is.null(dim(term.weights))){
+          weights = lapply(term.weights, function(l) do.call(c, lapply(names(termmap), function(p)
+            structure(rep(l[[p]], length(termmap[[p]])), names = termmap[[p]]))))
+          op = matrix(0, nrow(dtm), length(dict), dimnames = list(rownames(dtm), names(dict)))
+          for(cat in names(dict)) if(length(weights[[cat]]))
+            op[, cat] = as.numeric(dtm[, names(weights[[cat]]), drop = FALSE] %*% weights[[cat]])
+        }else{
+          weights = do.call(rbind, lapply(names(termmap), function(p) matrix(
+            rep(as.numeric(term.weights[p,]), length(termmap[[p]])),
+            ncol = ncol(term.weights), dimnames = list(termmap[[p]], colnames(term.weights))
+          )))
+          op = matrix(0, nrow(dtm), ncol(weights), dimnames = list(rownames(dtm), colnames(weights)))
+          for(cat in colnames(op)){
+            op[, cat] = as.numeric(dtm[, rownames(weights), drop = FALSE] %*% weights[, cat])
+          }
+        }
       }
     }else{
-      vapply(names(dict), function(cat) rowSums(dtm[, grep(dict[[cat]], ws, perl = TRUE),
+      dict = formatdict(dict)
+      op = vapply(names(dict), function(cat) rowSums(dtm[, grep(dict[[cat]], ws, perl = TRUE),
         drop = FALSE], na.rm = TRUE), numeric(nrow(dtm)))
     }
   }
@@ -1707,7 +1758,7 @@ lma_simets=function(a, b = NULL, metric = NULL, group = NULL, lag = 0, agg = TRU
     pairwise = 'dtCMatrix' %in% class(res[[1]])
     if((pairwise && symmetrical) || mean) for(i in seq_along(res)){
       if(pairwise && (symmetrical || mean)) res[[i]] = forceSymmetric(res[[i]], 'L')
-      if(mean) res[[i]] = if(is.null(nrow(res[[i]]))) mean(res[[i]], na.rm = TRUE) else rowMeans(res[[i]], TRUE)
+      if(mean) res[[i]] = if(is.null(dim(res[[i]]))) mean(res[[i]], na.rm = TRUE) else rowMeans(res[[i]], TRUE)
     }
     if(is.null(dim(res[[1]]))){
       rn = if(!is.na(nd <- which(d == length(res[[1]]))[1]) && !is.null(rownames(if(nd == 1) a else b)))
