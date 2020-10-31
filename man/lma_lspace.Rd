@@ -17,7 +17,7 @@ as \code{space}.}
 of a singular value decomposition of \code{dtm}. If a character, a file matching the character
 will be searched for in \code{dir} (e.g., \code{space = 'google'}). If a file is not found and
 the character matches one of the \href{https://osf.io/489he/wiki/home}{available spaces}, you
-will be given the option to download it, as handled by \code{\link{download.lsspace}}.
+will be given the option to download it, as handled by \code{\link{download.lspace}}.
 If \code{dtm} is missing, the entire space will be loaded and returned.}
 
 \item{map.space}{Logical: if \code{FALSE}, the original vectors of \code{space} for terms
@@ -110,8 +110,8 @@ lss_100k = lma_lspace(space = '100k')
 }
 \seealso{
 Other Latent Semantic Space functions: 
-\code{\link{download.lsspace}()},
-\code{\link{select.lsspace}()},
-\code{\link{standardize.lsspace}()}
+\code{\link{download.lspace}()},
+\code{\link{select.lspace}()},
+\code{\link{standardize.lspace}()}
 }
 \concept{Latent Semantic Space functions}

@@ -9,7 +9,7 @@ lma_termcat(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
   dir = getOption("lingmatch.dict.dir"))
 }
 \arguments{
-\item{dtm}{A matrix with words as column names.}
+\item{dtm}{A matrix with terms as column names.}
 
 \item{dict}{The name of a provided dictionary
 (\href{https://osf.io/y6g5b/wiki/home}{osf.io/y6g5b/wiki}) or of a file found in

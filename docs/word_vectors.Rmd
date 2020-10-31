@@ -96,14 +96,14 @@ These parameter decisions are often left unexamined, but have some potential to 
 ## Choosing a space
 
 ### Term coverage
-One simple thing to look at when choosing a space is its coverage of the terms that appear in your set of texts. You can do this without downloading all spaces by looking at the [common term map](https://osf.io/yauzm), which is what the `select.lsspace` function does when terms are entered as the first argument:
+One simple thing to look at when choosing a space is its coverage of the terms that appear in your set of texts. You can do this without downloading all spaces by looking at the [common term map](https://osf.io/yauzm), which is what the `select.lspace` function does when terms are entered as the first argument:
 ```{R}
 # some relatively rare terms for their formatting or narrow uses
 terms = c('part-time', 'i/o', "'cause", 'brexit', 'debuffs')
 
-# select.lsspace returns more information about each space,
+# select.lspace returns more information about each space,
 # as well as the full common term map
-spaces = select.lsspace(terms)
+spaces = select.lspace(terms)
 
 # the "selected" entry contains the top 5 spaces in terms of coverage
 spaces$selected[, c('terms', 'coverage')]
@@ -121,7 +121,7 @@ terms = c('small', 'big', 'frogs', 'crickets', 'horses', 'whales')
 # retrieve the terms from each space,
 # and calculate their similarities if all are found
 similarities = do.call(rbind, lapply(space_names, function(name){
-  lss = lma_lspace(terms, name)
+  lss = tryCatch(lma_lspace(terms, name), error = function(e) NULL)
   if(all(terms %in% rownames(lss))){
     lma_simets(lss, 'canberra')@x
   }else numeric(length(terms) * (length(terms) - 1) / 2)

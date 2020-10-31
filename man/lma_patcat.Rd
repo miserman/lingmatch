@@ -4,10 +4,11 @@
 \alias{lma_patcat}
 \title{Text Categorization}
 \usage{
-lma_patcat(text, dict, pattern.weights = "weight",
+lma_patcat(text, dict = NULL, pattern.weights = "weight",
   pattern.categories = "category", bias = NULL, to.lower = TRUE,
   return.dtm = FALSE, exclusive = TRUE, boundary = NULL, fixed = TRUE,
-  globtoregex = FALSE, name.map = c(intname = "_intercept", term = "term"))
+  globtoregex = FALSE, name.map = c(intname = "_intercept", term = "term"),
+  dir = getOption("lingmatch.dict.dir"))
 }
 \arguments{
 \item{text}{A vector of text to be categorized. Texts are padded by 2 spaces, and potentially lowercased.}
@@ -50,6 +51,9 @@ and \code{\\\\w`*`\\\\b} respectively. This will also set \code{fixed} to \code{
 }
 Missing names are added, so names can be specified positional (e.g., \code{c('_int', 'terms')}),
 or only some can be specified by name (e.g., \code{c(term = 'patterns')}), leaving the rest default.}
+
+\item{dir}{Path to a folder in which to look for \code{dict} if it is the name of a file to be passed to
+\code{\link{read.dic}}.}
 }
 \description{
 Categorize raw texts using a pattern-based dictionary.

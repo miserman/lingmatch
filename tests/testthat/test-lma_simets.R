@@ -143,4 +143,3 @@ test_that('lag works', {
     c(unname(lma_simets(dtm[1,], dtm[10,], metric = 'pearson')), numeric(4))
   )
 })
-

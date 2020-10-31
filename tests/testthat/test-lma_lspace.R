@@ -4,14 +4,14 @@ test_that('svd works', {
   dtm = matrix(rpois(100, 1), 10)
   colnames(dtm) = letters[1:10]
   lss = lma_lspace(dtm)
-  expect_equal(
-    lma_simets(lma_lspace(dtm, lma_lspace(dtm)), 'cos'),
-    lma_simets(lma_lspace(dtm, keep.dim = TRUE), 'cos')
-  )
-  expect_equal(
-    lma_simets(lma_lspace(dtm, lma_lspace(dtm, dim.cutoff = .1)), 'can'),
-    lma_simets(lma_lspace(dtm, dim.cutoff = .1, keep.dim = TRUE), 'can')
-  )
+  expect_true(all(
+    lma_simets(lma_lspace(dtm, lma_lspace(dtm)), 'cos') -
+    lma_simets(lma_lspace(dtm, keep.dim = TRUE), 'cos') < 1e-13
+  ))
+  expect_true(all(
+    lma_simets(lma_lspace(dtm, lma_lspace(dtm, dim.cutoff = .1)), 'can') -
+    lma_simets(lma_lspace(dtm, dim.cutoff = .1, keep.dim = TRUE), 'can') < 1e-13
+  ))
 })
 
 dir = getOption('lingmatch.lspace.dir')
@@ -22,7 +22,7 @@ skip_if(
   !length(files), 'embeddings files not downloaded'
 )
 
-spaces = select.lsspace()
+spaces = select.lspace()
 names = gsub('^.+/|\\.dat$', '', files)
 name = names[which(names %in% rownames(spaces$info))[1]]
 

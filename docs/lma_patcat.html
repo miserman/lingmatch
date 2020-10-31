@@ -19,7 +19,8 @@
 lma_patcat(text, dict, pattern.weights = "weight",
   pattern.categories = "category", bias = NULL, to.lower = TRUE,
   return.dtm = FALSE, exclusive = TRUE, boundary = NULL, fixed = TRUE,
-  globtoregex = FALSE, name.map = c(intname = "_intercept", term = "term"))
+  globtoregex = FALSE, name.map = c(intname = "_intercept", term = "term"),
+  dir = getOption("lingmatch.dict.dir"))
 </pre>
 
 
@@ -104,6 +105,11 @@ and <code>\\w`*`\\b</code> respectively. This will also set <code>fixed</code> t
 
 <p>Missing names are added, so names can be specified positional (e.g., <code>c('_int', 'terms')</code>),
 or only some can be specified by name (e.g., <code>c(term = 'patterns')</code>), leaving the rest default.</p>
+</td></tr>
+<tr valign="top"><td><code>dir</code></td>
+<td>
+<p>Path to a folder in which to look for <code>dict</code> if it is the name of a file to be passed to
+<code>read.dic</code>.</p>
 </td></tr>
 </table>
 

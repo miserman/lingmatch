@@ -17,7 +17,8 @@ Linguistic Inquiry and Word Count (.dic; non-weighted) format.
 <h3>Usage</h3>
 
 <pre>
-read.dic(path, cats, type = "asis", as.weighted = FALSE, ...)
+read.dic(path, cats, type = "asis", as.weighted = FALSE,
+  dir = getOption("lingmatch.dict.dir"), ...)
 
 write.dic(dict, filename = "custom", type = "asis", as.weighted = FALSE,
   save = TRUE)
@@ -51,6 +52,11 @@ when an asterisk is present, to match tokenized terms.</p>
 <p>Logical; if <code>TRUE</code>, prevents weighted dictionaries from being converted to
 unweighted versions, or converts unweighted dictionaries to a binary weighted version
 &ndash; a data.frame with a &quot;term&quot; column of unique terms, and a column for each category.</p>
+</td></tr>
+<tr valign="top"><td><code>dir</code></td>
+<td>
+<p>Path to a folder containing dictionaries, or where you would like dictionaries to be downloaded;
+passed to <code>select.dict</code> and/or <code>download.dict</code>.</p>
 </td></tr>
 <tr valign="top"><td><code>...</code></td>
 <td>

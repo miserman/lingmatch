@@ -3,7 +3,7 @@
 <link rel="stylesheet" type="text/css" href="R.css" />
 </head><body>
 
-<table width="100%" summary="page for standardize.lsspace"><tr><td>standardize.lsspace</td><td style="text-align: right;">R Documentation</td></tr></table>
+<table width="100%" summary="page for standardize.lspace"><tr><td>standardize.lspace</td><td style="text-align: right;">R Documentation</td></tr></table>
 
 <h2>Standardize a Latent Semantic Space</h2>
 
@@ -18,7 +18,7 @@ are processed line-by-line, so large spaces can be reformatted RAM-conservativel
 <h3>Usage</h3>
 
 <pre>
-standardize.lsspace(infile, name, sep = " ", digits = 9,
+standardize.lspace(infile, name, sep = " ", digits = 9,
   dir = getOption("lingmatch.lspace.dir"), outdir = dir, remove = "",
   term_check = "^[a-zA-Z]+$|^['a-zA-Z][a-zA-Z.'\\/-]*[a-zA-Z.]$",
   verbose = FALSE)
@@ -78,9 +78,9 @@ Only applies to plain-text files.</p>
 <h3>See Also</h3>
 
 <p>Other Latent Semantic Space functions: 
-<code>download.lsspace()</code>,
+<code>download.lspace()</code>,
 <code>lma_lspace()</code>,
-<code>select.lsspace()</code>
+<code>select.lspace()</code>
 </p>
 
 
@@ -90,10 +90,10 @@ Only applies to plain-text files.</p>
 ## Not run: 
 
 # from https://sites.google.com/site/fritzgntr/software-resources/semantic_spaces
-standardize.lsspace('EN_100k_lsa.rda', '100k_lsa')
+standardize.lspace('EN_100k_lsa.rda', '100k_lsa')
 
 # from https://fasttext.cc/docs/en/english-vectors.html
-standardize.lsspace('crawl-300d-2M.vec', 'facebook_crawl')
+standardize.lspace('crawl-300d-2M.vec', 'facebook_crawl')
 
 ## End(Not run)
 </pre>

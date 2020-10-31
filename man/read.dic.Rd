@@ -5,7 +5,8 @@
 \alias{write.dic}
 \title{Read/write dictionary files}
 \usage{
-read.dic(path, cats, type = "asis", as.weighted = FALSE, ...)
+read.dic(path, cats, type = "asis", as.weighted = FALSE,
+  dir = getOption("lingmatch.dict.dir"), ...)
 
 write.dic(dict, filename = "custom", type = "asis", as.weighted = FALSE,
   save = TRUE)
@@ -27,6 +28,9 @@ when an asterisk is present, to match tokenized terms.}
 \item{as.weighted}{Logical; if \code{TRUE}, prevents weighted dictionaries from being converted to
 unweighted versions, or converts unweighted dictionaries to a binary weighted version
 -- a data.frame with a "term" column of unique terms, and a column for each category.}
+
+\item{dir}{Path to a folder containing dictionaries, or where you would like dictionaries to be downloaded;
+passed to \code{\link{select.dict}} and/or \code{\link{download.dict}}.}
 
 \item{...}{Passes arguments to \code{\link{readLines}}.}
 

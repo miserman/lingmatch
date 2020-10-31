@@ -21,8 +21,8 @@ An all-in-one R package for the assessment of linguistic matching and/or accommo
 Download R from [r-project.org](https://www.r-project.org/), then install the package from an R console:
 
 ```R
-install.packages('devtools')
-devtools::install_github('miserman/lingmatch')
+install.packages('remotes')
+remotes::install_github('miserman/lingmatch')
 ```
 And load the package:
 ```R

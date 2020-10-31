@@ -3,7 +3,7 @@
 <link rel="stylesheet" type="text/css" href="R.css" />
 </head><body>
 
-<table width="100%" summary="page for select.lsspace"><tr><td>select.lsspace</td><td style="text-align: right;">R Documentation</td></tr></table>
+<table width="100%" summary="page for select.lspace"><tr><td>select.lspace</td><td style="text-align: right;">R Documentation</td></tr></table>
 
 <h2>Select Latent Semantic Spaces</h2>
 
@@ -18,7 +18,7 @@ and optionally download their term mappings (<a href="https://osf.io/xr7jv">osf.
 <h3>Usage</h3>
 
 <pre>
-select.lsspace(query = NULL, dir = getOption("lingmatch.lspace.dir"),
+select.lspace(query = NULL, dir = getOption("lingmatch.lspace.dir"),
   get.map = FALSE, check.md5 = TRUE, mode = "wb")
 </pre>
 
@@ -141,9 +141,9 @@ and compares it with that calculated from the downloaded file to check its integ
 <h3>See Also</h3>
 
 <p>Other Latent Semantic Space functions: 
-<code>download.lsspace()</code>,
+<code>download.lspace()</code>,
 <code>lma_lspace()</code>,
-<code>standardize.lsspace()</code>
+<code>standardize.lspace()</code>
 </p>
 
 
@@ -151,15 +151,15 @@ and compares it with that calculated from the downloaded file to check its integ
 
 <pre>
 # just retrieve information about available spaces
-spaces = select.lsspace()
+spaces = select.lspace()
 
 # retrieve all spaces that used word2vec
-w2v_spaces = select.lsspace('word2vec')$selected
+w2v_spaces = select.lspace('word2vec')$selected
 
 ## Not run: 
 
 # select spaces by terms
-select.lsspace(c(
+select.lspace(c(
   'part-time', 'i/o', "'cause", 'brexit', 'debuffs'
 ))$selected[, c('terms', 'coverage')]
 

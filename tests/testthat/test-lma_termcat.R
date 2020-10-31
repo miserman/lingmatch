@@ -1,30 +1,30 @@
 context('lma_termcat')
 
-words = vapply(seq_len(5e3), function(w)
-  paste0(sample(letters, 5), collapse = ''), '')
+words = vapply(seq_len(5e3), function(w) paste0(sample(letters, 5), collapse = ''), '')
 
 test_that('term.weights work', {
   category = structure(rnorm(100), names = sample(words, 100))
-  dtm = matrix(rpois(100 * 10, 1), 100,
-    dimnames = list(NULL, sample(names(category), 10)))
+  dtm = matrix(rpois(100 * 10, 1), 100, dimnames = list(NULL, sample(names(category), 10)))
   score = (dtm %*% category[colnames(dtm)])[, 1]
   names(category) = sub('\\w$', '*', names(category))
-  sepcat = list(terms = names(category), weights = as.numeric(category))
+  sepcat = data.frame(terms = names(category), weights = as.numeric(category))
   expect_equal(lma_termcat(dtm, category)[, 1], score)
   expect_equal(lma_termcat(dtm, list(a = category), list(a = category))[, 1], score)
   expect_equal(lma_termcat(dtm, sepcat$terms, sepcat$weights)[, 1], score)
-  expect_equal(lma_termcat(dtm, as.data.frame(sepcat))[, 1], score)
-  expect_equal(lma_termcat(dtm, as.data.frame(sepcat), 'weights')[, 1], score)
+  expect_equal(lma_termcat(dtm, sepcat)[, 1], score)
+  expect_equal(lma_termcat(dtm, sepcat, 'weights')[, 1], score)
+  expect_equal(lma_termcat(dtm, sepcat, 'weights')[, 1], score)
   s2 = lma_termcat(dtm, sepcat$terms, data.frame(a = sepcat$weights, b = sepcat$weights))
   expect_equal(s2[, 1], score)
   expect_equal(s2[, 1], s2[, 2])
+  sepcat$value = sepcat$weights * 2
+  expect_equal(lma_termcat(dtm, rbind(sepcat, sepcat[1:4,]))[, 2], score * 2)
 })
 
 test_that('bias works', {
   category = c(`_intercept` = 5, structure(rep(1, 100), names = sample(words, 100)))
   sepcat = list(terms = names(category), weights = as.numeric(category))
-  dtm = matrix(rpois(100 * 10, 1), 100,
-    dimnames = list(NULL, sample(names(category)[-1], 10)))
+  dtm = matrix(rpois(100 * 10, 1), 100, dimnames = list(NULL, sample(names(category)[-1], 10)))
   score = (dtm %*% category[colnames(dtm)])[, 1] + 5
   expect_equal(lma_termcat(dtm, category)[, 1], score)
   expect_equal(lma_termcat(dtm, category[-1], bias = 5)[, 1], score)
@@ -35,24 +35,24 @@ test_that('bias works', {
 
 test_that('escape works', {
   dtm = matrix(c(1, 0, 0, 1, 1, 0), 2, dimnames = list(NULL, c('aba', 'a.a', ':[')))
-  expect_equal(lma_termcat(dtm, 'a.a', escape = FALSE)[, 1], c(1, 1))
-  expect_equal(lma_termcat(dtm, 'a.a')[, 1], c(0, 1))
-  expect_equal(lma_termcat(dtm, ':[', escape = FALSE)[, 1], c(1, 0))
-  expect_equal(lma_termcat(dtm, ':[')[, 1], c(1, 0))
+  expect_equal(lma_termcat(dtm, list('a.a'), escape = FALSE)[, 1], c(1, 1))
+  expect_equal(lma_termcat(dtm, list('a.a'))[, 1], c(0, 1))
+  expect_equal(lma_termcat(dtm, list(':['), escape = FALSE)[, 1], c(1, 0))
+  expect_equal(lma_termcat(dtm, list(':['))[, 1], c(1, 0))
 })
 
 test_that('partial/glob works', {
   dtm = matrix(c(1, 0, 0, 1), 2, dimnames = list(NULL, c('aba', 'ababb')))
   expect_equal(as.numeric(lma_termcat(dtm, list('aba', 'aba*'))), c(1, 0, 1, 1))
-  expect_equal(lma_termcat(dtm, 'aba*', glob = FALSE)[, 1], c(0, 0))
-  expect_equal(lma_termcat(dtm, 'aba', partial = TRUE)[, 1], c(1, 1))
+  expect_equal(lma_termcat(dtm, list('aba*'), glob = FALSE)[, 1], c(0, 0))
+  expect_equal(lma_termcat(dtm, list('aba'), partial = TRUE)[, 1], c(1, 1))
   expect_equal(as.numeric(lma_termcat(dtm, list('aba.*', 'aba[b]*', 'aba.?.?', 'aba.{0,2}'))), rep(1, 8))
 })
 
 test_that('term.filter works', {
   dtm = matrix(c(1, 0, 0, 1), 2, dimnames = list(NULL, c('aba_', 'abaaa_dwe')))
-  expect_equal(lma_termcat(dtm, 'aba', term.filter = '_.*')[, 1], c(1, 0))
-  expect_equal(lma_termcat(dtm, 'aba', partial = TRUE, term.filter = '_.*')[, 1], c(1, 1))
+  expect_equal(lma_termcat(dtm, list('aba'), term.filter = '_.*')[, 1], c(1, 0))
+  expect_equal(lma_termcat(dtm, list('aba'), partial = TRUE, term.filter = '_.*')[, 1], c(1, 1))
 })
 
 test_that('term.break works', {
@@ -89,5 +89,8 @@ test_that('applied dictionaries work', {
     opp = lma_patcat(text, dict)
     expect_equal(dim(opt), dim(opp))
     expect_true(all(colnames(opt) %in% colnames(opp)))
+    if(any(grepl(' ', if(is.null(dim(dict))) dict$term else unique(unlist(dict)), fixed = TRUE))){
+      expect_equal(as.numeric(suppressWarnings(lma_termcat(text, dict))), as.numeric(opp))
+    }
   }
 })

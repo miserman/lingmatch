@@ -183,11 +183,13 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
   # fetches input from data or environment
   gv = function(a, data = NULL){
     ta = a
-    if(is.character(ta)){
-      if(!is.null(data) && ta %in% colnames(data)) return(unlist(data[, ta])) else
-        if(length(ta) == 1 || !any(grepl(' ', ta, fixed = TRUE))) ta = parse(text = a)
+    if(is.character(a)){
+      if(!is.null(data) && a %in% colnames(data)) return(unlist(data[, a])) else
+        if(length(ta) == 1 || !any(grepl(' ', a, fixed = TRUE))) ta = parse(text = a)
     }
-    ta = tryCatch(eval(ta, data, parent.frame(2)), error = function(e) NULL)
+    ta = tryCatch(eval(ta, parent.frame(3)), error = function(e) NULL)
+    if(length(ta) == 0 || (!is.null(dim(ta)) && dim(ta)[1] == 0))
+      ta = tryCatch(eval(a, data, parent.frame(2)), error = function(e) NULL)
     if(length(ta) == 0 || (!is.null(dim(ta)) && dim(ta)[1] == 0))
       ta = tryCatch(eval(a, globalenv()), error = function(e) NULL)
     if(is.null(ta)) ta = tryCatch(eval(a, data), error = function(e) NULL)
@@ -229,10 +231,8 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
   if(missing(input)) input = file.choose()
   if(is.function(input)) stop('enter a character vector or matrix-like object as input')
   if(missing(data)) data = input
-  input = if(!missing(data) && is.character(input) && all(input %in% colnames(data))) data[, input] else
-    gd(opt$input, data)
-  if(missing(data) && !missing(group) && is.data.frame(input))
-    input = as.matrix(input[, vapply(input, is.numeric, TRUE)])
+  input = if(is.character(input) && all(input %in% colnames(data))) data[, input] else gd(opt$input, data)
+  if(!missing(group) && is.data.frame(input)) input = as.matrix(input[, vapply(input, is.numeric, TRUE)])
   rx=NROW(input)
   cx=NCOL(input)
   # comp
@@ -260,7 +260,6 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
     }
     if(all(ck)){
       inp$dict = NULL
-      if(missing(data)) data=input
       if(any(!ck)) dn=dn[ck]
       cx = length(dn)
       input=input[,dn]
@@ -1059,7 +1058,7 @@ lma_weight = function(dtm, weight = 'count', normalize = TRUE, wc.complete = TRU
 #'   of a singular value decomposition of \code{dtm}. If a character, a file matching the character
 #'   will be searched for in \code{dir} (e.g., \code{space = 'google'}). If a file is not found and
 #'   the character matches one of the \href{https://osf.io/489he/wiki/home}{available spaces}, you
-#'   will be given the option to download it, as handled by \code{\link{download.lsspace}}.
+#'   will be given the option to download it, as handled by \code{\link{download.lspace}}.
 #'   If \code{dtm} is missing, the entire space will be loaded and returned.
 #' @param map.space Logical: if \code{FALSE}, the original vectors of \code{space} for terms
 #'   found in \code{dtm} are returned. Otherwise \code{dtm} \code{\%*\%} \code{space} is returned,
@@ -1174,20 +1173,22 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, t
     }else colnames(dtm)
     if(is.character(space)){
       if(space == 'default') space = '100k'
-      name = sub('\\..*$', '', space)[1]
+      name = gsub('^.*[/\\]|\\.[^/\\]*$', '', space)[1]
       spaces = list.files(dir)
       ts = grep(space, spaces, fixed = TRUE, value = TRUE)
       if(!length(ts)){
-        ts = rownames(select.lsspace(name)$selected)[1]
+        ts = rownames(select.lspace(name)$selected)[1]
         if(!is.na(ts) && grepl('^$|^[yt1]|^ent', readline(paste0(
           'would you like to download the ', ts, ' space? (press Enter for yes): ')))){
-          download.lsspace(ts, dir = dir)
+          download.lspace(ts, dir = dir)
           ts = paste0(ts, '.dat')
         }else stop('space (', space, ') not found in dir (', dir, ')', call. = FALSE)
       }
-      if(grepl('[bgx]z[ip2]*$', ts[1])) use.scan = TRUE
-      space_path = paste0(dir, '/', ts[1])
-      name = sub('\\..*$', '', ts[1])
+      space_path = paste0(dir, '/', if(length(su <- grep('\\.dat$', ts))) ts[su[[1]]] else{
+        use.scan = TRUE
+        ts[grep('[bgx]z[ip2]*$', ts)[[1]]]
+      })
+      name = gsub('^.*[/\\]|\\.[^/\\]*$', '', space_path)
       if(name %in% colnames(term.map)) term.map = term.map[term.map[, name] != 0, name]
       rex = function(inds, f){
         nc = length(strsplit(readLines(f, 1), '\\s+')[[1]])
@@ -1228,10 +1229,10 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, t
             if(!is.null(lma_term_map) && !is.null(colnames(lma_term_map)) && name %in% colnames(lma_term_map)){
               space_terms = names(lma_term_map[lma_term_map[, name] != 0, name])
             }else stop(
-              'could not find terms file (', space, '_terms.txt) in space (', dir, '),',
-              'nor retrieve terms from them term map (lma_term_map.rda).'
+              'could not find terms file (', space, '_terms.txt) in dir (', dir, '),',
+              ' nor retrieve terms from them term map (lma_term_map.rda).'
             )
-          }else stop('terms file (', space, '_terms.txt) not found in dir (', dir, ')')
+          }else stop('terms file (', space, '_terms.txt) not found in dir (', dir, ').')
         }else space_terms = readLines(paste0(dir, '/', name, '_terms.txt'))
         su = if(length(terms) == 1 && terms == ''){
           terms = space_terms
@@ -1289,7 +1290,7 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, t
 #' Document-Term Matrix Categorization
 #'
 #' Reduces the dimensions of a document-term matrix by dictionary-based categorization.
-#' @param dtm A matrix with words as column names.
+#' @param dtm A matrix with terms as column names.
 #' @param dict The name of a provided dictionary
 #'   (\href{https://osf.io/y6g5b/wiki/home}{osf.io/y6g5b/wiki}) or of a file found in
 #'   \code{dir}, or a \code{list} object with named character vectors as word lists,
@@ -1347,19 +1348,10 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
   glob = TRUE, term.filter = NULL, term.break = 2e4, dir = getOption('lingmatch.dict.dir')){
   st=proc.time()[[3]]
   if(missing(dict)) dict = lma_dict(1:9)
-  if(is.character(dict) && length(dict) == 1 && !grepl('[^a-z]', dict, TRUE)){
-    name = sub('\\.[^.]*$', '', dict)[1]
-    dicts = list.files(dir, full.names = TRUE)
-    ts = dicts[grepl(dict, sub('^.*/', '', dicts), fixed = TRUE)][1]
-    if(is.na(ts)){
-      ts = rownames(select.dict(paste0('^', name))$selected)[1]
-      if(!is.na(ts) && grepl('^$|^[yt1]|^ent', readline(paste0(
-        'would you like to download the ', ts, ' dictionary? (press Enter for yes): ')))){
-        ts = download.dict(ts, dir = dir)
-      }else if(grepl('\\.[a-z]{2,4}$', dict)) stop('dictionary (', dict,
-        ') not found in dir (', dir, ')', call. = FALSE)
-    }
-    if(!is.na(ts)) dict = ts
+  if(is.character(dict) && length(dict) == 1 && missing(term.weights) && !any(grepl('[\\s*]', dict, fixed = TRUE))){
+    if(!any(file.exists(dict)) && any(file.exists(paste0(dir, dict)))) dict = paste0(dir, dict)
+    td = tryCatch(read.dic(dict), error = function(e) NULL)
+    dict = if(is.null(td)) list(cat1 = dict) else td
   }
   if(!is.null(dim(dict))){
     if(!is.null(term.weights)){
@@ -1444,10 +1436,18 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
       }
     }else{
       if(length(dict) == 1 && length(dict[[1]]) == nrow(term.weights) && !any(rownames(term.weights) %in% dict[[1]])){
-        rownames(term.weights) = dict[[1]]
+        if(anyDuplicated(dict[[1]])){
+          dt = unique(dict[[1]][duplicated(dict[[1]])])
+          su = dict[[1]] %in% dt
+          td = term.weights[su,]
+          tw = matrix(0, length(dt), ncol(term.weights), dimnames = list(dt, colnames(term.weights)))
+          for(term in dt) tw[term,] = colMeans(term.weights[dict[[1]] == term,], na.rm = TRUE)
+          term.weights = rbind(term.weights[!su,], tw)
+          rownames(term.weights) = c(dict[[1]][!su], dt)
+          dict[[1]] = rownames(term.weights)
+        }else rownames(term.weights) = dict[[1]]
       }
     }
-
     if(!is.list(term.weights)) term.weights = list(term.weights)
     dlen = length(dict)
     if(is.null(names(term.weights)))
@@ -1464,7 +1464,26 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
     bias[n] = term.weights[[n]][ii]
     term.weights[[n]] = term.weights[[n]][!ii]
   }
-  if(is.character(dtm) || is.factor(dtm)) dtm=lma_dtm(dtm)
+  edtm = substitute(dtm)
+  if(is.factor(dtm)) dtm = as.character(dtm)
+  if(is.character(dtm) || !any(grepl('\\s', colnames(dtm)))){
+    if(any(grepl('\\s', unlist(dict, use.names = FALSE)))){
+      if(is.character(dtm)){
+        warning(
+          'dict has terms with spaces, so using lma_patcat instead;',
+          '\nenter a dtm (e.g., lma_dtm(', edtm, ')) to force lma_termcat use'
+        )
+        args = list(text = dtm, dict = dict)
+        if(!is.null(term.weights)) args$pattern.weights = term.weights
+        if(!is.null(bias)) args$bias = bias
+        if(!missing(glob)) args$globtoregex = glob
+        if(!missing(partial) && !partial) args$boundary = '\\b'
+        if(!missing(dir)) args$dir = dir
+        return(do.call(lma_patcat, args))
+      }
+    }
+    if(is.character(dtm)) dtm = lma_dtm(dtm)
+  }
   ats = attributes(dtm)[c('opts', 'WC', 'type')]
   ats = ats[!vapply(ats, is.null, TRUE)]
   atsn = names(ats)
@@ -1549,22 +1568,25 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
       termmap = lapply(terms, grep, ws, perl = TRUE, value = TRUE)
       names(termmap) = unique(unlist(odict))
       termmap = Filter(length, termmap)
-      if(length(termmap)){
-        if(is.null(dim(term.weights))){
+      if(is.null(dim(term.weights))){
+        op = matrix(0, nrow(dtm), length(dict), dimnames = list(rownames(dtm), names(dict)))
+        if(length(termmap)){
           weights = lapply(term.weights, function(l) do.call(c, lapply(names(termmap), function(p)
             structure(rep(l[[p]], length(termmap[[p]])), names = termmap[[p]]))))
-          op = matrix(0, nrow(dtm), length(dict), dimnames = list(rownames(dtm), names(dict)))
           for(cat in names(dict)) if(length(weights[[cat]]))
             op[, cat] = as.numeric(dtm[, names(weights[[cat]]), drop = FALSE] %*% weights[[cat]])
-        }else{
+        }
+      }else{
+        if(length(termmap)){
           weights = do.call(rbind, lapply(names(termmap), function(p) matrix(
             rep(as.numeric(term.weights[p,]), length(termmap[[p]])),
             ncol = ncol(term.weights), dimnames = list(termmap[[p]], colnames(term.weights))
           )))
           op = matrix(0, nrow(dtm), ncol(weights), dimnames = list(rownames(dtm), colnames(weights)))
-          for(cat in colnames(op)){
+          for(cat in colnames(op))
             op[, cat] = as.numeric(dtm[, rownames(weights), drop = FALSE] %*% weights[, cat])
-          }
+        }else{
+          op = matrix(0, nrow(dtm), length(dict), dimnames = list(rownames(dtm), colnames(weights)))
         }
       }
     }else{

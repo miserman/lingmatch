@@ -225,4 +225,6 @@ test_that('sequential comparisons work', {
     }, 0)
     expect_equal(comp[, 'cosine'], manual)
   }
+  o = sample(seq_len(nrow(data)))
+  expect_equal(h[[1]][, 1], lingmatch(data[o,], 'seq', dict = cats, group = speaker, order = order(o))$sim[, 1])
 })

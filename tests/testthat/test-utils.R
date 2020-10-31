@@ -40,24 +40,42 @@ test_that('lma_dict works', {
 })
 
 test_that('read/write.dic works', {
-  file = tempfile(fileext = '.txt')
+  file_dic = tempfile(fileext = '.dic')
+  file_csv = tempfile(fileext = '.csv')
   dict = list(
     full = letters,
     sub = letters[1:10],
     partial = paste0(letters[11:21], '*'),
     faces = c(': )', ':(', ':]', ': [', ': }', ':{')
   )
-  write.dic(dict, file)
-  expect_equal(read.dic(file), dict)
-  expect_true(all(vapply(read.dic(file, type = 'term'), function(cat){
+  write.dic(dict, file_dic)
+  expect_equal(read.dic(file_dic), dict)
+  expect_true(all(vapply(read.dic(file_dic, type = 'term'), function(cat){
     sum(grepl(paste(cat, collapse = '|'), unlist(dict))) >= length(cat)
   }, TRUE)))
   dict_weighted = read.dic(dict, as.weighted = TRUE)
+  write.dic(dict_weighted, file_csv)
+  expect_equal(read.dic(file_csv), dict_weighted)
+  files = sub('^.*\\\\', '', c(file_dic, file_csv))
+  dir = sub('\\\\[^\\]+$', '', file_dic)
+  expect_true(all(read.dic(files, dir = dir) == read.dic(list(dict_weighted, dict_weighted))))
   expect_equal(dim(dict_weighted), c(length(unique(unlist(dict))), length(dict) + 1))
-  expect_equal(write.dic(dict, file, as.weighted = TRUE), dict_weighted)
-  expect_equal(read.dic(file, as.weighted = FALSE), dict)
-  expect_equal(read.dic(file), dict_weighted)
-  file.remove(file)
+  expect_equal(write.dic(dict, file_dic, as.weighted = TRUE), dict_weighted)
+  expect_equal(read.dic(file_dic, as.weighted = FALSE), dict)
+  expect_equal(read.dic(file_dic), dict_weighted)
+  wdict = data.frame(
+    term = sample(unlist(dict, use.names = FALSE), 50),
+    cat1 = rnorm(50), cat2 = rpois(50, 1)
+  )
+  write.dic(wdict, file_csv)
+  expect_equal(read.dic(file_csv), wdict)
+  expect_equivalent(read.dic(files, dir = dir), read.dic(list(dict, wdict)))
+  expect_equal(
+    read.dic(list(a = c(1, 2, 3), b = c(0, 2, 4))),
+    read.dic(data.frame(a = c(1, 2, 3), b = c(0, 2, 4)))
+  )
+  file.remove(file_dic)
+  file.remove(file_csv)
   dict = list(
     positive = c('good', 'great'),
     neutral = c('what', 'hey'),
@@ -81,7 +99,7 @@ test_that('read/write.dic works', {
 
 test_that('lma_patcat variants works', {
   opts = expand.grid(exclusive = c(TRUE, FALSE), boundary = c(TRUE, FALSE))
-  opts_head = list(text = texts, dict = c('and', 'it', 'i'))
+  opts_head = list(text = texts, dict = list(c('and', 'it', 'i')))
   expected = list(c(3, 2), c(3, 2), c(6, 5), c(8, 6))
   exp_mats = list(c(1, 0, rep(1, 4)), c(1, 0, rep(1, 4)), c(1, 2, 2, 1, 3, 2), c(1, 2, 2, 1, 5, 3))
 
@@ -133,10 +151,20 @@ test_that('lma_patcat parts work', {
   expect_true(all(weighted_cat == manual_dtm %*% Matrix(weights * c(0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0), 6)))
   expect_true(all(weighted_cat == lma_patcat(texts, unlist(lapply(dict, names)),
     unlist(dict), rep(names(dict), vapply(dict, length, 0)))[, names(dict)]))
+  expect_true(all(weighted_cat == lma_patcat(texts,
+    data.frame(do.call(c, unname(dict)), rep(c('a', 'b'), each = 3)))[, names(dict)]))
 
   full = lma_patcat(texts, lex)[, names(dict)]
   expect_true(all(full == weighted_cat + rep(bias, each = 2)))
   expect_true(all(full == lma_patcat(texts, dict, bias = bias)[, names(dict)]))
+  expect_true(all(full == lma_patcat(texts, dict, bias = c(10, -10))[, names(dict)]))
+  expect_true(all(full == lma_patcat(texts, dict, bias = c(bias, g = 100))[, names(dict)]))
+
+  expect_true(all(lma_patcat(texts, data.frame(
+    term = lex$term[-5],
+    a = c(lex$weight[1:4], numeric(3)),
+    b = c(10, numeric(3), lex$weight[6:8])
+  )) == full))
 })
 
 test_that('lma_patcat wide dict format works', {
@@ -150,6 +178,8 @@ test_that('lma_patcat wide dict format works', {
   expect_true(all(lma_patcat(text, dict, pattern.categories = c('w1', 'w2')) == manual))
   expect_true(all(lma_patcat(text, dict, dict) == manual))
   expect_true(all(lma_patcat(text, dict, pattern.categories = dict) == manual))
+  expect_true(all(lma_patcat(text, list(dict$term, dict$term), dict) == manual))
+  expect_true(all(lma_patcat(text, pattern.weights = structure(dict, row.names = dict$term)) == manual))
   expect_true(all(lma_patcat(text, dict$term, dict) == manual))
   expect_true(all(lma_patcat(text, dict$term, pattern.categories = dict) == manual))
 })
@@ -190,24 +220,36 @@ test_that('read.segments works', {
   expect_true(all(tapply(segs50w$text, segs50w$input, paste, collapse = ' ') == manual))
 })
 
-test_that('select dict and lsspace work', {
+test_that('select dict and lspace work', {
   expect_equal(nrow(select.dict(c('inq', 'sent'))$selected), 5)
-  expect_equal(nrow(select.lsspace(c('goo'))$selected), 1)
-  expect_equal(nrow(select.lsspace(c('goo', 'glove'), dir = '', get.map = FALSE)$selected), 4)
+  expect_equal(nrow(select.lspace(c('goo'))$selected), 1)
+  expect_equal(nrow(select.lspace(c('goo', 'glove'), dir = '', get.map = FALSE)$selected), 4)
+  expect_equal(
+    select.lspace('goo glove', dir = '', get.map = FALSE)$selected,
+    select.lspace(c('goo', 'glove'), dir = '', get.map = FALSE)$selected,
+  )
+  expect_equal(
+    select.lspace('5-word window, Positive', dir = '', get.map = FALSE)$selected,
+    select.lspace('100k$', dir = '', get.map = FALSE)$selected,
+  )
+  expect_equal(
+    select.lspace('hyper hierarchical', dir = '', get.map = FALSE)$selected,
+    select.lspace(c('100k$', 'turian_hlbl'), dir = '', get.map = FALSE)$selected,
+  )
   skip_if_not(file.exists(paste0(getOption('lingmatch.lspace.dir'), '/lma_term_map.rda')), 'term map not present')
-  expect_equal(select.lsspace(c('cenepa', "didn't", 'pansear', 'xenops'))$selected$coverage, c(1, 1, .75, .5, .5))
+  expect_equal(select.lspace(c('cenepa', "didn't", 'pansear', 'xenops'))$selected$coverage, c(1, 1, .75, .5, .5))
 })
 
-test_that('standardize.lsspace works', {
+test_that('standardize.lspace works', {
   dir = getOption('lingmatch.lspace.dir')
   f = paste0(dir, '/stdtest.', c('txt', 'rda'))
   skip_if_not(all(file.exists(f)), 'raw embeddings test files not present')
-  standardize.lsspace('stdtest.txt', 'stdtest')
+  standardize.lspace('stdtest.txt', 'stdtest')
   o = read.table(f[1], sep = ' ', quote = '', row.names = 1)
   o = as.matrix(o[!grepl('[^a-z]', rownames(o)),])
   expect_equal(o, matrix(scan(paste0(dir, '/stdtest.dat'), quiet = TRUE),
     nrow(o), 300, TRUE, dimnames = list(readLines(paste0(dir, '/stdtest_terms.txt')), colnames(o))))
-  standardize.lsspace('stdtest.rda', 'stdtest')
+  standardize.lspace('stdtest.rda', 'stdtest')
   expect_equal(o, matrix(scan(paste0(dir, '/stdtest.dat'), quiet = TRUE),
     nrow(o), 300, TRUE, dimnames = list(readLines(paste0(dir, '/stdtest_terms.txt')), colnames(o))))
 })
@@ -215,9 +257,9 @@ test_that('standardize.lsspace works', {
 dir = '~/../Downloads/'
 skip_if(TRUE || !dir.exists(dir), 'not downloading dictionary or embeddings files')
 
-test_that('select.lsspace can download term_map', {
+test_that('select.lspace can download term_map', {
   skip_if(file.exists(paste0(dir, 'lma_term_map.rda')), 'term map already downloaded')
-  expect_true('term_map' %in% names(select.lsspace(get.map = TRUE, dir = dir)))
+  expect_true('term_map' %in% names(select.lspace(get.map = TRUE, dir = dir)))
 })
 
 test_that('download.dict works', {
@@ -226,8 +268,8 @@ test_that('download.dict works', {
   expect_true(file.exists(paste0(dir, 'lusi.dic')))
 })
 
-test_that('download.lsspace works', {
+test_that('download.lspace works', {
   skip_if(file.exists(paste0(dir, 'senna.dat')), 'embeddings set already downloaded')
-  download.lsspace('senna', dir = dir)
+  download.lspace('senna', dir = dir)
   expect_true(all(file.exists(paste0(dir, 'senna', c('.dat', '_terms.txt')))))
 })
