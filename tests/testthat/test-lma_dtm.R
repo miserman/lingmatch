@@ -52,3 +52,4 @@ test_that('tokens.only lines up', {
     paste(names(tokens$tokens)[inds], collapse = ' '), ''))
   expect_equal(as.numeric(lma_dtm(tokens)), as.numeric(dtm))
 })
+

@@ -154,7 +154,7 @@
 #' @useDynLib lingmatch, .registration = TRUE
 
 lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,comp.group=NULL,order=NULL,
-  drop=TRUE,all.levels=FALSE,type='lsm'){
+  drop=FALSE,all.levels=FALSE,type='lsm'){
   inp = as.list(substitute(...()))
   #setting up a default type if specified
   if(!missing(type) && !is.null(type)){
@@ -469,7 +469,7 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
     if(!is.null(speaker)) sal$group=speaker
     if(!is.null(comp.data)){
       if(ckf){
-        opt$comp=paste(opt$comp.data,opt$comp)
+        opt$comp=paste(if(length(opt$comp.data) > 1) deparse(opt$comp.data) else opt$comp.data,opt$comp)
         sal$b=comp.data=if(is.null(dim(comp.data))) comp.data else
           if(compmeanck) colMeans(comp.data,na.rm=TRUE) else apply(na.omit(comp.data),2,comp)
       }else sal$b=comp.data
@@ -671,6 +671,8 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
 #'   dictionary would only include one or another version of a word (e.g., the LIWC 2015 dictionary
 #'   does something like this with \emph{like}, and LIWC 2007 did something like this with
 #'   \emph{kind (of)}, both to try and clean up the posemo category).
+#' @param replace.special Logical: if \code{TRUE} (default), special characters are replaced with regular
+#'   equivalents using the \code{\link{lma_dict}} special function.
 #' @param numbers Logical: if \code{TRUE}, numbers are preserved.
 #' @param punct Logical: if \code{TRUE}, punctuation is preserved.
 #' @param urls Logical: if \code{FALSE}, attempts to replace all urls with "url".
@@ -712,9 +714,9 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
 #' lma_dtm(text)
 #' @export
 
-lma_dtm = function(text, exclude = NULL, context = NULL, numbers = FALSE, punct = FALSE, urls = TRUE,
-  emojis = FALSE, to.lower = TRUE, word.break = ' +', dc.min = 0, dc.max = Inf, sparse = TRUE,
-  tokens.only = FALSE){
+lma_dtm = function(text, exclude = NULL, context = NULL, replace.special = TRUE, numbers = FALSE,
+  punct = FALSE, urls = TRUE, emojis = FALSE, to.lower = TRUE, word.break = ' +', dc.min = 0,
+  dc.max = Inf, sparse = TRUE, tokens.only = FALSE){
   if(is.list(text) && all(c('tokens', 'indices') %in% names(text))){
     m = do.call(rbind, lapply(seq_along(text$indices), function(i){
       inds = as.factor(text$indices[[i]])
@@ -736,20 +738,20 @@ lma_dtm = function(text, exclude = NULL, context = NULL, numbers = FALSE, punct 
   }
   text = paste(' ', text, ' ')
   st = proc.time()[[3]]
-  text = gsub('[\u05be\u1806\u2010\u2011\u2013\uFE58\uFE63\uFF0D]', '-', text)
-  text = gsub('[\u2012\u2014\u2015\u2E3A\u2E3B]|--+', ' - ', text)
-  text = gsub('[\u2032\u2035\u2018\u2019]', "'", text)
-  text = gsub("[\u2033\u2036\u201C\u201D\u201F]|(?<=[^a-z0-9])'|'(?=[^a-z0-9])", '"', text, TRUE, TRUE)
+  if(replace.special){
+    text = lma_dict('special', as.function = gsub)(text)
+    text = gsub("(?<=[^a-z0-9])'|'(?=[^a-z0-9])", '"', text, TRUE, TRUE)
+  }
   if(!urls){
     text = gsub(paste0('\\s[a-z]+://[^\\s]*|www\\.[^\\s]*|\\s[a-z_~-]+\\.[a-z_~-]{2,}[^\\s]*|\\s[a-z_~-]+\\.',
       '(?:io|com|net|org|gov|edu)\\s'), ' url ', text, TRUE, TRUE)
     text = gsub('(?<=[A-Z])\\.\\s', ' ', text, perl = TRUE)
   }
-  text = gsub('[\\n\\t\\r]+', ' ', text, perl = TRUE)
+  text = gsub('\\s+', ' ', text, perl = TRUE)
   text = gsub('\\s(etc|st|rd|ft|feat|dr|drs|mr|ms|mrs|messrs|jr|prof)\\.', ' \\1tempperiod', text)
   text = gsub('\\s\\.|\\.\\s',' . ', text)
   if(any(punct, emojis, !is.null(context))){
-    special=lma_dict(special)[[1]]
+    special = lma_dict(special)[[1]]
     if(!missing(context) && length(context) == 1 && grepl('like', context, TRUE))
       context = special[['LIKE']]
     if(punct) text = gsub(special[['ELLIPSIS']], ' repellipsis ', text)
@@ -1308,6 +1310,9 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, t
 #' @param partial Logical; if \code{TRUE} terms are partially matched (not padded by ^ and $).
 #' @param glob Logical; if \code{TRUE} (default), will convert initial and terminal asterisks to
 #'   partial matches.
+#' @param to.lower Logical; if \code{TRUE} will lowercase dictionary terms. Otherwise, dictionary
+#'   terms will be converted to match the terms if they are single-cased. Set to \code{FALSE} to
+#'   always keep dictionary terms as entered.
 #' @param term.filter A regular expression string used to format the text of each term (passed to
 #'   \code{gsub}). For example, if terms are part-of-speech tagged (e.g.,
 #'   \code{'a_DT'}), \code{'_.*'} would remove the tag.
@@ -1345,10 +1350,10 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, t
 #' @export
 
 lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE, partial = FALSE,
-  glob = TRUE, term.filter = NULL, term.break = 2e4, dir = getOption('lingmatch.dict.dir')){
+  glob = TRUE, term.filter = NULL, term.break = 2e4, to.lower = FALSE, dir = getOption('lingmatch.dict.dir')){
   st=proc.time()[[3]]
   if(missing(dict)) dict = lma_dict(1:9)
-  if(is.character(dict) && length(dict) == 1 && missing(term.weights) && !any(grepl('[\\s*]', dict, fixed = TRUE))){
+  if(is.character(dict) && length(dict) == 1 && missing(term.weights) && !any(grepl('[\\s*]', dict))){
     if(!any(file.exists(dict)) && any(file.exists(paste0(dir, dict)))) dict = paste0(dir, dict)
     td = tryCatch(read.dic(dict), error = function(e) NULL)
     dict = if(is.null(td)) list(cat1 = dict) else td
@@ -1389,7 +1394,7 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
     }
     if(!length(term.weights)) stop('no numeric columns in term.weights')
   }
-  if(!is.list(dict)) dict = if(is.matrix(dict)) as.data.frame(dict) else if(length(dict) == 1 && is.character(dict) &&
+  if(!is.list(dict)) dict = if(is.matrix(dict)) as.data.frame(dict) else if(is.character(dict) && length(dict) == 1 &&
       (file.exists(dict) || dict %in% rownames(select.dict()$info))) read.dic(dict) else list(dict)
   if(is.list(dict) && is.null(names(dict))) names(dict) = paste0('cat', seq_along(dict))
   if(is.data.frame(dict)){
@@ -1441,19 +1446,21 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
           su = dict[[1]] %in% dt
           td = term.weights[su,]
           tw = matrix(0, length(dt), ncol(term.weights), dimnames = list(dt, colnames(term.weights)))
-          for(term in dt) tw[term,] = colMeans(term.weights[dict[[1]] == term,], na.rm = TRUE)
+          for(term in dt) tw[term,] = colMeans(term.weights[dict[[1]] == term,, drop = FALSE], na.rm = TRUE)
           term.weights = rbind(term.weights[!su,], tw)
           rownames(term.weights) = c(dict[[1]][!su], dt)
           dict[[1]] = rownames(term.weights)
         }else rownames(term.weights) = dict[[1]]
       }
     }
-    if(!is.list(term.weights)) term.weights = list(term.weights)
-    dlen = length(dict)
-    if(is.null(names(term.weights)))
-      names(term.weights) = if(length(term.weights) == dlen) names(dict) else seq_along(term.weights)
-    if(length(term.weights) > dlen && dlen == 1 && all(vapply(term.weights, length, 0) == length(dict[[1]])))
-      dict = lapply(term.weights, function(ws) dict[[1]])
+    if(!is.null(term.weights)){
+      if(!is.list(term.weights)) term.weights = list(term.weights)
+      dlen = length(dict)
+      if(is.null(names(term.weights)))
+        names(term.weights) = if(length(term.weights) == dlen) names(dict) else seq_along(term.weights)
+      if(length(term.weights) > dlen && dlen == 1 && all(vapply(term.weights, length, 0) == length(dict[[1]])))
+        dict = lapply(term.weights, function(ws) dict[[1]])
+    }
   }
   dict = lapply(dict, function(cat) if(!is.character(cat))
     if(is.null(names(cat))) as.character(cat) else names(cat) else cat)
@@ -1464,6 +1471,13 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
     bias[n] = term.weights[[n]][ii]
     term.weights[[n]] = term.weights[[n]][!ii]
   }
+  dict_chars = list(
+    all = paste(unique(strsplit(paste0(unique(unlist(dict, use.names = FALSE)), collapse = ''), '')[[1]]),
+      collapse = '')
+  )
+  dict_chars$alpha = gsub('[^A-Za-z]', '', dict_chars$all)
+  dict_chars$case = if(grepl('[A-Z]', dict_chars$alpha))
+    if(grepl('[a-z]', dict_chars$alpha)) 'mixed' else 'upper' else 'lower'
   edtm = substitute(dtm)
   if(is.factor(dtm)) dtm = as.character(dtm)
   if(is.character(dtm) || !any(grepl('\\s', colnames(dtm)))){
@@ -1471,7 +1485,7 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
       if(is.character(dtm)){
         warning(
           'dict has terms with spaces, so using lma_patcat instead;',
-          '\nenter a dtm (e.g., lma_dtm(', edtm, ')) to force lma_termcat use'
+          '\n  enter a dtm (e.g., lma_dtm(', edtm, ')) to force lma_termcat use'
         )
         args = list(text = dtm, dict = dict)
         if(!is.null(term.weights)) args$pattern.weights = term.weights
@@ -1482,12 +1496,32 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
         return(do.call(lma_patcat, args))
       }
     }
-    if(is.character(dtm)) dtm = lma_dtm(dtm)
+    if(is.character(dtm)){
+      if(dict_chars$case == 'upper') dtm = toupper(dtm)
+      dtm = lma_dtm(dtm, numbers = grepl('[0-9]', dict_chars$all), punct = grepl('[_/\\?!."-]', dict_chars$all),
+        to.lower = dict_chars$case == 'lower')
+    }
   }
+  if(is.null(dim(dtm))) dtm = t(dtm)
   ats = attributes(dtm)[c('opts', 'WC', 'type')]
   ats = ats[!vapply(ats, is.null, TRUE)]
   atsn = names(ats)
+  ws = if(is.null(term.filter)) colnames(dtm) else gsub(term.filter, '', colnames(dtm), perl = TRUE)
+  if((missing(to.lower) || !is.logical(to.lower)) && dict_chars$case != 'mixed'){
+    text_case = if(any(grepl('[A-Z]', ws))) if(any(grepl('[a-z]', ws))) 'mixed' else 'upper' else 'lower'
+    if(text_case == 'upper'){
+      dict = lapply(dict, toupper)
+      dict_chars$case = 'upper'
+    }
+    to.lower = text_case == 'lower'
+  }
+  if(to.lower && dict_chars$case != 'lower'){
+    dict = lapply(dict, tolower)
+    dict_chars$case = 'lower'
+  }
+  if(dict_chars$case != 'mixed') ws = (if(dict_chars$case == 'lower') tolower else toupper)(ws)
   odict = dict
+  boundries = FALSE
   formatdict = function(dict, collapse = '|'){
     lab = if(!escape){
       lab = lapply(dict, function(l){
@@ -1518,9 +1552,6 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
         '\\' else '', e
     ), '', l)) else res
   }
-  ws = if(is.null(term.filter)) colnames(dtm) else gsub(term.filter, '', colnames(dtm), perl = TRUE)
-  if('opts' %in% atsn && !ats$opts['to.lower']) ws = tolower(ws)
-  boundries = FALSE
   for(l in dict){
     if(!boundries) boundries = !any(grepl('^\\*|\\*$', l)) && any(grepl('^\\^|\\$$', l))
     if(missing(partial) && boundries) partial = TRUE
@@ -1535,7 +1566,7 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
       ccls = tryCatch(nchar(dict[[cat]]), error = function(e) NULL)
       if(is.null(ccls)){
         warning('dict appears to be miss-encoded, so results may not be as expected;\n',
-          'might try reading the dictionary in with encoding = "ISO-8859-1"')
+          'might try reading the dictionary in with encoding = "latin1"')
         dict[[cat]] = iconv(dict[[cat]], sub = '#')
         ccls = nchar(dict[[cat]])
       }
@@ -1571,8 +1602,17 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
       if(is.null(dim(term.weights))){
         op = matrix(0, nrow(dtm), length(dict), dimnames = list(rownames(dtm), names(dict)))
         if(length(termmap)){
-          weights = lapply(term.weights, function(l) do.call(c, lapply(names(termmap), function(p)
-            structure(rep(l[[p]], length(termmap[[p]])), names = termmap[[p]]))))
+          weights = lapply(names(term.weights), function(n){
+            l = term.weights[[n]]
+            if(is.null(names(l)) && n %in% names(dict) && length(dict[[n]]) == length(l)){
+              names(term.weights[[n]]) = dict[[n]]
+              l = term.weights[[n]]
+            }
+            if(!all(names(termmap) %in% names(l))) l[names(termmap)] = 0
+            do.call(c, lapply(names(termmap), function(p)
+              structure(rep(l[[p]], length(termmap[[p]])), names = termmap[[p]])))
+          })
+          names(weights) = names(term.weights)
           for(cat in names(dict)) if(length(weights[[cat]]))
             op[, cat] = as.numeric(dtm[, names(weights[[cat]]), drop = FALSE] %*% weights[[cat]])
         }
@@ -1604,12 +1644,12 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
 
 match_metric = function(x){
   mets = c('jaccard', 'euclidean', 'canberra', 'cosine', 'pearson')
-  sel = if(is.null(x) || length(x) == 1 && grepl(tolower(substr(x, 1, 1)), 'a', fixed = TRUE))
+  sel = if(is.null(x) || (length(x) == 1 && grepl(tolower(substr(x, 1, 1)), 'a', fixed = TRUE)))
     mets else if(is.function(x)){
       stop('only internal metrics are available: ', paste(mets, collapse = ', '), call. = FALSE)
     }else{
-      if(is.null(x)) 'cosine' else if(is.numeric(x)) mets[x] else{
-        su = grepl('cor', x)
+      if(is.numeric(x)) mets[x] else{
+        su = grepl('^cor', x)
         if(any(su)) x[su] = 'pearson'
         unique(unlist(lapply(substr(x, 1, 3), grep, mets, fixed = TRUE, value = TRUE)))
       }

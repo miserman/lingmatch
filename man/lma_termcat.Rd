@@ -6,7 +6,7 @@
 \usage{
 lma_termcat(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
   partial = FALSE, glob = TRUE, term.filter = NULL, term.break = 20000,
-  dir = getOption("lingmatch.dict.dir"))
+  to.lower = FALSE, dir = getOption("lingmatch.dict.dir"))
 }
 \arguments{
 \item{dtm}{A matrix with terms as column names.}
@@ -40,6 +40,10 @@ partial matches.}
 
 \item{term.break}{If a category has more than \code{term.break} characters, it will be processed
 in chunks. Reduce from 20000 if you get a PCRE compilation error.}
+
+\item{to.lower}{Logical; if \code{TRUE} will lowercase dictionary terms. Otherwise, dictionary
+terms will be converted to match the terms if they are single-cased. Set to \code{FALSE} to
+always keep dictionary terms as entered.}
 
 \item{dir}{Path to a folder in which to look for \code{dict}; defaults to
 \code{getOption('lingmatch.dict.dir')}.}

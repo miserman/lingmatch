@@ -4,10 +4,10 @@
 \alias{lma_dtm}
 \title{Document-Term Matrix Creation}
 \usage{
-lma_dtm(text, exclude = NULL, context = NULL, numbers = FALSE,
-  punct = FALSE, urls = TRUE, emojis = FALSE, to.lower = TRUE,
-  word.break = " +", dc.min = 0, dc.max = Inf, sparse = TRUE,
-  tokens.only = FALSE)
+lma_dtm(text, exclude = NULL, context = NULL, replace.special = TRUE,
+  numbers = FALSE, punct = FALSE, urls = TRUE, emojis = FALSE,
+  to.lower = TRUE, word.break = " +", dc.min = 0, dc.max = Inf,
+  sparse = TRUE, tokens.only = FALSE)
 }
 \arguments{
 \item{text}{Texts to be processed. This can be a vector (such as a column in a data frame)
@@ -26,6 +26,9 @@ replaced with a coded version of the word (e.g., \code{"Hey, i like that!"} woul
 dictionary would only include one or another version of a word (e.g., the LIWC 2015 dictionary
 does something like this with \emph{like}, and LIWC 2007 did something like this with
 \emph{kind (of)}, both to try and clean up the posemo category).}
+
+\item{replace.special}{Logical: if \code{TRUE} (default), special characters are replaced with regular
+equivalents using the \code{\link{lma_dict}} special function.}
 
 \item{numbers}{Logical: if \code{TRUE}, numbers are preserved.}
 

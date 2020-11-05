@@ -5,7 +5,7 @@
 \title{Linguistic Matching and Accommodation}
 \usage{
 lingmatch(input = NULL, comp = mean, data = NULL, group = NULL, ...,
-  comp.data = NULL, comp.group = NULL, order = NULL, drop = TRUE,
+  comp.data = NULL, comp.group = NULL, order = NULL, drop = FALSE,
   all.levels = FALSE, type = "lsm")
 }
 \arguments{

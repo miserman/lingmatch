@@ -13,7 +13,7 @@ test_that('results align with r implementation', {
   lapply(seq_len(10), function(i){
     a = Matrix(rpois(20, 1), nrow = 1, sparse = TRUE)
     b = Matrix(rpois(20, 1), nrow = 1, sparse = TRUE)
-    expect_equal(as.numeric(lma_simets(a, b)), manual(a, b), tolerance = 1e-7)
+    expect_equal(as.numeric(lma_simets(a, b)), manual(a, b), tolerance = 1e-13)
   })
 })
 
@@ -57,7 +57,6 @@ test_that('text inputs and differing a-b columns works', {
   dtm = lma_dtm(text[1:5])
   expect_equal(as.numeric(lma_simets(text[1:5], 'cos')), as.numeric(lma_simets(dtm, 'cos')))
   comp = lma_dtm(text[5:10])
-  sims_ab = lma_simets(dtm, comp, 'cos')
   expect_equal(
     as.numeric(lma_simets(text[1:5], text[5:10], 'cos')),
     as.numeric(lma_simets(dtm, comp, 'cos'))
@@ -69,15 +68,17 @@ test_that('entry order is arbitrary for vector-matrix comparisons', {
   comp = Matrix(rpois(100, .5), nrow = 1, sparse = TRUE)
   sims_ab = lma_simets(dtm, comp)
   sims_ba = lma_simets(comp, dtm)
-  expect_true(all(dim(sims_ab) == c(10, 5) & dim(sims_ba) == c(10, 5)))
+  expect_equivalent(sims_ab, sims_ba)
+  sims_ab = lma_simets(dtm, as.numeric(comp))
+  sims_ba = lma_simets(as.numeric(comp), dtm)
   expect_equivalent(sims_ab, sims_ba)
 })
 
 test_that('pearson aligns with cor', {
   a = matrix(rnorm(500), 20)
-  expect_equal(as.numeric(lma_simets(a, metric = 'pearson', symmetric = TRUE)), as.numeric(cor(t(a))))
+  expect_equal(as.numeric(lma_simets(a, metric = 5, symmetric = TRUE)), as.numeric(cor(t(a))))
   a = matrix(rpois(500, 1), 20)
-  expect_equal(as.numeric(lma_simets(a, metric = 'pearson', symmetric = TRUE)), as.numeric(cor(t(a))))
+  expect_equal(as.numeric(lma_simets(a, metric = 'correlation', symmetric = TRUE)), as.numeric(cor(t(a))))
 })
 
 test_that('groups work as expected', {

@@ -18,7 +18,7 @@
 <pre>
 lma_termcat(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
   partial = FALSE, glob = TRUE, term.filter = NULL, term.break = 20000,
-  dir = getOption("lingmatch.dict.dir"))
+  to.lower = FALSE, dir = getOption("lingmatch.dict.dir"))
 </pre>
 
 
@@ -74,6 +74,12 @@ partial matches.</p>
 <td>
 <p>If a category has more than <code>term.break</code> characters, it will be processed
 in chunks. Reduce from 20000 if you get a PCRE compilation error.</p>
+</td></tr>
+<tr valign="top"><td><code>to.lower</code></td>
+<td>
+<p>Logical; if <code>TRUE</code> will lowercase dictionary terms. Otherwise, dictionary
+terms will be converted to match the terms if they are single-cased. Set to <code>FALSE</code> to
+always keep dictionary terms as entered.</p>
 </td></tr>
 <tr valign="top"><td><code>dir</code></td>
 <td>

@@ -16,10 +16,10 @@
 <h3>Usage</h3>
 
 <pre>
-lma_dtm(text, exclude = NULL, context = NULL, numbers = FALSE,
-  punct = FALSE, urls = TRUE, emojis = FALSE, to.lower = TRUE,
-  word.break = " +", dc.min = 0, dc.max = Inf, sparse = TRUE,
-  tokens.only = FALSE)
+lma_dtm(text, exclude = NULL, context = NULL, replace.special = TRUE,
+  numbers = FALSE, punct = FALSE, urls = TRUE, emojis = FALSE,
+  to.lower = TRUE, word.break = " +", dc.min = 0, dc.max = Inf,
+  sparse = TRUE, tokens.only = FALSE)
 </pre>
 
 
@@ -48,6 +48,11 @@ replaced with a coded version of the word (e.g., <code>"Hey, i like that!"</code
 dictionary would only include one or another version of a word (e.g., the LIWC 2015 dictionary
 does something like this with <em>like</em>, and LIWC 2007 did something like this with
 <em>kind (of)</em>, both to try and clean up the posemo category).</p>
+</td></tr>
+<tr valign="top"><td><code>replace.special</code></td>
+<td>
+<p>Logical: if <code>TRUE</code> (default), special characters are replaced with regular
+equivalents using the <code>lma_dict</code> special function.</p>
 </td></tr>
 <tr valign="top"><td><code>numbers</code></td>
 <td>

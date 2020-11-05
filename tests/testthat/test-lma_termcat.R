@@ -11,14 +11,18 @@ test_that('term.weights work', {
   expect_equal(lma_termcat(dtm, category)[, 1], score)
   expect_equal(lma_termcat(dtm, list(a = category), list(a = category))[, 1], score)
   expect_equal(lma_termcat(dtm, sepcat$terms, sepcat$weights)[, 1], score)
-  expect_equal(lma_termcat(dtm, sepcat)[, 1], score)
+  expect_equal(lma_termcat(dtm, paste0('_', sepcat$terms), sepcat$weights)[, 1], numeric(100))
   expect_equal(lma_termcat(dtm, sepcat, 'weights')[, 1], score)
   expect_equal(lma_termcat(dtm, sepcat, 'weights')[, 1], score)
   s2 = lma_termcat(dtm, sepcat$terms, data.frame(a = sepcat$weights, b = sepcat$weights))
   expect_equal(s2[, 1], score)
   expect_equal(s2[, 1], s2[, 2])
   sepcat$value = sepcat$weights * 2
+  expect_equal(lma_termcat(dtm, structure(sepcat[, -1], row.names = sepcat$terms))[, 1], score)
   expect_equal(lma_termcat(dtm, rbind(sepcat, sepcat[1:4,]))[, 2], score * 2)
+  expect_equal(lma_termcat(dtm, sepcat$terms, as.matrix(unname(sepcat[, -1])))[, 2], score * 2)
+  expect_equal(lma_termcat(dtm, list(cat = sepcat$terms), list(sepcat$weights))[, 1], score)
+  expect_equal(lma_termcat(dtm, list(weights = sepcat$terms), as.list(sepcat[, -1]))[, 1], score)
 })
 
 test_that('bias works', {
@@ -44,9 +48,33 @@ test_that('escape works', {
 test_that('partial/glob works', {
   dtm = matrix(c(1, 0, 0, 1), 2, dimnames = list(NULL, c('aba', 'ababb')))
   expect_equal(as.numeric(lma_termcat(dtm, list('aba', 'aba*'))), c(1, 0, 1, 1))
+  expect_equal(lma_termcat(dtm, list('aba*'))[, 1], c(1, 1))
   expect_equal(lma_termcat(dtm, list('aba*'), glob = FALSE)[, 1], c(0, 0))
+  expect_equal(lma_termcat(dtm, list('aba'))[, 1], c(1, 0))
   expect_equal(lma_termcat(dtm, list('aba'), partial = TRUE)[, 1], c(1, 1))
   expect_equal(as.numeric(lma_termcat(dtm, list('aba.*', 'aba[b]*', 'aba.?.?', 'aba.{0,2}'))), rep(1, 8))
+})
+
+test_that('case conversion works', {
+  text = vapply(1:5, function(i) paste0(sample(gsub('\\b(\\w)', '\\U\\1', words, perl = TRUE), 50), collapse = ' '), '')
+  dtm = lma_dtm(text, to.lower = FALSE)
+  dict = colnames(dtm)
+  wc = rowSums(dtm)
+  expect_equal(lma_termcat(dtm, dict)[, 1], wc)
+  expect_equal(lma_patcat(text, dict)[, 1], wc)
+  expect_equal(lma_termcat(dtm, tolower(dict))[, 1], wc)
+  expect_equal(lma_patcat(text, tolower(dict))[, 1], wc)
+  expect_equal(lma_termcat(text, toupper(dict))[, 1], wc)
+  expect_equal(lma_patcat(text, toupper(dict))[, 1], wc)
+  expect_equal(lma_termcat(dtm, dict, to.lower = FALSE)[, 1], wc)
+  expect_equal(lma_patcat(text, dict, to.lower = FALSE)[, 1], wc)
+  expect_equal(lma_termcat(dtm, tolower(dict), to.lower = FALSE)[, 1], wc)
+  wc = numeric(nrow(dtm))
+  expect_equal(lma_patcat(text, tolower(dict), to.lower = FALSE)[, 1], wc)
+  expect_equal(lma_termcat(tolower(text), dict, to.lower = FALSE)[, 1], wc)
+  expect_equal(lma_patcat(tolower(text), dict, to.lower = FALSE)[, 1], wc)
+  expect_equal(lma_termcat(toupper(text), dict, to.lower = FALSE)[, 1], wc)
+  expect_equal(lma_patcat(toupper(text), dict, to.lower = FALSE)[, 1], wc)
 })
 
 test_that('term.filter works', {
@@ -71,6 +99,27 @@ test_that('wide dict format works', {
   expect_equivalent(lma_termcat(dtm, dict), manual)
   expect_equivalent(lma_termcat(dtm, dict$term, dict), manual)
   expect_equivalent(lma_termcat(dtm, dict$term, dict[, -1]), manual)
+  expect_equivalent(lma_termcat(dtm, structure(dict[, -1], row.names = dict$term)), manual)
+  expect_equivalent(lma_termcat(dtm, data.frame(c('a', 'a', 'b'), dict)), manual)
+})
+
+test_that('text input works', {
+  dict = vapply(1:50, function(i) paste(sample(words, 2, TRUE), collapse = ' '), '')
+  text = vapply(1:10, function(i) paste(sample(dict, 100, TRUE), collapse = ' '), '')
+  dtm = lma_dtm(text)
+  expect_equal(suppressWarnings(lma_termcat(text, dict)[, 1]), rowSums(dtm) / 2)
+  expect_equal(
+    suppressWarnings(lma_termcat(text, paste0(dict, '*'), term.weights = rep(.1, length(dict)),
+      bias = 10, glob = TRUE, partial = FALSE, dir = '')[, 1]),
+    rowSums(dtm) / 2 * .1 + 10
+  )
+  expect_equal(
+    suppressWarnings(lma_termcat(text, dict)[, 1]),
+    lma_patcat(text, dict)[, 1]
+  )
+  dict = unlist(strsplit(dict, ' '))
+  expect_equal(lma_termcat(as.factor(text), dict)[, 1], rowSums(dtm))
+  expect_equal(lma_termcat(dtm, dict)[, 1], rowSums(dtm))
 })
 
 textdir = '../'
@@ -78,7 +127,8 @@ if(!file.exists(paste0(textdir, 'texts.txt'))) textdir = paste0('../../', textdi
 skip_if(!file.exists(paste0(textdir, 'texts.txt')), paste('texts.txt not found in', normalizePath(textdir)))
 
 dicts = list.files(getOption('lingmatch.dict.dir'), '(?:csv|dic)$', full.names = TRUE)
-skip_if(!length(dicts), 'no .csv or .dic files in the dictionaries directory')
+skip_if(!length(dicts), paste('no .csv or .dic files in',
+  getOption('lingmatch.dict.dir'), 'from', getwd()))
 
 test_that('applied dictionaries work', {
   text = sample(readLines(paste0(textdir, 'texts.txt')), 10)

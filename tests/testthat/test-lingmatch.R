@@ -172,6 +172,8 @@ test_that('comp.group and comp.data work', {
     lma_termcat(lma_weight(dtm, percent = TRUE))
   )
   cats = names(lma_dict(1:9))
+  data$prep = 0
+  data[1, cats] = 0
   sdat = split(data[, cats], paste0(data$group, data$condition))
   pairs = list(a = lma_simets(sdat$a0, sdat$a1, metric = 'can'), b = lma_simets(sdat$b0, sdat$b1, metric = 'can'))
   expect_equal(as.numeric(rowMeans(pairs$a)), as.numeric(lma_simets(sdat$a0, sdat$a1, metric = 'can', mean = TRUE)))
@@ -187,6 +189,12 @@ test_that('comp.group and comp.data work', {
     tt$sim$canberra,
     as.numeric(unlist(c1mean))
   )
+  colnames(sdat$a0)[c(3, 6)] = colnames(sdat$a1)[c(3, 6)] = c('articles', 'preps')
+  expect_true(all(lingmatch(sdat$a0, colMeans(sdat$a1), metric = 'can')$sim == c1mean$a))
+  expect_equal(as.numeric(lingmatch(sdat$a0, comp.data = sdat$a1, metric = 'can')$sim), as.numeric(c1mean$a))
+  auto = lingmatch(sdat$a0, 'auto')
+  expect_equal(as.numeric(auto$sim),
+    as.numeric(lingmatch(sdat$a0, sub('auto: ', '', auto$comp.type, fixed = TRUE))$sim))
 })
 
 test_that('sequential comparisons work', {

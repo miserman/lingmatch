@@ -494,54 +494,56 @@ read.segments = function(path = '.', segment = NULL, ext = '.txt', subdir = FALS
       f = files[fi]
       args[[if(ck_text) 'text' else 'file']] = f
       WC = NULL
-      if(is.numeric(segment) || segment.size > 0){
-        words = tryCatch(do.call(scan, args), error = err)
-        if(!length(words)) return(NULL)
-        TWC = length(words)
-        if(segment.size == -1) segment.size = ceiling(TWC / segment)
-        if(bysentence){
-          if(!is.null(segment) && is.numeric(segment)){
-            lines = character(segment)
-            WC = numeric(segment)
-          }else{
-            lines = NULL
-            WC = NULL
-          }
-          sentends = c(1, grep(paste0(
-            '(?!<^(?:[a-z]+\\.[a-z.]+|\\d+|[a-z]|[iv]+|ans|govt|apt|etc|',
-            'st|rd|ft|feat|dr|drs|mr|ms|mrs|messrs|jr|prof))[.?!]+$'
-          ), words, perl = TRUE))
-          nsents = length(sentends)
-          if(sentends[nsents] != TWC){
-            sentends = c(sentends, TWC)
-            nsents = nsents + 1
-          }
-          i = s = p = 1
-          while(p < nsents && sum(WC) < TWC){
-            WC[i] = 0
-            while(p < nsents && WC[i] < segment.size){
-              p = p + 1
-              WC[i] = (sentends[p] - s) + 1
+      if(ck_text || file.exists(f)){
+        if(is.numeric(segment) || segment.size > 0){
+          words = tryCatch(do.call(scan, args), error = err)
+          if(!length(words)) return(NULL)
+          TWC = length(words)
+          if(segment.size == -1) segment.size = ceiling(TWC / segment)
+          if(bysentence){
+            if(!is.null(segment) && is.numeric(segment)){
+              lines = character(segment)
+              WC = numeric(segment)
+            }else{
+              lines = NULL
+              WC = NULL
             }
-            lines[i] = paste(words[seq(s, sentends[p])], collapse = ' ')
-            s = sentends[p] + 1
-            i = i + 1
+            sentends = c(1, grep(paste0(
+              '(?!<^(?:[a-z]+\\.[a-z.]+|\\d+|[a-z]|[iv]+|ans|govt|apt|etc|',
+              'st|rd|ft|feat|dr|drs|mr|ms|mrs|messrs|jr|prof))[.?!]+$'
+            ), words, perl = TRUE))
+            nsents = length(sentends)
+            if(sentends[nsents] != TWC){
+              sentends = c(sentends, TWC)
+              nsents = nsents + 1
+            }
+            i = s = p = 1
+            while(p < nsents && sum(WC) < TWC){
+              WC[i] = 0
+              while(p < nsents && WC[i] < segment.size){
+                p = p + 1
+                WC[i] = (sentends[p] - s) + 1
+              }
+              lines[i] = paste(words[seq(s, sentends[p])], collapse = ' ')
+              s = sentends[p] + 1
+              i = i + 1
+            }
+          }else{
+            segment = ceiling(TWC / segment.size)
+            lines = character(segment)
+            WC = rep(segment.size, segment)
+            WCC = 0
+            for(i in seq_len(segment)){
+              if(WCC + WC[i] > TWC) WC[i] = TWC - WCC
+              lines[i] = paste(words[seq(WCC + 1, WCC + WC[i])], collapse = ' ')
+              WCC = WCC + WC[i]
+            }
           }
         }else{
-          segment = ceiling(TWC / segment.size)
-          lines = character(segment)
-          WC = rep(segment.size, segment)
-          WCC = 0
-          for(i in seq_len(segment)){
-            if(WCC + WC[i] > TWC) WC[i] = TWC - WCC
-            lines[i] = paste(words[seq(WCC + 1, WCC + WC[i])], collapse = ' ')
-            WCC = WCC + WC[i]
-          }
+          lines = tryCatch(do.call(scan, args), error = err)
+          if(!length(lines)) return(NULL)
         }
-      }else{
-        lines = tryCatch(do.call(scan, args), error = err)
-        if(!length(lines)) return(NULL)
-      }
+      }else lines = ''
       data.frame(
         input = if(ck_text) fi else f, segment = seq_along(lines),
         WC = if(is.null(WC)) vapply(strsplit(lines, '\\s+'), function(sp) sum(sp != ''), 0) else WC,
@@ -1096,9 +1098,9 @@ lma_patcat = function(text, dict = NULL, pattern.weights = 'weight', pattern.cat
   if(is.factor(text)) text = as.character(text)
   if(!is.character(text)) stop('enter a character vector as the first argument')
   text = paste(' ', text, ' ')
-  if(to.lower) text = tolower(text)
   if(is.null(names(name.map)) && length(name.map) < 3) names(name.map) = c('intname', 'term')[seq_along(name.map)]
   wide = FALSE
+  if(missing(dict) && missing(pattern.weights) && missing(pattern.categories)) dict = lma_dict()
   if(is.character(dict) && length(dict) == 1 && missing(pattern.weights) && missing(pattern.categories)){
     if(!any(file.exists(dict)) && any(file.exists(paste0(dir, dict)))) dict = paste0(dir, dict)
     td = tryCatch(read.dic(dict), error = function(e) NULL)
@@ -1181,7 +1183,7 @@ lma_patcat = function(text, dict = NULL, pattern.weights = 'weight', pattern.cat
       weights = if(is.numeric(dict)) unname(dict) else if(is.numeric(pattern.weights))
         if(!is.null(names(pattern.weights)) && is.character(dict) && all(dict %in% names(pattern.weights)))
           pattern.weights[dict] else pattern.weights else if(is.list(dict)) if(is.numeric(dict[[1]]))
-        unlist(dict, use.names = FALSE) else if(is.numeric(dict[[1]]))
+        unlist(dict, use.names = FALSE) else if(is.list(pattern.weights) && is.numeric(pattern.weights[[1]]))
           unlist(pattern.weights, use.names = FALSE) else 1 else 1
     )
   }else{
@@ -1248,6 +1250,13 @@ lma_patcat = function(text, dict = NULL, pattern.weights = 'weight', pattern.cat
   }else bias = structure(integer(length(categories)), names = categories)
   bias = bias[categories]
   if(is.logical(boundary) && boundary) boundary = ' '
+  if(missing(to.lower)){
+    if(any(grepl('[A-Z]', lex$term))){
+      to.lower = FALSE
+      if(!any(grepl('[a-z]', lex$term))) text = toupper(text)
+    }
+  }
+  if(to.lower) text = tolower(text)
   st = proc.time()[[3]]
   op = pattern_search(
     text, if(is.character(boundary)) paste0(boundary, lex$term, boundary) else lex$term,
@@ -1513,44 +1522,54 @@ lma_dict = function(..., as.regex = TRUE, as.function = FALSE){
         '(?<=you) like\\b'),
       CHARACTERS = c(
         ` ` = '\\s',
-        `'` = paste0('[\u00B4\u2018-\u201B\u2032\u0235\u02B9\u02BB-\u02BF\u02C8\u02CA\u02CB\u02F4\u0300\u0301',
-          '\u020D\u0312-\u0315\u031B\u0321\u0322\u0326\u0328\u0329\u0340\u0341\u0343\u0351\u0357]'),
-        `"` = '[\u201C-\u201F\u2033\u2034\u2036\u2037\u2057\u02BA\u02DD\u02EE\u02F5\u02F6\u030B\u030F]',
+        `'` = paste0('[\u00B4\u2018\u2019\u201A\u201B\u2032\u2035\u02B9\u02BB\u02BE\u02BF\u02C8\u02CA\u02CB\u02F4',
+          '\u0300\u0301\u030D\u0312\u0313\u0314\u0315\u031B\u0321\u0322\u0326\u0328\u0329\u0340\u0341\u0343\u0351',
+          '\u0357]'),
+        `"` = '[\u201C\u201D\u201E\u201F\u2033\u2034\u2036\u2037\u2057\u02BA\u02DD\u02EE\u02F5\u02F6\u030B\u030F]',
         `...` = '\u2026',
         `-` = '[\u05BE\u1806\u2010\u2011\u2013\uFE58\uFE63\uFF0D]',
         ` - ` = '[\u2012\u2014\u2015\u2E3A\u2E3B]|--+',
-        a = paste0('[\u00C0-\u00C5\u00E0-\u00E5\u0100-\u105\u0200-\u0203\u0226\u0227\u0245\u0250-\u0252',
-          '\u0255\u0363\u0386\u0391\u0410\u0430]'),
+        a = paste0('[\u00C0\u00C1\u00C2\u00C3\u00C4\u00C5\u00E0\u00E1\u00E2\u00E3\u00E4\u00E5\u0100\u0101\u0102',
+          '\u0103\u0104\u105\u0200\u0201\u0202\u0203\u0226\u0227\u0245\u0250\u0251\u0252\u0255\u0363\u0386\u0391',
+          '\u0410\u0430]'),
         ae = '[\u00C6\u00E6\u0152\u0153\u0276]',
-        b = '[\u00DF\u0180-\u018C\u0243\u0253\u0299\u0411\u0412\u0431\u0432\u0462\u0463\u0494\u0495\u212C]',
-        c = '[\u00C7\u00E7\u0106-\u0109\u0186-\u0188\u0254\u0297\u0368\u0421\u0441\u2102\u2103]',
-        d = '[\u00D0\u00DE\u00FE\u010D-\u0111\u0189\u0221\u0256\u0256\u0257\u0369\u0392\u0434\u0500\u2145\u2146]',
-        e = paste0('[\u00C8-\u00CB\u00E8-\u00EB\u0112-\u011B\u018E-\u0190\u0204-\u0207\u0228\u0229\u0246\u0247',
-          '\u0258\u0259\u0364\u0388\u0395\u0400\u0401\u0404\u0415\u0417\u0435\u0437\u0450\u0451\u0454',
-          '\u0498\u0499\u2107\u2108\u2128\u212E-\u2130\u2147]'),
+        b = paste0('[\u00DF\u0180\u0181\u0182\u0183\u0184\u0185\u0186\u0187\u0188\u0189\u018A\u018B\u018C\u0243',
+          '\u0253\u0299\u0411\u0412\u0431\u0432\u0462\u0463\u0494\u0495\u212C]'),
+        c = paste0('[\u00C7\u00E7\u0106\u0107\u0108\u0109\u0186\u0187\u0188\u0254\u0297\u0368\u0421\u0441\u2102',
+          '\u2103]'),
+        d = paste0('[\u00D0\u00DE\u00FE\u010D\u010E\u010F\u0110\u0111\u0189\u0221\u0256\u0256\u0257\u0369\u0392',
+          '\u0434\u0500\u2145\u2146]'),
+        e = paste0('[\u00C8\u00C9\u00CA\u00CB\u00E8\u00E9\u00EA\u00EB\u0112\u0113\u0114\u0115\u0116\u0117\u0118',
+          '\u0119\u011A\u011B\u018E\u018F\u0190\u0204\u0205\u0206\u0207\u0228\u0229\u0246\u0247\u0258\u0259\u0364',
+          '\u0388\u0395\u0400\u0401\u0404\u0415\u0417\u0435\u0437\u0450\u0451\u0454\u0498\u0499\u2107\u2108\u2128',
+          '\u212E\u212F\u2130\u2147]'),
         f = '[\u0191\u0192\u0492\u0493\u2109\u2231\u2132\u214E]',
-        g = '[\u011C-\u0123\u0193\u0222\u0260-\u0262\u210A\u2141]',
-        h = '[\u0124-\u0127\u0195\u0266\u0267\u0389\u0397\u0452\u210B-\u210F]',
-        i = paste0('[\u00CC-\u00CF\u00EC-\u00EF\u0128-\u0131\u0169\u0197\u019A\u0208\u0209\u0365\u0390\u0399\u0406',
-          '\u0407\u0456\u0457]'),
-        j = '[\u0135\u0136\u0237\u0248\u0249\u0408\u0458\u2129\u2139\u2149]',
+        g = '[\u011C\u011D\u011E\u011F\u0120\u0121\u0122\u0123\u0193\u0222\u0260\u0261\u0262\u210A\u2141]',
+        h = '[\u0124\u0125\u0127\u0195\u0266\u0267\u0389\u0397\u0452\u210B\u210C\u210D\u210E\u210F]',
+        i = paste0('[\u00CC\u00CD\u00CE\u00CF\u00EC\u00ED\u00EE\u00EF\u0128\u0129\u012A\u012B\u012C\u012D\u012E\u012F',
+          '\u0130\u0131\u0197\u019A\u0208\u0209\u0365\u0390\u0399\u0406\u0407\u0456\u0457]'),
+        j = '[\u0135\u0236\u0237\u0248\u0249\u0408\u0458\u2129\u2139\u2149]',
         k = '[\u0137\u0138\u0198\u0199\u212A]',
-        l = '[\u0139-\u0142\u0234]',
+        l = '[\u0139\u013A\u013B\u013C\u013D\u013E\u013F\u0140\u0141\u0142\u0234]',
         m = '[\u0271\u0460\u2133]',
-        n = '[\u00D1\u00F1\u0143-\u014B\u0220\u0235\u0272-\u0274\u0376\u0377\u0418\u0419\u0438\u0439\u2115\u2135]',
+        n = paste0('[\u00D1\u00F1\u0143\u0144\u0145\u0146\u0147\u0148\u0149\u014A\u014B\u0220\u0235\u0272\u0273',
+          '\u0274\u0376\u0377\u0418\u0419\u0438\u0439\u2115\u2135]'),
         h = '\u0149',
-        o = paste0('[\u00D2-\u00D6\u00D8\u00F0\u00F2-\u00F6\u00F8\u014C-\u0151\u0150\u0151\u0230\u0231\u0275\u0298',
-          '\u0366\u0398\u0424\u0444\u0472\u0473\u2134]'),
-        p = '[\u0420\u0440\u2117-\u2119]',
+        o = paste0('[\u00D2\u00D3\u00D4\u00D5\u00D6\u00D8\u00F0\u00F2\u00F3\u00F4\u00F5\u00F6\u00F8\u014C\u014D',
+          '\u014E\u014F\u0150\u0151\u0150\u0151\u0230\u0231\u0275\u0298\u0366\u0398\u0424\u0444\u0472\u0473\u2134]'),
+        p = '[\u0420\u0440\u2117\u2118\u2119]',
         q = '[\u018D\u211A\u213A]',
-        r = '[\u0154-\u0159\u0211-\u0213\u0279-\u0281\u0433\u0453\u0490\u0491\u211B-\u211D\u211F\u213E]',
-        s = '[\u015A-\u0161\u0160\u0161\u0218\u0219\u0405\u0455]',
-        t = '[\u0162-\u0167\u0371\u0373\u0422\u0442]',
-        u = '[\u00D9-\u00DC\u00F9-\u00FC\u0168-\u0173\u01D3-\u01DC\u0214\u0217\u0244\u0289\u0367\u0426\u0446]',
-        v = '[\u0474-\u0477]',
+        r = paste0('[\u0154\u0155\u0156\u0157\u0158\u0159\u0211\u0212\u0213\u0279\u0280\u0281\u0433\u0453\u0490',
+          '\u0491\u211B\u211C\u211D\u211F\u213E]'),
+        s = '[\u015A\u015C\u015D\u015E\u015F\u0160\u0161\u0160\u0161\u0218\u0219\u0405\u0455]',
+        t = '[\u0162\u0163\u0164\u0165\u0166\u0167\u0371\u0373\u0422\u0442]',
+        u = paste0('[\u00D9\u00DA\u00DB\u00DC\u00F9\u00FA\u00FB\u00FC\u00FC\u0168\u0169\u016A\u016B\u016C\u016D',
+          '\u016E\u016F\u0170\u0171\u0172\u0173\u01D3\u01D4\u01D5\u01D6\u01D7\u01D8\u01D9\u01DA\u01DB\u01DC\u0214',
+          '\u0217\u0244\u0289\u0367\u0426\u0446]'),
+        v = '[\u0474\u0475\u0476\u0477]',
         w = '[\u0174\u0175\u0270\u0428\u0429\u0448\u0449\u0461]',
-        y = '[\u00DD\u00FD\u00FF\u0176-\u0178\u0232\u0233\u0423\u0427\u0443\u0447]',
-        z = '[\u0179-\u017E\u0224\u0225\u0240\u0290\u0291\u039\u0396\u2124]',
+        y = '[\u00DD\u00FD\u00FF\u0176\u0177\u0178\u0232\u0233\u0423\u0427\u0443\u0447]',
+        z = '[\u0179\u017A\u017B\u017C\u017E\u0224\u0225\u0240\u0290\u0291\u0396\u2124]',
         x = '[\u00D7\u0416\u0425\u0436\u0445\u0496\u0497]'
       ),
       SYMBOLS = c(
@@ -1583,9 +1602,17 @@ lma_dict = function(..., as.regex = TRUE, as.function = FALSE){
       if('special' %in% cats && is.function(as.function) && grepl('sub', substitute(as.function))){
         dict = c(dict$special$CHARACTERS, dict$special$SYMBOLS)
         fun = as.function
+        if(substitute(as.function) == 'gsub'){
+          charmap = as.data.frame(unlist(lapply(as.list(dict), strsplit, '')))
+          charmap = data.frame(to = sub('[0-9]+', '', rownames(charmap)), from = charmap[[1]])
+          charmap = charmap[grepl('^\\w$', charmap$to) & !charmap$from %in% c('[', ']'),]
+          dict = dict[!names(dict) %in% charmap$to]
+          charmap = list(to = paste(charmap$to, collapse = ''), from = paste(charmap$from, collapse = ''))
+        }else charmap = NULL
         function(terms, ...){
           args = list(...)
           args$x = terms
+          if(!is.null(charmap)) args$x = chartr(charmap$from, charmap$to, args$x)
           for(s in names(dict)){
             args$pattern = dict[s]
             args$replacement = s

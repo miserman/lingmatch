@@ -21,6 +21,8 @@ test_that('lma_process works', {
   write(texts[2], files[2])
   expect_equal(lma_process(files)[, -(1:3)], manual)
   expect_equal(lma_process(read.segments(files))[, -(1:3)], manual)
+  expect_equal(as.numeric(lma_termcat(texts[1])), as.numeric(lma_termcat(files[1])))
+  expect_equal(as.numeric(lma_patcat(texts[1])), as.numeric(lma_patcat(files[1])))
   file.remove(files)
   manual[, colnames(dtm)] = lma_weight(dtm, 'tfidf', normalize = FALSE)
   expect_equal(lma_process(texts, weight = 'tfidf', normalize = FALSE), manual)
@@ -243,7 +245,7 @@ test_that('select dict and lspace work', {
 test_that('standardize.lspace works', {
   dir = getOption('lingmatch.lspace.dir')
   f = paste0(dir, '/stdtest.', c('txt', 'rda'))
-  skip_if_not(all(file.exists(f)), 'raw embeddings test files not present')
+  skip_if_not(all(file.exists(f)), paste('raw embeddings test files not present in', dir, 'from', getwd()))
   standardize.lspace('stdtest.txt', 'stdtest')
   o = read.table(f[1], sep = ' ', quote = '', row.names = 1)
   o = as.matrix(o[!grepl('[^a-z]', rownames(o)),])
