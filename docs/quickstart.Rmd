@@ -62,16 +62,16 @@ You will need a path to the file containing your texts. You could...
 * Give the full path (you can use `/` or `\\` as separators), e.g.,
   + Windows: `'c:/users/name/documents/texts.txt'`
   + Linux: `'/home/Name/Documents/texts.txt'`
-  + Mac: `'/user/name/documents/texts.txt'`
-* Give a relative path (use `rnormalizePath('example')` to see the full path):
-  + with a tilde (see what that starts at with `path.expand('~')`), e.g., `'~/Documents/texts.txt'`
+  + Mac: `'/users/name/documents/texts.txt'`
+* Give a relative path (use `normalizePath('example')` to see the full path):
+  + with a tilde (see what that starts at with `path.expand('~')`), e.g., `'~/texts.txt'`
   + from the working directory (see what that is with `getwd()`, set it with `setwd()`), e.g., `'texts.txt'`
   + from the parent of the working directory, e.g., `'../texts.txt'`
 
 In the following examples, just the relative path to the file will be shown. This would be like if you set the working
 directory to the folder containing the files.
 
-## From plain text files
+## From plain-text files
 
 When there is one entry per line:
 ```r
@@ -103,9 +103,9 @@ When your files are just text, you could also enter the path into lingmatch func
 results = lingmatch('texts.txt')
 ```
 
-## From a delimited plain test file
+## From a delimited plain-text file
 
-When tests are in a column of a spreadsheet, stored in a plain text file:
+When texts are in a column of a spreadsheet, stored in a plain-text file:
 ```r
 # comma delimited
 data = read.csv('data.csv')
@@ -146,13 +146,13 @@ texts = readtext('data.xlsx')$name_of_text_column
 
 Processing texts represents them numerically, and this representation defines matching between them.
 
-For example, matching between structural features (e.g., number of words and their average length) gives a sense of how
-similar the text itself is between texts:
+For example, matching between **structural features** (e.g., number of words and their average length) gives a sense
+of how similar the text itself is between texts:
 ```r
 structural_features = lma_meta(texts)
 ```
 
-You could also look at exact matching between words by making a document-term matrix:
+You could also look at exact matching between **words** by making a document-term matrix:
 ```r
 # all words
 dtm = lma_dtm(texts)
@@ -164,18 +164,19 @@ dtm = lma_dtm(texts, exclude = 'function', dc.min = 2)
 The raw texts in the next examples are processed with the `lma_dtm` function, using its defaults, but you could also
 enter a document-term matrix in place of texts, processed separately as in the previous examples.
 
-Other structural features are function word categories, which would give a sense of how stylistically
+Other structural features are **function word categories**, which would give a sense of how stylistically
 similar texts are:
 ```r
 function_cats = lma_termcat(texts, lma_dict())
 ```
 
-To get at similarity in something like tone, you could use a sentiment dictionary:
+To get at similarity in something like **tone**, you could use a sentiment dictionary:
 ```r
 sentiment = lma_termcat(texts, 'huliu')
 ```
 
-To get at similarity in overall meaning, you could use a content analysis focused dictionary like the General Inquirer:
+To get at similarity in **overall meaning**, you could use a content analysis focused dictionary
+like the General Inquirer:
 ```r
 inquirer_cats = lma_termcat(texts, 'inquirer')
 ```

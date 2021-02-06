@@ -1,15 +1,15 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Calculate similarity between vectors</title>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Similarity Calculations</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <link rel="stylesheet" type="text/css" href="R.css" />
 </head><body>
 
 <table width="100%" summary="page for lma_simets"><tr><td>lma_simets</td><td style="text-align: right;">R Documentation</td></tr></table>
 
-<h2>Calculate similarity between vectors</h2>
+<h2>Similarity Calculations</h2>
 
 <h3>Description</h3>
 
-<p>Calculate similarity between vectors
+<p>Enter a numerical matrix, set of vectors, or set of matrices to calculate similarity per vector.
 </p>
 
 
@@ -27,17 +27,17 @@ lma_simets(a, b = NULL, metric = NULL, group = NULL, lag = 0,
 <table summary="R argblock">
 <tr valign="top"><td><code>a</code></td>
 <td>
-<p>vector or matrix. If a vector, <code>b</code> must also be provided. If a matrix and <code>b</code>
+<p>A vector or matrix. If a vector, <code>b</code> must also be provided. If a matrix and <code>b</code>
 is missing, each row will be compared. If a matrix and <code>b</code> is not missing, each row will
 be compared with <code>b</code> or each row of <code>b</code>.</p>
 </td></tr>
 <tr valign="top"><td><code>b</code></td>
 <td>
-<p>vector or matrix to be compared with <code>a</code> or rows of <code>a</code>.</p>
+<p>A vector or matrix to be compared with <code>a</code> or rows of <code>a</code>.</p>
 </td></tr>
 <tr valign="top"><td><code>metric</code></td>
 <td>
-<p>a character or vector of characters at least partially matching one of the
+<p>A character or vector of characters at least partially matching one of the
 available metric names (or 'all' to explicitly include all metrics),
 or a number or vector of numbers indicating the metric by index:
 </p>
@@ -73,42 +73,43 @@ or a number or vector of numbers indicating the metric by index:
 </td></tr>
 <tr valign="top"><td><code>group</code></td>
 <td>
-<p>if <code>b</code> is missing and <code>a</code> has multiple rows, this will be used to make
+<p>If <code>b</code> is missing and <code>a</code> has multiple rows, this will be used to make
 comparisons between rows of <code>a</code>, as modified by <code>agg</code> and <code>agg.mean</code>.</p>
 </td></tr>
 <tr valign="top"><td><code>lag</code></td>
 <td>
 <p>Amount to adjust the <code>b</code> index; either rows if <code>b</code> has multiple rows (e.g.,
 for <code>lag = 1</code>, <code>a[1,]</code> is compared with <code>b[2,]</code>), or values otherwise (e.g.,
-for <code>lag = 1</code>, <code>a[1]</code> is compared with <code>b[2]</code>)</p>
+for <code>lag = 1</code>, <code>a[1]</code> is compared with <code>b[2]</code>). If <code>b</code> is not supplied,
+<code>b</code> is a copy of <code>a</code>, resulting in lagged self-comparisons or autocorrelations.</p>
 </td></tr>
 <tr valign="top"><td><code>agg</code></td>
 <td>
-<p>logical; if <code>FALSE</code>, only the boundary rows between groups will be compared, see
+<p>Logical: if <code>FALSE</code>, only the boundary rows between groups will be compared, see
 example.</p>
 </td></tr>
 <tr valign="top"><td><code>agg.mean</code></td>
 <td>
-<p>logical; if <code>FALSE</code> aggregated rows are summed instead of averaged.</p>
+<p>Logical: if <code>FALSE</code> aggregated rows are summed instead of averaged.</p>
 </td></tr>
 <tr valign="top"><td><code>pairwise</code></td>
 <td>
-<p>logical; if <code>FALSE</code> and <code>a</code> and <code>b</code> are matrices with the same number of
+<p>Logical: if <code>FALSE</code> and <code>a</code> and <code>b</code> are matrices with the same number of
 rows, only paired rows are compared. Otherwise (and if only <code>a</code> is supplied), all pairwise
 comparisons are made.</p>
 </td></tr>
 <tr valign="top"><td><code>symmetrical</code></td>
 <td>
-<p>logical; if <code>TRUE</code> and pairwise comparisons between <code>a</code> rows were made,
+<p>Logical: if <code>TRUE</code> and pairwise comparisons between <code>a</code> rows were made,
 the results in the lower triangle are copied to the upper triangle.</p>
 </td></tr>
 <tr valign="top"><td><code>mean</code></td>
 <td>
-<p>logical; if <code>TRUE</code>, a single mean for each metric is returned per row of <code>a</code>.</p>
+<p>Logical: if <code>TRUE</code>, a single mean for each metric is returned per row of <code>a</code>.</p>
 </td></tr>
 <tr valign="top"><td><code>return.list</code></td>
 <td>
-<p>logical; if <code>TRUE</code>, a list-like object will always be returned, with an entry
+<p>Logical: if <code>TRUE</code>, a list-like object will always be returned, with an entry
 for each metric, even when only one metric is requested.</p>
 </td></tr>
 </table>

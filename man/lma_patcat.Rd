@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{lma_patcat}
 \alias{lma_patcat}
-\title{Text Categorization}
+\title{Categorize Texts}
 \usage{
 lma_patcat(text, dict = NULL, pattern.weights = "weight",
   pattern.categories = "category", bias = NULL, to.lower = TRUE,
@@ -29,7 +29,7 @@ on the intercept included in each category (defined by \code{name.map['intname']
 \item{to.lower}{Logical indicating whether \code{text} should be converted to lowercase before processing.}
 
 \item{return.dtm}{Logical; if \code{TRUE}, only a document-term matrix will be returned, rather than the
-summed and biased category value.}
+summed and biased category values.}
 
 \item{exclusive}{Logical; if \code{FALSE}, each dictionary term is searched for in the original text.
 Otherwise (by default), terms are sorted by length (with longer terms being searched for first), and
@@ -85,7 +85,7 @@ lma_patcat(text, list(c('a', 'b', 'c'), c('d', 'e', 'f')))
 lma_patcat(text, list('[abc]', '[def]'), fixed = FALSE)
 
 # match only words
-lma_patcat(text, 'i', boundary = TRUE)
+lma_patcat(text, list('i'), boundary = TRUE)
 
 # match only words, ignoring punctuation
 lma_patcat(

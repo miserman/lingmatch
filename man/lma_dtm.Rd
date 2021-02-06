@@ -14,15 +14,15 @@ lma_dtm(text, exclude = NULL, context = NULL, replace.special = TRUE,
 or list.}
 
 \item{exclude}{A character vector of words to be excluded. If \code{exclude} is a single string
-matching \code{'function'}, \code{lma_dict()} will be used.}
+matching \code{'function'}, \code{lma_dict(1:9)} will be used.}
 
 \item{context}{A character vector used to reformat text based on look- ahead/behind. For example,
 you might attempt to disambiguate \emph{like} by reformatting certain \emph{like}s
 (e.g., \code{context = c('(i) like*','(you) like*','(do) like')}, where words in parentheses are
 the context for the target word, and asterisks denote partial matching). This would be converted
-to regular expression (i.e., \code{'(?=i) like[ .,?!:;/]'}) which, if matched, would be
+to regular expression (i.e., \code{'(?<=i) like\\\\b'}) which, if matched, would be
 replaced with a coded version of the word (e.g., \code{"Hey, i like that!"} would become
-\code{"Hey, i i-like- that!"}). This would probably only be useful for categorization, where a
+\code{"Hey, i i-like that!"}). This would probably only be useful for categorization, where a
 dictionary would only include one or another version of a word (e.g., the LIWC 2015 dictionary
 does something like this with \emph{like}, and LIWC 2007 did something like this with
 \emph{kind (of)}, both to try and clean up the posemo category).}
@@ -34,7 +34,7 @@ equivalents using the \code{\link{lma_dict}} special function.}
 
 \item{punct}{Logical: if \code{TRUE}, punctuation is preserved.}
 
-\item{urls}{Logical: if \code{FALSE}, attempts to replace all urls with "url".}
+\item{urls}{Logical: if \code{FALSE}, attempts to replace all urls with "repurl".}
 
 \item{emojis}{Logical: if \code{TRUE}, attempts to replace emojis (e.g., ":(" would be replaced
 with "repfrown").}
@@ -46,15 +46,15 @@ different terms.}
 \code{' +'} which breaks words at one or more blank spaces. You may also like to break by
 dashes or slashes (\code{'[ /-]+'}), depending on the text.}
 
-\item{dc.min}{Numeric: excludes terms appearing in fewer than the set number of documents.
+\item{dc.min}{Numeric: excludes terms appearing in the set number or fewer documents.
 Default is 0 (no limit).}
 
-\item{dc.max}{Numeric: excludes terms appearing in more than the set number of documents. Default
+\item{dc.max}{Numeric: excludes terms appearing in the set number or more. Default
 is Inf (no limit).}
 
-\item{sparse}{Logical: if \code{FALSE}, a regular matrix is returned.}
+\item{sparse}{Logical: if \code{FALSE}, a regular dense matrix is returned.}
 
-\item{tokens.only}{Logical: if \code{TRUE}, returns a list rather than a matrix:
+\item{tokens.only}{Logical: if \code{TRUE}, returns a list rather than a matrix, with these entries:
 \tabular{ll}{
   \code{tokens} \tab A vector of indices with terms as names. \cr
   \code{frequencies} \tab A vector of counts with terms as names. \cr
@@ -71,8 +71,8 @@ LSM and LSS, a somewhat raw dtm should be fine, because both processes essential
 dictionaries (obviating stemming) and weighting or categorization (largely obviating 'stop word'
 removal). The exact effect of additional processing will depend on the dictionary/semantic space
 and weighting scheme used (particularly for LSA). This function also does some processing which
-may matter if you plan on categorizing using categories with look- ahead/behind. Otherwise,
-other methods may be faster, more memory efficient, and/or more featureful.
+may matter if you plan on categorizing with categories that have terms with look- ahead/behind assertions
+(like LIWC dictionaries). Otherwise, other methods may be faster, more memory efficient, and/or more featureful.
 }
 \examples{
 text = c(

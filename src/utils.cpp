@@ -411,19 +411,13 @@ NumericVector extract_matches(const CharacterVector &terms, const std::string &f
 }
 
 // [[Rcpp::export]]
-List pattern_search(const CharacterVector &texts, const CharacterVector &patterns,
-  const int &ncats, const IntegerVector &categories, const NumericVector &weight, const NumericVector &bias,
-  const bool &fixed, const bool &exclusive, const int &weight_cols = 0){
-  int cx, r, l, i = 0, n = patterns.length(), tn = texts.length(), wn = (int)weight.length() / categories.length();
+List pattern_search(const CharacterVector &texts, const CharacterVector &patterns, const IntegerVector &terms,
+  const bool &fixed, const bool &exclusive){
+  int cx, r, l, i = 0, n = patterns.length(), tn = texts.length();
   unsigned int p, tp;
   std::string txt;
-  IntegerVector dim{tn, ncats ? ncats : (int)patterns.length()}, rows, columns, rowsums(dim[0]);
+  IntegerVector dim{tn, (int)patterns.length()}, rows, columns, rowsums(dim[0]);
   NumericVector values;
-  if(ncats){
-    rows = rep(seq(0, tn - 1), ncats);
-    columns = rep_each(seq(0, ncats - 1), tn);
-    values = NumericVector(rep_each(bias, tn));
-  }
   if(fixed){
     for(r = 0; r < tn; r++){
       checkUserInterrupt();
@@ -438,20 +432,10 @@ List pattern_search(const CharacterVector &texts, const CharacterVector &pattern
           cx += 1;
         }
         if(cx){
-          if(ncats){
-            rowsums[r] += cx;
-            if(weight_cols){
-              for(l = weight_cols; l--;) values[r + tn * l] += cx * weight[i + wn * l];
-            }else{
-              l = categories[i];
-              values[r + tn * l] += cx * weight[i];
-            }
-          }else{
-            rows.push_back(r);
-            columns.push_back(categories[i]);
-            values.push_back(cx * weight[i]);
-            rowsums[r] += cx;
-          }
+          rows.push_back(r);
+          columns.push_back(terms[i]);
+          values.push_back(cx);
+          rowsums[r] += cx;
         }
       }
     }
@@ -475,16 +459,10 @@ List pattern_search(const CharacterVector &texts, const CharacterVector &pattern
           cx += 1;
         }
         if(cx){
-          if(ncats){
-            l = categories[i];
-            values[r + tn * l] += cx * weight[i];
-            rowsums[r] += cx;
-          }else{
-            rows.push_back(r);
-            columns.push_back(categories[i]);
-            values.push_back(cx * weight[i]);
-            rowsums[r] += cx;
-          }
+          rows.push_back(r);
+          columns.push_back(terms[i]);
+          values.push_back(cx);
+          rowsums[r] += cx;
         }
       }
     }

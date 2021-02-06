@@ -64,10 +64,10 @@ This could be considered a baseline for the sample.
 ## Stored means
 These LSM categories have some standard means stored internally, as found in the [LIWC manual](https://liwc.wpengine.com/wp-content/uploads/2015/11/LIWC2015_LanguageManual.pdf).
 ```{r}
-# compare with means from a set of novels
-lsm_novels = lingmatch(data, 'novels', type = 'lsm')
-lsm_novels[c('comp.type', 'comp')]
-mean(lsm_novels$sim)
+# compare with means from a set of tweets
+lsm_twitter = lingmatch(data, 'twitter', type = 'lsm')
+lsm_twitter[c('comp.type', 'comp')]
+mean(lsm_twitter$sim)
 
 # or the means of the set that is most similar to the current set
 lsm_auto = lingmatch(data, 'auto', type = 'lsm')

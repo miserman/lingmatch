@@ -23,39 +23,40 @@
 #' \itemize{
 #'   \item If a function, this will be applied to \code{input} within each group (overall if there is
 #'     no group; i.e., \code{apply(input, 2, comp)}; e.g., \code{comp = mean} would compare each text to
-#'     the mean profile of its group.)
-#'   \item If a character with a length of 1 and no spaces, if it partially matches one of
-#'     \code{lsm_profiles}'s rownames, that row will be used as the comparison; if it partially
-#'     matches \code{'auto'}, the highest correlating \code{lsm_profiles} row will be used; if it
-#'     partially matches \code{'pairwise'}, each text will be compared to one another; if it
-#'     partially matches \code{'sequential'}, the last variable in \code{group} will be treated as
-#'     a speaker ID (see the grouping and comparisons section).
+#'     the mean profile of its group).
+#'   \item If a character with a length of 1 and no spaces:
+#'     \itemize{
+#'       \item If it partially matches one of \code{lsm_profiles}'s rownames, that row will be used as the comparison.
+#'       \item If it partially matches \code{'auto'}, the highest correlating \code{lsm_profiles} row will be used.
+#'       \item If it partially matches \code{'pairwise'}, each text will be compared to one another.
+#'       \item If it partially matches \code{'sequential'}, the last variable in \code{group} will be treated as
+#'         a speaker ID (see the Grouping and Comparisons section).
+#'     }
 #'   \item If a character vector, this will be processed in the same way as \code{input}.
-#'   \item If a vector, either of the same length as \code{input} has rows and logical or factor-like
-#'     (having  n levels < length), or a numeric range or logical of length less than \code{nrow(input)}
-#'     , this will be used to select a subset of
-#'     \code{input} (e.g., \code{comp = 1:10} would treat the first 10 rows of \code{input} as the comparison;
-#'     \code{comp = type=='prompt'} would make a logical vector identifying prompts, assuming
-#'     "type" was the name of a column in \code{data}, or a variable in the global environment,
-#'     and the value "prompt" marked the prompts).
+#'   \item If a vector, either (a) logical or factor-like (having n levels < length) and of the same length as
+#'     \code{nrow(input)}, or (b) numeric or logical of length less than \code{nrow(input)}, this will be used to
+#'     select a subset of \code{input} (e.g., \code{comp = 1:10} would treat the first 10 rows of \code{input} as the
+#'     comparison; \code{comp = type=='prompt'} would make a logical vector identifying prompts, assuming "type" was
+#'     the name of a column in \code{data}, or a variable in the global environment, and the value "prompt" marked the
+#'     prompts).
 #'   \item If a matrix-like object (having multiple rows and columns), or a named vector, this will
 #'     be treated as a sort of dtm, assuming there are common (column) names between \code{input} and
 #'     \code{comp} (e.g., if you had prompt and response texts that were already processed separately).
 #' }
-#' @param data A matrix-like object as a reference for column names, if variables are refereed to in
+#' @param data A matrix-like object as a reference for column names, if variables are referred to in
 #'   other arguments (e.g., \code{lingmatch(text, data=data)} would be the same as
 #'   \code{lingmatch(data$text)}.
 #' @param group A logical or factor-like vector the same length as \code{NROW(input)}, used to defined
 #'   groups.
 #' @param ... Passes arguments to \code{\link{lma_dtm}}, \code{\link{lma_weight}},
-#'   \code{\link{lma_termcat}}, and/or \code{\link{lma_lspace}},
-#'   depending on \code{input} and \code{comp}, and \code{\link{lma_simets}}.
-#' @param comp.data A matrix-like object as a reference to \code{comp} variables.
+#'   \code{\link{lma_termcat}}, and/or \code{\link{lma_lspace}} (depending on \code{input} and \code{comp}),
+#'   and \code{\link{lma_simets}}.
+#' @param comp.data A matrix-like object as a source for \code{comp} variables.
 #' @param comp.group The column name of the grouping variable(s) in \code{comp.data}; if
 #'   \code{group} contains references to column names, and \code{comp.group} is not specified,
 #'   \code{group} variables will be looked for in \code{comp.data}.
 #' @param order A numeric vector the same length as \code{nrow(input)} indicating the order of the
-#'   texts and grouping variables if the type of comparison is sequential. Only necessary if the
+#'   texts and grouping variables when the type of comparison is sequential. Only necessary if the
 #'   texts are not already ordered as desired.
 #' @param drop logical; if \code{FALSE}, columns with a sum of 0 are retained.
 #' @param all.levels logical; if \code{FALSE}, multiple groups are combined. See the Grouping and
@@ -91,7 +92,7 @@
 #'     (as in the case of manipulated prompts or text-based conditions).}
 #'   \item{Speaker ID}{If \code{comp} matches \code{'sequential'}, the last grouping variable
 #'     entered is assumed to identify something like speakers (i.e., a factor with two or more
-#'     levels and multiple observations per level). In this case the data is assumed to be ordered
+#'     levels and multiple observations per level). In this case, the data are assumed to be ordered
 #'     (or ordered once sorted by \code{order} if specified). Any additional grouping variables
 #'     before the last are treated as splitting groups. This can set up for probabilistic
 #'     accommodation metrics. At the moment, when sequential comparisons are made within groups,
@@ -228,7 +229,15 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
   }
   # initial data parsing
   # input
-  if(missing(input)) input = file.choose()
+  if(missing(input)){
+    if(!is.null(data)){
+      opt$input = opt$data
+      input = data
+    }else{
+      input = file.choose()
+      opt$input = input
+    }
+  }
   if(is.function(input)) stop('enter a character vector or matrix-like object as input')
   if(missing(data)) data = input
   input = if(is.character(input) && all(input %in% colnames(data))) data[, input] else gd(opt$input, data)
@@ -258,9 +267,9 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
       if('article' %in% dn && !'article' %in% cn) colnames(input)[cn == 'articles'] = 'article'
       ck = dn %in% colnames(input)
     }
-    if(all(ck)){
+    if(sum(ck) / length(ck) > .75){
       inp$dict = NULL
-      if(any(!ck)) dn=dn[ck]
+      if(any(!ck)) dn = dn[ck]
       cx = length(dn)
       input=input[,dn]
       do.wmc=FALSE
@@ -376,7 +385,7 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
     nn = cn[!cn %in% colnames(input)]
     if(length(nn) != 0) input = cbind(input, matrix(0, nrow(input), length(nn), dimnames = list(NULL, nn)))
     input = rbind(matrix(0, cr, ncol(input), dimnames = list(NULL, colnames(input))), input)
-    input[seq_len(cr), cn] = comp
+    input[seq_len(cr), cn] = comp[seq_len(cr),]
     comp = seq_len(cr)
   }
   if(drop){
@@ -436,7 +445,7 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
   compmeanck=opt$comp=='mean'
   sim=speaker=NULL
   if(!is.null(group)){
-    if(!is.null(comp.data) && NROW(comp.data)==1){
+    if(!is.null(comp.data) && (NROW(comp.data) == 1 || (is.list(group) && length(group[[1]]) != nrow(input)))){
       group=NULL
       warning('group does not appear to be meaningful for this comparison, so it was ignored',
         call. = FALSE)
@@ -504,7 +513,12 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
           }))
         }else{
           ckmc=FALSE
-          if(!ckc && ckf){
+          if(!ckc){
+            if(!ckf){
+              ckf = TRUE
+              opt$comp = 'mean'
+              comp = mean
+            }
             ckmc=TRUE
             opt$comp=paste(opt$group,'group',opt$comp)
             comp.data=as.data.frame(matrix(NA,length(gs),nc,dimnames=list(gs,colnames(input))))
@@ -514,12 +528,8 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
             if(ckc){
               if(nrow(cc<-comp.data[if(!is.null(comp.group)) comp.group==g else g,,drop=FALSE])==1)
                 sal$b=cc else warning('comp.data has too few/many rows in group ',g, call. = FALSE)
-            }else if(ckf) if(sum(su)>1) sal$b=if(compmeanck) colMeans(input[su,],na.rm=TRUE) else
-              apply(na.omit(input[su,]),2,comp) else{
-                if(ckmc) comp.data[g,] = input[su,]
-                sim[su,mets]=1
-                next
-              }
+            }else if(sum(su)>1) sal$b=if(compmeanck) colMeans(input[su,],na.rm=TRUE) else
+              apply(na.omit(input[su,]),2,comp)
             if(!is.null(sal$b) && ckmc) comp.data[g,]=sal$b
             if(sum(su)==1 && is.null(sal$b)){
               sim[su,mets]=1
@@ -530,9 +540,8 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
           }
         }
       }else{
-        sal$symmetrical=if('symmetrical'%in%names(dsp$s)) dsp$s$symmetrical else TRUE
         sal$mean=if('mean'%in%names(dsp$s)) dsp$s$mean else TRUE
-        if(sal$symmetrical && sal$mean){
+        if(sal$mean){
           sim = vapply(seq_along(group[[1]]), function(i){
             su = group[[1]] == group[[1]][i]
             su[i] = FALSE
@@ -545,18 +554,13 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
           sim = data.frame(group[[1]], if(is.matrix(sim)) t(sim) else sim)
           colnames(sim) = c(opt$group, sal$metric)
         }else{
+          sal$symmetrical=if('symmetrical'%in%names(dsp$s)) dsp$s$symmetrical else FALSE
           sim=lapply(ug<-unique(group[[1]]),function(g){
             su=group[[1]]==g
             if(sum(su)!=1) do.call(lma_simets,c(list(input[su,]),sal)) else
               numeric(length(sal$metric)) + 1
           })
-          if(!sal$symmetrical){
-            sim=as.data.frame(
-              if(sal$mean) ug else rep(ug,vapply(sim,function(gs)length(gs[[1]]),0)),
-              do.call(rbind,if(sal$mean) sim else lapply(sim,as.data.frame))
-            )
-            colnames(sim)=c(opt$group,sal$metric)
-          }else names(sim)=ug
+          names(sim)=ug
         }
       }
     }else if(gl>1){
@@ -615,12 +619,10 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
             }else{
               ssg = lapply(usg, function(ss) sx[sg[, s] == ss,, drop = FALSE])
               names(ssg) = usg
-              ssg = Filter(function(ss) nrow(ss) > 1, ssg)
             }
             if(length(ssg) != 0) for(ssn in names(ssg)){
               ssu = su[sg[, s] == ssn]
               lss = length(ssu)
-              if(lss < 2) next
               if(cks) sal$group = speaker[ssu] else if(ckf)
                 sal$b = if(compmeanck) colMeans(ssg[[ssn]], na.rm = TRUE) else
                   apply(na.omit(ssg[[ssn]]), 2, comp)
@@ -660,14 +662,14 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
 #' @param text Texts to be processed. This can be a vector (such as a column in a data frame)
 #'   or list.
 #' @param exclude A character vector of words to be excluded. If \code{exclude} is a single string
-#'   matching \code{'function'}, \code{lma_dict()} will be used.
+#'   matching \code{'function'}, \code{lma_dict(1:9)} will be used.
 #' @param context A character vector used to reformat text based on look- ahead/behind. For example,
 #'   you might attempt to disambiguate \emph{like} by reformatting certain \emph{like}s
 #'   (e.g., \code{context = c('(i) like*','(you) like*','(do) like')}, where words in parentheses are
 #'   the context for the target word, and asterisks denote partial matching). This would be converted
-#'   to regular expression (i.e., \code{'(?=i) like[ .,?!:;/]'}) which, if matched, would be
+#'   to regular expression (i.e., \code{'(?<=i) like\\\\b'}) which, if matched, would be
 #'   replaced with a coded version of the word (e.g., \code{"Hey, i like that!"} would become
-#'   \code{"Hey, i i-like- that!"}). This would probably only be useful for categorization, where a
+#'   \code{"Hey, i i-like that!"}). This would probably only be useful for categorization, where a
 #'   dictionary would only include one or another version of a word (e.g., the LIWC 2015 dictionary
 #'   does something like this with \emph{like}, and LIWC 2007 did something like this with
 #'   \emph{kind (of)}, both to try and clean up the posemo category).
@@ -675,7 +677,7 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
 #'   equivalents using the \code{\link{lma_dict}} special function.
 #' @param numbers Logical: if \code{TRUE}, numbers are preserved.
 #' @param punct Logical: if \code{TRUE}, punctuation is preserved.
-#' @param urls Logical: if \code{FALSE}, attempts to replace all urls with "url".
+#' @param urls Logical: if \code{FALSE}, attempts to replace all urls with "repurl".
 #' @param emojis Logical: if \code{TRUE}, attempts to replace emojis (e.g., ":(" would be replaced
 #'   with "repfrown").
 #' @param to.lower Logical: if \code{FALSE}, words with different capitalization are treated as
@@ -683,12 +685,12 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
 #' @param word.break A regular expression string determining the way words are split. Default is
 #'   \code{' +'} which breaks words at one or more blank spaces. You may also like to break by
 #'   dashes or slashes (\code{'[ /-]+'}), depending on the text.
-#' @param dc.min Numeric: excludes terms appearing in fewer than the set number of documents.
+#' @param dc.min Numeric: excludes terms appearing in the set number or fewer documents.
 #'   Default is 0 (no limit).
-#' @param dc.max Numeric: excludes terms appearing in more than the set number of documents. Default
+#' @param dc.max Numeric: excludes terms appearing in the set number or more. Default
 #'   is Inf (no limit).
-#' @param sparse Logical: if \code{FALSE}, a regular matrix is returned.
-#' @param tokens.only Logical: if \code{TRUE}, returns a list rather than a matrix:
+#' @param sparse Logical: if \code{FALSE}, a regular dense matrix is returned.
+#' @param tokens.only Logical: if \code{TRUE}, returns a list rather than a matrix, with these entries:
 #'   \tabular{ll}{
 #'     \code{tokens} \tab A vector of indices with terms as names. \cr
 #'     \code{frequencies} \tab A vector of counts with terms as names. \cr
@@ -701,8 +703,8 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
 #' dictionaries (obviating stemming) and weighting or categorization (largely obviating 'stop word'
 #' removal). The exact effect of additional processing will depend on the dictionary/semantic space
 #' and weighting scheme used (particularly for LSA). This function also does some processing which
-#' may matter if you plan on categorizing using categories with look- ahead/behind. Otherwise,
-#' other methods may be faster, more memory efficient, and/or more featureful.
+#' may matter if you plan on categorizing with categories that have terms with look- ahead/behind assertions
+#' (like LIWC dictionaries). Otherwise, other methods may be faster, more memory efficient, and/or more featureful.
 #' @examples
 #' text = c(
 #'   "Why, hello there! How are you this evening?",
@@ -744,7 +746,7 @@ lma_dtm = function(text, exclude = NULL, context = NULL, replace.special = TRUE,
   }
   if(!urls){
     text = gsub(paste0('\\s[a-z]+://[^\\s]*|www\\.[^\\s]*|\\s[a-z_~-]+\\.[a-z_~-]{2,}[^\\s]*|\\s[a-z_~-]+\\.',
-      '(?:io|com|net|org|gov|edu)\\s'), ' url ', text, TRUE, TRUE)
+      '(?:io|com|net|org|gov|edu)\\s'), ' repurl ', text, TRUE, TRUE)
     text = gsub('(?<=[A-Z])\\.\\s', ' ', text, perl = TRUE)
   }
   text = gsub('\\s+', ' ', text, perl = TRUE)
@@ -834,15 +836,15 @@ lma_dtm = function(text, exclude = NULL, context = NULL, replace.special = TRUE,
 #' Document-Term Matrix Weighting
 #'
 #' Weight a document-term matrix.
-#' @param dtm a matrix with words as column names.
-#' @param weight a string referring at least partially to one (or a combination; see note) of the
+#' @param dtm A matrix with words as column names.
+#' @param weight A string referring at least partially to one (or a combination; see note) of the
 #'   available weighting methods:
 #'
 #'   \strong{Term weights} (applied uniquely to each cell)
 #'   \tabular{lll}{
 #'     \code{binary} \tab \code{(dtm > 0) * 1} \tab convert frequencies to 1s and 0s; remove
 #'       differences in frequencies\cr
-#'     \code{log} \tab \code{log(dtm + 1)} \tab log of frequencies\cr
+#'     \code{log} \tab \code{log(dtm + 1, log.base)} \tab log of frequencies\cr
 #'     \code{sqrt} \tab \code{sqrt(dtm)} \tab square root of frequencies\cr
 #'     \code{count} \tab \code{dtm} \tab unaltered; sometimes called term frequencies (tf)\cr
 #'     \code{amplify} \tab \code{dtm ^ alpha} \tab amplify difference in frequencies\cr
@@ -850,53 +852,52 @@ lma_dtm = function(text, exclude = NULL, context = NULL, replace.special = TRUE,
 #'
 #'   \strong{Document weights} (applied by column)
 #'   \tabular{lll}{
-#'     \code{dflog} \tab \code{log(colSums(dtm > 0))} \tab log of binary term sum\cr
-#'     \code{entropy} \tab \code{1 - rowSums(x * log(x) / log(ncol(x)))} \tab where
-#'       \code{x = t(dtm) / colSums(dtm > 0)};
-#'       entropy of term-conditional term distribution\cr
+#'     \code{dflog} \tab \code{log(colSums(dtm > 0), log.base)} \tab log of binary term sum\cr
+#'     \code{entropy} \tab \code{1 - rowSums(x * log(x + 1, log.base) / log(ncol(x), log.base), na.rm = TRUE)}
+#'       \tab where \code{x = t(dtm) / colSums(dtm > 0)}; entropy of term-conditional term distribution\cr
 #'     \code{ppois} \tab \code{1 - ppois(alpha, colSums(dtm) / nrow(dtm))} \tab Poisson-predicted
 #'       term distribution\cr
 #'     \code{dpois} \tab \code{1 - dpois(alpha, colSums(dtm) / nrow(dtm))} \tab Poisson-predicted
 #'       term density\cr
-#'     \code{dfmlog} \tab \code{log(diag(x[max.col(t(x)),]))} \tab log of maximum term
+#'     \code{dfmlog} \tab \code{log(diag(dtm[max.col(t(dtm)),]), log.base)} \tab log of maximum term
 #'       frequency\cr
-#'     \code{dfmax} \tab \code{diag(x[max.col(t(x)),])} \tab maximum term frequency\cr
+#'     \code{dfmax} \tab \code{diag(dtm[max.col(t(dtm)),])} \tab maximum term frequency\cr
 #'     \code{df} \tab \code{colSums(dtm > 0)} \tab sum of binary term occurance across documents\cr
-#'     \code{idf} \tab \code{log(nrow(dtm) / colSums(dtm > 0))} \tab inverse document frequency\cr
-#'     \code{ridf} \tab \code{idf - log(poisson)} \tab residual inverse document frequency\cr
-#'     \code{normal} \tab \code{1 / colSums(dtm ^ 2) ^ .5} \tab normalized document frequency\cr
+#'     \code{idf} \tab \code{log(nrow(dtm) / colSums(dtm > 0), log.base)} \tab inverse document frequency\cr
+#'     \code{ridf} \tab \code{idf - log(dpois, log.base)} \tab residual inverse document frequency\cr
+#'     \code{normal} \tab \code{sqrt(1 / colSums(dtm ^ 2))} \tab normalized document frequency\cr
 #'   }
 #'
 #' Alternatively, \code{'pmi'} or \code{'ppmi'} will apply a pointwise mutual information weighting
 #' scheme (with \code{'ppmi'} setting negative values to 0).
-#' @param normalize logical: if \code{FALSE}, the dtm is not divided by document word-count before
+#' @param normalize Logical: if \code{FALSE}, the dtm is not divided by document word-count before
 #'   being weighted.
-#' @param wc.complete if the dtm was made with \code{\link{lma_dtm}} (has a \code{'WC'}
+#' @param wc.complete If the dtm was made with \code{\link{lma_dtm}} (has a \code{'WC'}
 #'   attribute), word counts for
 #'   frequencies can be based on the raw count (default; \code{wc.complete = TRUE}). If
 #'   \code{wc.complete = FALSE}, or the dtm does not have a \code{'WC'} attribute,
 #'   \code{rowSums(dtm)} is used as word count.
-#' @param log.base the base of logs, applied to any weight using \code{\link[base]{log}}.
+#' @param log.base The base of logs, applied to any weight using \code{\link[base]{log}}.
 #'   Default is 10.
-#' @param alpha a scaling factor applied to document frequency as part of pointwise mutual
+#' @param alpha A scaling factor applied to document frequency as part of pointwise mutual
 #'   information weighting, or amplify's power (\code{dtm ^ alpha}, which defaults to 1.1), or the
 #'   specified quantile of the poisson distribution (\code{dpois(alpha,}
 #'   \code{colSums(x, na.rm = TRUE) /} \code{nrow(x))}).
-#' @param doc.only logical: if \code{TRUE}, only document weights are returned (a single value for
+#' @param doc.only Logical: if \code{TRUE}, only document weights are returned (a single value for
 #'   each term).
-#' @param percent logical; if \code{TRUE}, frequencies are multiplied by 100.
+#' @param percent Logical; if \code{TRUE}, frequencies are multiplied by 100.
 #' @note
 #' Term weights works to adjust differences in counts within documents, with differences meaning
 #' increasingly more from \code{binary} to \code{log} to \code{sqrt} to \code{count} to \code{amplify}.
 #'
 #' Document weights work to treat words differently based on their between-document or overall frequency.
 #' When term frequencies are constant, \code{dpois}, \code{idf}, \code{ridf}, and \code{normal} give
-#' less common words increasingly more weight, and \code{ppois}, \code{df}, \code{dflog}, and
-#' \code{entropy} give less common words increasingly less weight.
+#' less common words increasingly more weight, and \code{dfmax}, \code{dfmlog}, \code{ppois}, \code{df},
+#' \code{dflog}, and \code{entropy} give less common words increasingly less weight.
 #'
 #' \code{weight} can either be a vector with two characters, corresponding to term weight and
 #' document weight (e.g., \code{c('count', 'idf')}), or it can be a string with term and
-#' document weights separated by any of \code{\*} (e.g., \code{'count \* idf'}).
+#' document weights separated by any of \code{:\\*_/; ,-} (e.g., \code{'count-idf'}).
 #' \code{'tf'} is also acceptable for \code{'count'}, and \code{'tfidf'} will be parsed as
 #' \code{c('count', 'idf')}, though this is a special case.
 #'
@@ -1013,7 +1014,7 @@ lma_weight = function(dtm, weight = 'count', normalize = TRUE, wc.complete = TRU
         ridf = doc(x, 'idf') - log(doc(x, 'dpois'), base = log.base),
         entropy = {
           x = t(x) / colSums(x > 0, na.rm = TRUE)
-          1 - rowSums(x * log(x, base = log.base) /
+          1 - rowSums(x * log(x + 1, base = log.base) /
               log(ncol(x), base = log.base), na.rm = TRUE)
         }
       )
@@ -1051,7 +1052,7 @@ lma_weight = function(dtm, weight = 'count', normalize = TRUE, wc.complete = TRU
 #'
 #' Map a document-term matrix onto a latent semantic space, extract terms from a
 #' latent semantic space (if \code{dtm} is a character vector, or \code{map.space =} \code{FALSE}),
-#' or perform a singular value decomposition on a document-term matrix (if \code{dtm} is a matrix
+#' or perform a singular value decomposition of a document-term matrix (if \code{dtm} is a matrix
 #' and \code{space} is missing).
 #' @param dtm A matrix with terms as column names, or a character vector of terms to be extracted
 #'   from a specified space. If this is of length 1 and \code{space} is missing, it will be treated
@@ -1086,7 +1087,7 @@ lma_weight = function(dtm, weight = 'count', normalize = TRUE, wc.complete = TRU
 #' @note
 #' A traditional latent semantic space is a selection of right singular vectors from the singular
 #' value decomposition of a dtm (\code{svd(dtm)$v[, 1:k]}, where \code{k} is the selected number of
-#' dimensions, decided here by \code{cutoff}).
+#' dimensions, decided here by \code{dim.cutoff}).
 #'
 #' Mapping a new dtm into a latent semantic space consists of multiplying common terms:
 #' \code{dtm[, ct] \%*\% space[ct,]}, where \code{ct} \code{=} \code{colnames(dtm)[colnames(dtm)}
@@ -1300,9 +1301,9 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, t
 #' @param term.weights A \code{list} object with named numeric vectors lining up with the character
 #'   vectors in \code{dict}, used to weight the terms in each \code{dict} vector. If a category in
 #'   \code{dict} is not specified in \code{term.weights}, or the \code{dict} and \code{term.weights}
-#'   vectors aren't the same length, the weight for that category will be 1.
+#'   vectors aren't the same length, the weights for that category will be 1.
 #' @param bias A list or named vector specifying a constant to add to the named category. If an
-#'   '_intercept' is included in a category, if will be removed from the category, and the associated
+#'   '_intercept' is included in a category, it will be removed from the category, and the associated
 #'   \code{weight} will be used as the \code{bias} for that category.
 #' @param escape Logical indicating whether the terms in \code{dict} should not be treated as plain
 #'   text (including asterisk wild cards). If \code{TRUE}, regular expression related characters are
@@ -1342,9 +1343,7 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, t
 #'   sad = 'They are nearly suicidal in their mourning after the tragic and heartbreaking holocaust.'
 #' )
 #'
-#' emotion_scores = lma_termcat(
-#'   text, split(dict$term, dict$category), split(dict$weight, dict$category)
-#' )
+#' emotion_scores = lma_termcat(text, dict)
 #' if(require('splot')) splot(emotion_scores ~ names(text), leg = 'out')
 #' }
 #' @export
@@ -1353,7 +1352,7 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
   glob = TRUE, term.filter = NULL, term.break = 2e4, to.lower = FALSE, dir = getOption('lingmatch.dict.dir')){
   st=proc.time()[[3]]
   if(missing(dict)) dict = lma_dict(1:9)
-  if(is.character(dict) && length(dict) == 1 && missing(term.weights) && !any(grepl('[\\s*]', dict))){
+  if(is.character(dict) && length(dict) == 1 && missing(term.weights) && !grepl('[\\s*]', dict)){
     if(!any(file.exists(dict)) && any(file.exists(paste0(dir, dict)))) dict = paste0(dir, dict)
     td = tryCatch(read.dic(dict), error = function(e) NULL)
     dict = if(is.null(td)) list(cat1 = dict) else td
@@ -1367,6 +1366,7 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
         function(col) is.numeric(term.weights[, col]), TRUE)]
     }else if(any(su <- vapply(seq_len(ncol(dict)), function(col) is.numeric(dict[, col]), TRUE))){
       term.weights = dict[, su, drop = FALSE]
+      dict = dict[, !su, drop = FALSE]
     }
     if(!is.null(rownames(dict)) && any(grepl('^[a-z]', rownames(dict), TRUE))){
       dict = rownames(dict)
@@ -1374,8 +1374,16 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
       su = vapply(seq_len(ncol(dict)), function(col) !is.numeric(dict[, col]), TRUE)
       if(!any(su)) stop('no terms found in dictionary')
       dict = if(sum(su) > 1){
-        su = vapply(seq_len(ncol(dict)), function(col) anyDuplicated(dict[, col]) == 0, TRUE)
-        if(any(su)) dict[, which(su)[1]] else dict[, 1]
+        su = which(su)
+        if(!is.null(term.weights) && (!is.list(term.weights) || ncol(term.weights) == 1)){
+          if(is.list(term.weights)) term.weights = term.weights[, 1]
+          ssu = vapply(su, function(col) length(unique(dict[, col])), 0) + seq(length(su), 1)
+          term.weights = split(term.weights, dict[, which.min(ssu)])
+          dict = split(dict[, which.max(ssu)], dict[, which.min(ssu)])
+        }else{
+          ssu = vapply(su, function(col) anyDuplicated(dict[, col]) == 0, TRUE)
+          if(any(ssu)) dict[, su[ssu][1]] else dict[, su[1]]
+        }
       }else dict[, su]
     }
   }
@@ -1397,16 +1405,6 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
   if(!is.list(dict)) dict = if(is.matrix(dict)) as.data.frame(dict) else if(is.character(dict) && length(dict) == 1 &&
       (file.exists(dict) || dict %in% rownames(select.dict()$info))) read.dic(dict) else list(dict)
   if(is.list(dict) && is.null(names(dict))) names(dict) = paste0('cat', seq_along(dict))
-  if(is.data.frame(dict)){
-    su = vapply(dict, is.numeric, TRUE)
-    if(is.null(term.weights) && any(su)) term.weights = dict[, su]
-    dict = if(sum(!su) == 1) dict[, !su] else if(all(su) && any(grepl('[^0-9]', rownames(dict)))) rownames(dict) else{
-      if(all(su)) stop('could not identify terms in dict')
-      ssu = !su & vapply(dict, function(v) anyDuplicated(v) == 0, TRUE)
-      dict = if(any(!su & !ssu) && any(ssu)) split(dict[, which(ssu)[1]], do.call(paste,
-        dict[, !su & !ssu])) else if(any(ssu)) dict[, which(ssu)[1]] else dict[, which(su)[1]]
-    }
-  }
   if(!is.null(term.weights)){
     if(is.null(dim(term.weights))){
       if(is.list(term.weights)){
@@ -1608,7 +1606,7 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
               names(term.weights[[n]]) = dict[[n]]
               l = term.weights[[n]]
             }
-            if(!all(names(termmap) %in% names(l))) l[names(termmap)] = 0
+            if(any(su <- !names(termmap) %in% names(l))) l[names(termmap)[su]] = 0
             do.call(c, lapply(names(termmap), function(p)
               structure(rep(l[[p]], length(termmap[[p]])), names = termmap[[p]])))
           })
@@ -1657,13 +1655,15 @@ match_metric = function(x){
   list(all = mets, selected = sel, dummy = as.integer(mets %in% sel))
 }
 
-#' Calculate similarity between vectors
+#' Similarity Calculations
 #'
-#' @param a vector or matrix. If a vector, \code{b} must also be provided. If a matrix and \code{b}
+#' Enter a numerical matrix, set of vectors, or set of matrices to calculate similarity per vector.
+#'
+#' @param a A vector or matrix. If a vector, \code{b} must also be provided. If a matrix and \code{b}
 #'   is missing, each row will be compared. If a matrix and \code{b} is not missing, each row will
 #'   be compared with \code{b} or each row of \code{b}.
-#' @param b vector or matrix to be compared with \code{a} or rows of \code{a}.
-#' @param metric a character or vector of characters at least partially matching one of the
+#' @param b A vector or matrix to be compared with \code{a} or rows of \code{a}.
+#' @param metric A character or vector of characters at least partially matching one of the
 #'   available metric names (or 'all' to explicitly include all metrics),
 #'   or a number or vector of numbers indicating the metric by index:
 #'   \tabular{ll}{
@@ -1674,21 +1674,22 @@ match_metric = function(x){
 #'     \code{pearson} \tab \code{(mean(a * b) - (mean(a) * mean(b))) / sqrt(mean(a ^ 2) - mean(a) ^ 2) /
 #'       sqrt(mean(b ^ 2) - mean(b) ^ 2)} \cr
 #'   }
-#' @param group if \code{b} is missing and \code{a} has multiple rows, this will be used to make
+#' @param group If \code{b} is missing and \code{a} has multiple rows, this will be used to make
 #'   comparisons between rows of \code{a}, as modified by \code{agg} and \code{agg.mean}.
 #' @param lag Amount to adjust the \code{b} index; either rows if \code{b} has multiple rows (e.g.,
 #'   for \code{lag = 1}, \code{a[1,]} is compared with \code{b[2,]}), or values otherwise (e.g.,
-#'   for \code{lag = 1}, \code{a[1]} is compared with \code{b[2]})
-#' @param agg logical; if \code{FALSE}, only the boundary rows between groups will be compared, see
+#'   for \code{lag = 1}, \code{a[1]} is compared with \code{b[2]}). If \code{b} is not supplied,
+#'   \code{b} is a copy of \code{a}, resulting in lagged self-comparisons or autocorrelations.
+#' @param agg Logical: if \code{FALSE}, only the boundary rows between groups will be compared, see
 #'   example.
-#' @param agg.mean logical; if \code{FALSE} aggregated rows are summed instead of averaged.
-#' @param pairwise logical; if \code{FALSE} and \code{a} and \code{b} are matrices with the same number of
+#' @param agg.mean Logical: if \code{FALSE} aggregated rows are summed instead of averaged.
+#' @param pairwise Logical: if \code{FALSE} and \code{a} and \code{b} are matrices with the same number of
 #'   rows, only paired rows are compared. Otherwise (and if only \code{a} is supplied), all pairwise
 #'   comparisons are made.
-#' @param symmetrical logical; if \code{TRUE} and pairwise comparisons between \code{a} rows were made,
+#' @param symmetrical Logical: if \code{TRUE} and pairwise comparisons between \code{a} rows were made,
 #'   the results in the lower triangle are copied to the upper triangle.
-#' @param mean logical; if \code{TRUE}, a single mean for each metric is returned per row of \code{a}.
-#' @param return.list logical; if \code{TRUE}, a list-like object will always be returned, with an entry
+#' @param mean Logical: if \code{TRUE}, a single mean for each metric is returned per row of \code{a}.
+#' @param return.list Logical: if \code{TRUE}, a list-like object will always be returned, with an entry
 #'   for each metric, even when only one metric is requested.
 #' @details
 #' Use \code{\link[RcppParallel]{setThreadOptions}} to change parallelization options; e.g., run
@@ -1816,14 +1817,14 @@ lma_simets=function(a, b = NULL, metric = NULL, group = NULL, lag = 0, agg = TRU
           d[3] == 1) 1 else 3, met$dummy)
     }
   }
-  if('list' %in% class(res)){
+  if('list' %in% class(res) && length(res)){
     pairwise = 'dtCMatrix' %in% class(res[[1]])
     if((pairwise && symmetrical) || mean) for(i in seq_along(res)){
       if(pairwise && (symmetrical || mean)) res[[i]] = forceSymmetric(res[[i]], 'L')
       if(mean) res[[i]] = if(is.null(dim(res[[i]]))) mean(res[[i]], na.rm = TRUE) else rowMeans(res[[i]], TRUE)
     }
     if(is.null(dim(res[[1]]))){
-      rn = if(!is.na(nd <- which(d == length(res[[1]]))[1]) && !is.null(rownames(if(nd == 1) a else b)))
+      rn = if(!is.na(nd <- which(c(dim(a), dim(b)) == length(res[[1]]))[1]) && !is.null(rownames(if(nd == 1) a else b)))
         rownames(if(nd == 1) a else b) else NULL
       if(length(met$selected) == 1){
         if(length(rn) == length(res[[1]])) names(res[[1]]) = rn

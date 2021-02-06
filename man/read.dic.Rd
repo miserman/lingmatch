@@ -3,7 +3,7 @@
 \name{read.dic}
 \alias{read.dic}
 \alias{write.dic}
-\title{Read/write dictionary files}
+\title{Read/Write Dictionary Files}
 \usage{
 read.dic(path, cats, type = "asis", as.weighted = FALSE,
   dir = getOption("lingmatch.dict.dir"), ...)
@@ -39,15 +39,15 @@ with terms in one column, and categories or weights in the rest.}
 
 \item{filename}{The name of the file to be saved.}
 
-\item{save}{Logical; if \code{FALSE}, does not write a file.}
+\item{save}{Logical: if \code{FALSE}, does not write a file.}
 }
 \value{
 \code{read.dic}: A \code{list} (unweighted) with an entry for each category containing
   character vectors of terms, or a \code{data.frame} (weighted) with columns for terms (first, "term") and
   weights (all subsequent, with category labels as names).
 
-\code{write.dic}: A version of the written dictionary (write.dic; a raw character vector for
-  unweighted dictionaries, or a \code{data.frame} for weighted dictionaries).
+\code{write.dic}: A version of the written dictionary -- a raw character vector for
+  unweighted dictionaries, or a \code{data.frame} for weighted dictionaries.
 }
 \description{
 Read in or write dictionary files in Comma-Separated Values (.csv; weighted) or

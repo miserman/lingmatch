@@ -133,6 +133,8 @@ skip_if(!length(dicts), paste('no .csv or .dic files in',
 test_that('applied dictionaries work', {
   text = sample(readLines(paste0(textdir, 'texts.txt')), 10)
   dtm = lma_dtm(text)
+  expect_identical(as.numeric(lma_termcat(dtm, read.dic(dicts[1]))), as.numeric(lma_termcat(dtm, dicts[1])))
+  expect_identical(as.numeric(lma_patcat(text, read.dic(dicts[1]))), as.numeric(lma_patcat(text, dicts[1])))
   for(d in dicts){
     dict = (if(grepl('.csv', d, fixed = TRUE)) read.csv else read.dic)(d)
     opt = lma_termcat(dtm, dict)

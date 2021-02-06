@@ -58,6 +58,11 @@ test_that('read/write.dic works', {
   dict_weighted = read.dic(dict, as.weighted = TRUE)
   write.dic(dict_weighted, file_csv)
   expect_equal(read.dic(file_csv), dict_weighted)
+  expect_equal(read.dic(cbind(
+    term1 = dict_weighted[, 1],
+    dict_weighted[, -1],
+    term2 = paste0(sample(letters, nrow(dict_weighted), TRUE), seq_len(nrow(dict_weighted)))
+  ), as.weighted = TRUE), dict_weighted)
   files = sub('^.*\\\\', '', c(file_dic, file_csv))
   dir = sub('\\\\[^\\]+$', '', file_dic)
   expect_true(all(read.dic(files, dir = dir) == read.dic(list(dict_weighted, dict_weighted))))
@@ -87,6 +92,8 @@ test_that('read/write.dic works', {
     c(1, 1.5, 0, 0, -1, -1.5))))
   expect_equal(dict[c(1, 3)], read.dic(data.frame(unlist(dict[c(1, 3)], use.names = FALSE),
     c(1, 1.5, -1, -1.5))))
+  expect_equal(c(a = dict, b = dict)[c(3, 2, 1, 6, 5, 4)], read.dic(data.frame(unlist(dict, use.names = FALSE),
+    a = c(1, 1.5, 0, 0, -1, -1.5), b = c(1, 1.5, 0, 0, -1, -1.5))))
   expect_equal(read.dic(data.frame(
     term = unlist(dict, use.names = FALSE), sentiment = rep(c(1, 0, -1), each = 2)
   )), dict)
@@ -96,6 +103,11 @@ test_that('read/write.dic works', {
   dicts = select.dict()$info
   if(!is.na(d <- which(dicts$downloaded != '')[1])) expect_equal(
     read.dic(rownames(dicts)[d]), read.dic(dicts[d, 'downloaded'])
+  )
+  expect_equal(
+    data.frame(term = c('a', 'b', 'c', 'f', 'g'), a = c(1, 2, 3, 0, 0), b = c(4, 0, 0, 5, 0),
+      row.names = c('a', 'b', 'c', 'f', 'g')),
+    read.dic(list(a = c(a = 1, b = 2, c = 3), b = c(a = 4, f = 5, g = 0)))
   )
 })
 
@@ -138,17 +150,13 @@ test_that('lma_patcat parts work', {
   expect_true(all(base_dtm == manual_dtm))
   expect_true(all(base_dtm == lma_patcat(texts, unlist(lapply(dict, names)), return.dtm = TRUE)))
 
-  weights = unlist(dict, use.names = FALSE)[c(5, 2, 4, 6, 1, 3)]
-  weighted_dtm = lma_patcat(texts, dict, return.dtm = TRUE)
-  expect_true(all(weighted_dtm == manual_dtm * rep(weights, each = 2)))
-  expect_true(all(weighted_dtm == lma_patcat(texts, unlist(lapply(dict, names)), unlist(dict), return.dtm = TRUE)))
-
   manual_cat = manual_dtm %*% Matrix(c(0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0), 6)
   base_cat = lma_patcat(texts, lapply(dict, names))[, names(dict)]
   expect_true(all(base_cat == manual_cat))
   expect_true(all(base_cat == lma_patcat(texts, unlist(lapply(dict, names)),
     pattern.categories = rep(names(dict), vapply(dict, length, 0)))[, names(dict)]))
 
+  weights = unlist(dict, use.names = FALSE)[c(5, 2, 4, 6, 1, 3)]
   weighted_cat = lma_patcat(texts, dict)[, names(dict)]
   expect_true(all(weighted_cat == manual_dtm %*% Matrix(weights * c(0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0), 6)))
   expect_true(all(weighted_cat == lma_patcat(texts, unlist(lapply(dict, names)),
@@ -190,6 +198,8 @@ test_that('read.segments works', {
   dir = path.package('lingmatch')
   files = grep('[DNRAE]{2}', list.files(dir, full.names = TRUE), value = TRUE)
 
+  skip_if(is.null(tryCatch(readLines(files[1], 1), error = function(e) NULL)), 'unable to read package files')
+
   expect_equal(read.segments(texts, segment.size = 5, bysentence = TRUE)$WC, c(9, 10))
 
   segs = read.segments(files, ext = '')
@@ -204,6 +214,7 @@ test_that('read.segments works', {
   expect_true(all(tapply(segs$text, segs$input, paste, collapse = ' ') == manual))
 
   segs1 = read.segments(files, 1, ext = '')
+  expect_equal(segs1, read.segments(files, 1, ext = '', bysentence = TRUE))
   expect_equal(segs1[, -1], read.segments(manual, 1)[, -1])
   expect_true(all(table(segs1$input) == 1))
   expect_true(sum(segs1$WC) == wc)
@@ -224,6 +235,7 @@ test_that('read.segments works', {
 
 test_that('select dict and lspace work', {
   expect_equal(nrow(select.dict(c('inq', 'sent'))$selected), 5)
+  expect_equal(select.dict('sentiment analysis')$selected, select.dict('afinn')$selected)
   expect_equal(nrow(select.lspace(c('goo'))$selected), 1)
   expect_equal(nrow(select.lspace(c('goo', 'glove'), dir = '', get.map = FALSE)$selected), 4)
   expect_equal(

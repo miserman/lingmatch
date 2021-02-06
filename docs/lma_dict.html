@@ -1,16 +1,16 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: English function word category lists</title>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: English Function Word Category and Special Character Lists</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <link rel="stylesheet" type="text/css" href="R.css" />
 </head><body>
 
 <table width="100%" summary="page for lma_dict"><tr><td>lma_dict</td><td style="text-align: right;">R Documentation</td></tr></table>
 
-<h2>English function word category lists</h2>
+<h2>English Function Word Category and Special Character Lists</h2>
 
 <h3>Description</h3>
 
 <p>Returns a list of function words based on the Linguistic Inquiry and Word Count 2015 dictionary
-(in terms of category names &ndash; words were selected independently).
+(in terms of category names &ndash; words were selected independently), or a list of special characters and patterns.
 </p>
 
 
@@ -36,7 +36,7 @@ adverb, conj, prep, auxverb, negate, quant, interrog, number, interjection, or s
 <tr valign="top"><td><code>as.function</code></td>
 <td>
 <p>Logical or a function: if specified and <code>as.regex</code> is <code>TRUE</code>, the selected dictionary
-will be collapsed to a regex string (terms separated by '|') and function for matching characters to that
+will be collapsed to a regex string (terms separated by '|'), and a function for matching characters to that
 string will be returned. The regex string is passed to the matching function (<code>grepl</code> by default)
 as a 'pattern' argument, with the first argument of the returned function being passed as an 'x' argument.
 See examples.</p>
@@ -55,7 +55,7 @@ If <code>special</code> is part of the returned list, <code>as.regex</code> is s
 dtm, <code>special</code> is used to clean the original input (so that, by default, the punctuation involved in ellipses
 and emojis are treated as different &ndash; as ellipses and emojis rather than as periods and parens and colons and such).
 When categorizing a dtm, the input dictionary is passed by the special lists to be sure the terms in the dtm match up
-with the dictionary (so, for example, &quot;: (&quot; would be replaced with &quot;FROWN&quot; in both the text and dictionary).
+with the dictionary (so, for example, &quot;: (&quot; would be replaced with &quot;repfrown&quot; in both the text and dictionary).
 </p>
 
 
@@ -84,8 +84,8 @@ lma_dict(special)
 is.ppron = lma_dict(ppron, as.function = TRUE)
 is.ppron(c('i', 'am', 'you', 'were'))
 
-is.lsmcat = lma_dict(1:7, as.function = TRUE)
-is.lsmcat(c('a', 'frog', 'for', 'me'))
+in.lsmcat = lma_dict(1:7, as.function = TRUE)
+in.lsmcat(c('a', 'frog', 'for', 'me'))
 
 ## use as a stopword filter
 is.stopword = lma_dict(as.function = TRUE)

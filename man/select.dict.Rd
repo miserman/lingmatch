@@ -8,10 +8,10 @@ select.dict(query = NULL, dir = getOption("lingmatch.dict.dir"),
   check.md5 = TRUE, mode = "wb")
 }
 \arguments{
-\item{query}{A character matching a space name, or a set of keywords to search for in
+\item{query}{A character matching a dictionary name, or a set of keywords to search for in
 dictionary information.}
 
-\item{dir}{Path to a folder containing dictionaries, or where you want them to be saved}
+\item{dir}{Path to a folder containing dictionaries, or where you want them to be saved.}
 
 \item{check.md5}{Logical; if \code{TRUE} (default), retrieves the MD5 checksum from OSF,
 and compares it with that calculated from the downloaded file to check its integrity.}
@@ -19,14 +19,14 @@ and compares it with that calculated from the downloaded file to check its integ
 \item{mode}{Passed to \code{\link{download.file}} when downloading files.}
 }
 \value{
-a list with varying entries:
+A list with varying entries:
   \tabular{ll}{
     info \tab The version of \href{https://osf.io/kjqb8}{osf.io/kjqb8} stored internally; a
-      \code{data.frame}  with spaces as row names, and information about each space in columns.
+      \code{data.frame}  with dictionary names as row names, and information about each dictionary in columns.
         Also described at
         \href{https://osf.io/y6g5b/wiki/dict_variables}{osf.io/y6g5b/wiki/dict_variables},
         here \code{short} (corresponding to the file name [\code{{short}.(csv|dic)}] and
-        wiki urls [\code{https://osf.io/y6g5b/wiki/{short}}]) is set as row names, and removed:
+        wiki urls [\code{https://osf.io/y6g5b/wiki/{short}}]) is set as row names and removed:
         \tabular{ll}{
           \code{name} \tab Full name of the dictionary. \cr
           \code{description} \tab Description of the dictionary, relating to its purpose and
@@ -36,7 +36,7 @@ a list with varying entries:
             \tabular{ll}{
               \code{algorithm} \tab Terms were selected by some automated process, potentially
                 learned from data or other resources. \cr
-              \code{crowd} \tab Several individuals rated the terms, and in aggregate, those ratings
+              \code{crowd} \tab Several individuals rated the terms, and in aggregate those ratings
                 translate to categories and weights. \cr
               \code{mixed} \tab Some combination of the other methods, usually in some iterative
                 process. \cr
@@ -59,7 +59,7 @@ a list with varying entries:
           \code{terms} \tab Number of unique terms across categories. \cr
           \code{term_type} \tab Format of the terms:
             \tabular{ll}{
-              \code{glob} \tab Include asterisks which denote acceptance of any characters until a
+              \code{glob} \tab Include asterisks which denote inclusion of any characters until a
                 word boundary. \cr
               \code{glob+} \tab Glob-style asterisks with regular expressions within terms. \cr
               \code{ngram} \tab Includes any number of words as a term, separated by spaces. \cr
@@ -74,7 +74,7 @@ a list with varying entries:
             as .csv, and those without are stored as .dic files. \cr
           \code{regex_characters} \tab Logical indicating whether special regular expression
             characters are present in any term, which might need to be escaped if the terms are used
-            in regular expressions. Glob type terms allow complete parens (at least one open and one
+            in regular expressions. Glob-type terms allow complete parens (at least one open and one
             closed, indicating preceding or following words), and initial and terminal asterisks. For
             all other terms, \code{[](){}*.^$+?\|} are counted as regex characters. These could be
             escaped in R with \code{gsub('([][)(}{*.^$+?\\\\|])', '\\\\\\1', terms)} if \code{terms}
@@ -102,7 +102,7 @@ Retrieve information and links to dictionaries
 }
 \examples{
 # just retrieve information about available dictionaries
-dicts = select.dict()
+dicts = select.dict()$info
 
 # select all dictionaries mentioning sentiment or emotion
 sentiment_dicts = select.dict('sentiment emotion')$selected

@@ -19,10 +19,10 @@ or the path to a file to be read in by \code{\link{read.dic}}.}
 \item{term.weights}{A \code{list} object with named numeric vectors lining up with the character
 vectors in \code{dict}, used to weight the terms in each \code{dict} vector. If a category in
 \code{dict} is not specified in \code{term.weights}, or the \code{dict} and \code{term.weights}
-vectors aren't the same length, the weight for that category will be 1.}
+vectors aren't the same length, the weights for that category will be 1.}
 
 \item{bias}{A list or named vector specifying a constant to add to the named category. If an
-'_intercept' is included in a category, if will be removed from the category, and the associated
+'_intercept' is included in a category, it will be removed from the category, and the associated
 \code{weight} will be used as the \code{bias} for that category.}
 
 \item{escape}{Logical indicating whether the terms in \code{dict} should not be treated as plain
@@ -71,9 +71,7 @@ text = c(
   sad = 'They are nearly suicidal in their mourning after the tragic and heartbreaking holocaust.'
 )
 
-emotion_scores = lma_termcat(
-  text, split(dict$term, dict$category), split(dict$weight, dict$category)
-)
+emotion_scores = lma_termcat(text, dict)
 if(require('splot')) splot(emotion_scores ~ names(text), leg = 'out')
 }
 }

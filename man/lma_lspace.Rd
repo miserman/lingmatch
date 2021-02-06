@@ -51,13 +51,13 @@ change with \code{options(lingmatch.lspace.dir} \code{= 'desired/path')}.}
 \description{
 Map a document-term matrix onto a latent semantic space, extract terms from a
 latent semantic space (if \code{dtm} is a character vector, or \code{map.space =} \code{FALSE}),
-or perform a singular value decomposition on a document-term matrix (if \code{dtm} is a matrix
+or perform a singular value decomposition of a document-term matrix (if \code{dtm} is a matrix
 and \code{space} is missing).
 }
 \note{
 A traditional latent semantic space is a selection of right singular vectors from the singular
 value decomposition of a dtm (\code{svd(dtm)$v[, 1:k]}, where \code{k} is the selected number of
-dimensions, decided here by \code{cutoff}).
+dimensions, decided here by \code{dim.cutoff}).
 
 Mapping a new dtm into a latent semantic space consists of multiplying common terms:
 \code{dtm[, ct] \%*\% space[ct,]}, where \code{ct} \code{=} \code{colnames(dtm)[colnames(dtm)}

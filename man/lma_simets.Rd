@@ -2,20 +2,20 @@
 % Please edit documentation in R/lingmatch.R
 \name{lma_simets}
 \alias{lma_simets}
-\title{Calculate similarity between vectors}
+\title{Similarity Calculations}
 \usage{
 lma_simets(a, b = NULL, metric = NULL, group = NULL, lag = 0,
   agg = TRUE, agg.mean = TRUE, pairwise = TRUE, symmetrical = FALSE,
   mean = FALSE, return.list = FALSE)
 }
 \arguments{
-\item{a}{vector or matrix. If a vector, \code{b} must also be provided. If a matrix and \code{b}
+\item{a}{A vector or matrix. If a vector, \code{b} must also be provided. If a matrix and \code{b}
 is missing, each row will be compared. If a matrix and \code{b} is not missing, each row will
 be compared with \code{b} or each row of \code{b}.}
 
-\item{b}{vector or matrix to be compared with \code{a} or rows of \code{a}.}
+\item{b}{A vector or matrix to be compared with \code{a} or rows of \code{a}.}
 
-\item{metric}{a character or vector of characters at least partially matching one of the
+\item{metric}{A character or vector of characters at least partially matching one of the
 available metric names (or 'all' to explicitly include all metrics),
 or a number or vector of numbers indicating the metric by index:
 \tabular{ll}{
@@ -27,28 +27,29 @@ or a number or vector of numbers indicating the metric by index:
     sqrt(mean(b ^ 2) - mean(b) ^ 2)} \cr
 }}
 
-\item{group}{if \code{b} is missing and \code{a} has multiple rows, this will be used to make
+\item{group}{If \code{b} is missing and \code{a} has multiple rows, this will be used to make
 comparisons between rows of \code{a}, as modified by \code{agg} and \code{agg.mean}.}
 
 \item{lag}{Amount to adjust the \code{b} index; either rows if \code{b} has multiple rows (e.g.,
 for \code{lag = 1}, \code{a[1,]} is compared with \code{b[2,]}), or values otherwise (e.g.,
-for \code{lag = 1}, \code{a[1]} is compared with \code{b[2]})}
+for \code{lag = 1}, \code{a[1]} is compared with \code{b[2]}). If \code{b} is not supplied,
+\code{b} is a copy of \code{a}, resulting in lagged self-comparisons or autocorrelations.}
 
-\item{agg}{logical; if \code{FALSE}, only the boundary rows between groups will be compared, see
+\item{agg}{Logical: if \code{FALSE}, only the boundary rows between groups will be compared, see
 example.}
 
-\item{agg.mean}{logical; if \code{FALSE} aggregated rows are summed instead of averaged.}
+\item{agg.mean}{Logical: if \code{FALSE} aggregated rows are summed instead of averaged.}
 
-\item{pairwise}{logical; if \code{FALSE} and \code{a} and \code{b} are matrices with the same number of
+\item{pairwise}{Logical: if \code{FALSE} and \code{a} and \code{b} are matrices with the same number of
 rows, only paired rows are compared. Otherwise (and if only \code{a} is supplied), all pairwise
 comparisons are made.}
 
-\item{symmetrical}{logical; if \code{TRUE} and pairwise comparisons between \code{a} rows were made,
+\item{symmetrical}{Logical: if \code{TRUE} and pairwise comparisons between \code{a} rows were made,
 the results in the lower triangle are copied to the upper triangle.}
 
-\item{mean}{logical; if \code{TRUE}, a single mean for each metric is returned per row of \code{a}.}
+\item{mean}{Logical: if \code{TRUE}, a single mean for each metric is returned per row of \code{a}.}
 
-\item{return.list}{logical; if \code{TRUE}, a list-like object will always be returned, with an entry
+\item{return.list}{Logical: if \code{TRUE}, a list-like object will always be returned, with an entry
 for each metric, even when only one metric is requested.}
 }
 \value{
@@ -66,7 +67,7 @@ Output varies based on the dimensions of \code{a} and \code{b}:
   }
 }
 \description{
-Calculate similarity between vectors
+Enter a numerical matrix, set of vectors, or set of matrices to calculate similarity per vector.
 }
 \details{
 Use \code{\link[RcppParallel]{setThreadOptions}} to change parallelization options; e.g., run

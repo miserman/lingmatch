@@ -15,14 +15,17 @@ test_that('different input formats have the same results', {
   manual = as.numeric(lma_simets(dtm, metric = 'cosine'))
   expect_equal(as.numeric(lingmatch(textsfile)$sim), manual)
   expect_equal(as.numeric(lingmatch(texts)$sim), manual)
+  expect_equal(as.numeric(lingmatch(as.factor(texts))$sim), manual)
   expect_equal(as.numeric(lingmatch(dtm)$sim), manual)
   expect_equal(as.numeric(lingmatch(as.data.frame(as.matrix(dtm)))$sim), manual)
+  expect_equal(as.numeric(lingmatch(data = dtm)$sim), manual)
 })
 
 test_that('different input formats have the same results (comp)', {
   manual = as.numeric(lma_simets(dtm[-(1:10),], dtm[1:10,], metric = 'cosine'))
   expect_equal(as.numeric(lingmatch(textsfile, 1:10, drop = FALSE)$sim), manual)
   expect_equal(as.numeric(lingmatch(texts[-(1:10)], texts[1:10], drop = FALSE)$sim), manual)
+  expect_equal(as.numeric(lingmatch(texts[-(1:10)], as.factor(texts[1:10]), drop = FALSE)$sim), manual)
   expect_equal(as.numeric(lingmatch(dtm[-(1:10),], dtm[1:10,], drop = FALSE)$sim), manual)
   expect_equal(as.numeric(lingmatch(
     as.data.frame(as.matrix(dtm[-(1:10),])),
@@ -37,6 +40,8 @@ test_that('different input formats have the same results (LSM)', {
   expect_equal(as.numeric(lingmatch(texts, type = 'lsm')$sim), manual)
   expect_equal(as.numeric(lingmatch(dtm, type = 'lsm')$sim), manual)
   expect_equal(as.numeric(lingmatch(wdtm, type = 'lsm')$sim), manual)
+  expect_equal(as.numeric(lingmatch(cdtm, type = 'lsm')$sim), manual)
+  colnames(cdtm)[c(3, 6)] = c('articles', 'preps')
   expect_equal(as.numeric(lingmatch(cdtm, type = 'lsm')$sim), manual)
 })
 
@@ -114,9 +119,10 @@ test_that('group comparisons work', {
   g1 = lingmatch(dtm, group = groups, type = 'lsm')$sim[, 2]
   expect_equal(g1, rowSums(lingmatch(dtm, group_means, type = 'lsm')$sim * rep(
       c(1, 0, 1), nrow(dtm) / c(2, 1, 2))))
+  expect_true(class(lingmatch(dtm, type = 'lsm', symmetrical = FALSE)$sim)[1] == 'dtCMatrix')
   pw = lingmatch(dtm, type = 'lsm', symmetrical = TRUE)$sim
   expect_true(
-    all(lingmatch(dtm, 'pairwise', mean = FALSE, group = groups, type = 'lsm')$sim$a -
+    all(lingmatch(dtm, 'pairwise', mean = FALSE, symmetrical = TRUE, group = groups, type = 'lsm')$sim$a -
     pw[groups == 'a', groups == 'a']) < 1e-9
   )
   expect_equal(
@@ -133,6 +139,10 @@ test_that('group comparisons work', {
   expect_equal(g1, g1_2$g1_canberra)
   expect_equal(g1_2$g1_g2_canberra, vapply(seq_along(sg), function(i)
     lma_simets(cdtm[i,], sgmeans[sg[i],], 'can'), 0))
+  g1_2p = lingmatch(dtm, 'pair', group = cbind(groups, subgroups), type = 'lsm', mean = FALSE)$sim
+  for(s in names(g1_2p)){
+    expect_identical(as.numeric(g1_2p[[s]]), as.numeric(lingmatch(dtm[sg == s,], 'pair', type = 'lsm', mean = FALSE)$sim))
+  }
 })
 
 test_that('groups work through data', {

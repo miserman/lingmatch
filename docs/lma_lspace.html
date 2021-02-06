@@ -11,7 +11,7 @@
 
 <p>Map a document-term matrix onto a latent semantic space, extract terms from a
 latent semantic space (if <code>dtm</code> is a character vector, or <code>map.space =</code> <code>FALSE</code>),
-or perform a singular value decomposition on a document-term matrix (if <code>dtm</code> is a matrix
+or perform a singular value decomposition of a document-term matrix (if <code>dtm</code> is a matrix
 and <code>space</code> is missing).
 </p>
 
@@ -92,7 +92,7 @@ change with <code>options(lingmatch.lspace.dir</code> <code>= 'desired/path')</c
 
 <p>A traditional latent semantic space is a selection of right singular vectors from the singular
 value decomposition of a dtm (<code>svd(dtm)$v[, 1:k]</code>, where <code>k</code> is the selected number of
-dimensions, decided here by <code>cutoff</code>).
+dimensions, decided here by <code>dim.cutoff</code>).
 </p>
 <p>Mapping a new dtm into a latent semantic space consists of multiplying common terms:
 <code>dtm[, ct] %*% space[ct,]</code>, where <code>ct</code> <code>=</code> <code>colnames(dtm)[colnames(dtm)</code>

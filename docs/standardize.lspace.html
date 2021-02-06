@@ -30,46 +30,46 @@ standardize.lspace(infile, name, sep = " ", digits = 9,
 <table summary="R argblock">
 <tr valign="top"><td><code>infile</code></td>
 <td>
-<p>name of the .rda or plain-text file relative to <code>dir</code>,
+<p>Name of the .rda or plain-text file relative to <code>dir</code>,
 e.g., &quot;default.rda&quot; or &quot;glove/glove.6B.300d.txt&quot;.</p>
 </td></tr>
 <tr valign="top"><td><code>name</code></td>
 <td>
-<p>base name of the reformatted file and term file; e.g., &quot;glove&quot; would result in
+<p>Base name of the reformatted file and term file; e.g., &quot;glove&quot; would result in
 <code>glove.dat</code> and <code>glove_terms.txt</code> in <code>outdir</code>.</p>
 </td></tr>
 <tr valign="top"><td><code>sep</code></td>
 <td>
-<p>delimiting character between values in each line, e.g., <code>" "</code> or <code>"\t"</code>.
+<p>Delimiting character between values in each line, e.g., <code>" "</code> or <code>"\t"</code>.
 Only applies to plain-text files.</p>
 </td></tr>
 <tr valign="top"><td><code>digits</code></td>
 <td>
-<p>number of digits to round values to; default is 9.</p>
+<p>Number of digits to round values to; default is 9.</p>
 </td></tr>
 <tr valign="top"><td><code>dir</code></td>
 <td>
-<p>path to folder containing <code>infile</code>s; default is <code>getOption('lingmatch.lspace.dir')</code>.</p>
+<p>Path to folder containing <code>infile</code>s; default is <code>getOption('lingmatch.lspace.dir')</code>.</p>
 </td></tr>
 <tr valign="top"><td><code>outdir</code></td>
 <td>
-<p>path to folder in which to save standardized files; defaults to <code>dir</code>.</p>
+<p>Path to folder in which to save standardized files; default is <code>dir</code>.</p>
 </td></tr>
 <tr valign="top"><td><code>remove</code></td>
 <td>
-<p>a string with a regex pattern to be removed from term names (as in <code>gsub(</code><code>remove,</code>
+<p>A string with a regex pattern to be removed from term names (i.e., <code>gsub(</code><code>remove,</code>
 <code>"", term)</code>); default is <code>""</code>, which is ignored.</p>
 </td></tr>
 <tr valign="top"><td><code>term_check</code></td>
 <td>
-<p>a string with a regex pattern by which to filter terms; i.e., only lines with fully
+<p>A string with a regex pattern by which to filter terms; i.e., only lines with fully
 matched terms are written to the reformatted file. The default attempts to retain only regular words, including
 those with dashes, foreword slashes, and periods. Set to an empty string (<code>""</code>) to write all lines
 regardless of term.</p>
 </td></tr>
 <tr valign="top"><td><code>verbose</code></td>
 <td>
-<p>logical; if <code>TRUE</code>, prints the current line number and its term to the console every 1,000 lines.
+<p>Logical: if <code>TRUE</code>, prints the current line number and its term to the console every 1,000 lines.
 Only applies to plain-text files.</p>
 </td></tr>
 </table>
@@ -94,6 +94,9 @@ standardize.lspace('EN_100k_lsa.rda', '100k_lsa')
 
 # from https://fasttext.cc/docs/en/english-vectors.html
 standardize.lspace('crawl-300d-2M.vec', 'facebook_crawl')
+
+# Standardized versions of these spaces can also be downloaded with download.lspace.
+
 
 ## End(Not run)
 </pre>

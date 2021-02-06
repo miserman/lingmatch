@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{read.segments}
 \alias{read.segments}
-\title{Read and segment multiple texts}
+\title{Read and Segment Multiple Texts}
 \usage{
 read.segments(path = ".", segment = NULL, ext = ".txt", subdir = FALSE,
   segment.size = -1, bysentence = FALSE, text = NULL)
@@ -17,12 +17,12 @@ words.}
 
 \item{ext}{The extension of the files you want to read in. '.txt' by default.}
 
-\item{subdir}{If \code{TRUE} files in folders in \code{path} will also be included.}
+\item{subdir}{Logical: if \code{TRUE}, files in folders in \code{path} will also be included.}
 
-\item{segment.size}{If specified, \code{segment} will be ignored, and texts will be broken into segments containing
+\item{segment.size}{Logical: if specified, \code{segment} will be ignored, and texts will be broken into segments containing
 roughly \code{segment.size} number of words.}
 
-\item{bysentence}{If \code{TRUE}, and \code{segment} is a number or \code{segment.size} is specified, sentences will
+\item{bysentence}{A number: if \code{TRUE}, and \code{segment} is a number or \code{segment.size} is specified, sentences will
 be kept together, rather than potentially being broken across segments.}
 
 \item{text}{A character vector with text to be split, used in place of \code{path}. Each entry is treates as a file.}

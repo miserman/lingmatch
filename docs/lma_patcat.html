@@ -1,11 +1,11 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Text Categorization</title>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Categorize Texts</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <link rel="stylesheet" type="text/css" href="R.css" />
 </head><body>
 
 <table width="100%" summary="page for lma_patcat"><tr><td>lma_patcat</td><td style="text-align: right;">R Documentation</td></tr></table>
 
-<h2>Text Categorization</h2>
+<h2>Categorize Texts</h2>
 
 <h3>Description</h3>
 
@@ -59,7 +59,7 @@ on the intercept included in each category (defined by <code>name.map['intname']
 <tr valign="top"><td><code>return.dtm</code></td>
 <td>
 <p>Logical; if <code>TRUE</code>, only a document-term matrix will be returned, rather than the
-summed and biased category value.</p>
+summed and biased category values.</p>
 </td></tr>
 <tr valign="top"><td><code>exclusive</code></td>
 <td>
@@ -155,7 +155,7 @@ lma_patcat(text, list(c('a', 'b', 'c'), c('d', 'e', 'f')))
 lma_patcat(text, list('[abc]', '[def]'), fixed = FALSE)
 
 # match only words
-lma_patcat(text, 'i', boundary = TRUE)
+lma_patcat(text, list('i'), boundary = TRUE)
 
 # match only words, ignoring punctuation
 lma_patcat(

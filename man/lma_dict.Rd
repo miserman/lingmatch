@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{lma_dict}
 \alias{lma_dict}
-\title{English function word category lists}
+\title{English Function Word Category and Special Character Lists}
 \usage{
 lma_dict(..., as.regex = TRUE, as.function = FALSE)
 }
@@ -13,14 +13,14 @@ adverb, conj, prep, auxverb, negate, quant, interrog, number, interjection, or s
 \item{as.regex}{Logical: if \code{FALSE}, lists are returned without regular expression.}
 
 \item{as.function}{Logical or a function: if specified and \code{as.regex} is \code{TRUE}, the selected dictionary
-will be collapsed to a regex string (terms separated by `|`) and function for matching characters to that
+will be collapsed to a regex string (terms separated by `|`), and a function for matching characters to that
 string will be returned. The regex string is passed to the matching function (\code{\link{grepl}} by default)
 as a 'pattern' argument, with the first argument of the returned function being passed as an 'x' argument.
 See examples.}
 }
 \description{
 Returns a list of function words based on the Linguistic Inquiry and Word Count 2015 dictionary
-(in terms of category names -- words were selected independently).
+(in terms of category names -- words were selected independently), or a list of special characters and patterns.
 }
 \note{
 The \code{special} category is not returned unless specifically requested. It is a list of regular expression
@@ -32,7 +32,7 @@ The \code{special} list is always used by both \code{\link{lma_dtm}} and \code{\
 dtm, \code{special} is used to clean the original input (so that, by default, the punctuation involved in ellipses
 and emojis are treated as different -- as ellipses and emojis rather than as periods and parens and colons and such).
 When categorizing a dtm, the input dictionary is passed by the special lists to be sure the terms in the dtm match up
-with the dictionary (so, for example, ": (" would be replaced with "FROWN" in both the text and dictionary).
+with the dictionary (so, for example, ": (" would be replaced with "repfrown" in both the text and dictionary).
 }
 \examples{
 # return the full dictionary (excluding special)
@@ -51,8 +51,8 @@ lma_dict(special)
 is.ppron = lma_dict(ppron, as.function = TRUE)
 is.ppron(c('i', 'am', 'you', 'were'))
 
-is.lsmcat = lma_dict(1:7, as.function = TRUE)
-is.lsmcat(c('a', 'frog', 'for', 'me'))
+in.lsmcat = lma_dict(1:7, as.function = TRUE)
+in.lsmcat(c('a', 'frog', 'for', 'me'))
 
 ## use as a stopword filter
 is.stopword = lma_dict(as.function = TRUE)

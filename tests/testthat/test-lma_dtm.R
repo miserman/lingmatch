@@ -20,9 +20,9 @@ test_that('numbers works', {
 
 test_that('punct works', {
   text = "word, word word. Word's word-word 'word' word? Word word: word; word!"
-  expect_equal(colnames(lma_dtm(text)), c('word', "word's", 'word-word'))
+  expect_equal(colnames(lma_dtm(text)), sort(c('word', "word's", 'word-word')))
   expect_equal(colnames(lma_dtm(text, punct = TRUE)),
-    c('!', '"', ',', '.', ':', ';', '?', 'word', "word's", 'word-word'))
+    sort(c('!', '"', ',', '.', ':', ';', '?', 'word', "word's", 'word-word')))
 })
 
 test_that('urls works', {
@@ -30,7 +30,7 @@ test_that('urls works', {
   expect_true(all(c('https://www.site.com/page', 'www.that.net?q=term', 'dhji.gov#tag') %in%
     colnames(lma_dtm(text, punct = TRUE))))
   expect_true(all(c('www.site.com', 'www.that.net', 'dhji.gov') %in% colnames(lma_dtm(text))))
-  expect_true(lma_dtm(text, urls = FALSE)[, 'url'] == 3)
+  expect_true(lma_dtm(text, urls = FALSE)[, 'repurl'] == 3)
 })
 
 test_that('emojis works', {

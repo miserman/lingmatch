@@ -91,21 +91,17 @@ BEGIN_RCPP
 END_RCPP
 }
 // pattern_search
-List pattern_search(const CharacterVector& texts, const CharacterVector& patterns, const int& ncats, const IntegerVector& categories, const NumericVector& weight, const NumericVector& bias, const bool& fixed, const bool& exclusive, const int& weight_cols);
-RcppExport SEXP _lingmatch_pattern_search(SEXP textsSEXP, SEXP patternsSEXP, SEXP ncatsSEXP, SEXP categoriesSEXP, SEXP weightSEXP, SEXP biasSEXP, SEXP fixedSEXP, SEXP exclusiveSEXP, SEXP weight_colsSEXP) {
+List pattern_search(const CharacterVector& texts, const CharacterVector& patterns, const IntegerVector& terms, const bool& fixed, const bool& exclusive);
+RcppExport SEXP _lingmatch_pattern_search(SEXP textsSEXP, SEXP patternsSEXP, SEXP termsSEXP, SEXP fixedSEXP, SEXP exclusiveSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const CharacterVector& >::type texts(textsSEXP);
     Rcpp::traits::input_parameter< const CharacterVector& >::type patterns(patternsSEXP);
-    Rcpp::traits::input_parameter< const int& >::type ncats(ncatsSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector& >::type categories(categoriesSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type weight(weightSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type bias(biasSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type terms(termsSEXP);
     Rcpp::traits::input_parameter< const bool& >::type fixed(fixedSEXP);
     Rcpp::traits::input_parameter< const bool& >::type exclusive(exclusiveSEXP);
-    Rcpp::traits::input_parameter< const int& >::type weight_cols(weight_colsSEXP);
-    rcpp_result_gen = Rcpp::wrap(pattern_search(texts, patterns, ncats, categories, weight, bias, fixed, exclusive, weight_cols));
+    rcpp_result_gen = Rcpp::wrap(pattern_search(texts, patterns, terms, fixed, exclusive));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -117,7 +113,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_lingmatch_reformat_embedding", (DL_FUNC) &_lingmatch_reformat_embedding, 7},
     {"_lingmatch_extract_indices", (DL_FUNC) &_lingmatch_extract_indices, 3},
     {"_lingmatch_extract_matches", (DL_FUNC) &_lingmatch_extract_matches, 3},
-    {"_lingmatch_pattern_search", (DL_FUNC) &_lingmatch_pattern_search, 9},
+    {"_lingmatch_pattern_search", (DL_FUNC) &_lingmatch_pattern_search, 5},
     {NULL, NULL, 0}
 };
 

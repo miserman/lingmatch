@@ -34,3 +34,4 @@ debug*
 *.o
 *.so
 *.dll
+cran-comments.md

@@ -10,30 +10,30 @@ standardize.lspace(infile, name, sep = " ", digits = 9,
   verbose = FALSE)
 }
 \arguments{
-\item{infile}{name of the .rda or plain-text file relative to \code{dir},
+\item{infile}{Name of the .rda or plain-text file relative to \code{dir},
 e.g., "default.rda" or "glove/glove.6B.300d.txt".}
 
-\item{name}{base name of the reformatted file and term file; e.g., "glove" would result in
+\item{name}{Base name of the reformatted file and term file; e.g., "glove" would result in
 \code{glove.dat} and \code{glove_terms.txt} in \code{outdir}.}
 
-\item{sep}{delimiting character between values in each line, e.g., \code{" "} or \code{"\\t"}.
+\item{sep}{Delimiting character between values in each line, e.g., \code{" "} or \code{"\\t"}.
 Only applies to plain-text files.}
 
-\item{digits}{number of digits to round values to; default is 9.}
+\item{digits}{Number of digits to round values to; default is 9.}
 
-\item{dir}{path to folder containing \code{infile}s; default is \code{getOption('lingmatch.lspace.dir')}.}
+\item{dir}{Path to folder containing \code{infile}s; default is \code{getOption('lingmatch.lspace.dir')}.}
 
-\item{outdir}{path to folder in which to save standardized files; defaults to \code{dir}.}
+\item{outdir}{Path to folder in which to save standardized files; default is \code{dir}.}
 
-\item{remove}{a string with a regex pattern to be removed from term names (as in \code{gsub(}\code{remove,}
+\item{remove}{A string with a regex pattern to be removed from term names (i.e., \code{gsub(}\code{remove,}
 \code{"", term)}); default is \code{""}, which is ignored.}
 
-\item{term_check}{a string with a regex pattern by which to filter terms; i.e., only lines with fully
+\item{term_check}{A string with a regex pattern by which to filter terms; i.e., only lines with fully
 matched terms are written to the reformatted file. The default attempts to retain only regular words, including
 those with dashes, foreword slashes, and periods. Set to an empty string (\code{""}) to write all lines
 regardless of term.}
 
-\item{verbose}{logical; if \code{TRUE}, prints the current line number and its term to the console every 1,000 lines.
+\item{verbose}{Logical: if \code{TRUE}, prints the current line number and its term to the console every 1,000 lines.
 Only applies to plain-text files.}
 }
 \description{
@@ -49,6 +49,9 @@ standardize.lspace('EN_100k_lsa.rda', '100k_lsa')
 
 # from https://fasttext.cc/docs/en/english-vectors.html
 standardize.lspace('crawl-300d-2M.vec', 'facebook_crawl')
+
+# Standardized versions of these spaces can also be downloaded with download.lspace.
+
 }
 }
 \seealso{

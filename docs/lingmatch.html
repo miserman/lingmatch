@@ -41,27 +41,37 @@ or path to a file (.txt or .csv, with texts separated by one or more lines/rows)
 <ul>
 <li><p> If a function, this will be applied to <code>input</code> within each group (overall if there is
 no group; i.e., <code>apply(input, 2, comp)</code>; e.g., <code>comp = mean</code> would compare each text to
-the mean profile of its group.)
+the mean profile of its group).
 </p>
 </li>
-<li><p> If a character with a length of 1 and no spaces, if it partially matches one of
-<code>lsm_profiles</code>'s rownames, that row will be used as the comparison; if it partially
-matches <code>'auto'</code>, the highest correlating <code>lsm_profiles</code> row will be used; if it
-partially matches <code>'pairwise'</code>, each text will be compared to one another; if it
-partially matches <code>'sequential'</code>, the last variable in <code>group</code> will be treated as
-a speaker ID (see the grouping and comparisons section).
+<li><p> If a character with a length of 1 and no spaces:
 </p>
+
+<ul>
+<li><p> If it partially matches one of <code>lsm_profiles</code>'s rownames, that row will be used as the comparison.
+</p>
+</li>
+<li><p> If it partially matches <code>'auto'</code>, the highest correlating <code>lsm_profiles</code> row will be used.
+</p>
+</li>
+<li><p> If it partially matches <code>'pairwise'</code>, each text will be compared to one another.
+</p>
+</li>
+<li><p> If it partially matches <code>'sequential'</code>, the last variable in <code>group</code> will be treated as
+a speaker ID (see the Grouping and Comparisons section).
+</p>
+</li></ul>
+
 </li>
 <li><p> If a character vector, this will be processed in the same way as <code>input</code>.
 </p>
 </li>
-<li><p> If a vector, either of the same length as <code>input</code> has rows and logical or factor-like
-(having  n levels &lt; length), or a numeric range or logical of length less than <code>nrow(input)</code>
-, this will be used to select a subset of
-<code>input</code> (e.g., <code>comp = 1:10</code> would treat the first 10 rows of <code>input</code> as the comparison;
-<code>comp = type=='prompt'</code> would make a logical vector identifying prompts, assuming
-&quot;type&quot; was the name of a column in <code>data</code>, or a variable in the global environment,
-and the value &quot;prompt&quot; marked the prompts).
+<li><p> If a vector, either (a) logical or factor-like (having n levels &lt; length) and of the same length as
+<code>nrow(input)</code>, or (b) numeric or logical of length less than <code>nrow(input)</code>, this will be used to
+select a subset of <code>input</code> (e.g., <code>comp = 1:10</code> would treat the first 10 rows of <code>input</code> as the
+comparison; <code>comp = type=='prompt'</code> would make a logical vector identifying prompts, assuming &quot;type&quot; was
+the name of a column in <code>data</code>, or a variable in the global environment, and the value &quot;prompt&quot; marked the
+prompts).
 </p>
 </li>
 <li><p> If a matrix-like object (having multiple rows and columns), or a named vector, this will
@@ -72,7 +82,7 @@ be treated as a sort of dtm, assuming there are common (column) names between <c
 </td></tr>
 <tr valign="top"><td><code>data</code></td>
 <td>
-<p>A matrix-like object as a reference for column names, if variables are refereed to in
+<p>A matrix-like object as a reference for column names, if variables are referred to in
 other arguments (e.g., <code>lingmatch(text, data=data)</code> would be the same as
 <code>lingmatch(data$text)</code>.</p>
 </td></tr>
@@ -84,12 +94,12 @@ groups.</p>
 <tr valign="top"><td><code>...</code></td>
 <td>
 <p>Passes arguments to <code>lma_dtm</code>, <code>lma_weight</code>,
-<code>lma_termcat</code>, and/or <code>lma_lspace</code>,
-depending on <code>input</code> and <code>comp</code>, and <code>lma_simets</code>.</p>
+<code>lma_termcat</code>, and/or <code>lma_lspace</code> (depending on <code>input</code> and <code>comp</code>),
+and <code>lma_simets</code>.</p>
 </td></tr>
 <tr valign="top"><td><code>comp.data</code></td>
 <td>
-<p>A matrix-like object as a reference to <code>comp</code> variables.</p>
+<p>A matrix-like object as a source for <code>comp</code> variables.</p>
 </td></tr>
 <tr valign="top"><td><code>comp.group</code></td>
 <td>
@@ -100,7 +110,7 @@ depending on <code>input</code> and <code>comp</code>, and <code>lma_simets</cod
 <tr valign="top"><td><code>order</code></td>
 <td>
 <p>A numeric vector the same length as <code>nrow(input)</code> indicating the order of the
-texts and grouping variables if the type of comparison is sequential. Only necessary if the
+texts and grouping variables when the type of comparison is sequential. Only necessary if the
 texts are not already ordered as desired.</p>
 </td></tr>
 <tr valign="top"><td><code>drop</code></td>
@@ -177,7 +187,7 @@ uniquely identify a comparison. This makes for 'one to many' comparisons with sp
 </dd>
 <dt>Speaker ID</dt><dd><p>If <code>comp</code> matches <code>'sequential'</code>, the last grouping variable
 entered is assumed to identify something like speakers (i.e., a factor with two or more
-levels and multiple observations per level). In this case the data is assumed to be ordered
+levels and multiple observations per level). In this case, the data are assumed to be ordered
 (or ordered once sorted by <code>order</code> if specified). Any additional grouping variables
 before the last are treated as splitting groups. This can set up for probabilistic
 accommodation metrics. At the moment, when sequential comparisons are made within groups,

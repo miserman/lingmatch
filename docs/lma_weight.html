@@ -26,11 +26,11 @@ lma_weight(dtm, weight = "count", normalize = TRUE, wc.complete = TRUE,
 <table summary="R argblock">
 <tr valign="top"><td><code>dtm</code></td>
 <td>
-<p>a matrix with words as column names.</p>
+<p>A matrix with words as column names.</p>
 </td></tr>
 <tr valign="top"><td><code>weight</code></td>
 <td>
-<p>a string referring at least partially to one (or a combination; see note) of the
+<p>A string referring at least partially to one (or a combination; see note) of the
 available weighting methods:
 </p>
 <p><strong>Term weights</strong> (applied uniquely to each cell)
@@ -44,7 +44,7 @@ available weighting methods:
 </tr>
 <tr>
  <td style="text-align: left;">
-    <code>log</code> </td><td style="text-align: left;"> <code>log(dtm + 1)</code> </td><td style="text-align: left;"> log of frequencies</td>
+    <code>log</code> </td><td style="text-align: left;"> <code>log(dtm + 1, log.base)</code> </td><td style="text-align: left;"> log of frequencies</td>
 </tr>
 <tr>
  <td style="text-align: left;">
@@ -71,13 +71,12 @@ available weighting methods:
 <table summary="Rd table">
 <tr>
  <td style="text-align: left;">
-    <code>dflog</code> </td><td style="text-align: left;"> <code>log(colSums(dtm &gt; 0))</code> </td><td style="text-align: left;"> log of binary term sum</td>
+    <code>dflog</code> </td><td style="text-align: left;"> <code>log(colSums(dtm &gt; 0), log.base)</code> </td><td style="text-align: left;"> log of binary term sum</td>
 </tr>
 <tr>
  <td style="text-align: left;">
-    <code>entropy</code> </td><td style="text-align: left;"> <code>1 - rowSums(x * log(x) / log(ncol(x)))</code> </td><td style="text-align: left;"> where
-      <code>x = t(dtm) / colSums(dtm &gt; 0)</code>;
-      entropy of term-conditional term distribution</td>
+    <code>entropy</code> </td><td style="text-align: left;"> <code>1 - rowSums(x * log(x + 1, log.base) / log(ncol(x), log.base), na.rm = TRUE)</code>
+      </td><td style="text-align: left;"> where <code>x = t(dtm) / colSums(dtm &gt; 0)</code>; entropy of term-conditional term distribution</td>
 </tr>
 <tr>
  <td style="text-align: left;">
@@ -91,12 +90,12 @@ available weighting methods:
 </tr>
 <tr>
  <td style="text-align: left;">
-    <code>dfmlog</code> </td><td style="text-align: left;"> <code>log(diag(x[max.col(t(x)),]))</code> </td><td style="text-align: left;"> log of maximum term
+    <code>dfmlog</code> </td><td style="text-align: left;"> <code>log(diag(dtm[max.col(t(dtm)),]), log.base)</code> </td><td style="text-align: left;"> log of maximum term
       frequency</td>
 </tr>
 <tr>
  <td style="text-align: left;">
-    <code>dfmax</code> </td><td style="text-align: left;"> <code>diag(x[max.col(t(x)),])</code> </td><td style="text-align: left;"> maximum term frequency</td>
+    <code>dfmax</code> </td><td style="text-align: left;"> <code>diag(dtm[max.col(t(dtm)),])</code> </td><td style="text-align: left;"> maximum term frequency</td>
 </tr>
 <tr>
  <td style="text-align: left;">
@@ -104,15 +103,15 @@ available weighting methods:
 </tr>
 <tr>
  <td style="text-align: left;">
-    <code>idf</code> </td><td style="text-align: left;"> <code>log(nrow(dtm) / colSums(dtm &gt; 0))</code> </td><td style="text-align: left;"> inverse document frequency</td>
+    <code>idf</code> </td><td style="text-align: left;"> <code>log(nrow(dtm) / colSums(dtm &gt; 0), log.base)</code> </td><td style="text-align: left;"> inverse document frequency</td>
 </tr>
 <tr>
  <td style="text-align: left;">
-    <code>ridf</code> </td><td style="text-align: left;"> <code>idf - log(poisson)</code> </td><td style="text-align: left;"> residual inverse document frequency</td>
+    <code>ridf</code> </td><td style="text-align: left;"> <code>idf - log(dpois, log.base)</code> </td><td style="text-align: left;"> residual inverse document frequency</td>
 </tr>
 <tr>
  <td style="text-align: left;">
-    <code>normal</code> </td><td style="text-align: left;"> <code>1 / colSums(dtm ^ 2) ^ .5</code> </td><td style="text-align: left;"> normalized document frequency</td>
+    <code>normal</code> </td><td style="text-align: left;"> <code>sqrt(1 / colSums(dtm ^ 2))</code> </td><td style="text-align: left;"> normalized document frequency</td>
 </tr>
 <tr>
  <td style="text-align: left;">
@@ -126,12 +125,12 @@ scheme (with <code>'ppmi'</code> setting negative values to 0).</p>
 </td></tr>
 <tr valign="top"><td><code>normalize</code></td>
 <td>
-<p>logical: if <code>FALSE</code>, the dtm is not divided by document word-count before
+<p>Logical: if <code>FALSE</code>, the dtm is not divided by document word-count before
 being weighted.</p>
 </td></tr>
 <tr valign="top"><td><code>wc.complete</code></td>
 <td>
-<p>if the dtm was made with <code>lma_dtm</code> (has a <code>'WC'</code>
+<p>If the dtm was made with <code>lma_dtm</code> (has a <code>'WC'</code>
 attribute), word counts for
 frequencies can be based on the raw count (default; <code>wc.complete = TRUE</code>). If
 <code>wc.complete = FALSE</code>, or the dtm does not have a <code>'WC'</code> attribute,
@@ -139,24 +138,24 @@ frequencies can be based on the raw count (default; <code>wc.complete = TRUE</co
 </td></tr>
 <tr valign="top"><td><code>log.base</code></td>
 <td>
-<p>the base of logs, applied to any weight using <code>log</code>.
+<p>The base of logs, applied to any weight using <code>log</code>.
 Default is 10.</p>
 </td></tr>
 <tr valign="top"><td><code>alpha</code></td>
 <td>
-<p>a scaling factor applied to document frequency as part of pointwise mutual
+<p>A scaling factor applied to document frequency as part of pointwise mutual
 information weighting, or amplify's power (<code>dtm ^ alpha</code>, which defaults to 1.1), or the
 specified quantile of the poisson distribution (<code>dpois(alpha,</code>
 <code>colSums(x, na.rm = TRUE) /</code> <code>nrow(x))</code>).</p>
 </td></tr>
 <tr valign="top"><td><code>doc.only</code></td>
 <td>
-<p>logical: if <code>TRUE</code>, only document weights are returned (a single value for
+<p>Logical: if <code>TRUE</code>, only document weights are returned (a single value for
 each term).</p>
 </td></tr>
 <tr valign="top"><td><code>percent</code></td>
 <td>
-<p>logical; if <code>TRUE</code>, frequencies are multiplied by 100.</p>
+<p>Logical; if <code>TRUE</code>, frequencies are multiplied by 100.</p>
 </td></tr>
 </table>
 
@@ -168,12 +167,12 @@ increasingly more from <code>binary</code> to <code>log</code> to <code>sqrt</co
 </p>
 <p>Document weights work to treat words differently based on their between-document or overall frequency.
 When term frequencies are constant, <code>dpois</code>, <code>idf</code>, <code>ridf</code>, and <code>normal</code> give
-less common words increasingly more weight, and <code>ppois</code>, <code>df</code>, <code>dflog</code>, and
-<code>entropy</code> give less common words increasingly less weight.
+less common words increasingly more weight, and <code>dfmax</code>, <code>dfmlog</code>, <code>ppois</code>, <code>df</code>,
+<code>dflog</code>, and <code>entropy</code> give less common words increasingly less weight.
 </p>
 <p><code>weight</code> can either be a vector with two characters, corresponding to term weight and
 document weight (e.g., <code>c('count', 'idf')</code>), or it can be a string with term and
-document weights separated by any of <code>\*</code> (e.g., <code>'count \* idf'</code>).
+document weights separated by any of <code>:\*_/; ,-</code> (e.g., <code>'count-idf'</code>).
 <code>'tf'</code> is also acceptable for <code>'count'</code>, and <code>'tfidf'</code> will be parsed as
 <code>c('count', 'idf')</code>, though this is a special case.
 </p>

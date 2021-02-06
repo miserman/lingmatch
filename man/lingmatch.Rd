@@ -16,27 +16,28 @@ or path to a file (.txt or .csv, with texts separated by one or more lines/rows)
 \itemize{
   \item If a function, this will be applied to \code{input} within each group (overall if there is
     no group; i.e., \code{apply(input, 2, comp)}; e.g., \code{comp = mean} would compare each text to
-    the mean profile of its group.)
-  \item If a character with a length of 1 and no spaces, if it partially matches one of
-    \code{lsm_profiles}'s rownames, that row will be used as the comparison; if it partially
-    matches \code{'auto'}, the highest correlating \code{lsm_profiles} row will be used; if it
-    partially matches \code{'pairwise'}, each text will be compared to one another; if it
-    partially matches \code{'sequential'}, the last variable in \code{group} will be treated as
-    a speaker ID (see the grouping and comparisons section).
+    the mean profile of its group).
+  \item If a character with a length of 1 and no spaces:
+    \itemize{
+      \item If it partially matches one of \code{lsm_profiles}'s rownames, that row will be used as the comparison.
+      \item If it partially matches \code{'auto'}, the highest correlating \code{lsm_profiles} row will be used.
+      \item If it partially matches \code{'pairwise'}, each text will be compared to one another.
+      \item If it partially matches \code{'sequential'}, the last variable in \code{group} will be treated as
+        a speaker ID (see the Grouping and Comparisons section).
+    }
   \item If a character vector, this will be processed in the same way as \code{input}.
-  \item If a vector, either of the same length as \code{input} has rows and logical or factor-like
-    (having  n levels < length), or a numeric range or logical of length less than \code{nrow(input)}
-    , this will be used to select a subset of
-    \code{input} (e.g., \code{comp = 1:10} would treat the first 10 rows of \code{input} as the comparison;
-    \code{comp = type=='prompt'} would make a logical vector identifying prompts, assuming
-    "type" was the name of a column in \code{data}, or a variable in the global environment,
-    and the value "prompt" marked the prompts).
+  \item If a vector, either (a) logical or factor-like (having n levels < length) and of the same length as
+    \code{nrow(input)}, or (b) numeric or logical of length less than \code{nrow(input)}, this will be used to
+    select a subset of \code{input} (e.g., \code{comp = 1:10} would treat the first 10 rows of \code{input} as the
+    comparison; \code{comp = type=='prompt'} would make a logical vector identifying prompts, assuming "type" was
+    the name of a column in \code{data}, or a variable in the global environment, and the value "prompt" marked the
+    prompts).
   \item If a matrix-like object (having multiple rows and columns), or a named vector, this will
     be treated as a sort of dtm, assuming there are common (column) names between \code{input} and
     \code{comp} (e.g., if you had prompt and response texts that were already processed separately).
 }}
 
-\item{data}{A matrix-like object as a reference for column names, if variables are refereed to in
+\item{data}{A matrix-like object as a reference for column names, if variables are referred to in
 other arguments (e.g., \code{lingmatch(text, data=data)} would be the same as
 \code{lingmatch(data$text)}.}
 
@@ -44,17 +45,17 @@ other arguments (e.g., \code{lingmatch(text, data=data)} would be the same as
 groups.}
 
 \item{...}{Passes arguments to \code{\link{lma_dtm}}, \code{\link{lma_weight}},
-\code{\link{lma_termcat}}, and/or \code{\link{lma_lspace}},
-depending on \code{input} and \code{comp}, and \code{\link{lma_simets}}.}
+\code{\link{lma_termcat}}, and/or \code{\link{lma_lspace}} (depending on \code{input} and \code{comp}),
+and \code{\link{lma_simets}}.}
 
-\item{comp.data}{A matrix-like object as a reference to \code{comp} variables.}
+\item{comp.data}{A matrix-like object as a source for \code{comp} variables.}
 
 \item{comp.group}{The column name of the grouping variable(s) in \code{comp.data}; if
 \code{group} contains references to column names, and \code{comp.group} is not specified,
 \code{group} variables will be looked for in \code{comp.data}.}
 
 \item{order}{A numeric vector the same length as \code{nrow(input)} indicating the order of the
-texts and grouping variables if the type of comparison is sequential. Only necessary if the
+texts and grouping variables when the type of comparison is sequential. Only necessary if the
 texts are not already ordered as desired.}
 
 \item{drop}{logical; if \code{FALSE}, columns with a sum of 0 are retained.}
@@ -109,7 +110,7 @@ specific knowledge, so it can't always (readily) be done automatically. Variable
     (as in the case of manipulated prompts or text-based conditions).}
   \item{Speaker ID}{If \code{comp} matches \code{'sequential'}, the last grouping variable
     entered is assumed to identify something like speakers (i.e., a factor with two or more
-    levels and multiple observations per level). In this case the data is assumed to be ordered
+    levels and multiple observations per level). In this case, the data are assumed to be ordered
     (or ordered once sorted by \code{order} if specified). Any additional grouping variables
     before the last are treated as splitting groups. This can set up for probabilistic
     accommodation metrics. At the moment, when sequential comparisons are made within groups,

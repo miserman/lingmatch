@@ -14,7 +14,7 @@ to select spaces. If length is over 1, \code{get.map} is set to \code{TRUE}.}
 \item{dir}{Path to \code{lma_term_map.rda} and downloaded spaces.}
 
 \item{get.map}{Logical; if \code{TRUE} and \code{lma_term_map.rda} is not found in
-\code{dir}, the term map \href{https://osf.io/xr7jv}{lma_term_map.rda} is
+\code{dir}, the term map (\href{https://osf.io/xr7jv}{lma_term_map.rda}) is
 downloaded and decompressed.}
 
 \item{check.md5}{Logical; if \code{TRUE} (default), retrieves the MD5 checksum from OSF,
@@ -23,7 +23,7 @@ and compares it with that calculated from the downloaded file to check its integ
 \item{mode}{Passed to \code{\link{download.file}} when downloading the term map.}
 }
 \value{
-a list with varying entries:
+A list with varying entries:
   \tabular{ll}{
     info \tab The version of \href{https://osf.io/9yzca}{osf.io/9yzca} stored internally; a
       \code{data.frame}  with spaces as row names, and information about each space in columns:
@@ -36,9 +36,9 @@ a list with varying entries:
           \code{original_max} \tab maximum value used to normalize the space; the original
             space would be \code{(vectors *} \code{original_max) /} \code{100} \cr
           \code{osf_dat} \tab OSF id for the \code{.dat} files; the URL would be
-            https://osf.io/{osf_dat} \cr
+            https://osf.io/\code{osf_dat} \cr
           \code{osf_terms} \tab OSF id for the \code{_terms.txt} files; the URL would be
-            https://osf.io/{osf_terms} \cr
+            https://osf.io/\code{osf_terms} \cr
           \code{wiki} \tab link to the wiki for the space \cr
           \code{downloaded} \tab path to the \code{.dat} file if downloaded,
             and \code{''} otherwise. \cr

@@ -25,7 +25,7 @@ extract_matches <- function(terms, file, sep = ' ') {
     .Call(`_lingmatch_extract_matches`, terms, file, sep)
 }
 
-pattern_search <- function(texts, patterns, ncats, categories, weight, bias, fixed, exclusive, weight_cols = 0L) {
-    .Call(`_lingmatch_pattern_search`, texts, patterns, ncats, categories, weight, bias, fixed, exclusive, weight_cols)
+pattern_search <- function(texts, patterns, terms, fixed, exclusive) {
+    .Call(`_lingmatch_pattern_search`, texts, patterns, terms, fixed, exclusive)
 }
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{lma_process}
 \alias{lma_process}
-\title{Process text using a combination of pre-processing steps}
+\title{Process Text}
 \usage{
 lma_process(input = NULL, ..., meta = TRUE)
 }
@@ -23,7 +23,7 @@ A matrix with texts represented by rows, and features in columns, unless there a
 \description{
 A wrapper to other pre-processing functions, potentially from \code{\link{read.segments}}, to \code{\link{lma_dtm}}
 or \code{\link{lma_patcat}}, to \code{\link{lma_weight}}, then \code{\link{lma_termcat}} or \code{\link{lma_lspace}},
-and potentially including \code{\link{lma_meta}} output.
+and optionally including \code{\link{lma_meta}} output.
 }
 \examples{
 # starting with some texts in a vector

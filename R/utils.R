@@ -1,8 +1,8 @@
-#' Process text using a combination of pre-processing steps
+#' Process Text
 #'
 #' A wrapper to other pre-processing functions, potentially from \code{\link{read.segments}}, to \code{\link{lma_dtm}}
 #' or \code{\link{lma_patcat}}, to \code{\link{lma_weight}}, then \code{\link{lma_termcat}} or \code{\link{lma_lspace}},
-#' and potentially including \code{\link{lma_meta}} output.
+#' and optionally including \code{\link{lma_meta}} output.
 #'
 #' @param input A vector of text, or path to a text file or folder.
 #' @param ... arguments to be passed to \code{\link{lma_dtm}}, \code{\link{lma_patcat}}, \code{\link{lma_weight}},
@@ -77,14 +77,13 @@ lma_process = function(input = NULL, ..., meta = TRUE){
   if(length(arg_matches$lma_weight)){
     arg_matches$lma_weight$dtm = x
     x = do.call(lma_weight, arg_matches$lma_weight)
-    attr(x, 'category') = attr(arg_matches$lma_weight$dtm, 'category')
+    attr(x, 'categories') = attr(arg_matches$lma_weight$dtm, 'categories')
     ck_changed = TRUE
   }
-  if(!is.null(attr(x, 'category'))){
-    categories = attr(x, 'category')
-    cats = unique(categories)
-    xc = as.data.frame(matrix(0, nrow(op), length(unique(cats)), dimnames = list(NULL, cats)))
-    for(cat in cats) xc[, cat] = rowSums(x[, categories == cat, drop = FALSE], na.rm = TRUE)
+  if(!is.null(attr(x, 'categories'))){
+    categories = attr(x, 'categories')
+    xc = as.data.frame(matrix(0, nrow(op), length(categories), dimnames = list(NULL, names(categories))))
+    for(cat in names(categories)) xc[, cat] = rowSums(x[, categories[[cat]], drop = FALSE], na.rm = TRUE)
     x = xc
     ck_changed = TRUE
   }else if(length(arg_matches$lma_termcat)){
@@ -133,7 +132,7 @@ to_regex = function(dict, intext = FALSE){
   })
 }
 
-#' Read/write dictionary files
+#' Read/Write Dictionary Files
 #'
 #' Read in or write dictionary files in Comma-Separated Values (.csv; weighted) or
 #' Linguistic Inquiry and Word Count (.dic; non-weighted) format.
@@ -237,18 +236,16 @@ read.dic = function(path, cats, type = 'asis', as.weighted = FALSE, dir = getOpt
             }else if(anyDuplicated(weights)) split(terms, weights) else list(category = terms)
           }else{
             weights = as.data.frame(path[, cats])
-            lvs = sort(unique(unlist(weights)))
-            if(length(lvs) == 3 && all(lvs == c(-1, 0, 1))){
+            if(any(weights > 0) && any(weights < 0)){
               for(cat in cats){
-                if(any(weights[, cat] == -1)){
-                  weights[, paste0(cat, '_positive')] = as.integer(weights[, cat] == 1)
-                  weights[, paste0(cat, '_negative')] = as.integer(weights[, cat] == -1)
-                  weights = weights[, colnames(weights) != cat]
-                }
+                if(any(weights[, cat] > 0)) weights[, paste0(cat, '.positive')] = as.integer(weights[, cat] > 0)
+                if(any(weights[, cat] == 0)) weights[, paste0(cat, '.neutral')] = as.integer(weights[, cat] == 0)
+                if(any(weights[, cat] < 0)) weights[, paste0(cat, '.negative')] = as.integer(weights[, cat] < 0)
+                weights = weights[, colnames(weights) != cat]
               }
               cats = sort(colnames(weights))
-              lvs = c(0, 1)
             }
+            lvs = sort(unique(unlist(weights)))
             if(length(lvs) == 2 && all(lvs == c(0, 1))){
               wl = lapply(cats, function(cat) terms[weights[, cat] == 1])
               names(wl) = cats
@@ -356,9 +353,9 @@ read.dic = function(path, cats, type = 'asis', as.weighted = FALSE, dir = getOpt
 #' @param dict A \code{list} with a named entry of terms for each category, or a \code{data.frame}
 #'   with terms in one column, and categories or weights in the rest.
 #' @param filename The name of the file to be saved.
-#' @param save Logical; if \code{FALSE}, does not write a file.
-#' @return \code{write.dic}: A version of the written dictionary (write.dic; a raw character vector for
-#'   unweighted dictionaries, or a \code{data.frame} for weighted dictionaries).
+#' @param save Logical: if \code{FALSE}, does not write a file.
+#' @return \code{write.dic}: A version of the written dictionary -- a raw character vector for
+#'   unweighted dictionaries, or a \code{data.frame} for weighted dictionaries.
 #' @examples
 #' # make a small murder related dictionary
 #' dict = list(
@@ -422,7 +419,7 @@ write.dic = function(dict, filename = 'custom', type = 'asis', as.weighted = FAL
   invisible(o)
 }
 
-#' Read and segment multiple texts
+#' Read and Segment Multiple Texts
 #'
 #' Split texts by word count or specific characters. Input texts directly, or read them in from files.
 #'
@@ -432,10 +429,10 @@ write.dic = function(dict, filename = 'custom', type = 'asis', as.weighted = FAL
 #'   '\\n' by default. If a number, texts will be broken into that many segments, each with a roughly equal number of
 #'   words.
 #' @param ext The extension of the files you want to read in. '.txt' by default.
-#' @param subdir If \code{TRUE} files in folders in \code{path} will also be included.
-#' @param segment.size If specified, \code{segment} will be ignored, and texts will be broken into segments containing
+#' @param subdir Logical: if \code{TRUE}, files in folders in \code{path} will also be included.
+#' @param segment.size Logical: if specified, \code{segment} will be ignored, and texts will be broken into segments containing
 #'   roughly \code{segment.size} number of words.
-#' @param bysentence If \code{TRUE}, and \code{segment} is a number or \code{segment.size} is specified, sentences will
+#' @param bysentence A number: if \code{TRUE}, and \code{segment} is a number or \code{segment.size} is specified, sentences will
 #'   be kept together, rather than potentially being broken across segments.
 #' @param text A character vector with text to be split, used in place of \code{path}. Each entry is treates as a file.
 #' @returns
@@ -565,12 +562,12 @@ read.segments = function(path = '.', segment = NULL, ext = '.txt', subdir = FALS
 #'   to select spaces. If length is over 1, \code{get.map} is set to \code{TRUE}.
 #' @param dir Path to \code{lma_term_map.rda} and downloaded spaces.
 #' @param get.map Logical; if \code{TRUE} and \code{lma_term_map.rda} is not found in
-#'   \code{dir}, the term map \href{https://osf.io/xr7jv}{lma_term_map.rda} is
+#'   \code{dir}, the term map (\href{https://osf.io/xr7jv}{lma_term_map.rda}) is
 #'   downloaded and decompressed.
 #' @param check.md5 Logical; if \code{TRUE} (default), retrieves the MD5 checksum from OSF,
 #'   and compares it with that calculated from the downloaded file to check its integrity.
 #' @param mode Passed to \code{\link{download.file}} when downloading the term map.
-#' @return a list with varying entries:
+#' @return A list with varying entries:
 #'   \tabular{ll}{
 #'     info \tab The version of \href{https://osf.io/9yzca}{osf.io/9yzca} stored internally; a
 #'       \code{data.frame}  with spaces as row names, and information about each space in columns:
@@ -583,9 +580,9 @@ read.segments = function(path = '.', segment = NULL, ext = '.txt', subdir = FALS
 #'           \code{original_max} \tab maximum value used to normalize the space; the original
 #'             space would be \code{(vectors *} \code{original_max) /} \code{100} \cr
 #'           \code{osf_dat} \tab OSF id for the \code{.dat} files; the URL would be
-#'             https://osf.io/{osf_dat} \cr
+#'             https://osf.io/\code{osf_dat} \cr
 #'           \code{osf_terms} \tab OSF id for the \code{_terms.txt} files; the URL would be
-#'             https://osf.io/{osf_terms} \cr
+#'             https://osf.io/\code{osf_terms} \cr
 #'           \code{wiki} \tab link to the wiki for the space \cr
 #'           \code{downloaded} \tab path to the \code{.dat} file if downloaded,
 #'             and \code{''} otherwise. \cr
@@ -766,20 +763,20 @@ download.lspace = function(space = '100k', include.terms = TRUE, decompress = TR
 #' Retrieve information and links to dictionaries
 #' (lexicons/word lists) available at \href{https://osf.io/y6g5b}{osf.io/y6g5b}.
 #'
-#' @param query A character matching a space name, or a set of keywords to search for in
+#' @param query A character matching a dictionary name, or a set of keywords to search for in
 #'   dictionary information.
-#' @param dir Path to a folder containing dictionaries, or where you want them to be saved
+#' @param dir Path to a folder containing dictionaries, or where you want them to be saved.
 #' @param check.md5 Logical; if \code{TRUE} (default), retrieves the MD5 checksum from OSF,
 #'   and compares it with that calculated from the downloaded file to check its integrity.
 #' @param mode Passed to \code{\link{download.file}} when downloading files.
-#' @return a list with varying entries:
+#' @return A list with varying entries:
 #'   \tabular{ll}{
 #'     info \tab The version of \href{https://osf.io/kjqb8}{osf.io/kjqb8} stored internally; a
-#'       \code{data.frame}  with spaces as row names, and information about each space in columns.
+#'       \code{data.frame}  with dictionary names as row names, and information about each dictionary in columns.
 #'         Also described at
 #'         \href{https://osf.io/y6g5b/wiki/dict_variables}{osf.io/y6g5b/wiki/dict_variables},
 #'         here \code{short} (corresponding to the file name [\code{{short}.(csv|dic)}] and
-#'         wiki urls [\code{https://osf.io/y6g5b/wiki/{short}}]) is set as row names, and removed:
+#'         wiki urls [\code{https://osf.io/y6g5b/wiki/{short}}]) is set as row names and removed:
 #'         \tabular{ll}{
 #'           \code{name} \tab Full name of the dictionary. \cr
 #'           \code{description} \tab Description of the dictionary, relating to its purpose and
@@ -789,7 +786,7 @@ download.lspace = function(space = '100k', include.terms = TRUE, decompress = TR
 #'             \tabular{ll}{
 #'               \code{algorithm} \tab Terms were selected by some automated process, potentially
 #'                 learned from data or other resources. \cr
-#'               \code{crowd} \tab Several individuals rated the terms, and in aggregate, those ratings
+#'               \code{crowd} \tab Several individuals rated the terms, and in aggregate those ratings
 #'                 translate to categories and weights. \cr
 #'               \code{mixed} \tab Some combination of the other methods, usually in some iterative
 #'                 process. \cr
@@ -812,7 +809,7 @@ download.lspace = function(space = '100k', include.terms = TRUE, decompress = TR
 #'           \code{terms} \tab Number of unique terms across categories. \cr
 #'           \code{term_type} \tab Format of the terms:
 #'             \tabular{ll}{
-#'               \code{glob} \tab Include asterisks which denote acceptance of any characters until a
+#'               \code{glob} \tab Include asterisks which denote inclusion of any characters until a
 #'                 word boundary. \cr
 #'               \code{glob+} \tab Glob-style asterisks with regular expressions within terms. \cr
 #'               \code{ngram} \tab Includes any number of words as a term, separated by spaces. \cr
@@ -827,7 +824,7 @@ download.lspace = function(space = '100k', include.terms = TRUE, decompress = TR
 #'             as .csv, and those without are stored as .dic files. \cr
 #'           \code{regex_characters} \tab Logical indicating whether special regular expression
 #'             characters are present in any term, which might need to be escaped if the terms are used
-#'             in regular expressions. Glob type terms allow complete parens (at least one open and one
+#'             in regular expressions. Glob-type terms allow complete parens (at least one open and one
 #'             closed, indicating preceding or following words), and initial and terminal asterisks. For
 #'             all other terms, \code{[](){}*.^$+?\|} are counted as regex characters. These could be
 #'             escaped in R with \code{gsub('([][)(}{*.^$+?\\\\|])', '\\\\\\1', terms)} if \code{terms}
@@ -851,7 +848,7 @@ download.lspace = function(space = '100k', include.terms = TRUE, decompress = TR
 #' @family Dictionary functions
 #' @examples
 #' # just retrieve information about available dictionaries
-#' dicts = select.dict()
+#' dicts = select.dict()$info
 #'
 #' # select all dictionaries mentioning sentiment or emotion
 #' sentiment_dicts = select.dict('sentiment emotion')$selected
@@ -950,22 +947,22 @@ download.dict = function(dict = 'lusi', check.md5 = TRUE, mode = 'wb', dir = get
 #' which has a term at the start of each line, and consistent delimiting characters. Plain-text files
 #' are processed line-by-line, so large spaces can be reformatted RAM-conservatively.
 #'
-#' @param infile name of the .rda or plain-text file relative to \code{dir},
+#' @param infile Name of the .rda or plain-text file relative to \code{dir},
 #'   e.g., "default.rda" or "glove/glove.6B.300d.txt".
-#' @param name base name of the reformatted file and term file; e.g., "glove" would result in
+#' @param name Base name of the reformatted file and term file; e.g., "glove" would result in
 #'   \code{glove.dat} and \code{glove_terms.txt} in \code{outdir}.
-#' @param sep delimiting character between values in each line, e.g., \code{" "} or \code{"\\t"}.
+#' @param sep Delimiting character between values in each line, e.g., \code{" "} or \code{"\\t"}.
 #'   Only applies to plain-text files.
-#' @param digits number of digits to round values to; default is 9.
-#' @param dir path to folder containing \code{infile}s; default is \code{getOption('lingmatch.lspace.dir')}.
-#' @param outdir path to folder in which to save standardized files; defaults to \code{dir}.
-#' @param remove a string with a regex pattern to be removed from term names (as in \code{gsub(}\code{remove,}
+#' @param digits Number of digits to round values to; default is 9.
+#' @param dir Path to folder containing \code{infile}s; default is \code{getOption('lingmatch.lspace.dir')}.
+#' @param outdir Path to folder in which to save standardized files; default is \code{dir}.
+#' @param remove A string with a regex pattern to be removed from term names (i.e., \code{gsub(}\code{remove,}
 #'   \code{"", term)}); default is \code{""}, which is ignored.
-#' @param term_check a string with a regex pattern by which to filter terms; i.e., only lines with fully
+#' @param term_check A string with a regex pattern by which to filter terms; i.e., only lines with fully
 #'   matched terms are written to the reformatted file. The default attempts to retain only regular words, including
 #'   those with dashes, foreword slashes, and periods. Set to an empty string (\code{""}) to write all lines
 #'   regardless of term.
-#' @param verbose logical; if \code{TRUE}, prints the current line number and its term to the console every 1,000 lines.
+#' @param verbose Logical: if \code{TRUE}, prints the current line number and its term to the console every 1,000 lines.
 #'   Only applies to plain-text files.
 #' @family Latent Semantic Space functions
 #' @examples
@@ -976,6 +973,9 @@ download.dict = function(dict = 'lusi', check.md5 = TRUE, mode = 'wb', dir = get
 #'
 #' # from https://fasttext.cc/docs/en/english-vectors.html
 #' standardize.lspace('crawl-300d-2M.vec', 'facebook_crawl')
+#'
+#' # Standardized versions of these spaces can also be downloaded with download.lspace.
+#'
 #' }
 #' @export
 
@@ -1011,7 +1011,7 @@ standardize.lspace = function(infile, name, sep = ' ', digits = 9, dir = getOpti
 
 
 
-#' Text Categorization
+#' Categorize Texts
 #'
 #' Categorize raw texts using a pattern-based dictionary.
 #'
@@ -1027,7 +1027,7 @@ standardize.lspace = function(infile, name, sep = ' ', digits = 9, dir = getOpti
 #'   on the intercept included in each category (defined by \code{name.map['intname']}).
 #' @param to.lower Logical indicating whether \code{text} should be converted to lowercase before processing.
 #' @param return.dtm Logical; if \code{TRUE}, only a document-term matrix will be returned, rather than the
-#'   summed and biased category value.
+#'   summed and biased category values.
 #' @param exclusive Logical; if \code{FALSE}, each dictionary term is searched for in the original text.
 #'   Otherwise (by default), terms are sorted by length (with longer terms being searched for first), and
 #'   matches are removed from the text (avoiding subsequent matches to matched patterns).
@@ -1075,7 +1075,7 @@ standardize.lspace = function(infile, name, sep = ' ', digits = 9, dir = getOpti
 #' lma_patcat(text, list('[abc]', '[def]'), fixed = FALSE)
 #'
 #' # match only words
-#' lma_patcat(text, 'i', boundary = TRUE)
+#' lma_patcat(text, list('i'), boundary = TRUE)
 #'
 #' # match only words, ignoring punctuation
 #' lma_patcat(
@@ -1232,7 +1232,7 @@ lma_patcat = function(text, dict = NULL, pattern.weights = 'weight', pattern.cat
     cls = tryCatch(-nchar(lex$term), error = function(e) NULL)
     if(is.null(cls)){
       warning('dict appears to be miss-encoded, so results may not be as expected;\n',
-        'might try reading the dictionary in with encoding = "ISO-8859-1"')
+        'might try reading the dictionary in with encoding = "latin1"')
       lex$term = iconv(lex$term, sub = '#')
       cls = -nchar(lex$term)
     }
@@ -1258,15 +1258,23 @@ lma_patcat = function(text, dict = NULL, pattern.weights = 'weight', pattern.cat
   }
   if(to.lower) text = tolower(text)
   st = proc.time()[[3]]
+  terms = unique(lex$term)
   op = pattern_search(
-    text, if(is.character(boundary)) paste0(boundary, lex$term, boundary) else lex$term,
-    if(return.dtm) 0L else nlevels(lex$category),
-    (if(return.dtm) seq_along(lex$term) else as.integer(lex$category)) - 1L,
-    if(!is.data.frame(lex)) as.numeric(as.matrix(lex$weight)) else lex$weight, as.numeric(bias), fixed,
-    exclusive, if(wide) nlevels(lex$category) else 0
+    text, if(is.character(boundary)) paste0(boundary, terms, boundary) else terms,
+    seq_along(terms) - 1L, fixed, exclusive
   )
-  colnames(op[[1]]) = if(return.dtm) lex$term else categories
-  if(return.dtm) attr(op[[1]], 'category') = lex$category
+  colnames(op[[1]]) = terms
+  if(return.dtm){
+    attr(op[[1]], 'categories') = lapply(categories, function(cat)
+      which(colnames(op[[1]]) %in% lex[lex$category == cat, 'term']))
+    names(attr(op[[1]], 'categories')) = categories
+  }else{
+    op[[1]] = vapply(categories, function(cat){
+      l = if(wide) data.frame(term = lex$term, weights = if(cat %in% colnames(lex$weights)) lex$weights[, cat] else
+        lex$weights) else lex[lex$category == cat,]
+      as.numeric(op[[1]][, l$term, drop = FALSE] %*% l$weights + bias[[cat]])
+    }, numeric(length(text)))
+  }
   attr(op[[1]], 'WC') = op[[2]]
   attr(op[[1]], 'time') = c(patcat = proc.time()[[3]] - st)
   op[[1]]
@@ -1356,15 +1364,15 @@ lma_meta = function(text){
   )))
 }
 
-#' English function word category lists
+#' English Function Word Category and Special Character Lists
 #'
 #' Returns a list of function words based on the Linguistic Inquiry and Word Count 2015 dictionary
-#' (in terms of category names -- words were selected independently).
+#' (in terms of category names -- words were selected independently), or a list of special characters and patterns.
 #' @param ... Numbers or letters corresponding to category names: ppron, ipron, article,
 #' adverb, conj, prep, auxverb, negate, quant, interrog, number, interjection, or special.
 #' @param as.regex Logical: if \code{FALSE}, lists are returned without regular expression.
 #' @param as.function Logical or a function: if specified and \code{as.regex} is \code{TRUE}, the selected dictionary
-#' will be collapsed to a regex string (terms separated by `|`) and function for matching characters to that
+#' will be collapsed to a regex string (terms separated by `|`), and a function for matching characters to that
 #' string will be returned. The regex string is passed to the matching function (\code{\link{grepl}} by default)
 #' as a 'pattern' argument, with the first argument of the returned function being passed as an 'x' argument.
 #' See examples.
@@ -1378,7 +1386,7 @@ lma_meta = function(text){
 #' dtm, \code{special} is used to clean the original input (so that, by default, the punctuation involved in ellipses
 #' and emojis are treated as different -- as ellipses and emojis rather than as periods and parens and colons and such).
 #' When categorizing a dtm, the input dictionary is passed by the special lists to be sure the terms in the dtm match up
-#' with the dictionary (so, for example, ": (" would be replaced with "FROWN" in both the text and dictionary).
+#' with the dictionary (so, for example, ": (" would be replaced with "repfrown" in both the text and dictionary).
 #' @seealso To score texts with these categories, use \code{\link{lma_termcat}}.
 #' @examples
 #' # return the full dictionary (excluding special)
@@ -1397,8 +1405,8 @@ lma_meta = function(text){
 #' is.ppron = lma_dict(ppron, as.function = TRUE)
 #' is.ppron(c('i', 'am', 'you', 'were'))
 #'
-#' is.lsmcat = lma_dict(1:7, as.function = TRUE)
-#' is.lsmcat(c('a', 'frog', 'for', 'me'))
+#' in.lsmcat = lma_dict(1:7, as.function = TRUE)
+#' in.lsmcat(c('a', 'frog', 'for', 'me'))
 #'
 #' ## use as a stopword filter
 #' is.stopword = lma_dict(as.function = TRUE)

@@ -27,12 +27,12 @@ select.dict(query = NULL, dir = getOption("lingmatch.dict.dir"),
 <table summary="R argblock">
 <tr valign="top"><td><code>query</code></td>
 <td>
-<p>A character matching a space name, or a set of keywords to search for in
+<p>A character matching a dictionary name, or a set of keywords to search for in
 dictionary information.</p>
 </td></tr>
 <tr valign="top"><td><code>dir</code></td>
 <td>
-<p>Path to a folder containing dictionaries, or where you want them to be saved</p>
+<p>Path to a folder containing dictionaries, or where you want them to be saved.</p>
 </td></tr>
 <tr valign="top"><td><code>check.md5</code></td>
 <td>
@@ -48,18 +48,18 @@ and compares it with that calculated from the downloaded file to check its integ
 
 <h3>Value</h3>
 
-<p>a list with varying entries:
+<p>A list with varying entries:
 </p>
 
 <table summary="Rd table">
 <tr>
  <td style="text-align: left;">
     info </td><td style="text-align: left;"> The version of <a href="https://osf.io/kjqb8">osf.io/kjqb8</a> stored internally; a
-      <code>data.frame</code>  with spaces as row names, and information about each space in columns.
+      <code>data.frame</code>  with dictionary names as row names, and information about each dictionary in columns.
         Also described at
         <a href="https://osf.io/y6g5b/wiki/dict_variables">osf.io/y6g5b/wiki/dict_variables</a>,
         here <code>short</code> (corresponding to the file name [<code>{short}.(csv|dic)</code>] and
-        wiki urls [<code>https://osf.io/y6g5b/wiki/{short}</code>]) is set as row names, and removed:
+        wiki urls [<code>https://osf.io/y6g5b/wiki/{short}</code>]) is set as row names and removed:
         
 <table summary="Rd table">
 <tr>
@@ -87,7 +87,7 @@ and compares it with that calculated from the downloaded file to check its integ
 </tr>
 <tr>
  <td style="text-align: left;">
-              <code>crowd</code> </td><td style="text-align: left;"> Several individuals rated the terms, and in aggregate, those ratings
+              <code>crowd</code> </td><td style="text-align: left;"> Several individuals rated the terms, and in aggregate those ratings
                 translate to categories and weights. </td>
 </tr>
 <tr>
@@ -157,7 +157,7 @@ and compares it with that calculated from the downloaded file to check its integ
 <table summary="Rd table">
 <tr>
  <td style="text-align: left;">
-              <code>glob</code> </td><td style="text-align: left;"> Include asterisks which denote acceptance of any characters until a
+              <code>glob</code> </td><td style="text-align: left;"> Include asterisks which denote inclusion of any characters until a
                 word boundary. </td>
 </tr>
 <tr>
@@ -203,7 +203,7 @@ and compares it with that calculated from the downloaded file to check its integ
  <td style="text-align: left;">
           <code>regex_characters</code> </td><td style="text-align: left;"> Logical indicating whether special regular expression
             characters are present in any term, which might need to be escaped if the terms are used
-            in regular expressions. Glob type terms allow complete parens (at least one open and one
+            in regular expressions. Glob-type terms allow complete parens (at least one open and one
             closed, indicating preceding or following words), and initial and terminal asterisks. For
             all other terms, <code>[](){}*.^$+?\|</code> are counted as regex characters. These could be
             escaped in R with <code>gsub('([][)(}{*.^$+?\\|])', '\\\1', terms)</code> if <code>terms</code>
@@ -275,7 +275,7 @@ and compares it with that calculated from the downloaded file to check its integ
 
 <pre>
 # just retrieve information about available dictionaries
-dicts = select.dict()
+dicts = select.dict()$info
 
 # select all dictionaries mentioning sentiment or emotion
 sentiment_dicts = select.dict('sentiment emotion')$selected

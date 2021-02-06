@@ -8,16 +8,16 @@ lma_weight(dtm, weight = "count", normalize = TRUE, wc.complete = TRUE,
   log.base = 10, alpha = 1, doc.only = FALSE, percent = FALSE)
 }
 \arguments{
-\item{dtm}{a matrix with words as column names.}
+\item{dtm}{A matrix with words as column names.}
 
-\item{weight}{a string referring at least partially to one (or a combination; see note) of the
+\item{weight}{A string referring at least partially to one (or a combination; see note) of the
   available weighting methods:
 
   \strong{Term weights} (applied uniquely to each cell)
   \tabular{lll}{
     \code{binary} \tab \code{(dtm > 0) * 1} \tab convert frequencies to 1s and 0s; remove
       differences in frequencies\cr
-    \code{log} \tab \code{log(dtm + 1)} \tab log of frequencies\cr
+    \code{log} \tab \code{log(dtm + 1, log.base)} \tab log of frequencies\cr
     \code{sqrt} \tab \code{sqrt(dtm)} \tab square root of frequencies\cr
     \code{count} \tab \code{dtm} \tab unaltered; sometimes called term frequencies (tf)\cr
     \code{amplify} \tab \code{dtm ^ alpha} \tab amplify difference in frequencies\cr
@@ -25,47 +25,46 @@ lma_weight(dtm, weight = "count", normalize = TRUE, wc.complete = TRUE,
 
   \strong{Document weights} (applied by column)
   \tabular{lll}{
-    \code{dflog} \tab \code{log(colSums(dtm > 0))} \tab log of binary term sum\cr
-    \code{entropy} \tab \code{1 - rowSums(x * log(x) / log(ncol(x)))} \tab where
-      \code{x = t(dtm) / colSums(dtm > 0)};
-      entropy of term-conditional term distribution\cr
+    \code{dflog} \tab \code{log(colSums(dtm > 0), log.base)} \tab log of binary term sum\cr
+    \code{entropy} \tab \code{1 - rowSums(x * log(x + 1, log.base) / log(ncol(x), log.base), na.rm = TRUE)}
+      \tab where \code{x = t(dtm) / colSums(dtm > 0)}; entropy of term-conditional term distribution\cr
     \code{ppois} \tab \code{1 - ppois(alpha, colSums(dtm) / nrow(dtm))} \tab Poisson-predicted
       term distribution\cr
     \code{dpois} \tab \code{1 - dpois(alpha, colSums(dtm) / nrow(dtm))} \tab Poisson-predicted
       term density\cr
-    \code{dfmlog} \tab \code{log(diag(x[max.col(t(x)),]))} \tab log of maximum term
+    \code{dfmlog} \tab \code{log(diag(dtm[max.col(t(dtm)),]), log.base)} \tab log of maximum term
       frequency\cr
-    \code{dfmax} \tab \code{diag(x[max.col(t(x)),])} \tab maximum term frequency\cr
+    \code{dfmax} \tab \code{diag(dtm[max.col(t(dtm)),])} \tab maximum term frequency\cr
     \code{df} \tab \code{colSums(dtm > 0)} \tab sum of binary term occurance across documents\cr
-    \code{idf} \tab \code{log(nrow(dtm) / colSums(dtm > 0))} \tab inverse document frequency\cr
-    \code{ridf} \tab \code{idf - log(poisson)} \tab residual inverse document frequency\cr
-    \code{normal} \tab \code{1 / colSums(dtm ^ 2) ^ .5} \tab normalized document frequency\cr
+    \code{idf} \tab \code{log(nrow(dtm) / colSums(dtm > 0), log.base)} \tab inverse document frequency\cr
+    \code{ridf} \tab \code{idf - log(dpois, log.base)} \tab residual inverse document frequency\cr
+    \code{normal} \tab \code{sqrt(1 / colSums(dtm ^ 2))} \tab normalized document frequency\cr
   }
 
 Alternatively, \code{'pmi'} or \code{'ppmi'} will apply a pointwise mutual information weighting
 scheme (with \code{'ppmi'} setting negative values to 0).}
 
-\item{normalize}{logical: if \code{FALSE}, the dtm is not divided by document word-count before
+\item{normalize}{Logical: if \code{FALSE}, the dtm is not divided by document word-count before
 being weighted.}
 
-\item{wc.complete}{if the dtm was made with \code{\link{lma_dtm}} (has a \code{'WC'}
+\item{wc.complete}{If the dtm was made with \code{\link{lma_dtm}} (has a \code{'WC'}
 attribute), word counts for
 frequencies can be based on the raw count (default; \code{wc.complete = TRUE}). If
 \code{wc.complete = FALSE}, or the dtm does not have a \code{'WC'} attribute,
 \code{rowSums(dtm)} is used as word count.}
 
-\item{log.base}{the base of logs, applied to any weight using \code{\link[base]{log}}.
+\item{log.base}{The base of logs, applied to any weight using \code{\link[base]{log}}.
 Default is 10.}
 
-\item{alpha}{a scaling factor applied to document frequency as part of pointwise mutual
+\item{alpha}{A scaling factor applied to document frequency as part of pointwise mutual
 information weighting, or amplify's power (\code{dtm ^ alpha}, which defaults to 1.1), or the
 specified quantile of the poisson distribution (\code{dpois(alpha,}
 \code{colSums(x, na.rm = TRUE) /} \code{nrow(x))}).}
 
-\item{doc.only}{logical: if \code{TRUE}, only document weights are returned (a single value for
+\item{doc.only}{Logical: if \code{TRUE}, only document weights are returned (a single value for
 each term).}
 
-\item{percent}{logical; if \code{TRUE}, frequencies are multiplied by 100.}
+\item{percent}{Logical; if \code{TRUE}, frequencies are multiplied by 100.}
 }
 \description{
 Weight a document-term matrix.
@@ -76,12 +75,12 @@ increasingly more from \code{binary} to \code{log} to \code{sqrt} to \code{count
 
 Document weights work to treat words differently based on their between-document or overall frequency.
 When term frequencies are constant, \code{dpois}, \code{idf}, \code{ridf}, and \code{normal} give
-less common words increasingly more weight, and \code{ppois}, \code{df}, \code{dflog}, and
-\code{entropy} give less common words increasingly less weight.
+less common words increasingly more weight, and \code{dfmax}, \code{dfmlog}, \code{ppois}, \code{df},
+\code{dflog}, and \code{entropy} give less common words increasingly less weight.
 
 \code{weight} can either be a vector with two characters, corresponding to term weight and
 document weight (e.g., \code{c('count', 'idf')}), or it can be a string with term and
-document weights separated by any of \code{\*} (e.g., \code{'count \* idf'}).
+document weights separated by any of \code{:\\*_/; ,-} (e.g., \code{'count-idf'}).
 \code{'tf'} is also acceptable for \code{'count'}, and \code{'tfidf'} will be parsed as
 \code{c('count', 'idf')}, though this is a special case.
 
