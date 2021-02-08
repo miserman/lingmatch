@@ -540,27 +540,33 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
           }
         }
       }else{
-        sal$mean=if('mean'%in%names(dsp$s)) dsp$s$mean else TRUE
-        if(sal$mean){
-          sim = vapply(seq_along(group[[1]]), function(i){
-            su = group[[1]] == group[[1]][i]
-            su[i] = FALSE
-            sal$b = input[i,]
-            r = if(sum(su) != 0) do.call(lma_simets, c(list(input[su,]), sal)) else
-              numeric(length(sal$metric)) + 1
-            if(is.null(dim(r))) r else if(nrow(r) == 1) as.numeric(r) else
-              if(ncol(r) != 1) colMeans(r, TRUE) else mean(r, na.rm = TRUE)
-          }, numeric(length(sal$metric)))
-          sim = data.frame(group[[1]], if(is.matrix(sim)) t(sim) else sim)
+        tomean = if('mean'%in%names(dsp$s)) dsp$s$mean else TRUE
+        ug = unique(group[[1]])
+        if(tomean){
+          sal$symmetrical = TRUE
+          ids = seq_along(group[[1]])
+          sim = data.frame(group[[1]], 1)
           colnames(sim) = c(opt$group, sal$metric)
+          for(g in ug){
+            su = group[[1]] == g
+            ssu = sum(su)
+            if(ssu != 1){
+              gsim = do.call(lma_simets, c(list(input[su,]), sal))
+              sim[su, -1] = if(length(sal$metric) == 1){
+                (colSums(gsim) - 1) / (ssu - 1)
+              }else{
+                vapply(sal$metic, function(i) (colSums(gsim[[sal$metic[i]]]) - 1) / (ssu - 1), 0)
+              }
+            }
+          }
         }else{
-          sal$symmetrical=if('symmetrical'%in%names(dsp$s)) dsp$s$symmetrical else FALSE
-          sim=lapply(ug<-unique(group[[1]]),function(g){
-            su=group[[1]]==g
-            if(sum(su)!=1) do.call(lma_simets,c(list(input[su,]),sal)) else
+          sal$symmetrical = if('symmetrical'%in%names(dsp$s)) dsp$s$symmetrical else FALSE
+          sim = lapply(ug, function(g){
+            su = group[[1]] == g
+            if(sum(su) != 1) do.call(lma_simets, c(list(input[su,]), sal)) else
               numeric(length(sal$metric)) + 1
           })
-          names(sim)=ug
+          names(sim) = ug
         }
       }
     }else if(gl>1){
