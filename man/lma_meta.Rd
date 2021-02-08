@@ -10,40 +10,41 @@ lma_meta(text)
 \item{text}{A character vector of texts.}
 }
 \value{
-A data.frame: \tabular{ll}{
-  \code{characters} \tab Total number of characters.\cr
-  \code{syllables} \tab Total number of syllables, as estimated by split length of
-    \code{'a+[eu]*|e+a*|i+|o+[ui]*|u+|y+[aeiou]*'} - 1.\cr
-  \code{words} \tab Total number of words (raw word count).\cr
-  \code{unique_words} \tab Number of unique words (binary word count).\cr
-  \code{clauses} \tab Number of clauses, as marked by commas, colons, semicolons, dashes, or brackets
-    within sentences.\cr
-  \code{sentences} \tab Number of sentences, as marked by periods, question marks, exclamation points,
-    or new line characters.\cr
-  \code{words_per_clause} \tab Average number of words per clause.\cr
-  \code{words_per_sentence} \tab Average number of words per sentence.\cr
-  \code{sixltr} \tab Number of words 6 or more characters long.\cr
-  \code{characters_per_word} \tab Average number of characters per word
-    (\code{characters} / \code{words}).\cr
-  \code{syllables_per_word} \tab Average number of syllables per word
-    (\code{syllables} / \code{words}).\cr
-  \code{type_token_ratio} \tab Ratio of unique to total words: \code{unique_words} / \code{words}.\cr
-  \code{reading_grade} \tab Flesch-Kincaid grade level: .39 * \code{words} / \code{sentences} +
-    11.8 * \code{syllables} / \code{words} - 15.59.\cr
-  \code{numbers} \tab Number of terms starting with numbers. \cr
-  \code{punct} \tab Number of terms starting with non-alphanumeric characters.\cr
-  \code{periods} \tab Number of periods.\cr
-  \code{commas} \tab Number of commas.\cr
-  \code{qmarks} \tab Number of question marks.\cr
-  \code{exclams} \tab Number of exclamation points.\cr
-  \code{quotes} \tab Number of quotation marks (single and double).\cr
-  \code{apostrophes} \tab Number of apostrophes, defined as any modified letter apostrophe, or backtick
-    or single straight or curly quote surrounded by letters.\cr
-  \code{brackets} \tab Number of bracketing characters (including parentheses, and square,
-    curly, and angle brackets).\cr
-  \code{orgmarks} \tab Number of characters used for organization or structuring (including
-    dashes, foreword slashes, colons, and semicolons).
-}
+A data.frame:
+  \itemize{
+    \item \strong{\code{characters}}: Total number of characters.
+    \item \strong{\code{syllables}}: Total number of syllables, as estimated by split length of \cr
+      \code{'a+[eu]*|e+a*|i+|o+[ui]*|u+|y+[aeiou]*'} - 1.
+    \item \strong{\code{words}}: Total number of words (raw word count).
+    \item \strong{\code{unique_words}}: Number of unique words (binary word count).
+    \item \strong{\code{clauses}}: Number of clauses, as marked by commas, colons, semicolons, dashes, or brackets
+      within sentences.
+    \item \strong{\code{sentences}}: Number of sentences, as marked by periods, question marks, exclamation points,
+      or new line characters.
+    \item \strong{\code{words_per_clause}}: Average number of words per clause.
+    \item \strong{\code{words_per_sentence}}: Average number of words per sentence.
+    \item \strong{\code{sixltr}}: Number of words 6 or more characters long.
+    \item \strong{\code{characters_per_word}}: Average number of characters per word
+      (\code{characters} / \code{words}).
+    \item \strong{\code{syllables_per_word}}: Average number of syllables per word
+      (\code{syllables} / \code{words}).
+    \item \strong{\code{type_token_ratio}}: Ratio of unique to total words: \code{unique_words} / \code{words}.
+    \item \strong{\code{reading_grade}}: Flesch-Kincaid grade level: .39 * \code{words} / \code{sentences} +
+      11.8 * \code{syllables} / \code{words} - 15.59.
+    \item \strong{\code{numbers}}: Number of terms starting with numbers.
+    \item \strong{\code{punct}}: Number of terms starting with non-alphanumeric characters.
+    \item \strong{\code{periods}}: Number of periods.
+    \item \strong{\code{commas}}: Number of commas.
+    \item \strong{\code{qmarks}}: Number of question marks.
+    \item \strong{\code{exclams}}: Number of exclamation points.
+    \item \strong{\code{quotes}}: Number of quotation marks (single and double).
+    \item \strong{\code{apostrophes}}: Number of apostrophes, defined as any modified letter apostrophe, or backtick
+      or single straight or curly quote surrounded by letters.
+    \item \strong{\code{brackets}}: Number of bracketing characters (including parentheses, and square,
+      curly, and angle brackets).
+    \item \strong{\code{orgmarks}}: Number of characters used for organization or structuring (including
+      dashes, foreword slashes, colons, and semicolons).
+  }
 }
 \description{
 Calculate simple descriptive statistics from text.

@@ -45,8 +45,7 @@ in chunks. Reduce from 20000 if you get a PCRE compilation error.}
 terms will be converted to match the terms if they are single-cased. Set to \code{FALSE} to
 always keep dictionary terms as entered.}
 
-\item{dir}{Path to a folder in which to look for \code{dict}; defaults to
-\code{getOption('lingmatch.dict.dir')}.}
+\item{dir}{Path to a folder in which to look for \code{dict}; \cr defaults to \code{getOption('lingmatch.dict.dir')}.}
 }
 \description{
 Reduces the dimensions of a document-term matrix by dictionary-based categorization.
@@ -66,9 +65,15 @@ text = c(
     'We are outraged by their hateful brutality,',
     'and by the way they terrorize us with their hatred.'
   ),
-  fearful = 'The horrific torture of that terrorist was tantamount to the terrorism of terrorists.',
+  fearful = paste(
+    'The horrific torture of that terrorist was tantamount',
+    'to the terrorism of terrorists.'
+  ),
   joyous = 'I am jubilant to be celebrating the bliss of this happiest happiness.',
-  sad = 'They are nearly suicidal in their mourning after the tragic and heartbreaking holocaust.'
+  sad = paste(
+    'They are nearly suicidal in their mourning after',
+    'the tragic and heartbreaking holocaust.'
+  )
 )
 
 emotion_scores = lma_termcat(text, dict)

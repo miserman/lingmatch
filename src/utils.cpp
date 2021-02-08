@@ -180,9 +180,11 @@ struct Compare : public Worker{
       }
       ma = sa / ncol;
       mb = sb / ncol;
-      if(si && metrics[0]) jaccard[p] = sj / si;
+      if(si){
+        if(metrics[0]) jaccard[p] = sj / si;
+        if(metrics[2]) canberra[p] = 1 - sne / ncol;
+      }
       if(metrics[1]) euclidean[p] = 1 / (1 + sqrt(sse));
-      if(metrics[2]) canberra[p] = 1 - sne / ncol;
       if(sa && sb){
         if(metrics[3] && asq && bsq) cosine[p] = cp / sqrt(asq) / sqrt(bsq);
         if(metrics[4]){

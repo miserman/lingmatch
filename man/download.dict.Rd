@@ -17,8 +17,7 @@ and compares it with that calculated from the downloaded file to check its integ
 \item{mode}{A character specifying the file write mode; default is 'wb'. See
 \code{\link{download.file}}.}
 
-\item{dir}{Directory in which to save the dictionary; default is
-\code{getOption('lingmatch.dict.dir')}.}
+\item{dir}{Directory in which to save the dictionary; \cr default is \code{getOption('lingmatch.dict.dir')}.}
 }
 \value{
 Path to the downloaded dictionary, or a list of such if multiple were downloaded.

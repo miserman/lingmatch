@@ -10,7 +10,7 @@ standardize.lspace(infile, name, sep = " ", digits = 9,
   verbose = FALSE)
 }
 \arguments{
-\item{infile}{Name of the .rda or plain-text file relative to \code{dir},
+\item{infile}{Name of the .rda or plain-text file relative to \code{dir}, \cr
 e.g., "default.rda" or "glove/glove.6B.300d.txt".}
 
 \item{name}{Base name of the reformatted file and term file; e.g., "glove" would result in
@@ -21,11 +21,11 @@ Only applies to plain-text files.}
 
 \item{digits}{Number of digits to round values to; default is 9.}
 
-\item{dir}{Path to folder containing \code{infile}s; default is \code{getOption('lingmatch.lspace.dir')}.}
+\item{dir}{Path to folder containing \code{infile}s; \cr default is \code{getOption('lingmatch.lspace.dir')}.}
 
 \item{outdir}{Path to folder in which to save standardized files; default is \code{dir}.}
 
-\item{remove}{A string with a regex pattern to be removed from term names (i.e., \code{gsub(}\code{remove,}
+\item{remove}{A string with a regex pattern to be removed from term names \cr (i.e., \code{gsub(remove,}
 \code{"", term)}); default is \code{""}, which is ignored.}
 
 \item{term_check}{A string with a regex pattern by which to filter terms; i.e., only lines with fully

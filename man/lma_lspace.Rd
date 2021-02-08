@@ -45,8 +45,8 @@ dimensions as columns is returned.}
 
 \item{use.scan}{Logical: if \code{TRUE}, reads in the rows of \code{space} with \code{\link{scan}}.}
 
-\item{dir}{Path to a folder containing spaces. Default is \code{getOption('lingmatch.lspace.dir')};
-change with \code{options(lingmatch.lspace.dir} \code{= 'desired/path')}.}
+\item{dir}{Path to a folder containing spaces. \cr Default is \code{getOption('lingmatch.lspace.dir')}; \cr
+change with \code{options(lingmatch.lspace.dir = 'desired/path')}.}
 }
 \description{
 Map a document-term matrix onto a latent semantic space, extract terms from a

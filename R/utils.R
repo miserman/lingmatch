@@ -49,7 +49,7 @@ lma_process = function(input = NULL, ..., meta = TRUE){
     op = if(length(arg_matches$read.segments) || ck_paths){
       an = names(arg_matches$read.segments)
       if(!any(grepl('path|text', an))) arg_matches$read.segments$path = input
-      do.call(read.segments, arg_matches$read.segments)
+      do.call(read.segments, lapply(arg_matches$read.segments, eval.parent, 2))
     }else data.frame(
       text = if(length(input) == 1 && file.exists(input)) readLines(input) else input
     )
@@ -66,17 +66,17 @@ lma_process = function(input = NULL, ..., meta = TRUE){
       if(!'return.dtm' %in% names(arg_matches$lma_patcat) && length(arg_matches$lma_weight))
         arg_matches$lma_patcat$return.dtm = TRUE
       arg_matches$lma_patcat$text = op[, 'text']
-      x = do.call(lma_patcat, arg_matches$lma_patcat)
+      x = do.call(lma_patcat, lapply(arg_matches$lma_patcat, eval.parent, 2))
       ck_changed = TRUE
     }else{
       arg_matches$lma_dtm$text = op[, 'text']
-      x = do.call(lma_dtm, arg_matches$lma_dtm)
+      x = do.call(lma_dtm, lapply(arg_matches$lma_dtm, eval.parent, 2))
       ck_changed = TRUE
     }
   }else x = op
   if(length(arg_matches$lma_weight)){
     arg_matches$lma_weight$dtm = x
-    x = do.call(lma_weight, arg_matches$lma_weight)
+    x = do.call(lma_weight, lapply(arg_matches$lma_weight, eval.parent, 2))
     attr(x, 'categories') = attr(arg_matches$lma_weight$dtm, 'categories')
     ck_changed = TRUE
   }
@@ -88,13 +88,13 @@ lma_process = function(input = NULL, ..., meta = TRUE){
     ck_changed = TRUE
   }else if(length(arg_matches$lma_termcat)){
     arg_matches$lma_termcat$dtm = x
-    x = do.call(lma_termcat, arg_matches$lma_termcat)
+    x = do.call(lma_termcat, lapply(arg_matches$lma_termcat, eval.parent, 2))
     ck_changed = TRUE
   }
   if(length(arg_matches$lma_lspace)){
     nr = NROW(x)
     arg_matches$lma_lspace$dtm = x
-    x = do.call(lma_lspace, arg_matches$lma_lspace)
+    x = do.call(lma_lspace, lapply(arg_matches$lma_lspace, eval.parent, 2))
     colnames(x) = paste0('dim', seq_len(ncol(x)))
     if(nrow(x) != nr) return(x)
     ck_changed = TRUE
@@ -568,31 +568,30 @@ read.segments = function(path = '.', segment = NULL, ext = '.txt', subdir = FALS
 #'   and compares it with that calculated from the downloaded file to check its integrity.
 #' @param mode Passed to \code{\link{download.file}} when downloading the term map.
 #' @return A list with varying entries:
-#'   \tabular{ll}{
-#'     info \tab The version of \href{https://osf.io/9yzca}{osf.io/9yzca} stored internally; a
+#'   \itemize{
+#'     \item \strong{\code{info}}: The version of \href{https://osf.io/9yzca}{osf.io/9yzca} stored internally; a
 #'       \code{data.frame}  with spaces as row names, and information about each space in columns:
-#'         \tabular{ll}{
-#'           \code{terms} \tab number of terms in the space \cr
-#'           \code{corpus} \tab corpus(es) on which the space was trained \cr
-#'           \code{model} \tab model from which the space was trained \cr
-#'           \code{dimensions} \tab number of dimensions in the model (columns of the space) \cr
-#'           \code{model_info} \tab some parameter details about the model \cr
-#'           \code{original_max} \tab maximum value used to normalize the space; the original
-#'             space would be \code{(vectors *} \code{original_max) /} \code{100} \cr
-#'           \code{osf_dat} \tab OSF id for the \code{.dat} files; the URL would be
-#'             https://osf.io/\code{osf_dat} \cr
-#'           \code{osf_terms} \tab OSF id for the \code{_terms.txt} files; the URL would be
-#'             https://osf.io/\code{osf_terms} \cr
-#'           \code{wiki} \tab link to the wiki for the space \cr
-#'           \code{downloaded} \tab path to the \code{.dat} file if downloaded,
-#'             and \code{''} otherwise. \cr
+#'         \itemize{
+#'           \item \strong{\code{terms}}: number of terms in the space
+#'           \item \strong{\code{corpus}}: corpus(es) on which the space was trained
+#'           \item \strong{\code{model}}: model from which the space was trained
+#'           \item \strong{\code{dimensions}}: number of dimensions in the model (columns of the space)
+#'           \item \strong{\code{model_info}}: some parameter details about the model
+#'           \item \strong{\code{original_max}}: maximum value used to normalize the space; the original
+#'             space would be \code{(vectors *} \code{original_max) /} \code{100}
+#'           \item \strong{\code{osf_dat}}: OSF id for the \code{.dat} files; the URL would be
+#'             https://osf.io/\code{osf_dat}
+#'           \item \strong{\code{osf_terms}}: OSF id for the \code{_terms.txt} files; the URL would be
+#'             https://osf.io/\code{osf_terms}
+#'           \item \strong{\code{wiki}}: link to the wiki for the space
+#'           \item \strong{\code{downloaded}}: path to the \code{.dat} file if downloaded,
+#'             and \code{''} otherwise.
 #'         }
-#'       \cr
-#'     selected \tab A subset of \code{info} selected by \code{query}. \cr
-#'     term_map \tab If \code{get.map} is \code{TRUE} or \code{lma_term_map.rda} is found in
+#'     \item \strong{\code{selected}}: A subset of \code{info} selected by \code{query}.
+#'     \item \strong{\code{term_map}}: If \code{get.map} is \code{TRUE} or \code{lma_term_map.rda} is found in
 #'       \code{dir}, a copy of \href{https://osf.io/xr7jv}{osf.io/xr7jv}, which has space names as
 #'       column names, terms as row names, and indices as values, with 0 indicating the term is not
-#'       present in the associated space. \cr
+#'       present in the associated space.
 #'   }
 #' @family Latent Semantic Space functions
 #' @examples
@@ -679,13 +678,14 @@ select.lspace = function(query = NULL, dir = getOption('lingmatch.lspace.dir'),
 #' @param include.terms Logical; if \code{FALSE}, only the \code{.dat.bz2} file is downloaded
 #'  (which only has numeric vectors).
 #' @param decompress Logical; if \code{TRUE} (default), decompresses the downloaded file
-#'  with the \code{bunzip2} system command assuming it is available (as indicated by
+#'  with the \code{bunzip2} system command assuming it is available \cr (as indicated by
 #'  \code{Sys.which('bunzip2')}).
 #' @param check.md5 Logical; if \code{TRUE} (default), retrieves the MD5 checksum from OSF,
 #'  and compares it with that calculated from the downloaded file to check its integrity.
 #' @param mode A character specifying the file write mode; default is 'wb'. See
 #'  \code{\link{download.file}}.
-#' @param dir Directory in which to save the space; default is
+#'  \code{\link{download.file}}.
+#' @param dir Directory in which to save the space; \cr default is
 #'  \code{getOption('lingmatch.lspace.dir')}.
 #' @family Latent Semantic Space functions
 #' @return A character vector with paths to the [1] data and [2] term files.
@@ -770,59 +770,59 @@ download.lspace = function(space = '100k', include.terms = TRUE, decompress = TR
 #'   and compares it with that calculated from the downloaded file to check its integrity.
 #' @param mode Passed to \code{\link{download.file}} when downloading files.
 #' @return A list with varying entries:
-#'   \tabular{ll}{
-#'     info \tab The version of \href{https://osf.io/kjqb8}{osf.io/kjqb8} stored internally; a
-#'       \code{data.frame}  with dictionary names as row names, and information about each dictionary in columns.
+#'   \itemize{
+#'     \item \strong{\code{info}}: The version of \href{https://osf.io/kjqb8}{osf.io/kjqb8} stored internally; a
+#'       \code{data.frame}  with dictionary names as row names, and information about each dictionary in columns. \cr
 #'         Also described at
 #'         \href{https://osf.io/y6g5b/wiki/dict_variables}{osf.io/y6g5b/wiki/dict_variables},
 #'         here \code{short} (corresponding to the file name [\code{{short}.(csv|dic)}] and
 #'         wiki urls [\code{https://osf.io/y6g5b/wiki/{short}}]) is set as row names and removed:
-#'         \tabular{ll}{
-#'           \code{name} \tab Full name of the dictionary. \cr
-#'           \code{description} \tab Description of the dictionary, relating to its purpose and
-#'             development. \cr
-#'           \code{note} \tab Notes about processing decisions that additionally alter the original. \cr
-#'           \code{constructor} \tab How the dictionary was constructed:
-#'             \tabular{ll}{
-#'               \code{algorithm} \tab Terms were selected by some automated process, potentially
-#'                 learned from data or other resources. \cr
-#'               \code{crowd} \tab Several individuals rated the terms, and in aggregate those ratings
-#'                 translate to categories and weights. \cr
-#'               \code{mixed} \tab Some combination of the other methods, usually in some iterative
-#'                 process. \cr
-#'               \code{team} \tab One of more individuals make decisions about term inclusions,
-#'                 categories, and weights. \cr
-#'             } \cr
-#'           \code{subject} \tab Broad, rough subject or purpose of the dictionary:
-#'             \tabular{ll}{
-#'               \code{emotion} \tab Terms relate to emotions, potentially exemplifying or expressing
-#'                 them. \cr
-#'               \code{general} \tab A large range of categories, aiming to capture the content of the
-#'                 text. \cr
-#'               \code{impression} \tab Terms are categorized and weighted based on the impression they
-#'                 might give. \cr
-#'               \code{language} \tab Terms are categorized or weighted based on their linguistic
-#'                 features, such as part of speech, specificity, or area of use. \cr
-#'               \code{social} \tab Terms relate to social phenomena, such as characteristics or concerns
-#'                 of social entities. \cr
-#'             } \cr
-#'           \code{terms} \tab Number of unique terms across categories. \cr
-#'           \code{term_type} \tab Format of the terms:
-#'             \tabular{ll}{
-#'               \code{glob} \tab Include asterisks which denote inclusion of any characters until a
-#'                 word boundary. \cr
-#'               \code{glob+} \tab Glob-style asterisks with regular expressions within terms. \cr
-#'               \code{ngram} \tab Includes any number of words as a term, separated by spaces. \cr
-#'               \code{pattern} \tab A string of characters, potentially within or between words, or
-#'                 spanning words. \cr
-#'               \code{regex} \tab Regular expressions. \cr
-#'               \code{stem} \tab Unigrams with common endings removed. \cr
-#'               \code{unigram} \tab Complete single words. \cr
-#'             } \cr
-#'           \code{weighted} \tab Indicates whether weights are associated with terms. This
+#'         \itemize{
+#'           \item \strong{\code{name}}: Full name of the dictionary.
+#'           \item \strong{\code{description}}: Description of the dictionary, relating to its purpose and
+#'             development.
+#'           \item \strong{\code{note}}: Notes about processing decisions that additionally alter the original.
+#'           \item \strong{\code{constructor}}: How the dictionary was constructed:
+#'             \itemize{
+#'               \item \strong{\code{algorithm}}: Terms were selected by some automated process, potentially
+#'                 learned from data or other resources.
+#'               \item \strong{\code{crowd}}: Several individuals rated the terms, and in aggregate those ratings
+#'                 translate to categories and weights.
+#'               \item \strong{\code{mixed}}: Some combination of the other methods, usually in some iterative
+#'                 process.
+#'               \item \strong{\code{team}}: One of more individuals make decisions about term inclusions,
+#'                 categories, and weights.
+#'             }
+#'           \item \strong{\code{subject}}: Broad, rough subject or purpose of the dictionary:
+#'             \itemize{
+#'               \item \strong{\code{emotion}}: Terms relate to emotions, potentially exemplifying or expressing
+#'                 them.
+#'               \item \strong{\code{general}}: A large range of categories, aiming to capture the content of the
+#'                 text.
+#'               \item \strong{\code{impression}}: Terms are categorized and weighted based on the impression they
+#'                 might give.
+#'               \item \strong{\code{language}}: Terms are categorized or weighted based on their linguistic
+#'                 features, such as part of speech, specificity, or area of use.
+#'               \item \strong{\code{social}}: Terms relate to social phenomena, such as characteristics or concerns
+#'                 of social entities.
+#'             }
+#'           \item \strong{\code{terms}}: Number of unique terms across categories.
+#'           \item \strong{\code{term_type}}: Format of the terms:
+#'             \itemize{
+#'               \item \strong{\code{glob}}: Include asterisks which denote inclusion of any characters until a
+#'                 word boundary.
+#'               \item \strong{\code{glob+}}: Glob-style asterisks with regular expressions within terms.
+#'               \item \strong{\code{ngram}}: Includes any number of words as a term, separated by spaces.
+#'               \item \strong{\code{pattern}}: A string of characters, potentially within or between words, or
+#'                 spanning words.
+#'               \item \strong{\code{regex}}: Regular expressions.
+#'               \item \strong{\code{stem}}: Unigrams with common endings removed.
+#'               \item \strong{\code{unigram}}: Complete single words.
+#'             }
+#'           \item \strong{\code{weighted}}: Indicates whether weights are associated with terms. This
 #'             determines the file type of the dictionary: dictionaries with weights are stored
-#'             as .csv, and those without are stored as .dic files. \cr
-#'           \code{regex_characters} \tab Logical indicating whether special regular expression
+#'             as .csv, and those without are stored as .dic files.
+#'           \item \strong{\code{regex_characters}}: Logical indicating whether special regular expression
 #'             characters are present in any term, which might need to be escaped if the terms are used
 #'             in regular expressions. Glob-type terms allow complete parens (at least one open and one
 #'             closed, indicating preceding or following words), and initial and terminal asterisks. For
@@ -830,20 +830,19 @@ download.lspace = function(space = '100k', include.terms = TRUE, decompress = TR
 #'             escaped in R with \code{gsub('([][)(}{*.^$+?\\\\|])', '\\\\\\1', terms)} if \code{terms}
 #'             is a character vector, and in Python with (importing re)
 #'             \code{[re.sub(r'([][(){}*.^$+?\|])', r'\\\1', term) for term in terms]} if \code{terms}
-#'             is a list. \cr
-#'           \code{categories} \tab Category names in the order in which they appear in the dictionary
-#'             file, separated by commas. \cr
-#'           \code{ncategories} \tab Number of categories.\cr
-#'           \code{original_max} \tab Maximum value of the original dictionary before standardization:
+#'             is a list.
+#'           \item \strong{\code{categories}}: Category names in the order in which they appear in the dictionary
+#'             file, separated by commas.
+#'           \item \strong{\code{ncategories}}: Number of categories.
+#'           \item \strong{\code{original_max}}: Maximum value of the original dictionary before standardization:
 #'             \code{original values / max(original values) * 100}. Dictionaries with no weights are
-#'             considered to have a max of \code{1}. \cr
-#'           \code{osf} \tab ID of the file on OSF, translating to the file's URL:
-#'             https://osf.io/\code{osf} \cr
-#'           \code{wiki} \tab URL of the dictionary's wiki. \cr
-#'           \code{downloaded} \tab Path to the file if downloaded, and \code{''} otherwise. \cr
+#'             considered to have a max of \code{1}.
+#'           \item \strong{\code{osf}}: ID of the file on OSF, translating to the file's URL:
+#'             https://osf.io/\code{osf}.
+#'           \item \strong{\code{wiki}}: URL of the dictionary's wiki.
+#'           \item \strong{\code{downloaded}}: Path to the file if downloaded, and \code{''} otherwise.
 #'         }
-#'       \cr
-#'     selected \tab A subset of \code{info} selected by \code{query}. \cr
+#'     \item \strong{\code{selected}}: A subset of \code{info} selected by \code{query}.
 #'   }
 #' @family Dictionary functions
 #' @examples
@@ -885,8 +884,7 @@ select.dict = function(query = NULL, dir = getOption('lingmatch.dict.dir'),
 #'  and compares it with that calculated from the downloaded file to check its integrity.
 #' @param mode A character specifying the file write mode; default is 'wb'. See
 #'  \code{\link{download.file}}.
-#' @param dir Directory in which to save the dictionary; default is
-#'  \code{getOption('lingmatch.dict.dir')}.
+#' @param dir Directory in which to save the dictionary; \cr default is \code{getOption('lingmatch.dict.dir')}.
 #' @return Path to the downloaded dictionary, or a list of such if multiple were downloaded.
 #' @family Dictionary functions
 #' @examples
@@ -947,16 +945,16 @@ download.dict = function(dict = 'lusi', check.md5 = TRUE, mode = 'wb', dir = get
 #' which has a term at the start of each line, and consistent delimiting characters. Plain-text files
 #' are processed line-by-line, so large spaces can be reformatted RAM-conservatively.
 #'
-#' @param infile Name of the .rda or plain-text file relative to \code{dir},
+#' @param infile Name of the .rda or plain-text file relative to \code{dir}, \cr
 #'   e.g., "default.rda" or "glove/glove.6B.300d.txt".
 #' @param name Base name of the reformatted file and term file; e.g., "glove" would result in
 #'   \code{glove.dat} and \code{glove_terms.txt} in \code{outdir}.
 #' @param sep Delimiting character between values in each line, e.g., \code{" "} or \code{"\\t"}.
 #'   Only applies to plain-text files.
 #' @param digits Number of digits to round values to; default is 9.
-#' @param dir Path to folder containing \code{infile}s; default is \code{getOption('lingmatch.lspace.dir')}.
+#' @param dir Path to folder containing \code{infile}s; \cr default is \code{getOption('lingmatch.lspace.dir')}.
 #' @param outdir Path to folder in which to save standardized files; default is \code{dir}.
-#' @param remove A string with a regex pattern to be removed from term names (i.e., \code{gsub(}\code{remove,}
+#' @param remove A string with a regex pattern to be removed from term names \cr (i.e., \code{gsub(remove,}
 #'   \code{"", term)}); default is \code{""}, which is ignored.
 #' @param term_check A string with a regex pattern by which to filter terms; i.e., only lines with fully
 #'   matched terms are written to the reformatted file. The default attempts to retain only regular words, including
@@ -1009,8 +1007,6 @@ standardize.lspace = function(infile, name, sep = ' ', digits = 9, dir = getOpti
   message('created ', op, '.dat\nfrom ', ip)
 }
 
-
-
 #' Categorize Texts
 #'
 #' Categorize raw texts using a pattern-based dictionary.
@@ -1038,12 +1034,13 @@ standardize.lspace = function(infile, name, sep = ' ', digits = 9, dir = getOpti
 #' @param globtoregex Logical; if \code{TRUE}, initial and terminal asterisks are replaced with \code{\\\\b\\\\w`*`}
 #'   and \code{\\\\w`*`\\\\b} respectively. This will also set \code{fixed} to \code{FALSE} unless fixed is specified.
 #' @param name.map A named character vector:
-#'   \tabular{ll}{
-#'     \code{intname} \tab term identifying category biases within the term list; defaults to \code{'_intercept'} \cr
-#'     \code{term} \tab name of the column containing terms in \code{dict}; defaults to \code{'term'} \cr
+#'   \itemize{
+#'     \item \strong{\code{intname}}: term identifying category biases within the term list;
+#'       defaults to \code{'_intercept'}
+#'     \item \strong{\code{term}}: name of the column containing terms in \code{dict}; defaults to \code{'term'}
 #'   }
-#'   Missing names are added, so names can be specified positional (e.g., \code{c('_int', 'terms')}),
-#'   or only some can be specified by name (e.g., \code{c(term = 'patterns')}), leaving the rest default.
+#'   Missing names are added, so names can be specified positional (e.g., \code{c('_int',} \code{'terms')}),
+#'   or only some can be specified by name (e.g., \code{c(term =} \code{'patterns')}), leaving the rest default.
 #' @param dir Path to a folder in which to look for \code{dict} if it is the name of a file to be passed to
 #'   \code{\link{read.dic}}.
 #' @seealso For applying term-based dictionaries (to a document-term matrix) see \code{\link{lma_termcat}}.
@@ -1285,40 +1282,41 @@ lma_patcat = function(text, dict = NULL, pattern.weights = 'weight', pattern.cat
 #' Calculate simple descriptive statistics from text.
 #'
 #' @param text A character vector of texts.
-#' @return A data.frame: \tabular{ll}{
-#'   \code{characters} \tab Total number of characters.\cr
-#'   \code{syllables} \tab Total number of syllables, as estimated by split length of
-#'     \code{'a+[eu]*|e+a*|i+|o+[ui]*|u+|y+[aeiou]*'} - 1.\cr
-#'   \code{words} \tab Total number of words (raw word count).\cr
-#'   \code{unique_words} \tab Number of unique words (binary word count).\cr
-#'   \code{clauses} \tab Number of clauses, as marked by commas, colons, semicolons, dashes, or brackets
-#'     within sentences.\cr
-#'   \code{sentences} \tab Number of sentences, as marked by periods, question marks, exclamation points,
-#'     or new line characters.\cr
-#'   \code{words_per_clause} \tab Average number of words per clause.\cr
-#'   \code{words_per_sentence} \tab Average number of words per sentence.\cr
-#'   \code{sixltr} \tab Number of words 6 or more characters long.\cr
-#'   \code{characters_per_word} \tab Average number of characters per word
-#'     (\code{characters} / \code{words}).\cr
-#'   \code{syllables_per_word} \tab Average number of syllables per word
-#'     (\code{syllables} / \code{words}).\cr
-#'   \code{type_token_ratio} \tab Ratio of unique to total words: \code{unique_words} / \code{words}.\cr
-#'   \code{reading_grade} \tab Flesch-Kincaid grade level: .39 * \code{words} / \code{sentences} +
-#'     11.8 * \code{syllables} / \code{words} - 15.59.\cr
-#'   \code{numbers} \tab Number of terms starting with numbers. \cr
-#'   \code{punct} \tab Number of terms starting with non-alphanumeric characters.\cr
-#'   \code{periods} \tab Number of periods.\cr
-#'   \code{commas} \tab Number of commas.\cr
-#'   \code{qmarks} \tab Number of question marks.\cr
-#'   \code{exclams} \tab Number of exclamation points.\cr
-#'   \code{quotes} \tab Number of quotation marks (single and double).\cr
-#'   \code{apostrophes} \tab Number of apostrophes, defined as any modified letter apostrophe, or backtick
-#'     or single straight or curly quote surrounded by letters.\cr
-#'   \code{brackets} \tab Number of bracketing characters (including parentheses, and square,
-#'     curly, and angle brackets).\cr
-#'   \code{orgmarks} \tab Number of characters used for organization or structuring (including
-#'     dashes, foreword slashes, colons, and semicolons).
-#' }
+#' @return A data.frame:
+#'   \itemize{
+#'     \item \strong{\code{characters}}: Total number of characters.
+#'     \item \strong{\code{syllables}}: Total number of syllables, as estimated by split length of \cr
+#'       \code{'a+[eu]*|e+a*|i+|o+[ui]*|u+|y+[aeiou]*'} - 1.
+#'     \item \strong{\code{words}}: Total number of words (raw word count).
+#'     \item \strong{\code{unique_words}}: Number of unique words (binary word count).
+#'     \item \strong{\code{clauses}}: Number of clauses, as marked by commas, colons, semicolons, dashes, or brackets
+#'       within sentences.
+#'     \item \strong{\code{sentences}}: Number of sentences, as marked by periods, question marks, exclamation points,
+#'       or new line characters.
+#'     \item \strong{\code{words_per_clause}}: Average number of words per clause.
+#'     \item \strong{\code{words_per_sentence}}: Average number of words per sentence.
+#'     \item \strong{\code{sixltr}}: Number of words 6 or more characters long.
+#'     \item \strong{\code{characters_per_word}}: Average number of characters per word
+#'       (\code{characters} / \code{words}).
+#'     \item \strong{\code{syllables_per_word}}: Average number of syllables per word
+#'       (\code{syllables} / \code{words}).
+#'     \item \strong{\code{type_token_ratio}}: Ratio of unique to total words: \code{unique_words} / \code{words}.
+#'     \item \strong{\code{reading_grade}}: Flesch-Kincaid grade level: .39 * \code{words} / \code{sentences} +
+#'       11.8 * \code{syllables} / \code{words} - 15.59.
+#'     \item \strong{\code{numbers}}: Number of terms starting with numbers.
+#'     \item \strong{\code{punct}}: Number of terms starting with non-alphanumeric characters.
+#'     \item \strong{\code{periods}}: Number of periods.
+#'     \item \strong{\code{commas}}: Number of commas.
+#'     \item \strong{\code{qmarks}}: Number of question marks.
+#'     \item \strong{\code{exclams}}: Number of exclamation points.
+#'     \item \strong{\code{quotes}}: Number of quotation marks (single and double).
+#'     \item \strong{\code{apostrophes}}: Number of apostrophes, defined as any modified letter apostrophe, or backtick
+#'       or single straight or curly quote surrounded by letters.
+#'     \item \strong{\code{brackets}}: Number of bracketing characters (including parentheses, and square,
+#'       curly, and angle brackets).
+#'     \item \strong{\code{orgmarks}}: Number of characters used for organization or structuring (including
+#'       dashes, foreword slashes, colons, and semicolons).
+#'   }
 #'
 #' @export
 

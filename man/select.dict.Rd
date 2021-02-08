@@ -20,59 +20,59 @@ and compares it with that calculated from the downloaded file to check its integ
 }
 \value{
 A list with varying entries:
-  \tabular{ll}{
-    info \tab The version of \href{https://osf.io/kjqb8}{osf.io/kjqb8} stored internally; a
-      \code{data.frame}  with dictionary names as row names, and information about each dictionary in columns.
+  \itemize{
+    \item \strong{\code{info}}: The version of \href{https://osf.io/kjqb8}{osf.io/kjqb8} stored internally; a
+      \code{data.frame}  with dictionary names as row names, and information about each dictionary in columns. \cr
         Also described at
         \href{https://osf.io/y6g5b/wiki/dict_variables}{osf.io/y6g5b/wiki/dict_variables},
         here \code{short} (corresponding to the file name [\code{{short}.(csv|dic)}] and
         wiki urls [\code{https://osf.io/y6g5b/wiki/{short}}]) is set as row names and removed:
-        \tabular{ll}{
-          \code{name} \tab Full name of the dictionary. \cr
-          \code{description} \tab Description of the dictionary, relating to its purpose and
-            development. \cr
-          \code{note} \tab Notes about processing decisions that additionally alter the original. \cr
-          \code{constructor} \tab How the dictionary was constructed:
-            \tabular{ll}{
-              \code{algorithm} \tab Terms were selected by some automated process, potentially
-                learned from data or other resources. \cr
-              \code{crowd} \tab Several individuals rated the terms, and in aggregate those ratings
-                translate to categories and weights. \cr
-              \code{mixed} \tab Some combination of the other methods, usually in some iterative
-                process. \cr
-              \code{team} \tab One of more individuals make decisions about term inclusions,
-                categories, and weights. \cr
-            } \cr
-          \code{subject} \tab Broad, rough subject or purpose of the dictionary:
-            \tabular{ll}{
-              \code{emotion} \tab Terms relate to emotions, potentially exemplifying or expressing
-                them. \cr
-              \code{general} \tab A large range of categories, aiming to capture the content of the
-                text. \cr
-              \code{impression} \tab Terms are categorized and weighted based on the impression they
-                might give. \cr
-              \code{language} \tab Terms are categorized or weighted based on their linguistic
-                features, such as part of speech, specificity, or area of use. \cr
-              \code{social} \tab Terms relate to social phenomena, such as characteristics or concerns
-                of social entities. \cr
-            } \cr
-          \code{terms} \tab Number of unique terms across categories. \cr
-          \code{term_type} \tab Format of the terms:
-            \tabular{ll}{
-              \code{glob} \tab Include asterisks which denote inclusion of any characters until a
-                word boundary. \cr
-              \code{glob+} \tab Glob-style asterisks with regular expressions within terms. \cr
-              \code{ngram} \tab Includes any number of words as a term, separated by spaces. \cr
-              \code{pattern} \tab A string of characters, potentially within or between words, or
-                spanning words. \cr
-              \code{regex} \tab Regular expressions. \cr
-              \code{stem} \tab Unigrams with common endings removed. \cr
-              \code{unigram} \tab Complete single words. \cr
-            } \cr
-          \code{weighted} \tab Indicates whether weights are associated with terms. This
+        \itemize{
+          \item \strong{\code{name}}: Full name of the dictionary.
+          \item \strong{\code{description}}: Description of the dictionary, relating to its purpose and
+            development.
+          \item \strong{\code{note}}: Notes about processing decisions that additionally alter the original.
+          \item \strong{\code{constructor}}: How the dictionary was constructed:
+            \itemize{
+              \item \strong{\code{algorithm}}: Terms were selected by some automated process, potentially
+                learned from data or other resources.
+              \item \strong{\code{crowd}}: Several individuals rated the terms, and in aggregate those ratings
+                translate to categories and weights.
+              \item \strong{\code{mixed}}: Some combination of the other methods, usually in some iterative
+                process.
+              \item \strong{\code{team}}: One of more individuals make decisions about term inclusions,
+                categories, and weights.
+            }
+          \item \strong{\code{subject}}: Broad, rough subject or purpose of the dictionary:
+            \itemize{
+              \item \strong{\code{emotion}}: Terms relate to emotions, potentially exemplifying or expressing
+                them.
+              \item \strong{\code{general}}: A large range of categories, aiming to capture the content of the
+                text.
+              \item \strong{\code{impression}}: Terms are categorized and weighted based on the impression they
+                might give.
+              \item \strong{\code{language}}: Terms are categorized or weighted based on their linguistic
+                features, such as part of speech, specificity, or area of use.
+              \item \strong{\code{social}}: Terms relate to social phenomena, such as characteristics or concerns
+                of social entities.
+            }
+          \item \strong{\code{terms}}: Number of unique terms across categories.
+          \item \strong{\code{term_type}}: Format of the terms:
+            \itemize{
+              \item \strong{\code{glob}}: Include asterisks which denote inclusion of any characters until a
+                word boundary.
+              \item \strong{\code{glob+}}: Glob-style asterisks with regular expressions within terms.
+              \item \strong{\code{ngram}}: Includes any number of words as a term, separated by spaces.
+              \item \strong{\code{pattern}}: A string of characters, potentially within or between words, or
+                spanning words.
+              \item \strong{\code{regex}}: Regular expressions.
+              \item \strong{\code{stem}}: Unigrams with common endings removed.
+              \item \strong{\code{unigram}}: Complete single words.
+            }
+          \item \strong{\code{weighted}}: Indicates whether weights are associated with terms. This
             determines the file type of the dictionary: dictionaries with weights are stored
-            as .csv, and those without are stored as .dic files. \cr
-          \code{regex_characters} \tab Logical indicating whether special regular expression
+            as .csv, and those without are stored as .dic files.
+          \item \strong{\code{regex_characters}}: Logical indicating whether special regular expression
             characters are present in any term, which might need to be escaped if the terms are used
             in regular expressions. Glob-type terms allow complete parens (at least one open and one
             closed, indicating preceding or following words), and initial and terminal asterisks. For
@@ -80,20 +80,19 @@ A list with varying entries:
             escaped in R with \code{gsub('([][)(}{*.^$+?\\\\|])', '\\\\\\1', terms)} if \code{terms}
             is a character vector, and in Python with (importing re)
             \code{[re.sub(r'([][(){}*.^$+?\|])', r'\\\1', term) for term in terms]} if \code{terms}
-            is a list. \cr
-          \code{categories} \tab Category names in the order in which they appear in the dictionary
-            file, separated by commas. \cr
-          \code{ncategories} \tab Number of categories.\cr
-          \code{original_max} \tab Maximum value of the original dictionary before standardization:
+            is a list.
+          \item \strong{\code{categories}}: Category names in the order in which they appear in the dictionary
+            file, separated by commas.
+          \item \strong{\code{ncategories}}: Number of categories.
+          \item \strong{\code{original_max}}: Maximum value of the original dictionary before standardization:
             \code{original values / max(original values) * 100}. Dictionaries with no weights are
-            considered to have a max of \code{1}. \cr
-          \code{osf} \tab ID of the file on OSF, translating to the file's URL:
-            https://osf.io/\code{osf} \cr
-          \code{wiki} \tab URL of the dictionary's wiki. \cr
-          \code{downloaded} \tab Path to the file if downloaded, and \code{''} otherwise. \cr
+            considered to have a max of \code{1}.
+          \item \strong{\code{osf}}: ID of the file on OSF, translating to the file's URL:
+            https://osf.io/\code{osf}.
+          \item \strong{\code{wiki}}: URL of the dictionary's wiki.
+          \item \strong{\code{downloaded}}: Path to the file if downloaded, and \code{''} otherwise.
         }
-      \cr
-    selected \tab A subset of \code{info} selected by \code{query}. \cr
+    \item \strong{\code{selected}}: A subset of \code{info} selected by \code{query}.
   }
 }
 \description{

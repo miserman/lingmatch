@@ -198,7 +198,7 @@ test_that('read.segments works', {
   dir = path.package('lingmatch')
   files = grep('[DNRAE]{2}', list.files(dir, full.names = TRUE), value = TRUE)
 
-  skip_if(is.null(tryCatch(readLines(files[1], 1), error = function(e) NULL)), 'unable to read package files')
+  skip_if(is.null(tryCatch(lapply(files, readLines, 1), error = function(e) NULL)), 'unable to read package files')
 
   expect_equal(read.segments(texts, segment.size = 5, bysentence = TRUE)$WC, c(9, 10))
 

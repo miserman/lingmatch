@@ -122,6 +122,29 @@ test_that('text input works', {
   expect_equal(lma_termcat(dtm, dict)[, 1], rowSums(dtm))
 })
 
+test_that('lma_termcat and lma_patcat are accurate', {
+  terms = sample(words, 50)
+  dict = do.call(rbind, lapply(c('a', 'b', 'c'), function(cat){
+    data.frame(
+      term = sample(terms, 30),
+      category = cat,
+      weight = rnorm(30)
+    )
+  }))
+  text = vapply(1:10, function(i) paste(sample(terms, sample(50:150, 1), TRUE), collapse = ' '), '')
+  dtm = lma_dtm(text)
+  bias = c(a = .23, b = 1.2, c = 3)
+  manual = vapply(names(bias), function(cat){
+    cd = dict[dict$category == cat, -2]
+    as.numeric(dtm[, cd$term] %*% cd$weight) + bias[[cat]]
+  }, numeric(nrow(dtm)))
+  dict = rbind(dict, data.frame(term = '_intercept', category = names(bias), weight = bias))
+
+  expect_equal(as.numeric(as.matrix(lma_process(text, dict = dict)[, names(bias)])), as.numeric(manual))
+  expect_equal(as.numeric(lma_termcat(text, dict)), as.numeric(manual))
+  expect_identical(as.numeric(lma_patcat(text, dict)), as.numeric(manual))
+})
+
 textdir = '../'
 if(!file.exists(paste0(textdir, 'texts.txt'))) textdir = paste0('../../', textdir)
 skip_if(!file.exists(paste0(textdir, 'texts.txt')), paste('texts.txt not found in', normalizePath(textdir)))

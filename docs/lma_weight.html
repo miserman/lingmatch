@@ -36,89 +36,87 @@ available weighting methods:
 <p><strong>Term weights</strong> (applied uniquely to each cell)
 </p>
 
-<table summary="Rd table">
-<tr>
- <td style="text-align: left;">
-    <code>binary</code> </td><td style="text-align: left;"> <code>(dtm &gt; 0) * 1</code> </td><td style="text-align: left;"> convert frequencies to 1s and 0s; remove
-      differences in frequencies</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-    <code>log</code> </td><td style="text-align: left;"> <code>log(dtm + 1, log.base)</code> </td><td style="text-align: left;"> log of frequencies</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-    <code>sqrt</code> </td><td style="text-align: left;"> <code>sqrt(dtm)</code> </td><td style="text-align: left;"> square root of frequencies</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-    <code>count</code> </td><td style="text-align: left;"> <code>dtm</code> </td><td style="text-align: left;"> unaltered; sometimes called term frequencies (tf)</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-    <code>amplify</code> </td><td style="text-align: left;"> <code>dtm ^ alpha</code> </td><td style="text-align: left;"> amplify difference in frequencies</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-  </td>
-</tr>
-
-</table>
+<ul>
+<li> <p><strong><code>binary</code></strong> <br />
+<code>(dtm &gt; 0) * 1</code> <br />
+Convert frequencies to 1s and 0s; remove differences in frequencies.
+</p>
+</li>
+<li> <p><strong><code>log</code></strong> <br />
+<code>log(dtm + 1, log.base)</code> <br />
+Log of frequencies.
+</p>
+</li>
+<li> <p><strong><code>sqrt</code></strong> <br />
+<code>sqrt(dtm)</code> <br />
+Square root of frequencies.
+</p>
+</li>
+<li> <p><strong><code>count</code></strong> <br />
+<code>dtm</code> <br />
+Unaltered; sometimes called term frequencies (tf).
+</p>
+</li>
+<li> <p><strong><code>amplify</code></strong> <br />
+<code>dtm ^ alpha</code> <br />
+Amplify difference in frequencies.
+</p>
+</li></ul>
 
 <p><strong>Document weights</strong> (applied by column)
 </p>
 
-<table summary="Rd table">
-<tr>
- <td style="text-align: left;">
-    <code>dflog</code> </td><td style="text-align: left;"> <code>log(colSums(dtm &gt; 0), log.base)</code> </td><td style="text-align: left;"> log of binary term sum</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-    <code>entropy</code> </td><td style="text-align: left;"> <code>1 - rowSums(x * log(x + 1, log.base) / log(ncol(x), log.base), na.rm = TRUE)</code>
-      </td><td style="text-align: left;"> where <code>x = t(dtm) / colSums(dtm &gt; 0)</code>; entropy of term-conditional term distribution</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-    <code>ppois</code> </td><td style="text-align: left;"> <code>1 - ppois(alpha, colSums(dtm) / nrow(dtm))</code> </td><td style="text-align: left;"> Poisson-predicted
-      term distribution</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-    <code>dpois</code> </td><td style="text-align: left;"> <code>1 - dpois(alpha, colSums(dtm) / nrow(dtm))</code> </td><td style="text-align: left;"> Poisson-predicted
-      term density</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-    <code>dfmlog</code> </td><td style="text-align: left;"> <code>log(diag(dtm[max.col(t(dtm)),]), log.base)</code> </td><td style="text-align: left;"> log of maximum term
-      frequency</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-    <code>dfmax</code> </td><td style="text-align: left;"> <code>diag(dtm[max.col(t(dtm)),])</code> </td><td style="text-align: left;"> maximum term frequency</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-    <code>df</code> </td><td style="text-align: left;"> <code>colSums(dtm &gt; 0)</code> </td><td style="text-align: left;"> sum of binary term occurance across documents</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-    <code>idf</code> </td><td style="text-align: left;"> <code>log(nrow(dtm) / colSums(dtm &gt; 0), log.base)</code> </td><td style="text-align: left;"> inverse document frequency</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-    <code>ridf</code> </td><td style="text-align: left;"> <code>idf - log(dpois, log.base)</code> </td><td style="text-align: left;"> residual inverse document frequency</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-    <code>normal</code> </td><td style="text-align: left;"> <code>sqrt(1 / colSums(dtm ^ 2))</code> </td><td style="text-align: left;"> normalized document frequency</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-  </td>
-</tr>
-
-</table>
+<ul>
+<li> <p><strong><code>dflog</code></strong> <br />
+<code>log(colSums(dtm &gt; 0), log.base)</code> <br />
+Log of binary term sum.
+</p>
+</li>
+<li> <p><strong><code>entropy</code></strong> <br />
+<code>1 - rowSums(x *</code> <code>log(x + 1, log.base) /</code> <code>log(ncol(x),</code> <code>log.base), na.rm = TRUE)</code> <br />
+Where <code>x = t(dtm) / colSums(dtm &gt; 0)</code>; entropy of term-conditional term distribution.
+</p>
+</li>
+<li> <p><strong><code>ppois</code></strong> <br />
+<code>1 - ppois(alpha,</code> <code>colSums(dtm) / nrow(dtm))</code> <br />
+Poisson-predicted term distribution.
+</p>
+</li>
+<li> <p><strong><code>dpois</code></strong> <br />
+<code>1 - dpois(alpha, colSums(dtm) / nrow(dtm))</code> <br />
+Poisson-predicted term density.
+</p>
+</li>
+<li> <p><strong><code>dfmlog</code></strong> <br />
+<code>log(diag(dtm[max.col(t(dtm)),]), log.base)</code> <br />
+Log of maximum term frequency.
+</p>
+</li>
+<li> <p><strong><code>dfmax</code></strong> <br />
+<code>diag(dtm[max.col(t(dtm)),])</code> <br />
+Maximum term frequency.
+</p>
+</li>
+<li> <p><strong><code>df</code></strong> <br />
+<code>colSums(dtm &gt; 0)</code> <br />
+Sum of binary term occurrence across documents.
+</p>
+</li>
+<li> <p><strong><code>idf</code></strong> <br />
+<code>log(nrow(dtm) / colSums(dtm &gt; 0), log.base)</code> <br />
+Inverse document frequency.
+</p>
+</li>
+<li> <p><strong><code>ridf</code></strong> <br />
+<code>idf - log(dpois, log.base)</code> <br />
+Residual inverse document frequency.
+</p>
+</li>
+<li> <p><strong><code>normal</code></strong> <br />
+<code>sqrt(1 / colSums(dtm ^ 2))</code> <br />
+Normalized document frequency.
+</p>
+</li></ul>
 
 <p>Alternatively, <code>'pmi'</code> or <code>'ppmi'</code> will apply a pointwise mutual information weighting
 scheme (with <code>'ppmi'</code> setting negative values to 0).</p>
@@ -146,7 +144,7 @@ Default is 10.</p>
 <p>A scaling factor applied to document frequency as part of pointwise mutual
 information weighting, or amplify's power (<code>dtm ^ alpha</code>, which defaults to 1.1), or the
 specified quantile of the poisson distribution (<code>dpois(alpha,</code>
-<code>colSums(x, na.rm = TRUE) /</code> <code>nrow(x))</code>).</p>
+<code>colSums(x,</code> <code>na.rm = TRUE) /</code> <code>nrow(x))</code>).</p>
 </td></tr>
 <tr valign="top"><td><code>doc.only</code></td>
 <td>

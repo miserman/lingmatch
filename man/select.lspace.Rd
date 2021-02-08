@@ -24,31 +24,30 @@ and compares it with that calculated from the downloaded file to check its integ
 }
 \value{
 A list with varying entries:
-  \tabular{ll}{
-    info \tab The version of \href{https://osf.io/9yzca}{osf.io/9yzca} stored internally; a
+  \itemize{
+    \item \strong{\code{info}}: The version of \href{https://osf.io/9yzca}{osf.io/9yzca} stored internally; a
       \code{data.frame}  with spaces as row names, and information about each space in columns:
-        \tabular{ll}{
-          \code{terms} \tab number of terms in the space \cr
-          \code{corpus} \tab corpus(es) on which the space was trained \cr
-          \code{model} \tab model from which the space was trained \cr
-          \code{dimensions} \tab number of dimensions in the model (columns of the space) \cr
-          \code{model_info} \tab some parameter details about the model \cr
-          \code{original_max} \tab maximum value used to normalize the space; the original
-            space would be \code{(vectors *} \code{original_max) /} \code{100} \cr
-          \code{osf_dat} \tab OSF id for the \code{.dat} files; the URL would be
-            https://osf.io/\code{osf_dat} \cr
-          \code{osf_terms} \tab OSF id for the \code{_terms.txt} files; the URL would be
-            https://osf.io/\code{osf_terms} \cr
-          \code{wiki} \tab link to the wiki for the space \cr
-          \code{downloaded} \tab path to the \code{.dat} file if downloaded,
-            and \code{''} otherwise. \cr
+        \itemize{
+          \item \strong{\code{terms}}: number of terms in the space
+          \item \strong{\code{corpus}}: corpus(es) on which the space was trained
+          \item \strong{\code{model}}: model from which the space was trained
+          \item \strong{\code{dimensions}}: number of dimensions in the model (columns of the space)
+          \item \strong{\code{model_info}}: some parameter details about the model
+          \item \strong{\code{original_max}}: maximum value used to normalize the space; the original
+            space would be \code{(vectors *} \code{original_max) /} \code{100}
+          \item \strong{\code{osf_dat}}: OSF id for the \code{.dat} files; the URL would be
+            https://osf.io/\code{osf_dat}
+          \item \strong{\code{osf_terms}}: OSF id for the \code{_terms.txt} files; the URL would be
+            https://osf.io/\code{osf_terms}
+          \item \strong{\code{wiki}}: link to the wiki for the space
+          \item \strong{\code{downloaded}}: path to the \code{.dat} file if downloaded,
+            and \code{''} otherwise.
         }
-      \cr
-    selected \tab A subset of \code{info} selected by \code{query}. \cr
-    term_map \tab If \code{get.map} is \code{TRUE} or \code{lma_term_map.rda} is found in
+    \item \strong{\code{selected}}: A subset of \code{info} selected by \code{query}.
+    \item \strong{\code{term_map}}: If \code{get.map} is \code{TRUE} or \code{lma_term_map.rda} is found in
       \code{dir}, a copy of \href{https://osf.io/xr7jv}{osf.io/xr7jv}, which has space names as
       column names, terms as row names, and indices as values, with 0 indicating the term is not
-      present in the associated space. \cr
+      present in the associated space.
   }
 }
 \description{

@@ -14,31 +14,69 @@ lma_weight(dtm, weight = "count", normalize = TRUE, wc.complete = TRUE,
   available weighting methods:
 
   \strong{Term weights} (applied uniquely to each cell)
-  \tabular{lll}{
-    \code{binary} \tab \code{(dtm > 0) * 1} \tab convert frequencies to 1s and 0s; remove
-      differences in frequencies\cr
-    \code{log} \tab \code{log(dtm + 1, log.base)} \tab log of frequencies\cr
-    \code{sqrt} \tab \code{sqrt(dtm)} \tab square root of frequencies\cr
-    \code{count} \tab \code{dtm} \tab unaltered; sometimes called term frequencies (tf)\cr
-    \code{amplify} \tab \code{dtm ^ alpha} \tab amplify difference in frequencies\cr
+  \itemize{
+    \item \strong{\code{binary}} \cr
+    \code{(dtm > 0) * 1} \cr
+    Convert frequencies to 1s and 0s; remove differences in frequencies.
+
+    \item \strong{\code{log}} \cr
+    \code{log(dtm + 1, log.base)} \cr
+    Log of frequencies.
+
+    \item \strong{\code{sqrt}} \cr
+    \code{sqrt(dtm)} \cr
+    Square root of frequencies.
+
+    \item \strong{\code{count}} \cr
+    \code{dtm} \cr
+    Unaltered; sometimes called term frequencies (tf).
+
+    \item \strong{\code{amplify}} \cr
+    \code{dtm ^ alpha} \cr
+    Amplify difference in frequencies.
   }
 
   \strong{Document weights} (applied by column)
-  \tabular{lll}{
-    \code{dflog} \tab \code{log(colSums(dtm > 0), log.base)} \tab log of binary term sum\cr
-    \code{entropy} \tab \code{1 - rowSums(x * log(x + 1, log.base) / log(ncol(x), log.base), na.rm = TRUE)}
-      \tab where \code{x = t(dtm) / colSums(dtm > 0)}; entropy of term-conditional term distribution\cr
-    \code{ppois} \tab \code{1 - ppois(alpha, colSums(dtm) / nrow(dtm))} \tab Poisson-predicted
-      term distribution\cr
-    \code{dpois} \tab \code{1 - dpois(alpha, colSums(dtm) / nrow(dtm))} \tab Poisson-predicted
-      term density\cr
-    \code{dfmlog} \tab \code{log(diag(dtm[max.col(t(dtm)),]), log.base)} \tab log of maximum term
-      frequency\cr
-    \code{dfmax} \tab \code{diag(dtm[max.col(t(dtm)),])} \tab maximum term frequency\cr
-    \code{df} \tab \code{colSums(dtm > 0)} \tab sum of binary term occurance across documents\cr
-    \code{idf} \tab \code{log(nrow(dtm) / colSums(dtm > 0), log.base)} \tab inverse document frequency\cr
-    \code{ridf} \tab \code{idf - log(dpois, log.base)} \tab residual inverse document frequency\cr
-    \code{normal} \tab \code{sqrt(1 / colSums(dtm ^ 2))} \tab normalized document frequency\cr
+  \itemize{
+    \item \strong{\code{dflog}} \cr
+    \code{log(colSums(dtm > 0), log.base)} \cr
+    Log of binary term sum.
+
+    \item \strong{\code{entropy}} \cr
+    \code{1 - rowSums(x *} \code{log(x + 1, log.base) /} \code{log(ncol(x),} \code{log.base), na.rm = TRUE)} \cr
+    Where \code{x = t(dtm) / colSums(dtm > 0)}; entropy of term-conditional term distribution.
+
+    \item \strong{\code{ppois}} \cr
+    \code{1 - ppois(alpha,} \code{colSums(dtm) / nrow(dtm))} \cr
+    Poisson-predicted term distribution.
+
+    \item \strong{\code{dpois}} \cr
+    \code{1 - dpois(alpha, colSums(dtm) / nrow(dtm))} \cr
+    Poisson-predicted term density.
+
+    \item \strong{\code{dfmlog}} \cr
+    \code{log(diag(dtm[max.col(t(dtm)),]), log.base)} \cr
+    Log of maximum term frequency.
+
+    \item \strong{\code{dfmax}} \cr
+    \code{diag(dtm[max.col(t(dtm)),])} \cr
+    Maximum term frequency.
+
+    \item \strong{\code{df}} \cr
+    \code{colSums(dtm > 0)} \cr
+    Sum of binary term occurrence across documents.
+
+    \item \strong{\code{idf}} \cr
+    \code{log(nrow(dtm) / colSums(dtm > 0), log.base)} \cr
+    Inverse document frequency.
+
+    \item \strong{\code{ridf}} \cr
+    \code{idf - log(dpois, log.base)} \cr
+    Residual inverse document frequency.
+
+    \item \strong{\code{normal}} \cr
+    \code{sqrt(1 / colSums(dtm ^ 2))} \cr
+    Normalized document frequency.
   }
 
 Alternatively, \code{'pmi'} or \code{'ppmi'} will apply a pointwise mutual information weighting
@@ -59,7 +97,7 @@ Default is 10.}
 \item{alpha}{A scaling factor applied to document frequency as part of pointwise mutual
 information weighting, or amplify's power (\code{dtm ^ alpha}, which defaults to 1.1), or the
 specified quantile of the poisson distribution (\code{dpois(alpha,}
-\code{colSums(x, na.rm = TRUE) /} \code{nrow(x))}).}
+\code{colSums(x,} \code{na.rm = TRUE) /} \code{nrow(x))}).}
 
 \item{doc.only}{Logical: if \code{TRUE}, only document weights are returned (a single value for
 each term).}

@@ -38,7 +38,7 @@ See <a href="https://osf.io/489he/wiki/home">osf.io/489he/wiki</a> for more info
 <tr valign="top"><td><code>decompress</code></td>
 <td>
 <p>Logical; if <code>TRUE</code> (default), decompresses the downloaded file
-with the <code>bunzip2</code> system command assuming it is available (as indicated by
+with the <code>bunzip2</code> system command assuming it is available <br /> (as indicated by
 <code>Sys.which('bunzip2')</code>).</p>
 </td></tr>
 <tr valign="top"><td><code>check.md5</code></td>
@@ -49,11 +49,12 @@ and compares it with that calculated from the downloaded file to check its integ
 <tr valign="top"><td><code>mode</code></td>
 <td>
 <p>A character specifying the file write mode; default is 'wb'. See
+<code>download.file</code>.
 <code>download.file</code>.</p>
 </td></tr>
 <tr valign="top"><td><code>dir</code></td>
 <td>
-<p>Directory in which to save the space; default is
+<p>Directory in which to save the space; <br /> default is
 <code>getOption('lingmatch.lspace.dir')</code>.</p>
 </td></tr>
 </table>

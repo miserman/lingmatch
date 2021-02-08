@@ -42,34 +42,23 @@ available metric names (or 'all' to explicitly include all metrics),
 or a number or vector of numbers indicating the metric by index:
 </p>
 
-<table summary="Rd table">
-<tr>
- <td style="text-align: left;">
-  <code>jaccard</code> </td><td style="text-align: left;"> <code>sum(a &amp; b) / sum(a | b)</code> </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-  <code>euclidean</code> </td><td style="text-align: left;"> <code>1 / (1 + sqrt(sum((a - b) ^ 2)))</code> </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-  <code>canberra</code> </td><td style="text-align: left;"> <code>mean(1 - abs(a - b) / (a + b))</code> </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-  <code>cosine</code> </td><td style="text-align: left;"> <code>sum(a * b) / sqrt(sum(a ^ 2 * sum(b ^ 2)))</code> </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-  <code>pearson</code> </td><td style="text-align: left;"> <code>(mean(a * b) - (mean(a) * mean(b))) / sqrt(mean(a ^ 2) - mean(a) ^ 2) /
-    sqrt(mean(b ^ 2) - mean(b) ^ 2)</code> </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-</td>
-</tr>
-
-</table>
+<ul>
+<li> <p><strong><code>jaccard</code></strong>: <code>sum(a &amp; b) / sum(a | b)</code>
+</p>
+</li>
+<li> <p><strong><code>euclidean</code></strong>: <code>1 / (1 + sqrt(sum((a - b) ^ 2)))</code>
+</p>
+</li>
+<li> <p><strong><code>canberra</code></strong>: <code>mean(1 - abs(a - b) / (a + b))</code>
+</p>
+</li>
+<li> <p><strong><code>cosine</code></strong>: <code>sum(a * b) / sqrt(sum(a ^ 2 * sum(b ^ 2)))</code>
+</p>
+</li>
+<li> <p><strong><code>pearson</code></strong>: <code>(mean(a * b) - (mean(a) * mean(b))) /</code> <br />
+<code>sqrt(mean(a ^ 2) - mean(a) ^ 2) / sqrt(mean(b ^ 2) - mean(b) ^ 2)</code>
+</p>
+</li></ul>
 </td></tr>
 <tr valign="top"><td><code>group</code></td>
 <td>
@@ -128,40 +117,30 @@ threads to 4.
 <p>Output varies based on the dimensions of <code>a</code> and <code>b</code>:
 </p>
 
-<table summary="Rd table">
-<tr>
- <td style="text-align: left;">
-    <strong>output</strong> </td><td style="text-align: left;"> <strong>input</strong> </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-    vector with a value per metric </td><td style="text-align: left;"> Only when <code>a</code> and <code>b</code> are both vectors.</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-    vector with a value per row </td><td style="text-align: left;"> Any time a single value is expected per row: <code>a</code> or <code>b</code> is a vector,
-      <code>a</code> and <code>b</code> are matrices with the same number of rows and <code>pairwise = FALSE</code>, a group is
-      specified, or <code>mean = TRUE</code>, and only one metric is requested.</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-    data.frame with a column per metric </td><td style="text-align: left;"> When multiple metrics are requested in the previous case.</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-    sparse matrix </td><td style="text-align: left;"> Pairwise comparisons within an <code>a</code> matrix or between
-      an <code>a</code> and <code>b</code> matrix, when only 1 metric is requested.</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-    list with a sparse matrix per metric </td><td style="text-align: left;"> When multiple metrics are requested in the previous case.</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-  </td>
-</tr>
-
-</table>
+<ul>
+<li> <p><strong>Out:</strong> vector with a value per metric
+<strong>In:</strong> Only when <code>a</code> and <code>b</code> are both vectors.
+</p>
+</li>
+<li> <p><strong>Out:</strong> vector with a value per row
+<strong>In:</strong> Any time a single value is expected per row: <code>a</code> or <code>b</code> is a vector,
+<code>a</code> and <code>b</code> are matrices with the same number of rows and <code>pairwise = FALSE</code>, a group is
+specified, or <code>mean = TRUE</code>, and only one metric is requested.
+</p>
+</li>
+<li> <p><strong>Out:</strong> data.frame with a column per metric
+<strong>In:</strong> When multiple metrics are requested in the previous case.
+</p>
+</li>
+<li> <p><strong>Out:</strong> sparse matrix
+<strong>In:</strong> Pairwise comparisons within an <code>a</code> matrix or between
+an <code>a</code> and <code>b</code> matrix, when only 1 metric is requested.
+</p>
+</li>
+<li> <p><strong>Out:</strong> list with a sparse matrix per metric
+<strong>In:</strong> When multiple metrics are requested in the previous case.
+</p>
+</li></ul>
 
 
 

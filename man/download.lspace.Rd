@@ -16,16 +16,17 @@ See \href{https://osf.io/489he/wiki/home}{osf.io/489he/wiki} for more informatio
 (which only has numeric vectors).}
 
 \item{decompress}{Logical; if \code{TRUE} (default), decompresses the downloaded file
-with the \code{bunzip2} system command assuming it is available (as indicated by
+with the \code{bunzip2} system command assuming it is available \cr (as indicated by
 \code{Sys.which('bunzip2')}).}
 
 \item{check.md5}{Logical; if \code{TRUE} (default), retrieves the MD5 checksum from OSF,
 and compares it with that calculated from the downloaded file to check its integrity.}
 
 \item{mode}{A character specifying the file write mode; default is 'wb'. See
+\code{\link{download.file}}.
 \code{\link{download.file}}.}
 
-\item{dir}{Directory in which to save the space; default is
+\item{dir}{Directory in which to save the space; \cr default is
 \code{getOption('lingmatch.lspace.dir')}.}
 }
 \value{

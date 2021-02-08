@@ -45,12 +45,13 @@ terms are left as entered.}
 and \code{\\\\w`*`\\\\b} respectively. This will also set \code{fixed} to \code{FALSE} unless fixed is specified.}
 
 \item{name.map}{A named character vector:
-\tabular{ll}{
-  \code{intname} \tab term identifying category biases within the term list; defaults to \code{'_intercept'} \cr
-  \code{term} \tab name of the column containing terms in \code{dict}; defaults to \code{'term'} \cr
+\itemize{
+  \item \strong{\code{intname}}: term identifying category biases within the term list;
+    defaults to \code{'_intercept'}
+  \item \strong{\code{term}}: name of the column containing terms in \code{dict}; defaults to \code{'term'}
 }
-Missing names are added, so names can be specified positional (e.g., \code{c('_int', 'terms')}),
-or only some can be specified by name (e.g., \code{c(term = 'patterns')}), leaving the rest default.}
+Missing names are added, so names can be specified positional (e.g., \code{c('_int',} \code{'terms')}),
+or only some can be specified by name (e.g., \code{c(term =} \code{'patterns')}), leaving the rest default.}
 
 \item{dir}{Path to a folder in which to look for \code{dict} if it is the name of a file to be passed to
 \code{\link{read.dic}}.}

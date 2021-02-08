@@ -21,10 +21,10 @@
 #'   or path to a file (.txt or .csv, with texts separated by one or more lines/rows).
 #' @param comp Defines the comparison to be made:
 #' \itemize{
-#'   \item If a function, this will be applied to \code{input} within each group (overall if there is
+#'   \item If a \strong{function}, this will be applied to \code{input} within each group (overall if there is
 #'     no group; i.e., \code{apply(input, 2, comp)}; e.g., \code{comp = mean} would compare each text to
 #'     the mean profile of its group).
-#'   \item If a character with a length of 1 and no spaces:
+#'   \item If a \strong{character} with a length of 1 and no spaces:
 #'     \itemize{
 #'       \item If it partially matches one of \code{lsm_profiles}'s rownames, that row will be used as the comparison.
 #'       \item If it partially matches \code{'auto'}, the highest correlating \code{lsm_profiles} row will be used.
@@ -32,14 +32,14 @@
 #'       \item If it partially matches \code{'sequential'}, the last variable in \code{group} will be treated as
 #'         a speaker ID (see the Grouping and Comparisons section).
 #'     }
-#'   \item If a character vector, this will be processed in the same way as \code{input}.
-#'   \item If a vector, either (a) logical or factor-like (having n levels < length) and of the same length as
+#'   \item If a \strong{character vector}, this will be processed in the same way as \code{input}.
+#'   \item If a \strong{vector}, either (a) logical or factor-like (having n levels < length) and of the same length as
 #'     \code{nrow(input)}, or (b) numeric or logical of length less than \code{nrow(input)}, this will be used to
 #'     select a subset of \code{input} (e.g., \code{comp = 1:10} would treat the first 10 rows of \code{input} as the
 #'     comparison; \code{comp = type=='prompt'} would make a logical vector identifying prompts, assuming "type" was
 #'     the name of a column in \code{data}, or a variable in the global environment, and the value "prompt" marked the
 #'     prompts).
-#'   \item If a matrix-like object (having multiple rows and columns), or a named vector, this will
+#'   \item If a \strong{matrix-like object} (having multiple rows and columns), or a named vector, this will
 #'     be treated as a sort of dtm, assuming there are common (column) names between \code{input} and
 #'     \code{comp} (e.g., if you had prompt and response texts that were already processed separately).
 #' }
@@ -841,31 +841,69 @@ lma_dtm = function(text, exclude = NULL, context = NULL, replace.special = TRUE,
 #'   available weighting methods:
 #'
 #'   \strong{Term weights} (applied uniquely to each cell)
-#'   \tabular{lll}{
-#'     \code{binary} \tab \code{(dtm > 0) * 1} \tab convert frequencies to 1s and 0s; remove
-#'       differences in frequencies\cr
-#'     \code{log} \tab \code{log(dtm + 1, log.base)} \tab log of frequencies\cr
-#'     \code{sqrt} \tab \code{sqrt(dtm)} \tab square root of frequencies\cr
-#'     \code{count} \tab \code{dtm} \tab unaltered; sometimes called term frequencies (tf)\cr
-#'     \code{amplify} \tab \code{dtm ^ alpha} \tab amplify difference in frequencies\cr
+#'   \itemize{
+#'     \item \strong{\code{binary}} \cr
+#'     \code{(dtm > 0) * 1} \cr
+#'     Convert frequencies to 1s and 0s; remove differences in frequencies.
+#'
+#'     \item \strong{\code{log}} \cr
+#'     \code{log(dtm + 1, log.base)} \cr
+#'     Log of frequencies.
+#'
+#'     \item \strong{\code{sqrt}} \cr
+#'     \code{sqrt(dtm)} \cr
+#'     Square root of frequencies.
+#'
+#'     \item \strong{\code{count}} \cr
+#'     \code{dtm} \cr
+#'     Unaltered; sometimes called term frequencies (tf).
+#'
+#'     \item \strong{\code{amplify}} \cr
+#'     \code{dtm ^ alpha} \cr
+#'     Amplify difference in frequencies.
 #'   }
 #'
 #'   \strong{Document weights} (applied by column)
-#'   \tabular{lll}{
-#'     \code{dflog} \tab \code{log(colSums(dtm > 0), log.base)} \tab log of binary term sum\cr
-#'     \code{entropy} \tab \code{1 - rowSums(x * log(x + 1, log.base) / log(ncol(x), log.base), na.rm = TRUE)}
-#'       \tab where \code{x = t(dtm) / colSums(dtm > 0)}; entropy of term-conditional term distribution\cr
-#'     \code{ppois} \tab \code{1 - ppois(alpha, colSums(dtm) / nrow(dtm))} \tab Poisson-predicted
-#'       term distribution\cr
-#'     \code{dpois} \tab \code{1 - dpois(alpha, colSums(dtm) / nrow(dtm))} \tab Poisson-predicted
-#'       term density\cr
-#'     \code{dfmlog} \tab \code{log(diag(dtm[max.col(t(dtm)),]), log.base)} \tab log of maximum term
-#'       frequency\cr
-#'     \code{dfmax} \tab \code{diag(dtm[max.col(t(dtm)),])} \tab maximum term frequency\cr
-#'     \code{df} \tab \code{colSums(dtm > 0)} \tab sum of binary term occurance across documents\cr
-#'     \code{idf} \tab \code{log(nrow(dtm) / colSums(dtm > 0), log.base)} \tab inverse document frequency\cr
-#'     \code{ridf} \tab \code{idf - log(dpois, log.base)} \tab residual inverse document frequency\cr
-#'     \code{normal} \tab \code{sqrt(1 / colSums(dtm ^ 2))} \tab normalized document frequency\cr
+#'   \itemize{
+#'     \item \strong{\code{dflog}} \cr
+#'     \code{log(colSums(dtm > 0), log.base)} \cr
+#'     Log of binary term sum.
+#'
+#'     \item \strong{\code{entropy}} \cr
+#'     \code{1 - rowSums(x *} \code{log(x + 1, log.base) /} \code{log(ncol(x),} \code{log.base), na.rm = TRUE)} \cr
+#'     Where \code{x = t(dtm) / colSums(dtm > 0)}; entropy of term-conditional term distribution.
+#'
+#'     \item \strong{\code{ppois}} \cr
+#'     \code{1 - ppois(alpha,} \code{colSums(dtm) / nrow(dtm))} \cr
+#'     Poisson-predicted term distribution.
+#'
+#'     \item \strong{\code{dpois}} \cr
+#'     \code{1 - dpois(alpha, colSums(dtm) / nrow(dtm))} \cr
+#'     Poisson-predicted term density.
+#'
+#'     \item \strong{\code{dfmlog}} \cr
+#'     \code{log(diag(dtm[max.col(t(dtm)),]), log.base)} \cr
+#'     Log of maximum term frequency.
+#'
+#'     \item \strong{\code{dfmax}} \cr
+#'     \code{diag(dtm[max.col(t(dtm)),])} \cr
+#'     Maximum term frequency.
+#'
+#'     \item \strong{\code{df}} \cr
+#'     \code{colSums(dtm > 0)} \cr
+#'     Sum of binary term occurrence across documents.
+#'
+#'     \item \strong{\code{idf}} \cr
+#'     \code{log(nrow(dtm) / colSums(dtm > 0), log.base)} \cr
+#'     Inverse document frequency.
+#'
+#'     \item \strong{\code{ridf}} \cr
+#'     \code{idf - log(dpois, log.base)} \cr
+#'     Residual inverse document frequency.
+#'
+#'     \item \strong{\code{normal}} \cr
+#'     \code{sqrt(1 / colSums(dtm ^ 2))} \cr
+#'     Normalized document frequency.
 #'   }
 #'
 #' Alternatively, \code{'pmi'} or \code{'ppmi'} will apply a pointwise mutual information weighting
@@ -882,7 +920,7 @@ lma_dtm = function(text, exclude = NULL, context = NULL, replace.special = TRUE,
 #' @param alpha A scaling factor applied to document frequency as part of pointwise mutual
 #'   information weighting, or amplify's power (\code{dtm ^ alpha}, which defaults to 1.1), or the
 #'   specified quantile of the poisson distribution (\code{dpois(alpha,}
-#'   \code{colSums(x, na.rm = TRUE) /} \code{nrow(x))}).
+#'   \code{colSums(x,} \code{na.rm = TRUE) /} \code{nrow(x))}).
 #' @param doc.only Logical: if \code{TRUE}, only document weights are returned (a single value for
 #'   each term).
 #' @param percent Logical; if \code{TRUE}, frequencies are multiplied by 100.
@@ -1082,8 +1120,8 @@ lma_weight = function(dtm, weight = 'count', normalize = TRUE, wc.complete = TRU
 #'   in the same dimensions as \code{dtm} is returned. Otherwise, a matrix with terms as rows and
 #'   dimensions as columns is returned.
 #' @param use.scan Logical: if \code{TRUE}, reads in the rows of \code{space} with \code{\link{scan}}.
-#' @param dir Path to a folder containing spaces. Default is \code{getOption('lingmatch.lspace.dir')};
-#'   change with \code{options(lingmatch.lspace.dir} \code{= 'desired/path')}.
+#' @param dir Path to a folder containing spaces. \cr Default is \code{getOption('lingmatch.lspace.dir')}; \cr
+#'   change with \code{options(lingmatch.lspace.dir = 'desired/path')}.
 #' @note
 #' A traditional latent semantic space is a selection of right singular vectors from the singular
 #' value decomposition of a dtm (\code{svd(dtm)$v[, 1:k]}, where \code{k} is the selected number of
@@ -1319,8 +1357,7 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, t
 #'   \code{'a_DT'}), \code{'_.*'} would remove the tag.
 #' @param term.break If a category has more than \code{term.break} characters, it will be processed
 #'   in chunks. Reduce from 20000 if you get a PCRE compilation error.
-#' @param dir Path to a folder in which to look for \code{dict}; defaults to
-#'   \code{getOption('lingmatch.dict.dir')}.
+#' @param dir Path to a folder in which to look for \code{dict}; \cr defaults to \code{getOption('lingmatch.dict.dir')}.
 #' @seealso For applying pattern-based dictionaries (to raw text) see \code{\link{lma_patcat}}.
 #' @family Dictionary functions
 #' @examples
@@ -1338,9 +1375,15 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, t
 #'     'We are outraged by their hateful brutality,',
 #'     'and by the way they terrorize us with their hatred.'
 #'   ),
-#'   fearful = 'The horrific torture of that terrorist was tantamount to the terrorism of terrorists.',
+#'   fearful = paste(
+#'     'The horrific torture of that terrorist was tantamount',
+#'     'to the terrorism of terrorists.'
+#'   ),
 #'   joyous = 'I am jubilant to be celebrating the bliss of this happiest happiness.',
-#'   sad = 'They are nearly suicidal in their mourning after the tragic and heartbreaking holocaust.'
+#'   sad = paste(
+#'     'They are nearly suicidal in their mourning after',
+#'     'the tragic and heartbreaking holocaust.'
+#'   )
 #' )
 #'
 #' emotion_scores = lma_termcat(text, dict)
@@ -1366,9 +1409,12 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
         function(col) is.numeric(term.weights[, col]), TRUE)]
     }else if(any(su <- vapply(seq_len(ncol(dict)), function(col) is.numeric(dict[, col]), TRUE))){
       term.weights = dict[, su, drop = FALSE]
-      dict = dict[, !su, drop = FALSE]
+      dict = if(all(su)) if(!is.null(rownames(dict))) data.frame(term = rownames(dict)) else{
+        term.weights = if(ncol(term.weights) == 1) NULL else term.weights[, -1, drop = FALSE]
+        dict[, 1, drop = FALSE]
+      }else dict[, !su, drop = FALSE]
     }
-    if(!is.null(rownames(dict)) && any(grepl('^[a-z]', rownames(dict), TRUE))){
+    if(!is.null(rownames(dict)) && ncol(dict) == 1 && any(grepl('^[a-z]', rownames(dict), TRUE))){
       dict = rownames(dict)
     }else{
       su = vapply(seq_len(ncol(dict)), function(col) !is.numeric(dict[, col]), TRUE)
@@ -1519,7 +1565,7 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
   }
   if(dict_chars$case != 'mixed') ws = (if(dict_chars$case == 'lower') tolower else toupper)(ws)
   odict = dict
-  boundries = FALSE
+  boundaries = FALSE
   formatdict = function(dict, collapse = '|'){
     lab = if(!escape){
       lab = lapply(dict, function(l){
@@ -1551,10 +1597,10 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
     ), '', l)) else res
   }
   for(l in dict){
-    if(!boundries) boundries = !any(grepl('^\\*|\\*$', l)) && any(grepl('^\\^|\\$$', l))
-    if(missing(partial) && boundries) partial = TRUE
+    if(!boundaries) boundaries = !any(grepl('^\\*|\\*$', l)) && any(grepl('^\\^|\\$$', l))
+    if(missing(partial) && boundaries) partial = TRUE
     if(missing(glob) && (any(grepl('([][}{.^$+?\\|\\\\])', l)) || any(grepl('\\w\\*\\w', l)))) glob = FALSE
-    if(missing(escape) && (boundries || any(grepl('[.])][+*]|[.+*]\\?|\\[\\^', l))) &&
+    if(missing(escape) && (boundaries || any(grepl('[.])][+*]|[.+*]\\?|\\[\\^', l))) &&
       !any(grepl('[({[][^])}]*$|^[^({[]*[])}]', l))) escape = FALSE
   }
   cls = 0
@@ -1666,13 +1712,13 @@ match_metric = function(x){
 #' @param metric A character or vector of characters at least partially matching one of the
 #'   available metric names (or 'all' to explicitly include all metrics),
 #'   or a number or vector of numbers indicating the metric by index:
-#'   \tabular{ll}{
-#'     \code{jaccard} \tab \code{sum(a & b) / sum(a | b)} \cr
-#'     \code{euclidean} \tab \code{1 / (1 + sqrt(sum((a - b) ^ 2)))} \cr
-#'     \code{canberra} \tab \code{mean(1 - abs(a - b) / (a + b))} \cr
-#'     \code{cosine} \tab \code{sum(a * b) / sqrt(sum(a ^ 2 * sum(b ^ 2)))} \cr
-#'     \code{pearson} \tab \code{(mean(a * b) - (mean(a) * mean(b))) / sqrt(mean(a ^ 2) - mean(a) ^ 2) /
-#'       sqrt(mean(b ^ 2) - mean(b) ^ 2)} \cr
+#'   \itemize{
+#'     \item \strong{\code{jaccard}}: \code{sum(a & b) / sum(a | b)}
+#'     \item \strong{\code{euclidean}}: \code{1 / (1 + sqrt(sum((a - b) ^ 2)))}
+#'     \item \strong{\code{canberra}}: \code{mean(1 - abs(a - b) / (a + b))}
+#'     \item \strong{\code{cosine}}: \code{sum(a * b) / sqrt(sum(a ^ 2 * sum(b ^ 2)))}
+#'     \item \strong{\code{pearson}}: \code{(mean(a * b) - (mean(a) * mean(b))) /} \cr
+#'       \code{sqrt(mean(a ^ 2) - mean(a) ^ 2) / sqrt(mean(b ^ 2) - mean(b) ^ 2)}
 #'   }
 #' @param group If \code{b} is missing and \code{a} has multiple rows, this will be used to make
 #'   comparisons between rows of \code{a}, as modified by \code{agg} and \code{agg.mean}.
@@ -1696,16 +1742,20 @@ match_metric = function(x){
 #' RcppParallel::setThreadOptions(4) before a call to lma_simets to set the number of CPU
 #' threads to 4.
 #' @return Output varies based on the dimensions of \code{a} and \code{b}:
-#'   \tabular{ll}{
-#'     \strong{output} \tab \strong{input} \cr
-#'     vector with a value per metric \tab Only when \code{a} and \code{b} are both vectors.\cr
-#'     vector with a value per row \tab Any time a single value is expected per row: \code{a} or \code{b} is a vector,
+#'   \itemize{
+#'     \item \strong{Out:} vector with a value per metric
+#'       \strong{In:} Only when \code{a} and \code{b} are both vectors.
+#'     \item \strong{Out:} vector with a value per row
+#'       \strong{In:} Any time a single value is expected per row: \code{a} or \code{b} is a vector,
 #'       \code{a} and \code{b} are matrices with the same number of rows and \code{pairwise = FALSE}, a group is
-#'       specified, or \code{mean = TRUE}, and only one metric is requested.\cr
-#'     data.frame with a column per metric \tab When multiple metrics are requested in the previous case.\cr
-#'     sparse matrix \tab Pairwise comparisons within an \code{a} matrix or between
-#'       an \code{a} and \code{b} matrix, when only 1 metric is requested.\cr
-#'     list with a sparse matrix per metric \tab When multiple metrics are requested in the previous case.\cr
+#'       specified, or \code{mean = TRUE}, and only one metric is requested.
+#'     \item \strong{Out:} data.frame with a column per metric
+#'       \strong{In:} When multiple metrics are requested in the previous case.
+#'     \item \strong{Out:} sparse matrix
+#'       \strong{In:} Pairwise comparisons within an \code{a} matrix or between
+#'       an \code{a} and \code{b} matrix, when only 1 metric is requested.
+#'     \item \strong{Out:} list with a sparse matrix per metric
+#'       \strong{In:} When multiple metrics are requested in the previous case.
 #'   }
 #' @examples
 #' text = c(

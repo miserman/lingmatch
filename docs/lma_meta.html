@@ -32,113 +32,88 @@ lma_meta(text)
 
 <h3>Value</h3>
 
-<p>A data.frame: </p>
+<p>A data.frame:
+</p>
 
-<table summary="Rd table">
-<tr>
- <td style="text-align: left;">
-  <code>characters</code> </td><td style="text-align: left;"> Total number of characters.</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-  <code>syllables</code> </td><td style="text-align: left;"> Total number of syllables, as estimated by split length of
-    <code>'a+[eu]*|e+a*|i+|o+[ui]*|u+|y+[aeiou]*'</code> - 1.</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-  <code>words</code> </td><td style="text-align: left;"> Total number of words (raw word count).</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-  <code>unique_words</code> </td><td style="text-align: left;"> Number of unique words (binary word count).</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-  <code>clauses</code> </td><td style="text-align: left;"> Number of clauses, as marked by commas, colons, semicolons, dashes, or brackets
-    within sentences.</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-  <code>sentences</code> </td><td style="text-align: left;"> Number of sentences, as marked by periods, question marks, exclamation points,
-    or new line characters.</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-  <code>words_per_clause</code> </td><td style="text-align: left;"> Average number of words per clause.</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-  <code>words_per_sentence</code> </td><td style="text-align: left;"> Average number of words per sentence.</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-  <code>sixltr</code> </td><td style="text-align: left;"> Number of words 6 or more characters long.</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-  <code>characters_per_word</code> </td><td style="text-align: left;"> Average number of characters per word
-    (<code>characters</code> / <code>words</code>).</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-  <code>syllables_per_word</code> </td><td style="text-align: left;"> Average number of syllables per word
-    (<code>syllables</code> / <code>words</code>).</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-  <code>type_token_ratio</code> </td><td style="text-align: left;"> Ratio of unique to total words: <code>unique_words</code> / <code>words</code>.</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-  <code>reading_grade</code> </td><td style="text-align: left;"> Flesch-Kincaid grade level: .39 * <code>words</code> / <code>sentences</code> +
-    11.8 * <code>syllables</code> / <code>words</code> - 15.59.</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-  <code>numbers</code> </td><td style="text-align: left;"> Number of terms starting with numbers. </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-  <code>punct</code> </td><td style="text-align: left;"> Number of terms starting with non-alphanumeric characters.</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-  <code>periods</code> </td><td style="text-align: left;"> Number of periods.</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-  <code>commas</code> </td><td style="text-align: left;"> Number of commas.</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-  <code>qmarks</code> </td><td style="text-align: left;"> Number of question marks.</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-  <code>exclams</code> </td><td style="text-align: left;"> Number of exclamation points.</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-  <code>quotes</code> </td><td style="text-align: left;"> Number of quotation marks (single and double).</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-  <code>apostrophes</code> </td><td style="text-align: left;"> Number of apostrophes, defined as any modified letter apostrophe, or backtick
-    or single straight or curly quote surrounded by letters.</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-  <code>brackets</code> </td><td style="text-align: left;"> Number of bracketing characters (including parentheses, and square,
-    curly, and angle brackets).</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-  <code>orgmarks</code> </td><td style="text-align: left;"> Number of characters used for organization or structuring (including
-    dashes, foreword slashes, colons, and semicolons).
-</td>
-</tr>
-
-</table>
+<ul>
+<li> <p><strong><code>characters</code></strong>: Total number of characters.
+</p>
+</li>
+<li> <p><strong><code>syllables</code></strong>: Total number of syllables, as estimated by split length of <br />
+<code>'a+[eu]*|e+a*|i+|o+[ui]*|u+|y+[aeiou]*'</code> - 1.
+</p>
+</li>
+<li> <p><strong><code>words</code></strong>: Total number of words (raw word count).
+</p>
+</li>
+<li> <p><strong><code>unique_words</code></strong>: Number of unique words (binary word count).
+</p>
+</li>
+<li> <p><strong><code>clauses</code></strong>: Number of clauses, as marked by commas, colons, semicolons, dashes, or brackets
+within sentences.
+</p>
+</li>
+<li> <p><strong><code>sentences</code></strong>: Number of sentences, as marked by periods, question marks, exclamation points,
+or new line characters.
+</p>
+</li>
+<li> <p><strong><code>words_per_clause</code></strong>: Average number of words per clause.
+</p>
+</li>
+<li> <p><strong><code>words_per_sentence</code></strong>: Average number of words per sentence.
+</p>
+</li>
+<li> <p><strong><code>sixltr</code></strong>: Number of words 6 or more characters long.
+</p>
+</li>
+<li> <p><strong><code>characters_per_word</code></strong>: Average number of characters per word
+(<code>characters</code> / <code>words</code>).
+</p>
+</li>
+<li> <p><strong><code>syllables_per_word</code></strong>: Average number of syllables per word
+(<code>syllables</code> / <code>words</code>).
+</p>
+</li>
+<li> <p><strong><code>type_token_ratio</code></strong>: Ratio of unique to total words: <code>unique_words</code> / <code>words</code>.
+</p>
+</li>
+<li> <p><strong><code>reading_grade</code></strong>: Flesch-Kincaid grade level: .39 * <code>words</code> / <code>sentences</code> +
+11.8 * <code>syllables</code> / <code>words</code> - 15.59.
+</p>
+</li>
+<li> <p><strong><code>numbers</code></strong>: Number of terms starting with numbers.
+</p>
+</li>
+<li> <p><strong><code>punct</code></strong>: Number of terms starting with non-alphanumeric characters.
+</p>
+</li>
+<li> <p><strong><code>periods</code></strong>: Number of periods.
+</p>
+</li>
+<li> <p><strong><code>commas</code></strong>: Number of commas.
+</p>
+</li>
+<li> <p><strong><code>qmarks</code></strong>: Number of question marks.
+</p>
+</li>
+<li> <p><strong><code>exclams</code></strong>: Number of exclamation points.
+</p>
+</li>
+<li> <p><strong><code>quotes</code></strong>: Number of quotation marks (single and double).
+</p>
+</li>
+<li> <p><strong><code>apostrophes</code></strong>: Number of apostrophes, defined as any modified letter apostrophe, or backtick
+or single straight or curly quote surrounded by letters.
+</p>
+</li>
+<li> <p><strong><code>brackets</code></strong>: Number of bracketing characters (including parentheses, and square,
+curly, and angle brackets).
+</p>
+</li>
+<li> <p><strong><code>orgmarks</code></strong>: Number of characters used for organization or structuring (including
+dashes, foreword slashes, colons, and semicolons).
+</p>
+</li></ul>
 
 
 

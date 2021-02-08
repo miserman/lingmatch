@@ -51,213 +51,149 @@ and compares it with that calculated from the downloaded file to check its integ
 <p>A list with varying entries:
 </p>
 
-<table summary="Rd table">
-<tr>
- <td style="text-align: left;">
-    info </td><td style="text-align: left;"> The version of <a href="https://osf.io/kjqb8">osf.io/kjqb8</a> stored internally; a
-      <code>data.frame</code>  with dictionary names as row names, and information about each dictionary in columns.
-        Also described at
-        <a href="https://osf.io/y6g5b/wiki/dict_variables">osf.io/y6g5b/wiki/dict_variables</a>,
-        here <code>short</code> (corresponding to the file name [<code>{short}.(csv|dic)</code>] and
-        wiki urls [<code>https://osf.io/y6g5b/wiki/{short}</code>]) is set as row names and removed:
-        
-<table summary="Rd table">
-<tr>
- <td style="text-align: left;">
-          <code>name</code> </td><td style="text-align: left;"> Full name of the dictionary. </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-          <code>description</code> </td><td style="text-align: left;"> Description of the dictionary, relating to its purpose and
-            development. </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-          <code>note</code> </td><td style="text-align: left;"> Notes about processing decisions that additionally alter the original. </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-          <code>constructor</code> </td><td style="text-align: left;"> How the dictionary was constructed:
-            
-<table summary="Rd table">
-<tr>
- <td style="text-align: left;">
-              <code>algorithm</code> </td><td style="text-align: left;"> Terms were selected by some automated process, potentially
-                learned from data or other resources. </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-              <code>crowd</code> </td><td style="text-align: left;"> Several individuals rated the terms, and in aggregate those ratings
-                translate to categories and weights. </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-              <code>mixed</code> </td><td style="text-align: left;"> Some combination of the other methods, usually in some iterative
-                process. </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-              <code>team</code> </td><td style="text-align: left;"> One of more individuals make decisions about term inclusions,
-                categories, and weights. </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-            </td>
-</tr>
+<ul>
+<li> <p><strong><code>info</code></strong>: The version of <a href="https://osf.io/kjqb8">osf.io/kjqb8</a> stored internally; a
+<code>data.frame</code>  with dictionary names as row names, and information about each dictionary in columns. <br />
+Also described at
+<a href="https://osf.io/y6g5b/wiki/dict_variables">osf.io/y6g5b/wiki/dict_variables</a>,
+here <code>short</code> (corresponding to the file name [<code>{short}.(csv|dic)</code>] and
+wiki urls [<code>https://osf.io/y6g5b/wiki/{short}</code>]) is set as row names and removed:
+</p>
 
-</table>
- </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-          <code>subject</code> </td><td style="text-align: left;"> Broad, rough subject or purpose of the dictionary:
-            
-<table summary="Rd table">
-<tr>
- <td style="text-align: left;">
-              <code>emotion</code> </td><td style="text-align: left;"> Terms relate to emotions, potentially exemplifying or expressing
-                them. </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-              <code>general</code> </td><td style="text-align: left;"> A large range of categories, aiming to capture the content of the
-                text. </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-              <code>impression</code> </td><td style="text-align: left;"> Terms are categorized and weighted based on the impression they
-                might give. </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-              <code>language</code> </td><td style="text-align: left;"> Terms are categorized or weighted based on their linguistic
-                features, such as part of speech, specificity, or area of use. </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-              <code>social</code> </td><td style="text-align: left;"> Terms relate to social phenomena, such as characteristics or concerns
-                of social entities. </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-            </td>
-</tr>
+<ul>
+<li> <p><strong><code>name</code></strong>: Full name of the dictionary.
+</p>
+</li>
+<li> <p><strong><code>description</code></strong>: Description of the dictionary, relating to its purpose and
+development.
+</p>
+</li>
+<li> <p><strong><code>note</code></strong>: Notes about processing decisions that additionally alter the original.
+</p>
+</li>
+<li> <p><strong><code>constructor</code></strong>: How the dictionary was constructed:
+</p>
 
-</table>
- </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-          <code>terms</code> </td><td style="text-align: left;"> Number of unique terms across categories. </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-          <code>term_type</code> </td><td style="text-align: left;"> Format of the terms:
-            
-<table summary="Rd table">
-<tr>
- <td style="text-align: left;">
-              <code>glob</code> </td><td style="text-align: left;"> Include asterisks which denote inclusion of any characters until a
-                word boundary. </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-              <code>glob+</code> </td><td style="text-align: left;"> Glob-style asterisks with regular expressions within terms. </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-              <code>ngram</code> </td><td style="text-align: left;"> Includes any number of words as a term, separated by spaces. </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-              <code>pattern</code> </td><td style="text-align: left;"> A string of characters, potentially within or between words, or
-                spanning words. </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-              <code>regex</code> </td><td style="text-align: left;"> Regular expressions. </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-              <code>stem</code> </td><td style="text-align: left;"> Unigrams with common endings removed. </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-              <code>unigram</code> </td><td style="text-align: left;"> Complete single words. </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-            </td>
-</tr>
+<ul>
+<li> <p><strong><code>algorithm</code></strong>: Terms were selected by some automated process, potentially
+learned from data or other resources.
+</p>
+</li>
+<li> <p><strong><code>crowd</code></strong>: Several individuals rated the terms, and in aggregate those ratings
+translate to categories and weights.
+</p>
+</li>
+<li> <p><strong><code>mixed</code></strong>: Some combination of the other methods, usually in some iterative
+process.
+</p>
+</li>
+<li> <p><strong><code>team</code></strong>: One of more individuals make decisions about term inclusions,
+categories, and weights.
+</p>
+</li></ul>
 
-</table>
- </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-          <code>weighted</code> </td><td style="text-align: left;"> Indicates whether weights are associated with terms. This
-            determines the file type of the dictionary: dictionaries with weights are stored
-            as .csv, and those without are stored as .dic files. </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-          <code>regex_characters</code> </td><td style="text-align: left;"> Logical indicating whether special regular expression
-            characters are present in any term, which might need to be escaped if the terms are used
-            in regular expressions. Glob-type terms allow complete parens (at least one open and one
-            closed, indicating preceding or following words), and initial and terminal asterisks. For
-            all other terms, <code>[](){}*.^$+?\|</code> are counted as regex characters. These could be
-            escaped in R with <code>gsub('([][)(}{*.^$+?\\|])', '\\\1', terms)</code> if <code>terms</code>
-            is a character vector, and in Python with (importing re)
-            <code>[re.sub(r'([][(){}*.^$+?\|])', r'\\1', term) for term in terms]</code> if <code>terms</code>
-            is a list. </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-          <code>categories</code> </td><td style="text-align: left;"> Category names in the order in which they appear in the dictionary
-            file, separated by commas. </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-          <code>ncategories</code> </td><td style="text-align: left;"> Number of categories.</td>
-</tr>
-<tr>
- <td style="text-align: left;">
-          <code>original_max</code> </td><td style="text-align: left;"> Maximum value of the original dictionary before standardization:
-            <code>original values / max(original values) * 100</code>. Dictionaries with no weights are
-            considered to have a max of <code>1</code>. </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-          <code>osf</code> </td><td style="text-align: left;"> ID of the file on OSF, translating to the file's URL:
-            https://osf.io/<code>osf</code> </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-          <code>wiki</code> </td><td style="text-align: left;"> URL of the dictionary's wiki. </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-          <code>downloaded</code> </td><td style="text-align: left;"> Path to the file if downloaded, and <code>''</code> otherwise. </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-        </td>
-</tr>
+</li>
+<li> <p><strong><code>subject</code></strong>: Broad, rough subject or purpose of the dictionary:
+</p>
 
-</table>
+<ul>
+<li> <p><strong><code>emotion</code></strong>: Terms relate to emotions, potentially exemplifying or expressing
+them.
+</p>
+</li>
+<li> <p><strong><code>general</code></strong>: A large range of categories, aiming to capture the content of the
+text.
+</p>
+</li>
+<li> <p><strong><code>impression</code></strong>: Terms are categorized and weighted based on the impression they
+might give.
+</p>
+</li>
+<li> <p><strong><code>language</code></strong>: Terms are categorized or weighted based on their linguistic
+features, such as part of speech, specificity, or area of use.
+</p>
+</li>
+<li> <p><strong><code>social</code></strong>: Terms relate to social phenomena, such as characteristics or concerns
+of social entities.
+</p>
+</li></ul>
 
-      </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-    selected </td><td style="text-align: left;"> A subset of <code>info</code> selected by <code>query</code>. </td>
-</tr>
-<tr>
- <td style="text-align: left;">
-  </td>
-</tr>
+</li>
+<li> <p><strong><code>terms</code></strong>: Number of unique terms across categories.
+</p>
+</li>
+<li> <p><strong><code>term_type</code></strong>: Format of the terms:
+</p>
 
-</table>
+<ul>
+<li> <p><strong><code>glob</code></strong>: Include asterisks which denote inclusion of any characters until a
+word boundary.
+</p>
+</li>
+<li> <p><strong><code>glob+</code></strong>: Glob-style asterisks with regular expressions within terms.
+</p>
+</li>
+<li> <p><strong><code>ngram</code></strong>: Includes any number of words as a term, separated by spaces.
+</p>
+</li>
+<li> <p><strong><code>pattern</code></strong>: A string of characters, potentially within or between words, or
+spanning words.
+</p>
+</li>
+<li> <p><strong><code>regex</code></strong>: Regular expressions.
+</p>
+</li>
+<li> <p><strong><code>stem</code></strong>: Unigrams with common endings removed.
+</p>
+</li>
+<li> <p><strong><code>unigram</code></strong>: Complete single words.
+</p>
+</li></ul>
+
+</li>
+<li> <p><strong><code>weighted</code></strong>: Indicates whether weights are associated with terms. This
+determines the file type of the dictionary: dictionaries with weights are stored
+as .csv, and those without are stored as .dic files.
+</p>
+</li>
+<li> <p><strong><code>regex_characters</code></strong>: Logical indicating whether special regular expression
+characters are present in any term, which might need to be escaped if the terms are used
+in regular expressions. Glob-type terms allow complete parens (at least one open and one
+closed, indicating preceding or following words), and initial and terminal asterisks. For
+all other terms, <code>[](){}*.^$+?\|</code> are counted as regex characters. These could be
+escaped in R with <code>gsub('([][)(}{*.^$+?\\|])', '\\\1', terms)</code> if <code>terms</code>
+is a character vector, and in Python with (importing re)
+<code>[re.sub(r'([][(){}*.^$+?\|])', r'\\1', term) for term in terms]</code> if <code>terms</code>
+is a list.
+</p>
+</li>
+<li> <p><strong><code>categories</code></strong>: Category names in the order in which they appear in the dictionary
+file, separated by commas.
+</p>
+</li>
+<li> <p><strong><code>ncategories</code></strong>: Number of categories.
+</p>
+</li>
+<li> <p><strong><code>original_max</code></strong>: Maximum value of the original dictionary before standardization:
+<code>original values / max(original values) * 100</code>. Dictionaries with no weights are
+considered to have a max of <code>1</code>.
+</p>
+</li>
+<li> <p><strong><code>osf</code></strong>: ID of the file on OSF, translating to the file's URL:
+https://osf.io/<code>osf</code>.
+</p>
+</li>
+<li> <p><strong><code>wiki</code></strong>: URL of the dictionary's wiki.
+</p>
+</li>
+<li> <p><strong><code>downloaded</code></strong>: Path to the file if downloaded, and <code>''</code> otherwise.
+</p>
+</li></ul>
+
+</li>
+<li> <p><strong><code>selected</code></strong>: A subset of <code>info</code> selected by <code>query</code>.
+</p>
+</li></ul>
 
 
 

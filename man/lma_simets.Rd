@@ -18,13 +18,13 @@ be compared with \code{b} or each row of \code{b}.}
 \item{metric}{A character or vector of characters at least partially matching one of the
 available metric names (or 'all' to explicitly include all metrics),
 or a number or vector of numbers indicating the metric by index:
-\tabular{ll}{
-  \code{jaccard} \tab \code{sum(a & b) / sum(a | b)} \cr
-  \code{euclidean} \tab \code{1 / (1 + sqrt(sum((a - b) ^ 2)))} \cr
-  \code{canberra} \tab \code{mean(1 - abs(a - b) / (a + b))} \cr
-  \code{cosine} \tab \code{sum(a * b) / sqrt(sum(a ^ 2 * sum(b ^ 2)))} \cr
-  \code{pearson} \tab \code{(mean(a * b) - (mean(a) * mean(b))) / sqrt(mean(a ^ 2) - mean(a) ^ 2) /
-    sqrt(mean(b ^ 2) - mean(b) ^ 2)} \cr
+\itemize{
+  \item \strong{\code{jaccard}}: \code{sum(a & b) / sum(a | b)}
+  \item \strong{\code{euclidean}}: \code{1 / (1 + sqrt(sum((a - b) ^ 2)))}
+  \item \strong{\code{canberra}}: \code{mean(1 - abs(a - b) / (a + b))}
+  \item \strong{\code{cosine}}: \code{sum(a * b) / sqrt(sum(a ^ 2 * sum(b ^ 2)))}
+  \item \strong{\code{pearson}}: \code{(mean(a * b) - (mean(a) * mean(b))) /} \cr
+    \code{sqrt(mean(a ^ 2) - mean(a) ^ 2) / sqrt(mean(b ^ 2) - mean(b) ^ 2)}
 }}
 
 \item{group}{If \code{b} is missing and \code{a} has multiple rows, this will be used to make
@@ -54,16 +54,20 @@ for each metric, even when only one metric is requested.}
 }
 \value{
 Output varies based on the dimensions of \code{a} and \code{b}:
-  \tabular{ll}{
-    \strong{output} \tab \strong{input} \cr
-    vector with a value per metric \tab Only when \code{a} and \code{b} are both vectors.\cr
-    vector with a value per row \tab Any time a single value is expected per row: \code{a} or \code{b} is a vector,
+  \itemize{
+    \item \strong{Out:} vector with a value per metric
+      \strong{In:} Only when \code{a} and \code{b} are both vectors.
+    \item \strong{Out:} vector with a value per row
+      \strong{In:} Any time a single value is expected per row: \code{a} or \code{b} is a vector,
       \code{a} and \code{b} are matrices with the same number of rows and \code{pairwise = FALSE}, a group is
-      specified, or \code{mean = TRUE}, and only one metric is requested.\cr
-    data.frame with a column per metric \tab When multiple metrics are requested in the previous case.\cr
-    sparse matrix \tab Pairwise comparisons within an \code{a} matrix or between
-      an \code{a} and \code{b} matrix, when only 1 metric is requested.\cr
-    list with a sparse matrix per metric \tab When multiple metrics are requested in the previous case.\cr
+      specified, or \code{mean = TRUE}, and only one metric is requested.
+    \item \strong{Out:} data.frame with a column per metric
+      \strong{In:} When multiple metrics are requested in the previous case.
+    \item \strong{Out:} sparse matrix
+      \strong{In:} Pairwise comparisons within an \code{a} matrix or between
+      an \code{a} and \code{b} matrix, when only 1 metric is requested.
+    \item \strong{Out:} list with a sparse matrix per metric
+      \strong{In:} When multiple metrics are requested in the previous case.
   }
 }
 \description{
