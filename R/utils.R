@@ -434,7 +434,7 @@ write.dic = function(dict, filename = 'custom', type = 'asis', as.weighted = FAL
 #'   roughly \code{segment.size} number of words.
 #' @param bysentence A number: if \code{TRUE}, and \code{segment} is a number or \code{segment.size} is specified, sentences will
 #'   be kept together, rather than potentially being broken across segments.
-#' @param text A character vector with text to be split, used in place of \code{path}. Each entry is treates as a file.
+#' @param text A character vector with text to be split, used in place of \code{path}. Each entry is treated as a file.
 #' @returns
 #' A \code{data.frame} with columns for file names (\code{input}),
 #' segment number within file (\code{segment}), word count for each segment (\code{WC}), and the text of

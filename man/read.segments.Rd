@@ -25,7 +25,7 @@ roughly \code{segment.size} number of words.}
 \item{bysentence}{A number: if \code{TRUE}, and \code{segment} is a number or \code{segment.size} is specified, sentences will
 be kept together, rather than potentially being broken across segments.}
 
-\item{text}{A character vector with text to be split, used in place of \code{path}. Each entry is treates as a file.}
+\item{text}{A character vector with text to be split, used in place of \code{path}. Each entry is treated as a file.}
 }
 \value{
 A \code{data.frame} with columns for file names (\code{input}),
