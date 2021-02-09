@@ -21,6 +21,5 @@ Suggests:
   rmarkdown,
   splot,
   testthat (>= 2.1.0)
-VignetteBuilder: knitr
 LinkingTo: Rcpp, RcppParallel
 SystemRequirements: C++11
