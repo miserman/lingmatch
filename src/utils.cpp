@@ -140,7 +140,7 @@ struct Compare : public Worker{
       r = aind[p];
       comp = bind[p];
       i = a.row_starts[r];
-      c = a.columns[i];
+      c = i == -1 ? -1 : a.columns[i];
       bi = b.row_starts[comp];
       bc = b.columns[bi];
       x = bx = sa = sb = sdif = sadif = sse = sne = cp = asq = bsq = sj = si = 0;

@@ -121,9 +121,9 @@ test_that('group comparisons work', {
       c(1, 0, 1), nrow(dtm) / c(2, 1, 2))))
   expect_true(class(lingmatch(dtm, type = 'lsm', symmetrical = FALSE)$sim)[1] == 'dtCMatrix')
   pw = lingmatch(dtm, type = 'lsm', symmetrical = TRUE)$sim
-  expect_true(
-    all(lingmatch(dtm, 'pairwise', mean = FALSE, symmetrical = TRUE, group = groups, type = 'lsm')$sim$a -
-    pw[groups == 'a', groups == 'a']) < 1e-9
+  expect_equal(
+    as.numeric(lingmatch(dtm, 'pairwise', mean = FALSE, symmetrical = TRUE, group = groups, type = 'lsm')$sim$a),
+    as.numeric(pw[groups == 'a', groups == 'a'])
   )
   expect_equal(
     lingmatch(dtm, 'pairwise', group = groups, type = 'lsm')$sim[, 2],

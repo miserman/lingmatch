@@ -540,11 +540,10 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
           }
         }
       }else{
-        tomean = if('mean'%in%names(dsp$s)) dsp$s$mean else TRUE
+        tomean = if('mean' %in% names(dsp$s)) dsp$s$mean else TRUE
         ug = unique(group[[1]])
         if(tomean){
           sal$symmetrical = TRUE
-          ids = seq_along(group[[1]])
           sim = data.frame(group[[1]], 1)
           colnames(sim) = c(opt$group, sal$metric)
           for(g in ug){
@@ -560,7 +559,7 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
             }
           }
         }else{
-          sal$symmetrical = if('symmetrical'%in%names(dsp$s)) dsp$s$symmetrical else FALSE
+          sal$symmetrical = if('symmetrical' %in% names(dsp$s)) dsp$s$symmetrical else FALSE
           sim = lapply(ug, function(g){
             su = group[[1]] == g
             if(sum(su) != 1) do.call(lma_simets, c(list(input[su,]), sal)) else
