@@ -55,18 +55,18 @@ for each metric, even when only one metric is requested.}
 \value{
 Output varies based on the dimensions of \code{a} and \code{b}:
   \itemize{
-    \item \strong{Out:} vector with a value per metric
+    \item \strong{Out:} A vector with a value per metric. \cr
       \strong{In:} Only when \code{a} and \code{b} are both vectors.
-    \item \strong{Out:} vector with a value per row
+    \item \strong{Out:} A vector with a value per row. \cr
       \strong{In:} Any time a single value is expected per row: \code{a} or \code{b} is a vector,
       \code{a} and \code{b} are matrices with the same number of rows and \code{pairwise = FALSE}, a group is
       specified, or \code{mean = TRUE}, and only one metric is requested.
-    \item \strong{Out:} data.frame with a column per metric
+    \item \strong{Out:} A data.frame with a column per metric. \cr
       \strong{In:} When multiple metrics are requested in the previous case.
-    \item \strong{Out:} sparse matrix
+    \item \strong{Out:} A sparse matrix. \cr
       \strong{In:} Pairwise comparisons within an \code{a} matrix or between
       an \code{a} and \code{b} matrix, when only 1 metric is requested.
-    \item \strong{Out:} list with a sparse matrix per metric
+    \item \strong{Out:} A list with a sparse matrix per metric. \cr
       \strong{In:} When multiple metrics are requested in the previous case.
   }
 }

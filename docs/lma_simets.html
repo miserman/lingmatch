@@ -118,26 +118,26 @@ threads to 4.
 </p>
 
 <ul>
-<li> <p><strong>Out:</strong> vector with a value per metric
+<li> <p><strong>Out:</strong> A vector with a value per metric. <br />
 <strong>In:</strong> Only when <code>a</code> and <code>b</code> are both vectors.
 </p>
 </li>
-<li> <p><strong>Out:</strong> vector with a value per row
+<li> <p><strong>Out:</strong> A vector with a value per row. <br />
 <strong>In:</strong> Any time a single value is expected per row: <code>a</code> or <code>b</code> is a vector,
 <code>a</code> and <code>b</code> are matrices with the same number of rows and <code>pairwise = FALSE</code>, a group is
 specified, or <code>mean = TRUE</code>, and only one metric is requested.
 </p>
 </li>
-<li> <p><strong>Out:</strong> data.frame with a column per metric
+<li> <p><strong>Out:</strong> A data.frame with a column per metric. <br />
 <strong>In:</strong> When multiple metrics are requested in the previous case.
 </p>
 </li>
-<li> <p><strong>Out:</strong> sparse matrix
+<li> <p><strong>Out:</strong> A sparse matrix. <br />
 <strong>In:</strong> Pairwise comparisons within an <code>a</code> matrix or between
 an <code>a</code> and <code>b</code> matrix, when only 1 metric is requested.
 </p>
 </li>
-<li> <p><strong>Out:</strong> list with a sparse matrix per metric
+<li> <p><strong>Out:</strong> A list with a sparse matrix per metric. <br />
 <strong>In:</strong> When multiple metrics are requested in the previous case.
 </p>
 </li></ul>

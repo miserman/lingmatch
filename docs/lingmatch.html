@@ -158,6 +158,36 @@ Babcock, Ta, &amp; Ickes, 2014). See the <code>type</code> argument for specific
 </p>
 
 
+<h3>Value</h3>
+
+<p>A list with processed components of the input, information about the comparison, and results of
+the comparison:
+</p>
+
+<ul>
+<li> <p><strong><code>dtm</code></strong>: A sparse matrix; the raw count-dtm, or a version of the original input
+if it is more processed.
+</p>
+</li>
+<li> <p><strong><code>processed</code></strong>: A matrix-like object; a processed version of the input
+(e.g., weighted and categorized).
+</p>
+</li>
+<li> <p><strong><code>comp.type</code></strong>: A string describing the comparison if applicable.
+</p>
+</li>
+<li> <p><strong><code>comp</code></strong>: A vector or matrix-like object; the comparison data if applicable.
+</p>
+</li>
+<li> <p><strong><code>group</code></strong>: A string describing the group if applicable.
+</p>
+</li>
+<li> <p><strong><code>sim</code></strong>: Result of <code>lma_simets</code>.
+</p>
+</li></ul>
+
+
+
 <h3>Grouping and Comparisons</h3>
 
 <p>Defining groups and comparisons can sometimes be a bit complicated, and requires dataset

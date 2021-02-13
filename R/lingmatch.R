@@ -115,6 +115,18 @@
 #' Niederhoffer, K. G., & Pennebaker, J. W. (2002). Linguistic style matching in social interaction.
 #'   \emph{Journal of Language and Social Psychology, 21}, 337-360.
 #' @seealso For a general text processing function, see \code{\link{lma_process}}.
+#' @return A list with processed components of the input, information about the comparison, and results of
+#' the comparison:
+#' \itemize{
+#'   \item \strong{\code{dtm}}: A sparse matrix; the raw count-dtm, or a version of the original input
+#'     if it is more processed.
+#'   \item \strong{\code{processed}}: A matrix-like object; a processed version of the input
+#'     (e.g., weighted and categorized).
+#'   \item \strong{\code{comp.type}}: A string describing the comparison if applicable.
+#'   \item \strong{\code{comp}}: A vector or matrix-like object; the comparison data if applicable.
+#'   \item \strong{\code{group}}: A string describing the group if applicable.
+#'   \item \strong{\code{sim}}: Result of \code{\link{lma_simets}}.
+#' }
 #' @examples
 #' # compare single strings
 #' lingmatch('Compare this sentence.', 'With this other sentence.')
@@ -474,16 +486,24 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
   #making comparisons
   sal=dsp$s
   ckf=is.function(comp)
+  apply_comp = function(m){
+    a = names(as.list(args(comp)))
+    if('na.rm' %in% a){
+      apply(m, 2, comp, na.rm = TRUE)
+    }else if('na.action' %in% a){
+      apply(m, 2, comp, na.action = na.omit)
+    }else apply(m, 2, comp)
+  }
   if(is.null(group)){
     if(!is.null(speaker)) sal$group=speaker
     if(!is.null(comp.data)){
       if(ckf){
         opt$comp=paste(if(length(opt$comp.data) > 1) deparse(opt$comp.data) else opt$comp.data,opt$comp)
         sal$b=comp.data=if(is.null(dim(comp.data))) comp.data else
-          if(compmeanck) colMeans(comp.data,na.rm=TRUE) else apply(na.omit(comp.data),2,comp)
+          if(compmeanck) colMeans(comp.data,na.rm=TRUE) else apply_comp(comp.data)
       }else sal$b=comp.data
     }else if(ckf) sal$b=comp.data=if(compmeanck) colMeans(input,na.rm=TRUE) else
-      apply(na.omit(input),2,comp)
+      apply_comp(input)
     if(!'b' %in% names(sal) && (is.numeric(comp) || !is.null(dim(comp)))) sal$b = comp
     sim=do.call(lma_simets,c(list(input),sal))
   }else{
@@ -519,17 +539,18 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
               opt$comp = 'mean'
               comp = mean
             }
-            ckmc=TRUE
-            opt$comp=paste(opt$group,'group',opt$comp)
-            comp.data=as.data.frame(matrix(NA,length(gs),nc,dimnames=list(gs,colnames(input))))
+            ckmc = TRUE
+            opt$comp = paste0(if(length(opt$group) == 1) paste(opt$group, ''), 'group ', opt$comp)
+            comp.data = as.data.frame(matrix(NA, length(gs), nc, dimnames = list(gs, colnames(input))))
           }
           for(g in gs){
-            su=sim[,1]==g
+            su = sim[,1] == g
+            sal$b = NULL
             if(ckc){
-              if(nrow(cc<-comp.data[if(!is.null(comp.group)) comp.group==g else g,,drop=FALSE])==1)
-                sal$b=cc else warning('comp.data has too few/many rows in group ',g, call. = FALSE)
-            }else if(sum(su)>1) sal$b=if(compmeanck) colMeans(input[su,],na.rm=TRUE) else
-              apply(na.omit(input[su,]),2,comp)
+              if(nrow(cc <- comp.data[if(!is.null(comp.group)) comp.group == g else g,, drop = FALSE]) == 1)
+                sal$b = cc else warning('comp.data has too few/many rows in group ', g, call. = FALSE)
+            }else if(sum(su) == 1) sal$b = input[su,] else if(sum(su) > 1)
+              sal$b = if(compmeanck) colMeans(input[su,], na.rm = TRUE) else apply_comp(input[su,])
             if(!is.null(sal$b) && ckmc) comp.data[g,]=sal$b
             if(sum(su)==1 && is.null(sal$b)){
               sim[su,mets]=1
@@ -630,7 +651,7 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
               lss = length(ssu)
               if(cks) sal$group = speaker[ssu] else if(ckf)
                 sal$b = if(compmeanck) colMeans(ssg[[ssn]], na.rm = TRUE) else
-                  apply(na.omit(ssg[[ssn]]), 2, comp)
+                  apply_comp(ssg[[ssn]])
               if(!is.null(sal$b) && identical(sal$b, ssg[[ssn]])){
                 sim[ssu, gl + mw + (mn * (s - 1))] = 1
                 next
@@ -658,7 +679,16 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
       }
     }
   }
-  list(dtm=dtm,processed=input,comp.type=opt$comp,comp=comp.data,group=opt$group,sim=sim)
+  list(
+    dtm = dtm,
+    processed = input,
+    comp.type = if(!is.null(opt$comp)) if(is.character(opt$comp)) opt$comp else
+      gsub('"', "'", as.character(deparse(opt$comp))),
+    comp = comp.data,
+    group = if(!is.null(opt$group)) if(is.character(opt$group)) opt$group else
+      gsub('"', "'", as.character(deparse(opt$group))),
+    sim = sim
+  )
 }
 
 #' Document-Term Matrix Creation
@@ -710,6 +740,8 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
 #' and weighting scheme used (particularly for LSA). This function also does some processing which
 #' may matter if you plan on categorizing with categories that have terms with look- ahead/behind assertions
 #' (like LIWC dictionaries). Otherwise, other methods may be faster, more memory efficient, and/or more featureful.
+#' @return A sparse matrix (or regular matrix if \code{sparse = FALSE}), with a row per \code{text},
+#' and column per term.
 #' @examples
 #' text = c(
 #'   "Why, hello there! How are you this evening?",
@@ -948,6 +980,7 @@ lma_dtm = function(text, exclude = NULL, context = NULL, replace.special = TRUE,
 #' not apply any document weight, and document weights alone will apply a \code{'count'} term weight
 #' (unless \code{doc.only = TRUE}, in which case a term-named vector of document weights is returned
 #' instead of a weighted dtm).
+#' @return A weighted version of \code{dtm}.
 #' @examples
 #' # visualize term and document weights
 #'
@@ -1008,7 +1041,7 @@ lma_weight = function(dtm, weight = 'count', normalize = TRUE, wc.complete = TRU
     wc = attr(dtm, 'WC')
     if(is.null(wc) || !wc.complete || nrow(dtm) != length(wc)) wc = rowSums(dtm, na.rm = TRUE)
     adj = if(percent) 100 else 1
-    if(.hasSlot(dtm, 'x')){
+    if(.hasSlot(dtm, 'x') && .hasSlot(dtm, 'i')){
       wc = wc[dtm@i + 1]
       su = wc != 0
       dtm@x[su] = dtm@x[su] / wc[su] * adj
@@ -1137,6 +1170,10 @@ lma_weight = function(dtm, weight = 'count', normalize = TRUE, wc.complete = TRU
 #' \code{\%in\%} \code{rownames(space)]} -- the terms common between the dtm and the space. This
 #' results in a matrix with documents as rows, and dimensions as columns, replacing terms.
 #' @family Latent Semantic Space functions
+#' @return A matrix or sparse matrix with either (a) a row per term and column per latent dimension (a latent
+#' space, either calculated from the input, or retrieved when \code{map.space = FALSE}), (b) a row per document
+#' and column per latent dimension (when a dtm is mapped to a space), or (c) a row per document and
+#' column per term (when a space is calculated and \code{keep.dim = TRUE}).
 #' @examples
 #'
 #' text = c(
@@ -1365,6 +1402,7 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, t
 #' @param dir Path to a folder in which to look for \code{dict}; \cr defaults to \code{getOption('lingmatch.dict.dir')}.
 #' @seealso For applying pattern-based dictionaries (to raw text) see \code{\link{lma_patcat}}.
 #' @family Dictionary functions
+#' @return A matrix with a row per \code{dtm} row and columns per dictionary category.
 #' @examples
 #' # Score texts with the NRC Affect Intensity Lexicon
 #' \dontrun{
@@ -1748,18 +1786,18 @@ match_metric = function(x){
 #' threads to 4.
 #' @return Output varies based on the dimensions of \code{a} and \code{b}:
 #'   \itemize{
-#'     \item \strong{Out:} vector with a value per metric
+#'     \item \strong{Out:} A vector with a value per metric. \cr
 #'       \strong{In:} Only when \code{a} and \code{b} are both vectors.
-#'     \item \strong{Out:} vector with a value per row
+#'     \item \strong{Out:} A vector with a value per row. \cr
 #'       \strong{In:} Any time a single value is expected per row: \code{a} or \code{b} is a vector,
 #'       \code{a} and \code{b} are matrices with the same number of rows and \code{pairwise = FALSE}, a group is
 #'       specified, or \code{mean = TRUE}, and only one metric is requested.
-#'     \item \strong{Out:} data.frame with a column per metric
+#'     \item \strong{Out:} A data.frame with a column per metric. \cr
 #'       \strong{In:} When multiple metrics are requested in the previous case.
-#'     \item \strong{Out:} sparse matrix
+#'     \item \strong{Out:} A sparse matrix. \cr
 #'       \strong{In:} Pairwise comparisons within an \code{a} matrix or between
 #'       an \code{a} and \code{b} matrix, when only 1 metric is requested.
-#'     \item \strong{Out:} list with a sparse matrix per metric
+#'     \item \strong{Out:} A list with a sparse matrix per metric. \cr
 #'       \strong{In:} When multiple metrics are requested in the previous case.
 #'   }
 #' @examples

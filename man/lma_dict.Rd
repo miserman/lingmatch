@@ -18,6 +18,11 @@ string will be returned. The regex string is passed to the matching function (\c
 as a 'pattern' argument, with the first argument of the returned function being passed as an 'x' argument.
 See examples.}
 }
+\value{
+A list with a vector of terms for each category, or (when \code{as.function = TRUE}) a function which
+accepts an initial "terms" argument (a character vector), and any additional arguments determined by function
+entered as \code{as.function} (\code{\link{grepl}} by default).
+}
 \description{
 Returns a list of function words based on the Linguistic Inquiry and Word Count 2015 dictionary
 (in terms of category names -- words were selected independently), or a list of special characters and patterns.

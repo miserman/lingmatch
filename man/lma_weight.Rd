@@ -104,6 +104,9 @@ each term).}
 
 \item{percent}{Logical; if \code{TRUE}, frequencies are multiplied by 100.}
 }
+\value{
+A weighted version of \code{dtm}.
+}
 \description{
 Weight a document-term matrix.
 }

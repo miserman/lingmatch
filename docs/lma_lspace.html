@@ -88,6 +88,15 @@ change with <code>options(lingmatch.lspace.dir = 'desired/path')</code>.</p>
 </table>
 
 
+<h3>Value</h3>
+
+<p>A matrix or sparse matrix with either (a) a row per term and column per latent dimension (a latent
+space, either calculated from the input, or retrieved when <code>map.space = FALSE</code>), (b) a row per document
+and column per latent dimension (when a dtm is mapped to a space), or (c) a row per document and
+column per term (when a space is calculated and <code>keep.dim = TRUE</code>).
+</p>
+
+
 <h3>Note</h3>
 
 <p>A traditional latent semantic space is a selection of right singular vectors from the singular

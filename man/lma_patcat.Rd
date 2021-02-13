@@ -56,6 +56,10 @@ or only some can be specified by name (e.g., \code{c(term =} \code{'patterns')})
 \item{dir}{Path to a folder in which to look for \code{dict} if it is the name of a file to be passed to
 \code{\link{read.dic}}.}
 }
+\value{
+A matrix with a row per \code{text} and columns per dictionary category, or (when \code{return.dtm = TRUE})
+a sparse matrix with a row per \code{text} and column per term.
+}
 \description{
 Categorize raw texts using a pattern-based dictionary.
 }

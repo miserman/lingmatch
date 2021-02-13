@@ -70,6 +70,20 @@ aligning with the standard calculations of each type:
   LSA \tab \code{lingmatch(text, weight='tfidf', space='100k_lsa', metric='cosine')}\cr
 }}
 }
+\value{
+A list with processed components of the input, information about the comparison, and results of
+the comparison:
+\itemize{
+  \item \strong{\code{dtm}}: A sparse matrix; the raw count-dtm, or a version of the original input
+    if it is more processed.
+  \item \strong{\code{processed}}: A matrix-like object; a processed version of the input
+    (e.g., weighted and categorized).
+  \item \strong{\code{comp.type}}: A string describing the comparison if applicable.
+  \item \strong{\code{comp}}: A vector or matrix-like object; the comparison data if applicable.
+  \item \strong{\code{group}}: A string describing the group if applicable.
+  \item \strong{\code{sim}}: Result of \code{\link{lma_simets}}.
+}
+}
 \description{
 Offers a variety of methods to assess linguistic matching or accommodation, where \emph{matching}
 is general similarity (sometimes called \emph{homophily}), and \emph{accommodation} is some form

@@ -48,6 +48,12 @@ dimensions as columns is returned.}
 \item{dir}{Path to a folder containing spaces. \cr Default is \code{getOption('lingmatch.lspace.dir')}; \cr
 change with \code{options(lingmatch.lspace.dir = 'desired/path')}.}
 }
+\value{
+A matrix or sparse matrix with either (a) a row per term and column per latent dimension (a latent
+space, either calculated from the input, or retrieved when \code{map.space = FALSE}), (b) a row per document
+and column per latent dimension (when a dtm is mapped to a space), or (c) a row per document and
+column per term (when a space is calculated and \code{keep.dim = TRUE}).
+}
 \description{
 Map a document-term matrix onto a latent semantic space, extract terms from a
 latent semantic space (if \code{dtm} is a character vector, or \code{map.space =} \code{FALSE}),

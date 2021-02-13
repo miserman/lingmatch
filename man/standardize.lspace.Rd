@@ -36,6 +36,9 @@ regardless of term.}
 \item{verbose}{Logical: if \code{TRUE}, prints the current line number and its term to the console every 1,000 lines.
 Only applies to plain-text files.}
 }
+\value{
+Path to the standardized [1] data file and [2] terms file if applicable.
+}
 \description{
 Reformat a .rda file which has a matrix with terms as row names, or a plain-text embeddings file
 which has a term at the start of each line, and consistent delimiting characters. Plain-text files

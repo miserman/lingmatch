@@ -47,6 +47,9 @@ always keep dictionary terms as entered.}
 
 \item{dir}{Path to a folder in which to look for \code{dict}; \cr defaults to \code{getOption('lingmatch.dict.dir')}.}
 }
+\value{
+A matrix with a row per \code{dtm} row and columns per dictionary category.
+}
 \description{
 Reduces the dimensions of a document-term matrix by dictionary-based categorization.
 }

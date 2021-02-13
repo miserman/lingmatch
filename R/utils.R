@@ -435,8 +435,7 @@ write.dic = function(dict, filename = 'custom', type = 'asis', as.weighted = FAL
 #' @param bysentence A number: if \code{TRUE}, and \code{segment} is a number or \code{segment.size} is specified, sentences will
 #'   be kept together, rather than potentially being broken across segments.
 #' @param text A character vector with text to be split, used in place of \code{path}. Each entry is treated as a file.
-#' @returns
-#' A \code{data.frame} with columns for file names (\code{input}),
+#' @return A \code{data.frame} with columns for file names (\code{input}),
 #' segment number within file (\code{segment}), word count for each segment (\code{WC}), and the text of
 #' each segment (\code{text}).
 #' @examples
@@ -963,6 +962,7 @@ download.dict = function(dict = 'lusi', check.md5 = TRUE, mode = 'wb', dir = get
 #' @param verbose Logical: if \code{TRUE}, prints the current line number and its term to the console every 1,000 lines.
 #'   Only applies to plain-text files.
 #' @family Latent Semantic Space functions
+#' @return Path to the standardized [1] data file and [2] terms file if applicable.
 #' @examples
 #' \dontrun{
 #'
@@ -982,6 +982,7 @@ standardize.lspace = function(infile, name, sep = ' ', digits = 9, dir = getOpti
   if(!is.character(term_check)) term_check = ''
   ip = paste0(sub('/+$', '', path.expand(dir)), '/', infile)
   op = paste0(sub('/+$', '', path.expand(outdir)), '/', name)
+  fs = op
   if(!is.character(infile) || grepl('\\.rda$', infile)){
     if(is.character(infile)){
       f = load(ip)
@@ -995,16 +996,19 @@ standardize.lspace = function(infile, name, sep = ' ', digits = 9, dir = getOpti
       o = o[su,]
       ot = ot[su]
     }
-    writeLines(ot, paste0(op, '_terms.txt'))
-    write(formatC(t(o), digits, 0, 'f'), paste0(op, '.dat'), ncol(o))
+    fs = paste0(op, c('.dat', '_terms.txt'))
+    writeLines(ot, fs[2])
+    write(formatC(t(o), digits, 0, 'f'), fs[1], ncol(o))
     if(is.character(infile)) rm(f, 'o')
   }else{
     if(!file.exists(ip)) stop('infile does not exist: ', ip)
     if(!grepl(term_check, scan(ip, '', 1, sep = sep, quiet = TRUE)))
       stop('infile does not appear to start with a term: ', ip)
+    fs = paste0(op, '.dat')
     reformat_embedding(ip, op, sep, digits, remove, term_check, verbose)
   }
   message('created ', op, '.dat\nfrom ', ip)
+  fs
 }
 
 #' Categorize Texts
@@ -1045,6 +1049,8 @@ standardize.lspace = function(infile, name, sep = ' ', digits = 9, dir = getOpti
 #'   \code{\link{read.dic}}.
 #' @seealso For applying term-based dictionaries (to a document-term matrix) see \code{\link{lma_termcat}}.
 #' @family Dictionary functions
+#' @return A matrix with a row per \code{text} and columns per dictionary category, or (when \code{return.dtm = TRUE})
+#' a sparse matrix with a row per \code{text} and column per term.
 #' @examples
 #' # example text
 #' text = c(
@@ -1386,6 +1392,9 @@ lma_meta = function(text){
 #' When categorizing a dtm, the input dictionary is passed by the special lists to be sure the terms in the dtm match up
 #' with the dictionary (so, for example, ": (" would be replaced with "repfrown" in both the text and dictionary).
 #' @seealso To score texts with these categories, use \code{\link{lma_termcat}}.
+#' @return A list with a vector of terms for each category, or (when \code{as.function = TRUE}) a function which
+#' accepts an initial "terms" argument (a character vector), and any additional arguments determined by function
+#' entered as \code{as.function} (\code{\link{grepl}} by default).
 #' @examples
 #' # return the full dictionary (excluding special)
 #' lma_dict()

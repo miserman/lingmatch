@@ -62,6 +62,10 @@ is Inf (no limit).}
   \code{indices} \tab A list with a vector of token indices for each document. \cr
 }}
 }
+\value{
+A sparse matrix (or regular matrix if \code{sparse = FALSE}), with a row per \code{text},
+and column per term.
+}
 \description{
 Creates a document-term matrix (dtm) from a set of texts.
 }
