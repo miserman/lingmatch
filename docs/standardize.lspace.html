@@ -49,7 +49,9 @@ Only applies to plain-text files.</p>
 </td></tr>
 <tr valign="top"><td><code>dir</code></td>
 <td>
-<p>Path to folder containing <code>infile</code>s; <br /> default is <code>getOption('lingmatch.lspace.dir')</code>.</p>
+<p>Path to folder containing <code>infile</code>s. <br /> Default is <code>getOption('lingmatch.lspace.dir')</code>,
+which must be set in the current session. If this is not specified and <code>infile</code> is a full path,
+<code>dir</code> will be set to <code>infile</code>'s parent directory.</p>
 </td></tr>
 <tr valign="top"><td><code>outdir</code></td>
 <td>

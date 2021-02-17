@@ -1,6 +1,6 @@
 .onLoad = function(lib, pkg){
-  if(is.null(getOption('lingmatch.lspace.dir'))) options(lingmatch.lspace.dir = path.expand('~/Latent Semantic Spaces'))
-  if(is.null(getOption('lingmatch.dict.dir'))) options(lingmatch.dict.dir = path.expand('~/Dictionaries'))
+  if(is.null(getOption('lingmatch.lspace.dir'))) options(lingmatch.lspace.dir = '')
+  if(is.null(getOption('lingmatch.dict.dir'))) options(lingmatch.dict.dir = '')
 }
 
 #' Linguistic Matching and Accommodation
@@ -1158,8 +1158,8 @@ lma_weight = function(dtm, weight = 'count', normalize = TRUE, wc.complete = TRU
 #'   in the same dimensions as \code{dtm} is returned. Otherwise, a matrix with terms as rows and
 #'   dimensions as columns is returned.
 #' @param use.scan Logical: if \code{TRUE}, reads in the rows of \code{space} with \code{\link{scan}}.
-#' @param dir Path to a folder containing spaces. \cr Default is \code{getOption('lingmatch.lspace.dir')}; \cr
-#'   change with \code{options(lingmatch.lspace.dir = 'desired/path')}.
+#' @param dir Path to a folder containing spaces. \cr
+#'   Set a session default with \code{options(lingmatch.lspace.dir = 'desired/path')}.
 #' @note
 #' A traditional latent semantic space is a selection of right singular vectors from the singular
 #' value decomposition of a dtm (\code{svd(dtm)$v[, 1:k]}, where \code{k} is the selected number of
@@ -1221,7 +1221,7 @@ lma_weight = function(dtm, weight = 'count', normalize = TRUE, wc.complete = TRU
 
 lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, term.map = NULL,
   dim.cutoff = .5, keep.dim = FALSE, use.scan = FALSE, dir = getOption('lingmatch.lspace.dir')){
-  dir = path.expand(dir)
+  if(ckd <- dir == '') dir = '~/Latent Semantic Spaces'
   if(is.character(dtm) || is.factor(dtm)){
     if(length(dtm) > 1 && missing(space)){
       dtm = lma_dtm(dtm)
@@ -1261,17 +1261,17 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, t
       ts = grep(space, spaces, fixed = TRUE, value = TRUE)
       if(!length(ts)){
         ts = rownames(select.lspace(name)$selected)[1]
-        if(!is.na(ts) && grepl('^$|^[yt1]|^ent', readline(paste0(
+        if(!ckd && !is.na(ts) && grepl('^$|^[yt1]|^ent', readline(paste0(
           'would you like to download the ', ts, ' space? (press Enter for yes): ')))){
           download.lspace(ts, dir = dir)
           ts = paste0(ts, '.dat')
         }else stop('space (', space, ') not found in dir (', dir, ')', call. = FALSE)
       }
-      space_path = paste0(dir, '/', if(length(su <- grep('\\.dat$', ts))) ts[su[[1]]] else{
+      space_path = normalizePath(paste0(dir, '/', if(length(su <- grep('\\.dat$', ts))) ts[su[[1]]] else{
         use.scan = TRUE
         ts[grep('[bgx]z[ip2]*$', ts)[[1]]]
-      })
-      name = gsub('^.*[/\\]|\\.[^/\\]*$', '', space_path)
+      }), '/', FALSE)
+      name = sub('\\.[^.]*$', '', basename(space_path))
       if(name %in% colnames(term.map)) term.map = term.map[term.map[, name] != 0, name]
       rex = function(inds, f){
         nc = length(strsplit(readLines(f, 1), '\\s+')[[1]])
@@ -1305,10 +1305,10 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, t
           rownames(space) = ts = names(term.map)[inds]
         }else stop('no matching terms in space ', space)
       }else{
-        if(!file.exists(paste0(dir, '/', name, '_terms.txt'))){
-          if(file.exists(paste0(dir, '/lma_term_map.rda'))){
+        if(!file.exists(normalizePath(paste0(dir, '/', name, '_terms.txt'), '/', FALSE))){
+          if(file.exists(normalizePath(paste0(dir, '/lma_term_map.rda')))){
             lma_term_map = NULL
-            load(paste0(dir, '/lma_term_map.rda'))
+            load(normalizePath(paste0(dir, '/lma_term_map.rda'), '/', FALSE))
             if(!is.null(lma_term_map) && !is.null(colnames(lma_term_map)) && name %in% colnames(lma_term_map)){
               space_terms = names(lma_term_map[lma_term_map[, name] != 0, name])
             }else stop(
@@ -1316,7 +1316,7 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, t
               ' nor retrieve terms from them term map (lma_term_map.rda).'
             )
           }else stop('terms file (', space, '_terms.txt) not found in dir (', dir, ').')
-        }else space_terms = readLines(paste0(dir, '/', name, '_terms.txt'))
+        }else space_terms = readLines(normalizePath(paste0(dir, '/', name, '_terms.txt'), '/', FALSE))
         su = if(length(terms) == 1 && terms == ''){
           terms = space_terms
           !logical(length(space_terms))
@@ -1399,7 +1399,9 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, t
 #'   \code{'a_DT'}), \code{'_.*'} would remove the tag.
 #' @param term.break If a category has more than \code{term.break} characters, it will be processed
 #'   in chunks. Reduce from 20000 if you get a PCRE compilation error.
-#' @param dir Path to a folder in which to look for \code{dict}; \cr defaults to \code{getOption('lingmatch.dict.dir')}.
+#' @param dir Path to a folder in which to look for \code{dict}; \cr
+#'   will look in '~/Dictionaries' by default. \cr
+#'   Set a session default with \code{options(lingmatch.dict.dir = 'desired/path')}.
 #' @seealso For applying pattern-based dictionaries (to raw text) see \code{\link{lma_patcat}}.
 #' @family Dictionary functions
 #' @return A matrix with a row per \code{dtm} row and columns per dictionary category.
@@ -1437,9 +1439,11 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, t
 lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE, partial = FALSE,
   glob = TRUE, term.filter = NULL, term.break = 2e4, to.lower = FALSE, dir = getOption('lingmatch.dict.dir')){
   st=proc.time()[[3]]
+  if(ckd <- dir == '') dir = '~/Dictionaries'
   if(missing(dict)) dict = lma_dict(1:9)
   if(is.character(dict) && length(dict) == 1 && missing(term.weights) && !grepl('[\\s*]', dict)){
-    if(!any(file.exists(dict)) && any(file.exists(paste0(dir, dict)))) dict = paste0(dir, dict)
+    if(!any(file.exists(dict)) && any(file.exists(normalizePath(paste0(dir, '/', dict), '/', FALSE))))
+      dict = normalizePath(paste0(dir, '/', dict))
     td = tryCatch(read.dic(dict), error = function(e) NULL)
     dict = if(is.null(td)) list(cat1 = dict) else td
   }
@@ -1579,7 +1583,7 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
         if(!is.null(bias)) args$bias = bias
         if(!missing(glob)) args$globtoregex = glob
         if(!missing(partial) && !partial) args$boundary = '\\b'
-        if(!missing(dir)) args$dir = dir
+        if(!missing(dir)) args$dir = if(ckd) '' else dir
         return(do.call(lma_patcat, args))
       }
     }

@@ -5,7 +5,8 @@
 \title{Read and Segment Multiple Texts}
 \usage{
 read.segments(path = ".", segment = NULL, ext = ".txt", subdir = FALSE,
-  segment.size = -1, bysentence = FALSE, text = NULL)
+  segment.size = -1, bysentence = FALSE, end_in_quotes = TRUE,
+  preclean = FALSE, text = NULL)
 }
 \arguments{
 \item{path}{Path to a folder containing files, or a vector of paths to files. If no folders or files are
@@ -17,13 +18,19 @@ words.}
 
 \item{ext}{The extension of the files you want to read in. '.txt' by default.}
 
-\item{subdir}{Logical: if \code{TRUE}, files in folders in \code{path} will also be included.}
+\item{subdir}{Logical; if \code{TRUE}, files in folders in \code{path} will also be included.}
 
-\item{segment.size}{Logical: if specified, \code{segment} will be ignored, and texts will be broken into segments containing
-roughly \code{segment.size} number of words.}
+\item{segment.size}{Logical; if specified, \code{segment} will be ignored, and texts will be broken into
+segments containing roughly \code{segment.size} number of words.}
 
-\item{bysentence}{A number: if \code{TRUE}, and \code{segment} is a number or \code{segment.size} is specified, sentences will
-be kept together, rather than potentially being broken across segments.}
+\item{bysentence}{Logical; if \code{TRUE}, and \code{segment} is a number or \code{segment.size} is specified,
+sentences will be kept together, rather than potentially being broken across segments.}
+
+\item{end_in_quotes}{Logical; if \code{FALSE}, sentence-ending marks (\code{.?!}) will not be considered when
+immediately followed by a quotation mark. For example, \code{'"Word." Word.'} would be considered one sentence.}
+
+\item{preclean}{Logical; if \code{TRUE}, text will be cleaned with \code{lma_dict(special)} before
+segmentation.}
 
 \item{text}{A character vector with text to be split, used in place of \code{path}. Each entry is treated as a file.}
 }

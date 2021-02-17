@@ -1,5 +1,6 @@
 context('utils')
 
+TEST_DOWNLOAD = FALSE
 texts = c(
   "And there with it isn't I think anyone would.",
   "Command lands of a few I two of it is."
@@ -100,7 +101,7 @@ test_that('read/write.dic works', {
   expect_equal(read.dic(data.frame(
     term = unlist(dict, use.names = FALSE), category = rep(names(dict), each = 2)
   ))[names(dict)], dict)
-  dicts = select.dict()$info
+  dicts = select.dict(dir = '~/Dictionaries')$info
   if(!is.na(d <- which(dicts$downloaded != '')[1])) expect_equal(
     read.dic(rownames(dicts)[d]), read.dic(dicts[d, 'downloaded'])
   )
@@ -109,6 +110,33 @@ test_that('read/write.dic works', {
       row.names = c('a', 'b', 'c', 'f', 'g')),
     read.dic(list(a = c(a = 1, b = 2, c = 3), b = c(a = 4, f = 5, g = 0)))
   )
+})
+
+test_that('lma_initdirs works', {
+  options(lingmatch.dict.dir = '', lingmatch.lspace.dir = '')
+  dir = tempdir()
+  new = lma_initdirs(dir, link = FALSE)
+  expect_equal(names(new), c('dict', 'lspace'))
+  new = normalizePath(new, '/', FALSE)
+  names(new) = c('dict', 'lspace')
+  expect_true(all(dir.exists(new)))
+  expect_identical(unname(new),
+    normalizePath(paste0(dir, '/', c('Dictionaries', 'Latent Semantic Spaces')), '/', FALSE))
+  new_single = lma_initdirs(dict = paste0(dir, '/other_dicts'), link = FALSE)
+  expect_identical(names(new_single), 'dict')
+  expect_true(dir.exists(new_single[['dict']]))
+  expect_identical(normalizePath(getOption('lingmatch.dict.dir'), '/', FALSE), new[['dict']])
+  if(!dir.exists(paste0(dir, '/other_lspace'))){
+    expect_true(
+      (if(Sys.info()[['sysname']] == 'Windows') Sys.junction else file.symlink)(
+        new[['lspace']], paste0(dir, '/other_lspace')
+      )
+    )
+  }
+  new_single = lma_initdirs(dir, lspace = 'other_lspace', link = FALSE)
+  expect_identical(names(new_single), 'lspace')
+  expect_true(dir.exists(new_single[['lspace']]))
+  options(lingmatch.dict.dir = '', lingmatch.lspace.dir = '')
 })
 
 test_that('lma_patcat variants works', {
@@ -233,6 +261,12 @@ test_that('read.segments works', {
   expect_true(all(tapply(segs50w$text, segs50w$input, paste, collapse = ' ') == manual))
 })
 
+test_that('read.segments sentence parsing works', {
+  text = 'S. Mwdok wdko lksk. I) efewod, efe II) "koslk." wdkowe. Wok dsle? Wodks?!?! Dr. Wodsk xjvkc jkfu.'
+  expect_identical(read.segments(text, segment.size = 1, bysentence = TRUE, end_in_quotes = FALSE)$WC, c(4, 6, 2, 1, 4))
+  expect_identical(read.segments(text, segment.size = 1, bysentence = TRUE)$WC, c(4, 5, 1, 2, 1, 4))
+})
+
 test_that('select dict and lspace work', {
   expect_equal(nrow(select.dict(c('inq', 'sent'))$selected), 5)
   expect_equal(select.dict('sentiment analysis')$selected, select.dict('afinn')$selected)
@@ -250,26 +284,35 @@ test_that('select dict and lspace work', {
     select.lspace('hyper hierarchical', dir = '', get.map = FALSE)$selected,
     select.lspace(c('100k$', 'turian_hlbl'), dir = '', get.map = FALSE)$selected,
   )
-  skip_if_not(file.exists(paste0(getOption('lingmatch.lspace.dir'), '/lma_term_map.rda')), 'term map not present')
+  skip_if_not(file.exists('~/Latent Semantic Spaces/lma_term_map.rda'), 'term map not present')
   expect_equal(select.lspace(c('cenepa', "didn't", 'pansear', 'xenops'))$selected$coverage, c(1, 1, .75, .5, .5))
 })
 
 test_that('standardize.lspace works', {
-  dir = getOption('lingmatch.lspace.dir')
-  f = paste0(dir, '/stdtest.', c('txt', 'rda'))
+  dir = path.expand('~/Latent Semantic Spaces/')
+  f = paste0(dir, 'stdtest.', c('txt', 'rda'))
   skip_if_not(all(file.exists(f)), paste('raw embeddings test files not present in', dir, 'from', getwd()))
-  standardize.lspace('stdtest.txt', 'stdtest')
+  enc = getOption('encoding')
+  on.exit(options(encoding = enc))
+  options(encoding = 'latin1')
+  standardize.lspace('stdtest.txt', 'stdtest', dir = dir)
   o = read.table(f[1], sep = ' ', quote = '', row.names = 1)
   o = as.matrix(o[!grepl('[^a-z]', rownames(o)),])
-  expect_equal(o, matrix(scan(paste0(dir, '/stdtest.dat'), quiet = TRUE),
-    nrow(o), 300, TRUE, dimnames = list(readLines(paste0(dir, '/stdtest_terms.txt')), colnames(o))))
-  standardize.lspace('stdtest.rda', 'stdtest')
-  expect_equal(o, matrix(scan(paste0(dir, '/stdtest.dat'), quiet = TRUE),
-    nrow(o), 300, TRUE, dimnames = list(readLines(paste0(dir, '/stdtest_terms.txt')), colnames(o))))
+  expect_equal(o, matrix(scan(paste0(dir, 'stdtest.dat'), quiet = TRUE),
+    nrow(o), 300, TRUE, dimnames = list(readLines(paste0(dir, 'stdtest_terms.txt')), colnames(o))))
+  standardize.lspace(paste0(dir, 'stdtest.txt'), 'stdtest')
+  o = read.table(f[1], sep = ' ', quote = '', row.names = 1)
+  o = as.matrix(o[!grepl('[^a-z]', rownames(o)),])
+  expect_equal(o, matrix(scan(paste0(dir, 'stdtest.dat'), quiet = TRUE),
+    nrow(o), 300, TRUE, dimnames = list(readLines(paste0(dir, 'stdtest_terms.txt')), colnames(o))))
+  standardize.lspace('stdtest.rda', 'stdtest', dir = dir)
+  expect_equal(o, matrix(scan(paste0(dir, 'stdtest.dat'), quiet = TRUE),
+    nrow(o), 300, TRUE, dimnames = list(readLines(paste0(dir, 'stdtest_terms.txt')), colnames(o))))
 })
 
 dir = '~/../Downloads/'
-skip_if(TRUE || !dir.exists(dir), 'not downloading dictionary or embeddings files')
+if(!dir.exists(dir)) dir = '~/Downloads/'
+skip_if(!TEST_DOWNLOAD || !dir.exists(dir), 'not downloading dictionary or embeddings files')
 
 test_that('select.lspace can download term_map', {
   skip_if(file.exists(paste0(dir, 'lma_term_map.rda')), 'term map already downloaded')

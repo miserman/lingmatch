@@ -20,8 +20,7 @@ Linguistic Inquiry and Word Count (.dic; non-weighted) format.
 read.dic(path, cats, type = "asis", as.weighted = FALSE,
   dir = getOption("lingmatch.dict.dir"), ...)
 
-write.dic(dict, filename = "custom", type = "asis", as.weighted = FALSE,
-  save = TRUE)
+write.dic(dict, filename, type = "asis", as.weighted = FALSE, save = TRUE)
 </pre>
 
 
@@ -30,9 +29,9 @@ write.dic(dict, filename = "custom", type = "asis", as.weighted = FALSE,
 <table summary="R argblock">
 <tr valign="top"><td><code>path</code></td>
 <td>
-<p>Path to a file, a name corresponding to a file in <code>getOption('lingmatch.dict.dir')</code> or
-one of the dictionaries available at <a href="https://osf.io/y6g5b">osf.io/y6g5b</a>, a matrix-like object
-to be categorized, or a list to be formatted.</p>
+<p>Path to a file, a name corresponding to a file in <code>getOption('lingmatch.dict.dir')</code>
+(or <code>'~/Dictionaries'</code>) or one of the dictionaries available at <a href="https://osf.io/y6g5b">osf.io/y6g5b</a>,
+a matrix-like object to be categorized, or a list to be formatted.</p>
 </td></tr>
 <tr valign="top"><td><code>cats</code></td>
 <td>
@@ -44,7 +43,7 @@ to be categorized, or a list to be formatted.</p>
 leaves terms as they are. Other options change wildcards to regular expressions:
 <code>'pattern'</code> (<code>'^[poi]'</code>) replaces initial asterisks with <code>'\\b\\w*'</code>,
 and terminal asterisks with <code>'\\w*\\b'</code>, to match terms within raw text;
-for anything else, terms are padded with '^' and '$', then those bounding marks are removed
+for anything else, terms are padded with <code>^</code> and <code>$</code>, then those bounding marks are removed
 when an asterisk is present, to match tokenized terms.</p>
 </td></tr>
 <tr valign="top"><td><code>as.weighted</code></td>

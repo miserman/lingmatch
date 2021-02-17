@@ -99,7 +99,6 @@ test_that('lag works', {
   dtm = Matrix(rpois(200, 1), 10, sparse = TRUE)
   dtm[2, c(1, 20)] = 1
 
-
   # +1
   expect_equal(
     as.numeric(lma_simets(dtm[1,], metric = 'pearson', lag = 1)),

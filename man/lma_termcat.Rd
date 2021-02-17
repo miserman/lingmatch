@@ -45,7 +45,9 @@ in chunks. Reduce from 20000 if you get a PCRE compilation error.}
 terms will be converted to match the terms if they are single-cased. Set to \code{FALSE} to
 always keep dictionary terms as entered.}
 
-\item{dir}{Path to a folder in which to look for \code{dict}; \cr defaults to \code{getOption('lingmatch.dict.dir')}.}
+\item{dir}{Path to a folder in which to look for \code{dict}; \cr
+will look in '~/Dictionaries' by default. \cr
+Set a session default with \code{options(lingmatch.dict.dir = 'desired/path')}.}
 }
 \value{
 A matrix with a row per \code{dtm} row and columns per dictionary category.

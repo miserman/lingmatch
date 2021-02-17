@@ -41,6 +41,7 @@
 pre > code.sourceCode { white-space: pre; position: relative; }
 pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
 div.sourceCode { margin: 1em 0; }
 pre.sourceCode { margin: 0; }
@@ -345,7 +346,7 @@ div.tocify {
 
 
 <p>This example demonstrates a few ways to specify comparisons and groups in lingmatch.</p>
-<p><em>Built with R 4.0.3 on February 12 2021</em></p>
+<p><em>Built with R 4.0.4 on February 17 2021</em></p>
 <hr />
 <div id="setup" class="section level1">
 <h1>Setup</h1>
@@ -363,11 +364,11 @@ div.tocify {
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>prompts[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>,]</span></code></pre></div>
 <pre><code>##     study   prompt     ppron     ipron   article    adverb      conj      prep   auxverb
-## 1 study 1 prompt 1 15.838597 14.227694  9.261328 11.539917 10.439635 16.886811 12.495452
-## 2 study 1 prompt 2  8.133509 12.691963 10.055155  4.955173 14.206743 10.727067  9.302664
-## 3 study 1 prompt 3  7.257475  6.819002 10.192566  7.172503 10.395132  6.584436  7.631207
-## 4 study 2 prompt 1 17.962972 10.980761 11.902328  9.389269  9.136122  5.628518  9.832242
-## 5 study 2 prompt 2 11.562686 10.903759  9.278005 13.346747 15.078316  6.189094 10.668599</code></pre>
+## 1 study 1 prompt 1  7.606306  9.119629  9.104822 12.078574 15.510420  3.593917 14.157892
+## 2 study 1 prompt 2  1.396342 16.428805  8.796834  7.020770 12.410217  5.518590  9.793690
+## 3 study 1 prompt 3 12.975046 14.521081 13.480338  7.952849  6.844685  8.950829  8.565668
+## 4 study 2 prompt 1 15.765448 16.764566  4.664713 17.977013  4.215720  2.693475 12.851866
+## 5 study 2 prompt 2  6.680152  9.633344  8.335636 21.831100  9.661514 12.792093 11.345603</code></pre>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># then, the same representation of the language the participants produced:</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>data <span class="ot">=</span> <span class="fu">data.frame</span>(</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">study =</span> <span class="fu">sort</span>(<span class="fu">sample</span>(<span class="fu">paste</span>(<span class="st">&#39;study&#39;</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>), <span class="dv">100</span>, <span class="cn">TRUE</span>)),</span>
@@ -377,12 +378,12 @@ div.tocify {
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="dv">100</span> <span class="sc">*</span> <span class="dv">7</span>, <span class="dv">10</span>, <span class="dv">4</span>), <span class="dv">100</span>, <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="cn">NULL</span>, <span class="fu">colnames</span>(prompts)[<span class="sc">-</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>)]))</span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>data[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">9</span>]</span></code></pre></div>
-<pre><code>##     study    pair   prompt speaker     ppron     ipron   article    adverb      conj
-## 1 study 1 pair 01 prompt 1       b 10.775674  6.631728 11.853855  9.895531 11.019669
-## 2 study 1 pair 01 prompt 2       b 13.847496  5.665775  1.838429  6.953156 10.045832
-## 3 study 1 pair 01 prompt 2       a 10.643603  6.007518  1.628038 12.967665  8.384815
-## 4 study 1 pair 01 prompt 2       b  9.234620 11.071202  5.669689  4.574575 13.026730
-## 5 study 1 pair 01 prompt 3       b  7.719172  8.717335 10.182319  5.928748  9.701943</code></pre>
+<pre><code>##     study    pair   prompt speaker      ppron    ipron   article    adverb      conj
+## 1 study 1 pair 01 prompt 1       a 11.7482211 14.55092  3.695429  9.090181 10.083169
+## 2 study 1 pair 01 prompt 3       b 14.3195204 10.77374 13.207559  3.844300 12.892439
+## 3 study 1 pair 01 prompt 1       b 10.0598797 11.56953 15.498397 17.211668  4.138488
+## 4 study 1 pair 01 prompt 3       a 10.7285110 14.66180 19.109533 13.398135 10.930601
+## 5 study 1 pair 01 prompt 3       b -0.5748996 13.11203 13.904121  4.314459 13.469577</code></pre>
 </div>
 <div id="matching-with-a-standard" class="section level1">
 <h1>Matching with a standard</h1>
@@ -400,10 +401,10 @@ div.tocify {
 ## 
 ## $comp
 ##     ppron     ipron   article    adverb      conj      prep   auxverb 
-## 10.673069  9.433425  9.701046 10.343165  9.640914  9.408827 10.299066</code></pre>
+##  9.374115 10.240168  9.494598  9.528911 10.779467 11.147336  9.939030</code></pre>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># and maybe the average similarity score</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(lsm_mean<span class="sc">$</span>sim)</span></code></pre></div>
-<pre><code>## [1] 0.8328598</code></pre>
+<pre><code>## [1] 0.8255727</code></pre>
 <p>This could be considered a baseline for the sample.</p>
 </div>
 <div id="stored-means" class="section level2">
@@ -419,18 +420,18 @@ div.tocify {
 ##         ppron ipron article adverb conj  prep auxverb
 ## twitter  9.02   4.6    5.58   5.13 4.19 11.88    8.27</code></pre>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(lsm_twitter<span class="sc">$</span>sim)</span></code></pre></div>
-<pre><code>## [1] 0.7309931</code></pre>
+<pre><code>## [1] 0.7208515</code></pre>
 <div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># or the means of the set that is most similar to the current set</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>lsm_auto <span class="ot">=</span> <span class="fu">lingmatch</span>(data, <span class="st">&#39;auto&#39;</span>, <span class="at">type =</span> <span class="st">&#39;lsm&#39;</span>)</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>lsm_auto[<span class="fu">c</span>(<span class="st">&#39;comp.type&#39;</span>, <span class="st">&#39;comp&#39;</span>)]</span></code></pre></div>
 <pre><code>## $comp.type
-## [1] &quot;auto: natural&quot;
+## [1] &quot;auto: nytimes&quot;
 ## 
 ## $comp
 ##         ppron ipron article adverb conj  prep auxverb
-## natural 13.37  7.53    4.34   7.67 6.21 10.29   12.03</code></pre>
+## nytimes  3.56  3.84    9.08   2.76 4.85 14.27    5.11</code></pre>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(lsm_auto<span class="sc">$</span>sim)</span></code></pre></div>
-<pre><code>## [1] 0.7794852</code></pre>
+<pre><code>## [1] 0.6457234</code></pre>
 </div>
 <div id="external-means" class="section level2">
 <h2>External means</h2>
@@ -442,9 +443,9 @@ div.tocify {
 ## 
 ## $comp
 ##     ppron     ipron   article    adverb      conj      prep   auxverb 
-## 11.222169  9.716869  9.766979  8.768430 12.044358  8.790769  9.488122</code></pre>
+##  7.727741 13.616174  8.170651 12.364783 10.262077  6.057922 11.016322</code></pre>
 <div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(lsm_prmed<span class="sc">$</span>sim)</span></code></pre></div>
-<pre><code>## [1] 0.8283184</code></pre>
+<pre><code>## [1] 0.7896946</code></pre>
 </div>
 <div id="group-means" class="section level2">
 <h2>Group means</h2>
@@ -455,12 +456,12 @@ div.tocify {
 ## [1] &quot;study group mean&quot;
 ## 
 ## $comp
-##            ppron    ipron   article    adverb     conj      prep   auxverb
-## study 1 10.68952 9.286652  9.130492 10.829932 9.228641  8.510391 10.797217
-## study 2 10.65961 9.553512 10.167864  9.944901 9.978229 10.143911  9.891487</code></pre>
+##            ppron    ipron   article   adverb      conj     prep   auxverb
+## study 1 9.381630 10.28399 10.232644 9.776359 11.391089 10.71460  9.835014
+## study 2 9.362844 10.17443  8.387528 9.157740  9.862034 11.79643 10.095055</code></pre>
 <div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tapply</span>(lsm_topics<span class="sc">$</span>sim[, <span class="dv">2</span>], lsm_topics<span class="sc">$</span>sim[, <span class="dv">1</span>], mean)</span></code></pre></div>
 <pre><code>##   study 1   study 2 
-## 0.8345892 0.8334443</code></pre>
+## 0.8380869 0.8082419</code></pre>
 <p>This type of group variable is just splitting the data, and performing the same comparisons within splits.</p>
 </div>
 </div>
@@ -477,24 +478,24 @@ div.tocify {
 ## 
 ## $comp
 ##                      ppron     ipron   article    adverb      conj      prep   auxverb
-## study 1 prompt 1 15.838597 14.227694  9.261328 11.539917 10.439635 16.886811 12.495452
-## study 1 prompt 2  8.133509 12.691963 10.055155  4.955173 14.206743 10.727067  9.302664
-## study 1 prompt 3  7.257475  6.819002 10.192566  7.172503 10.395132  6.584436  7.631207
-## study 2 prompt 1 17.962972 10.980761 11.902328  9.389269  9.136122  5.628518  9.832242
-## study 2 prompt 2 11.562686 10.903759  9.278005 13.346747 15.078316  6.189094 10.668599
-## study 2 prompt 3  6.577772  2.678033  7.912490  6.206968 13.010199  6.728687  6.998566</code></pre>
+## study 1 prompt 1  7.606306  9.119629  9.104822 12.078574 15.510420  3.593917 14.157892
+## study 1 prompt 2  1.396342 16.428805  8.796834  7.020770 12.410217  5.518590  9.793690
+## study 1 prompt 3 12.975046 14.521081 13.480338  7.952849  6.844685  8.950829  8.565668
+## study 2 prompt 1 15.765448 16.764566  4.664713 17.977013  4.215720  2.693475 12.851866
+## study 2 prompt 2  6.680152  9.633344  8.335636 21.831100  9.661514 12.792093 11.345603
+## study 2 prompt 3  1.943151 15.229621  4.641564  7.328391 12.929907  2.798627  9.383211</code></pre>
 <div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>lsm<span class="sc">$</span>sim[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>,]</span></code></pre></div>
 <pre><code>##                  g1  canberra
-## 1  study 1 prompt 1 0.8406948
-## 2  study 1 prompt 2 0.6817684
-## 3  study 1 prompt 2 0.7002969
-## 4  study 1 prompt 2 0.8727694
-## 5  study 1 prompt 3 0.9210187
-## 6  study 1 prompt 1 0.8260743
-## 7  study 1 prompt 2 0.7515578
-## 8  study 1 prompt 1 0.7074442
-## 9  study 1 prompt 1 0.6416839
-## 10 study 1 prompt 3 0.8188112</code></pre>
+## 1  study 1 prompt 1 0.7318257
+## 2  study 1 prompt 3 0.8368506
+## 3  study 1 prompt 1 0.6530698
+## 4  study 1 prompt 3 0.8322515
+## 5  study 1 prompt 3 0.6748744
+## 6  study 1 prompt 2 0.7679022
+## 7  study 1 prompt 3 0.8040173
+## 8  study 1 prompt 3 0.8515094
+## 9  study 1 prompt 2 0.6875853
+## 10 study 1 prompt 2 0.7933310</code></pre>
 <p>Here, the <code>group</code> argument is just pasting together the included variables, and using the resulting string to identify a single comparison for each text (acting as a condition ID).</p>
 </div>
 <div id="participant-id" class="section level2">
@@ -502,29 +503,29 @@ div.tocify {
 <p>Similarly, participants are only uniquely identified by pair ID and speaker ID (though this could just as well be a single column with unique IDs).</p>
 <div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>interlsm <span class="ot">=</span> <span class="fu">lingmatch</span>(data, <span class="at">group =</span> <span class="fu">c</span>(<span class="st">&#39;pair&#39;</span>, <span class="st">&#39;speaker&#39;</span>), <span class="at">type =</span> <span class="st">&#39;lsm&#39;</span>)</span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>interlsm<span class="sc">$</span>comp[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>,]</span></code></pre></div>
-<pre><code>##               ppron     ipron   article    adverb      conj     prep   auxverb
-## pair 01 b 11.264625  8.660583  6.737760  7.062249 10.046148 9.492999 11.833564
-## pair 01 a  5.473566  7.711775  7.674824 11.100827  6.990798 9.755212  7.960877
-## pair 02 a 11.488632 11.578191 10.381246 17.452115  6.834167 7.138036 11.143681
-## pair 02 b  5.570036  8.180427 12.581112 10.026459  3.384891 1.418983 12.165469
-## pair 03 b 14.130909  9.812647 12.141031 12.847392  3.589438 5.087932 15.144210
-## pair 03 a  8.978460 10.071161  5.472585 13.045328  9.013764 8.499606  8.862696
-## pair 04 b 10.981285  9.998339  8.039864 11.442802 11.335781 8.981926 14.316221
-## pair 04 a 16.209833  9.917420  6.328837 11.228898 13.815371 7.521664 18.611252
-## pair 05 a  8.354753  9.343891 11.066874  9.720329 11.561767 8.940793 10.141957
-## pair 05 b 14.550723  5.167699 12.840165 14.342261 14.300963 7.901345 11.965184</code></pre>
+<pre><code>##               ppron     ipron   article    adverb      conj      prep   auxverb
+## pair 01 a 11.238366 14.606361 11.402481 11.244158 10.506885 16.028030  9.949982
+## pair 01 b  7.279511 11.453091 14.390347  9.090070 10.773267  7.816106  7.162236
+## pair 02 b 11.262515  9.886080  8.469501 11.346891 12.324152  9.401929 10.260630
+## pair 02 a  9.199777 13.921628 17.838245  6.918764 11.034971 11.574751 15.136623
+## pair 03 a  7.586523 11.116306  9.716407 11.439962 10.221112 11.403123  6.885510
+## pair 03 b 11.270433  8.577908 11.372548 11.487911 17.214712 10.240975 12.400530
+## pair 04 a  8.617026 11.261672 11.064375  9.231171 11.101283 13.772105 14.940745
+## pair 04 b  5.953237 11.254686  7.924526 13.677317  9.999065 14.391780  9.952592
+## pair 05 a  9.367088  8.805760  9.925913  9.349749  8.972609 10.021944  8.004888
+## pair 05 b 13.881792  7.462858  7.400966  9.146136 13.198260 14.524914 10.808971</code></pre>
 <div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>interlsm<span class="sc">$</span>sim[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>,]</span></code></pre></div>
 <pre><code>##           g1  canberra
-## 1  pair 01 b 0.8912852
-## 2  pair 01 b 0.8009339
-## 3  pair 01 a 0.8115649
-## 4  pair 01 b 0.8578706
-## 5  pair 01 b 0.9102347
-## 6  pair 01 b 0.8559415
-## 7  pair 01 a 0.8395127
-## 8  pair 01 a 0.7686168
-## 9  pair 01 a 0.7160160
-## 10 pair 02 a 0.9391987</code></pre>
+## 1  pair 01 a 0.8822816
+## 2  pair 01 b 0.8429016
+## 3  pair 01 b 0.7807953
+## 4  pair 01 a 0.9150952
+## 5  pair 01 b 0.6890498
+## 6  pair 01 b 0.9395840
+## 7  pair 02 b 0.8799690
+## 8  pair 02 a 1.0000000
+## 9  pair 02 b 0.9054637
+## 10 pair 02 b 0.9064645</code></pre>
 </div>
 </div>
 <div id="matching-in-sequence" class="section level1">
@@ -532,32 +533,32 @@ div.tocify {
 <p>Since participants are having interactions in sequence, we might compare each turn in sequence. The last entry in the <code>group</code> argument specifies the speaker:</p>
 <div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>seqlsm <span class="ot">=</span> <span class="fu">lingmatch</span>(data, <span class="st">&#39;seq&#39;</span>, <span class="at">group =</span> <span class="fu">c</span>(<span class="st">&#39;pair&#39;</span>, <span class="st">&#39;speaker&#39;</span>), <span class="at">type =</span> <span class="st">&#39;lsm&#39;</span>)</span>
 <span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>seqlsm<span class="sc">$</span>sim[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>,]</span></code></pre></div>
-<pre><code>##                             group  canberra
-## 1, 2 &lt;-&gt; 3                pair 01 0.8146222
-## 3 &lt;-&gt; 4, 5, 6             pair 01 0.7630035
-## 4, 5, 6 &lt;-&gt; 7, 8, 9       pair 01 0.7844292
-## 10 &lt;-&gt; 11                 pair 02 0.6719939
-## 11 &lt;-&gt; 12                 pair 02 0.7422762
-## 13 &lt;-&gt; 14, 15, 16         pair 03 0.7434010
-## 14, 15, 16 &lt;-&gt; 17         pair 03 0.7730071
-## 18, 19, 20 &lt;-&gt; 21         pair 04 0.9082322
-## 22 &lt;-&gt; 23                 pair 05 0.9037709
-## 23 &lt;-&gt; 24, 25, 26, 27, 28 pair 05 0.8538454</code></pre>
+<pre><code>##                         group  canberra
+## 1 &lt;-&gt; 2, 3            pair 01 0.7930420
+## 2, 3 &lt;-&gt; 4            pair 01 0.8724715
+## 4 &lt;-&gt; 5, 6            pair 01 0.7323266
+## 7 &lt;-&gt; 8               pair 02 0.7640069
+## 8 &lt;-&gt; 9, 10           pair 02 0.8469054
+## 11 &lt;-&gt; 12             pair 03 0.8633464
+## 12 &lt;-&gt; 13, 14, 15, 16 pair 03 0.8432269
+## 13, 14, 15, 16 &lt;-&gt; 17 pair 03 0.7724651
+## 18 &lt;-&gt; 19             pair 04 0.9193137
+## 19 &lt;-&gt; 20             pair 04 0.8495160</code></pre>
 <p>The rownames of <code>sim</code> show the row numbers that are being compared, with some being aggregated if the same speaker takes multiple turns in a row. You could also just compare edges by adding <code>agg = FALSE</code>:</p>
 <div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">lingmatch</span>(</span>
 <span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  data, <span class="st">&#39;seq&#39;</span>, <span class="at">group =</span> <span class="fu">c</span>(<span class="st">&#39;pair&#39;</span>, <span class="st">&#39;speaker&#39;</span>), <span class="at">type =</span> <span class="st">&#39;lsm&#39;</span>, <span class="at">agg =</span> <span class="cn">FALSE</span></span>
 <span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>)<span class="sc">$</span>sim[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>,]</span></code></pre></div>
 <pre><code>##             group  canberra
-## 2 &lt;-&gt; 3   pair 01 0.8297907
-## 3 &lt;-&gt; 4   pair 01 0.6883813
-## 6 &lt;-&gt; 7   pair 01 0.7475039
-## 10 &lt;-&gt; 11 pair 02 0.6719939
-## 11 &lt;-&gt; 12 pair 02 0.7422762
-## 13 &lt;-&gt; 14 pair 03 0.7081098
-## 16 &lt;-&gt; 17 pair 03 0.6681458
-## 20 &lt;-&gt; 21 pair 04 0.8456014
-## 22 &lt;-&gt; 23 pair 05 0.9037709
-## 23 &lt;-&gt; 24 pair 05 0.8929732</code></pre>
+## 1 &lt;-&gt; 2   pair 01 0.7071742
+## 3 &lt;-&gt; 4   pair 01 0.8400126
+## 4 &lt;-&gt; 5   pair 01 0.6120141
+## 7 &lt;-&gt; 8   pair 02 0.7640069
+## 8 &lt;-&gt; 9   pair 02 0.8183083
+## 11 &lt;-&gt; 12 pair 03 0.8633464
+## 12 &lt;-&gt; 13 pair 03 0.5668039
+## 16 &lt;-&gt; 17 pair 03 0.7667542
+## 18 &lt;-&gt; 19 pair 04 0.9193137
+## 19 &lt;-&gt; 20 pair 04 0.8495160</code></pre>
 <hr />
 <div style="text-align:center">
 <div class="figure">

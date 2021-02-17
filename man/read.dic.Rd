@@ -8,13 +8,12 @@
 read.dic(path, cats, type = "asis", as.weighted = FALSE,
   dir = getOption("lingmatch.dict.dir"), ...)
 
-write.dic(dict, filename = "custom", type = "asis", as.weighted = FALSE,
-  save = TRUE)
+write.dic(dict, filename, type = "asis", as.weighted = FALSE, save = TRUE)
 }
 \arguments{
-\item{path}{Path to a file, a name corresponding to a file in \code{getOption('lingmatch.dict.dir')} or
-one of the dictionaries available at \href{https://osf.io/y6g5b}{osf.io/y6g5b}, a matrix-like object
-to be categorized, or a list to be formatted.}
+\item{path}{Path to a file, a name corresponding to a file in \code{getOption('lingmatch.dict.dir')}
+(or \code{'~/Dictionaries'}) or one of the dictionaries available at \href{https://osf.io/y6g5b}{osf.io/y6g5b},
+a matrix-like object to be categorized, or a list to be formatted.}
 
 \item{cats}{A character vector of category names to be returned. All categories are returned by default.}
 
@@ -22,7 +21,7 @@ to be categorized, or a list to be formatted.}
 leaves terms as they are. Other options change wildcards to regular expressions:
 \code{'pattern'} (\code{'^[poi]'}) replaces initial asterisks with \code{'\\\\b\\\\w*'},
 and terminal asterisks with \code{'\\\\w*\\\\b'}, to match terms within raw text;
-for anything else, terms are padded with '^' and '$', then those bounding marks are removed
+for anything else, terms are padded with \code{^} and \code{$}, then those bounding marks are removed
 when an asterisk is present, to match tokenized terms.}
 
 \item{as.weighted}{Logical; if \code{TRUE}, prevents weighted dictionaries from being converted to

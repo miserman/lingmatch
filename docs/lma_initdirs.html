@@ -1,0 +1,81 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Initialize Directories for Dictionaries and Latent Semantic...</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for lma_initdirs"><tr><td>lma_initdirs</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Initialize Directories for Dictionaries and Latent Semantic Spaces</h2>
+
+<h3>Description</h3>
+
+<p>Creates directories for dictionaries and latent semantic spaces if needed, sets them as the
+<br /> <code>lingmatch.dict.dir</code> and <code>lingmatch.lspace.dir</code> options if they are not already set,
+and creates links to them in their expected locations (<code>'~/Dictionaries'</code> and
+<code>'~/Latent Semantic Spaces'</code>) by default if applicable.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+lma_initdirs(base = "", dict = "Dictionaries",
+  lspace = "Latent Semantic Spaces", link = TRUE)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>base</code></td>
+<td>
+<p>Path to a directory in which to create the <code>dict</code> and <code>lspace</code> subdirectories.</p>
+</td></tr>
+<tr valign="top"><td><code>dict</code></td>
+<td>
+<p>Path to the dictionaries directory relative to <code>base</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>lspace</code></td>
+<td>
+<p>Path to the latent semantic spaces directory relative to <code>base</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>link</code></td>
+<td>
+<p>Logical; if <code>TRUE</code> (default), the full <code>dict</code> and/or <code>lspace</code> paths exist
+(potentially after being created), and they are not <code>'~/Dictionaries'</code> or <code>'~/Latent Semantic Spaces'</code>
+respectively, junctions (Windows) or symbolic links will be created: <code>~/Dictionaries</code> <code>&lt;&lt;===&gt;&gt;</code>
+<code>dict</code> and <code>~/Latent Semantic Spaces</code> <code>&lt;&lt;===&gt;&gt;</code> <code>lspace</code>.</p>
+</td></tr>
+</table>
+
+
+<h3>Value</h3>
+
+<p>Paths to the [1] dictionaries and [2] latent semantic space directories, or a single path if only
+<code>dict</code> or <code>lspace</code> is specified.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+## Not run: 
+
+# set up the expected dictionary and latent semantic space directories
+lma_initdirs('~')
+
+# set up directories elsewhere, and links to the expected locations
+lma_initdirs('d:')
+
+# point options and create links to preexisting directories
+lma_initdirs('~/NLP_Resources', 'Dicts', 'Dicts/Embeddings')
+
+# create just a dictionaries directory and set the
+# lingmatch.dict.dir option without creating a link
+lma_initdirs(dict = 'z:/external_dictionaries', link = FALSE)
+
+## End(Not run)
+</pre>
+
+
+</body></html>

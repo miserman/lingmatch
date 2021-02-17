@@ -13,7 +13,7 @@ adverb, conj, prep, auxverb, negate, quant, interrog, number, interjection, or s
 \item{as.regex}{Logical: if \code{FALSE}, lists are returned without regular expression.}
 
 \item{as.function}{Logical or a function: if specified and \code{as.regex} is \code{TRUE}, the selected dictionary
-will be collapsed to a regex string (terms separated by `|`), and a function for matching characters to that
+will be collapsed to a regex string (terms separated by \code{|}), and a function for matching characters to that
 string will be returned. The regex string is passed to the matching function (\code{\link{grepl}} by default)
 as a 'pattern' argument, with the first argument of the returned function being passed as an 'x' argument.
 See examples.}

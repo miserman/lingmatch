@@ -11,7 +11,8 @@ select.dict(query = NULL, dir = getOption("lingmatch.dict.dir"),
 \item{query}{A character matching a dictionary name, or a set of keywords to search for in
 dictionary information.}
 
-\item{dir}{Path to a folder containing dictionaries, or where you want them to be saved.}
+\item{dir}{Path to a folder containing dictionaries, or where you want them to be saved.
+Will look in getOption('lingmatch.dict.dir') and '~/Dictionaries' by default.}
 
 \item{check.md5}{Logical; if \code{TRUE} (default), retrieves the MD5 checksum from OSF,
 and compares it with that calculated from the downloaded file to check its integrity.}

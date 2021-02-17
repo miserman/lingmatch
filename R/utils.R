@@ -136,15 +136,15 @@ to_regex = function(dict, intext = FALSE){
 #'
 #' Read in or write dictionary files in Comma-Separated Values (.csv; weighted) or
 #' Linguistic Inquiry and Word Count (.dic; non-weighted) format.
-#' @param path Path to a file, a name corresponding to a file in \code{getOption('lingmatch.dict.dir')} or
-#'   one of the dictionaries available at \href{https://osf.io/y6g5b}{osf.io/y6g5b}, a matrix-like object
-#'   to be categorized, or a list to be formatted.
+#' @param path Path to a file, a name corresponding to a file in \code{getOption('lingmatch.dict.dir')}
+#'   (or \code{'~/Dictionaries'}) or one of the dictionaries available at \href{https://osf.io/y6g5b}{osf.io/y6g5b},
+#'   a matrix-like object to be categorized, or a list to be formatted.
 #' @param cats A character vector of category names to be returned. All categories are returned by default.
 #' @param type A character indicating whether and how terms should be altered. Unspecified or matching 'asis'
 #'   leaves terms as they are. Other options change wildcards to regular expressions:
 #'   \code{'pattern'} (\code{'^[poi]'}) replaces initial asterisks with \code{'\\\\b\\\\w*'},
 #'   and terminal asterisks with \code{'\\\\w*\\\\b'}, to match terms within raw text;
-#'   for anything else, terms are padded with '^' and '$', then those bounding marks are removed
+#'   for anything else, terms are padded with \code{^} and \code{$}, then those bounding marks are removed
 #'   when an asterisk is present, to match tokenized terms.
 #' @param as.weighted Logical; if \code{TRUE}, prevents weighted dictionaries from being converted to
 #'   unweighted versions, or converts unweighted dictionaries to a binary weighted version
@@ -160,11 +160,13 @@ to_regex = function(dict, intext = FALSE){
 #' @export
 
 read.dic = function(path, cats, type = 'asis', as.weighted = FALSE, dir = getOption('lingmatch.dict.dir'), ...){
+  if(ckd <- dir == '') dir = '~/Dictionaries'
   if(missing(path)) path = file.choose()
-  if(is.character(path) && !any(file.exists(path)) && any(file.exists(paste0(dir, '/', path))))
-    path = paste0(dir, '/', path)
+  if(is.character(path) && !any(file.exists(path)) &&
+      any(file.exists(normalizePath(paste0(dir, '/', path), '/', FALSE))))
+    path = normalizePath(paste0(dir, '/', path), '/', FALSE)
   if(is.character(path) && !any(file.exists(path))){
-    tp = select.dict(path, dir = dir)
+    tp = select.dict(path, dir = if(ckd) '' else dir)
     if(nrow(tp$selected) && length(path) <= nrow(tp$info)){
       if(any(tp$selected$downloaded == '')){
          td = rownames(tp$selected)[tp$selected$downloaded == '']
@@ -172,7 +174,7 @@ read.dic = function(path, cats, type = 'asis', as.weighted = FALSE, dir = getOpt
            'would you like to download ', if(length(td) == 1) 'this dictionary' else 'these dictionaries', '?:\n',
            sub(',(?=[^,]+$)', if(length(td) == 2) ' and' else ', and', paste0(td, collapse = ', '), perl = TRUE),
            '\n(press Enter for yes): '
-         )))) tp$selected[td, 'downloaded'] = download.dict(td, dir = dir)
+         )))) tp$selected[td, 'downloaded'] = download.dict(td, dir = if(ckd) '' else dir)
       }
       path = tp$selected[tp$selected[, 'downloaded'] != '', 'downloaded']
       if(!length(path)) stop('none of the selected dictionaries are downloaded')
@@ -182,7 +184,7 @@ read.dic = function(path, cats, type = 'asis', as.weighted = FALSE, dir = getOpt
     dicts = list()
     for(p in path) if(file.exists(p)){
       name = gsub('^.*[/\\]+|\\.[^.]+$', '', p)
-      dicts[[name]] = read.dic(p, dir = dir)
+      dicts[[name]] = read.dic(p)
     }
     path = if(length(dicts) == 1) dicts[[1]] else dicts
   }
@@ -386,7 +388,7 @@ read.dic = function(path, cats, type = 'asis', as.weighted = FALSE, dir = getOpt
 #' }
 #' @export
 
-write.dic = function(dict, filename = 'custom', type = 'asis', as.weighted = FALSE, save = TRUE){
+write.dic = function(dict, filename, type = 'asis', as.weighted = FALSE, save = TRUE){
   if(!is.list(dict) || is.data.frame(dict)){
     if(save && (missing(as.weighted) || as.weighted)){
       as.weighted = TRUE
@@ -411,7 +413,7 @@ write.dic = function(dict, filename = 'custom', type = 'asis', as.weighted = FAL
   }
   if(save){
     filename = filename[[1]]
-    filename = paste0(filename, if(!grepl('\\.[^.]+$', filename)) if(as.weighted) '.csv' else '.dic')
+    if(!grepl('\\.[^.]+$', filename)) filename = paste0(filename, if(as.weighted) '.csv' else '.dic')
     if(as.weighted) write.table(o, filename, sep = ',', row.names = FALSE, qmethod = 'double') else
       write(o, filename)
     message('dictionary saved to ', filename)
@@ -429,11 +431,15 @@ write.dic = function(dict, filename = 'custom', type = 'asis', as.weighted = FAL
 #'   '\\n' by default. If a number, texts will be broken into that many segments, each with a roughly equal number of
 #'   words.
 #' @param ext The extension of the files you want to read in. '.txt' by default.
-#' @param subdir Logical: if \code{TRUE}, files in folders in \code{path} will also be included.
-#' @param segment.size Logical: if specified, \code{segment} will be ignored, and texts will be broken into segments containing
-#'   roughly \code{segment.size} number of words.
-#' @param bysentence A number: if \code{TRUE}, and \code{segment} is a number or \code{segment.size} is specified, sentences will
-#'   be kept together, rather than potentially being broken across segments.
+#' @param subdir Logical; if \code{TRUE}, files in folders in \code{path} will also be included.
+#' @param segment.size Logical; if specified, \code{segment} will be ignored, and texts will be broken into
+#'   segments containing roughly \code{segment.size} number of words.
+#' @param bysentence Logical; if \code{TRUE}, and \code{segment} is a number or \code{segment.size} is specified,
+#'   sentences will be kept together, rather than potentially being broken across segments.
+#' @param end_in_quotes Logical; if \code{FALSE}, sentence-ending marks (\code{.?!}) will not be considered when
+#'   immediately followed by a quotation mark. For example, \code{'"Word." Word.'} would be considered one sentence.
+#' @param preclean Logical; if \code{TRUE}, text will be cleaned with \code{lma_dict(special)} before
+#'   segmentation.
 #' @param text A character vector with text to be split, used in place of \code{path}. Each entry is treated as a file.
 #' @return A \code{data.frame} with columns for file names (\code{input}),
 #' segment number within file (\code{segment}), word count for each segment (\code{WC}), and the text of
@@ -466,7 +472,7 @@ write.dic = function(dict, filename = 'custom', type = 'asis', as.weighted = FAL
 #' @export
 
 read.segments = function(path = '.', segment = NULL, ext = '.txt', subdir = FALSE, segment.size = -1,
-  bysentence = FALSE, text = NULL){
+  bysentence = FALSE, end_in_quotes = TRUE, preclean = FALSE, text = NULL){
   if(any(path == '')) path[path == ''] = '.'
   if(!any(file.exists(sub('[\\/]+$', '', path)))){
     ck_text = TRUE
@@ -494,6 +500,7 @@ read.segments = function(path = '.', segment = NULL, ext = '.txt', subdir = FALS
         if(is.numeric(segment) || segment.size > 0){
           words = tryCatch(do.call(scan, args), error = err)
           if(!length(words)) return(NULL)
+          if(preclean) words = lma_dict('special', as.function = gsub)(words)
           TWC = length(words)
           if(segment.size == -1) segment.size = ceiling(TWC / segment)
           if(bysentence){
@@ -504,10 +511,16 @@ read.segments = function(path = '.', segment = NULL, ext = '.txt', subdir = FALS
               lines = NULL
               WC = NULL
             }
-            sentends = c(1, grep(paste0(
-              '(?!<^(?:[a-z]+\\.[a-z.]+|\\d+|[a-z]|[iv]+|ans|govt|apt|etc|',
-              'st|rd|ft|feat|dr|drs|mr|ms|mrs|messrs|jr|prof))[.?!]+$'
-            ), words, perl = TRUE))
+            sentends = grep('[.?!]$', if(end_in_quotes){
+              gsub(if(preclean) '["\']+' else paste0('(?:', paste(c('["\']',
+                unlist(lma_dict('special')$special$CHARACTERS[c('"', "'")])),
+                collapse = '|'), ')+$'), '', words)
+            }else words)
+            if(length(sentends)){
+              sentends = sentends[!grepl(paste0('\\.[a-z]|^(?:[a-z]|[ivxm]+|\\d+|ans|govt|apt|etc|',
+                'st|rd|ft|feat|dr|drs|mr|ms|mrs|messrs|jr|prof)[.?!]$'), words[sentends], TRUE, TRUE)]
+            }
+            sentends = c(1, sentends)
             nsents = length(sentends)
             if(sentends[nsents] != TWC){
               sentends = c(sentends, TWC)
@@ -559,7 +572,8 @@ read.segments = function(path = '.', segment = NULL, ext = '.txt', subdir = FALS
 #'
 #' @param query A character matching a space name, or a character vector of terms, used
 #'   to select spaces. If length is over 1, \code{get.map} is set to \code{TRUE}.
-#' @param dir Path to \code{lma_term_map.rda} and downloaded spaces.
+#' @param dir Path to a directory containing \code{lma_term_map.rda} and downloaded spaces; \cr will look in
+#'   \code{getOption('lingmatch.lspace.dir')} and \code{'~/Latent Semantic Spaces'} by default.
 #' @param get.map Logical; if \code{TRUE} and \code{lma_term_map.rda} is not found in
 #'   \code{dir}, the term map (\href{https://osf.io/xr7jv}{lma_term_map.rda}) is
 #'   downloaded and decompressed.
@@ -611,11 +625,11 @@ read.segments = function(path = '.', segment = NULL, ext = '.txt', subdir = FALS
 
 select.lspace = function(query = NULL, dir = getOption('lingmatch.lspace.dir'),
   get.map = FALSE, check.md5 = TRUE, mode = 'wb'){
-  dir = sub('/*$', '/', path.expand(dir))
-  map_path = paste0(dir, 'lma_term_map.rda')
+  if(ckd <- dir == '') dir = '~/Latent Semantic Spaces'
+  map_path = normalizePath(paste0(dir, '/lma_term_map.rda'), '/', FALSE)
   if(missing(get.map) && !missing(query) && length(query) > 1) get.map = TRUE
   if(!exists('lma_term_map')) lma_term_map = NULL
-  if(get.map && !(file.exists(map_path) || !is.null(lma_term_map))){
+  if(get.map && !ckd && !(file.exists(map_path) || !is.null(lma_term_map))){
     if(!file.exists(map_path)){
       status = tryCatch(download.file('https://osf.io/download/xr7jv',
         map_path, mode = mode), error = function(e) 1)
@@ -634,7 +648,7 @@ select.lspace = function(query = NULL, dir = getOption('lingmatch.lspace.dir'),
   }
   r = list(info = lss_info, selected = lss_info[NULL,])
   r$info[, 'wiki'] = paste0('https://osf.io/489he/wiki/', rownames(lss_info))
-  r$info[, 'downloaded'] = paste0(dir, rownames(r$info), '.dat')
+  r$info[, 'downloaded'] = normalizePath(paste0(dir, '/', rownames(r$info), '.dat'), '/', FALSE)
   r$info[!r$info[, 'downloaded'] %in% list.files(dir, '\\.dat'), 'downloaded'] = ''
   if(get.map || missing(query)) if(!is.null(lma_term_map)){
     r$term_map = lma_term_map
@@ -671,9 +685,10 @@ select.lspace = function(query = NULL, dir = getOption('lingmatch.lspace.dir'),
 #'
 #' Downloads the specified semantic space from \href{https://osf.io/489he}{osf.io/489he}.
 #'
-#' @param space Name of one or more spaces you want to download, or \code{'all'} for all available. \code{'100k'} is
-#'  the default, and some other common options might be \code{'google'}, \code{'facebook'}, or \code{'glove'}.
-#'  See \href{https://osf.io/489he/wiki/home}{osf.io/489he/wiki} for more information, and a full list of spaces.
+#' @param space Name of one or more spaces you want to download, or \code{'all'} for all available.
+#'  \code{'100k_lsa'} is the default, and some other common options might be \code{'google'}, \code{'facebook'},
+#'  or \code{'glove'}. See \href{https://osf.io/489he/wiki/home}{osf.io/489he/wiki} for more information,
+#'  and a full list of spaces.
 #' @param include.terms Logical; if \code{FALSE}, only the \code{.dat.bz2} file is downloaded
 #'  (which only has numeric vectors).
 #' @param decompress Logical; if \code{TRUE} (default), decompresses the downloaded file
@@ -683,22 +698,26 @@ select.lspace = function(query = NULL, dir = getOption('lingmatch.lspace.dir'),
 #'  and compares it with that calculated from the downloaded file to check its integrity.
 #' @param mode A character specifying the file write mode; default is 'wb'. See
 #'  \code{\link{download.file}}.
-#'  \code{\link{download.file}}.
-#' @param dir Directory in which to save the space; \cr default is
-#'  \code{getOption('lingmatch.lspace.dir')}.
+#' @param dir Directory in which to save the space. Specify this here, or set the lspace directory option
+#'  (e.g., \code{options(lingmatch.lspace.dir = '~/Latent Semantic Spaces')}), or use
+#'  \code{\link{lma_initdirs}} to initialize a directory.
 #' @family Latent Semantic Space functions
 #' @return A character vector with paths to the [1] data and [2] term files.
 #' @examples
 #' \dontrun{
 #'
-#' download.lspace('glove_crawl')
+#' download.lspace('glove_crawl', dir = '~/Latent Semantic Spaces')
 #' }
 #' @export
 #' @importFrom utils download.file
 #' @importFrom tools md5sum
 
-download.lspace = function(space = '100k', include.terms = TRUE, decompress = TRUE,
+download.lspace = function(space = '100k_lsa', include.terms = TRUE, decompress = TRUE,
   check.md5 = TRUE, mode = 'wb', dir = getOption('lingmatch.lspace.dir')){
+  if(dir == '') stop(paste(
+    'specify a directory (dir), or set the lspace directory option\n(e.g., options(lingmatch.lspace.dir =',
+    '"~/Latent Semantic Spaces")) or initialize it with lma_initdirs'
+  ), call. = FALSE)
   if(length(space) == 1 && space == 'all') space = rownames(select.lspace()$info)
   if(length(space) > 1){
     res = lapply(space, function(d){
@@ -709,8 +728,8 @@ download.lspace = function(space = '100k', include.terms = TRUE, decompress = TR
     names(res) = space
     return(res)
   }
-  dir = sub('/+$', '', path.expand(dir))
-  if(space == 'default') space = '100k'
+  dir = normalizePath(dir, '/', FALSE)
+  if(space == 'default') space = '100k_lsa'
   name = grep(paste0('^', sub('\\..*$', '', space)), rownames(lss_info), value = TRUE)
   if(!length(name)) name = grep(paste0('^', substr(space, 1, 4)), rownames(lss_info), TRUE, value = TRUE)
   if(!length(name)){
@@ -721,11 +740,10 @@ download.lspace = function(space = '100k', include.terms = TRUE, decompress = TR
     dl = function(id) paste0('https://osf.io/download/', id),
     versions = function(id) paste0('https://osf.io/', id, '/?show=revision')
   )
-  dir = path.expand(dir)
-  if(!dir.exists(dir)) dir.create(dir)
+  if(!dir.exists(dir)) dir.create(dir, recursive = TRUE)
   dl = function(id, ext, ck){
     s = urls$dl(id)
-    o = paste0(dir, '/', name, ext)
+    o = normalizePath(paste0(dir, '/', name, ext), '/', FALSE)
     status = tryCatch(download.file(s, o, mode = mode), error = function(e) 1)
     if(!status && check.md5){
       fi = strsplit(readLines(urls$info(id), 1, TRUE, FALSE, 'utf-8'), '[:,{}"]+')[[1]]
@@ -744,7 +762,7 @@ download.lspace = function(space = '100k', include.terms = TRUE, decompress = TR
     if(Sys.which('bunzip2') == ''){
       warning('could not find path to bunzip2 command for decompression')
     }else{
-      o = paste0(dir, '/', name, '.dat.bz2')
+      o = normalizePath(paste0(dir, '/', name, '.dat.bz2'), '/', FALSE)
       status = tryCatch(system2('bunzip2', shQuote(path.expand(o))), error = function(e) 1)
       if(status) warning(
         'failed to decompress; might try this from a system console:\n  bunzip2 "', path.expand(o), '"'
@@ -765,6 +783,7 @@ download.lspace = function(space = '100k', include.terms = TRUE, decompress = TR
 #' @param query A character matching a dictionary name, or a set of keywords to search for in
 #'   dictionary information.
 #' @param dir Path to a folder containing dictionaries, or where you want them to be saved.
+#'   Will look in getOption('lingmatch.dict.dir') and '~/Dictionaries' by default.
 #' @param check.md5 Logical; if \code{TRUE} (default), retrieves the MD5 checksum from OSF,
 #'   and compares it with that calculated from the downloaded file to check its integrity.
 #' @param mode Passed to \code{\link{download.file}} when downloading files.
@@ -854,11 +873,12 @@ download.lspace = function(space = '100k', include.terms = TRUE, decompress = TR
 
 select.dict = function(query = NULL, dir = getOption('lingmatch.dict.dir'),
   check.md5 = TRUE, mode = 'wb'){
-  dir = sub('/+$', '', path.expand(dir))
+  if(dir == '') dir = '~/Dictionaries'
   r = list(info = dict_info, selected = dict_info[NULL,])
   r$info[, 'wiki'] = paste0('https://osf.io/y6g5b/wiki/', rownames(dict_info))
-  r$info[, 'downloaded'] = paste0(sub('/+$', '', dir), '/', rownames(r$info),
-    ifelse(r$info$weighted, '.csv', '.dic'))
+  r$info[, 'downloaded'] = normalizePath(paste0(
+    dir, '/', rownames(r$info), ifelse(r$info$weighted, '.csv', '.dic')
+  ), '/', FALSE)
   r$info[!file.exists(r$info[, 'downloaded']), 'downloaded'] = ''
   if(!missing(query) && length(query) < nrow(dict_info) * 2){
     query = paste0(query, collapse = '|')
@@ -883,7 +903,8 @@ select.dict = function(query = NULL, dir = getOption('lingmatch.dict.dir'),
 #'  and compares it with that calculated from the downloaded file to check its integrity.
 #' @param mode A character specifying the file write mode; default is 'wb'. See
 #'  \code{\link{download.file}}.
-#' @param dir Directory in which to save the dictionary; \cr default is \code{getOption('lingmatch.dict.dir')}.
+#' @param dir Directory in which to save the dictionary; \cr default is \code{getOption('lingmatch.dict.dir')}. \cr
+#'  This must be specified, or the option must be set -- use \code{\link{lma_initdirs}} to initialize a directory.
 #' @return Path to the downloaded dictionary, or a list of such if multiple were downloaded.
 #' @family Dictionary functions
 #' @examples
@@ -894,6 +915,10 @@ select.dict = function(query = NULL, dir = getOption('lingmatch.dict.dir'),
 #' @export
 
 download.dict = function(dict = 'lusi', check.md5 = TRUE, mode = 'wb', dir = getOption('lingmatch.dict.dir')){
+  if(dir == '') stop(paste(
+    'specify a dir, or set the dict directory option\n(e.g., options(lingmatch.dict.dir = "~/Dictionaries"))',
+    ' or initialize it with lma_initdirs'
+  ), call. = FALSE)
   if(length(dict) == 1 && dict == 'all') dict = rownames(select.dict()$info)
   if(length(dict) > 1){
     res = lapply(dict, function(d) tryCatch(
@@ -903,7 +928,7 @@ download.dict = function(dict = 'lusi', check.md5 = TRUE, mode = 'wb', dir = get
     names(res) = dict
     return(res)
   }
-  dir = sub('/+$', '', path.expand(dir))
+  dir = normalizePath(dir, '/', FALSE)
   name = grep(paste0('^', sub('\\.[^.]*$', '', dict)), rownames(dict_info), value = TRUE)
   if(!length(name)) name = grep(paste0('^', substr(dict, 1, 6)), rownames(dict_info), TRUE, value = TRUE)
   if(!length(name)){
@@ -914,11 +939,10 @@ download.dict = function(dict = 'lusi', check.md5 = TRUE, mode = 'wb', dir = get
     dl = function(id) paste0('https://osf.io/download/', id),
     versions = function(id) paste0('https://osf.io/', id, '/?show=revision')
   )
-  dir = path.expand(dir)
-  if(!dir.exists(dir)) dir.create(dir)
+  if(!dir.exists(dir)) dir.create(dir, recursive = TRUE)
   dl = function(id, ext, ck){
     s = urls$dl(id)
-    o = paste0(dir, '/', name, ext)
+    o = normalizePath(paste0(dir, '/', name, ext), '/', FALSE)
     status = tryCatch(download.file(s, o, mode = mode), error = function(e) 1)
     if(!status && check.md5){
       fi = strsplit(readLines(urls$info(id), 1, TRUE, FALSE, 'utf-8'), '[:,{}"]+')[[1]]
@@ -951,7 +975,9 @@ download.dict = function(dict = 'lusi', check.md5 = TRUE, mode = 'wb', dir = get
 #' @param sep Delimiting character between values in each line, e.g., \code{" "} or \code{"\\t"}.
 #'   Only applies to plain-text files.
 #' @param digits Number of digits to round values to; default is 9.
-#' @param dir Path to folder containing \code{infile}s; \cr default is \code{getOption('lingmatch.lspace.dir')}.
+#' @param dir Path to folder containing \code{infile}s. \cr Default is \code{getOption('lingmatch.lspace.dir')},
+#'   which must be set in the current session. If this is not specified and \code{infile} is a full path,
+#'   \code{dir} will be set to \code{infile}'s parent directory.
 #' @param outdir Path to folder in which to save standardized files; default is \code{dir}.
 #' @param remove A string with a regex pattern to be removed from term names \cr (i.e., \code{gsub(remove,}
 #'   \code{"", term)}); default is \code{""}, which is ignored.
@@ -979,9 +1005,25 @@ download.dict = function(dict = 'lusi', check.md5 = TRUE, mode = 'wb', dir = get
 
 standardize.lspace = function(infile, name, sep = ' ', digits = 9, dir = getOption('lingmatch.lspace.dir'),
   outdir = dir, remove = '', term_check = "^[a-zA-Z]+$|^['a-zA-Z][a-zA-Z.'\\/-]*[a-zA-Z.]$", verbose = FALSE){
+  if(is.character(infile) && file.exists(infile) && missing(dir)){
+    dir = dirname(normalizePath(infile, mustWork = FALSE))
+    if(missing(outdir)) outdir = dir
+  }else if(dir == ''){
+    if(outdir != ''){
+      dir = outdir
+    }else{
+      stop(paste(
+        'specify a directory (dir), or set the lspace directory option\n(e.g.,',
+        'options(lingmatch.lspace.dir = ~/Latent Semantic Spaces")) or call lma_initdir()'
+      ), call. = FALSE)
+    }
+  }
   if(!is.character(term_check)) term_check = ''
-  ip = paste0(sub('/+$', '', path.expand(dir)), '/', infile)
-  op = paste0(sub('/+$', '', path.expand(outdir)), '/', name)
+  if(is.character(infile)){
+    ip = normalizePath(paste0(dir, '/', infile), '/', FALSE)
+    if(!file.exists(ip)) ip = infile
+  }
+  op = normalizePath(paste0(outdir, '/', name), '/', FALSE)
   fs = op
   if(!is.character(infile) || grepl('\\.rda$', infile)){
     if(is.character(infile)){
@@ -1105,7 +1147,9 @@ lma_patcat = function(text, dict = NULL, pattern.weights = 'weight', pattern.cat
   wide = FALSE
   if(missing(dict) && missing(pattern.weights) && missing(pattern.categories)) dict = lma_dict()
   if(is.character(dict) && length(dict) == 1 && missing(pattern.weights) && missing(pattern.categories)){
-    if(!any(file.exists(dict)) && any(file.exists(paste0(dir, dict)))) dict = paste0(dir, dict)
+    if(dir == '') dir = '~/Dictionaries'
+    if(!any(file.exists(dict)) && any(file.exists(normalizePath(paste0(dir, '/', dict), '/', FALSE))))
+      dict = normalizePath(paste0(dir, '/', dict), '/', FALSE)
     td = tryCatch(read.dic(dict), error = function(e) NULL)
     dict = if(is.null(td)) list(cat1 = dict) else td
   }
@@ -1376,7 +1420,7 @@ lma_meta = function(text){
 #' adverb, conj, prep, auxverb, negate, quant, interrog, number, interjection, or special.
 #' @param as.regex Logical: if \code{FALSE}, lists are returned without regular expression.
 #' @param as.function Logical or a function: if specified and \code{as.regex} is \code{TRUE}, the selected dictionary
-#' will be collapsed to a regex string (terms separated by `|`), and a function for matching characters to that
+#' will be collapsed to a regex string (terms separated by \code{|}), and a function for matching characters to that
 #' string will be returned. The regex string is passed to the matching function (\code{\link{grepl}} by default)
 #' as a 'pattern' argument, with the first argument of the returned function being passed as an 'x' argument.
 #' See examples.
@@ -1648,4 +1692,81 @@ lma_dict = function(..., as.regex = TRUE, as.function = FALSE){
       }
     }else dict[cats]
   }else lapply(dict[cats], function(l) gsub('\\^|\\$', '', sub('(?<=[^$])$', '*', l, perl = TRUE)))
+}
+
+#' Initialize Directories for Dictionaries and Latent Semantic Spaces
+#'
+#' Creates directories for dictionaries and latent semantic spaces if needed, sets them as the
+#' \cr \code{lingmatch.dict.dir} and \code{lingmatch.lspace.dir} options if they are not already set,
+#' and creates links to them in their expected locations (\code{'~/Dictionaries'} and
+#' \code{'~/Latent Semantic Spaces'}) by default if applicable.
+#' @param base Path to a directory in which to create the \code{dict} and \code{lspace} subdirectories.
+#' @param dict Path to the dictionaries directory relative to \code{base}.
+#' @param lspace Path to the latent semantic spaces directory relative to \code{base}.
+#' @param link Logical; if \code{TRUE} (default), the full \code{dict} and/or \code{lspace} paths exist
+#' (potentially after being created), and they are not \code{'~/Dictionaries'} or \code{'~/Latent Semantic Spaces'}
+#' respectively, junctions (Windows) or symbolic links will be created: \code{~/Dictionaries} \code{<<===>>}
+#' \code{dict} and \code{~/Latent Semantic Spaces} \code{<<===>>} \code{lspace}.
+#' @return Paths to the [1] dictionaries and [2] latent semantic space directories, or a single path if only
+#' \code{dict} or \code{lspace} is specified.
+#' @examples
+#' \dontrun{
+#'
+#' # set up the expected dictionary and latent semantic space directories
+#' lma_initdirs('~')
+#'
+#' # set up directories elsewhere, and links to the expected locations
+#' lma_initdirs('d:')
+#'
+#' # point options and create links to preexisting directories
+#' lma_initdirs('~/NLP_Resources', 'Dicts', 'Dicts/Embeddings')
+#'
+#' # create just a dictionaries directory and set the
+#' # lingmatch.dict.dir option without creating a link
+#' lma_initdirs(dict = 'z:/external_dictionaries', link = FALSE)
+#' }
+#' @export
+
+lma_initdirs = function(base = '', dict = 'Dictionaries', lspace = 'Latent Semantic Spaces', link = TRUE){
+  mck = c(missing(dict), missing(lspace))
+  if(base == '' && all(mck)){
+    base = gsub('^[\'"]+|[\'"]+$', '', readline(paste0(
+      'Enter the path to a directory; ~ is recommended: \n',
+      'This is where ', dict, ' and ', lspace, ' subdirectories will be made.'
+    )))
+    if(grepl('^(|cancel|exit|stop|q|x|quit|no|nvm|nevermind)$', tolower(base))) stop(
+      'Specify a path to a directory in which you want dictionaries',
+      ' and latent semantic spaces to be stored; e.g., "~".',
+      call. = FALSE
+    )
+  }
+  if(base == ''){
+    dirs = normalizePath(c(dict, lspace), '/', FALSE)
+    names(dirs) = c('dict', 'lspace')
+    if(!all(mck)) dirs = dirs[which(!mck)]
+  }else{
+    dirs = normalizePath(paste0(base, if(base != '') '/', c(dict, lspace)), '/', FALSE)
+    names(dirs) = c('dict', 'lspace')
+    if(!all(mck)) dirs = dirs[!mck]
+  }
+  if('dict' %in% names(dirs)){
+    if(!dir.exists(dirs[['dict']])) dir.create(dirs[['dict']], recursive = TRUE)
+    if(getOption('lingmatch.dict.dir') == '') options(lingmatch.dict.dir = dirs[['dict']])
+  }
+  if('lspace' %in% names(dirs)){
+    if(!dir.exists(dirs[['lspace']])) dir.create(dirs[['lspace']], recursive = TRUE)
+    if(getOption('lingmatch.lspace.dir') == '') options(lingmatch.lspace.dir = dirs[['lspace']])
+  }
+  if(link){
+    linker = if(Sys.info()[['sysname']] == 'Windows') Sys.junction else file.symlink
+    if(dir.exists(dirs[['dict']]) && !dir.exists('~/Dictionaries')){
+      linker(dirs[['dict']], '~/Dictionaries')
+      message('created dictionaries link:\n  ', dirs[['dict']], ' <<==>> ', path.expand('~/Dictionaries'))
+    }
+    if(dir.exists(dirs[['lspace']]) && !dir.exists('~/Latent Semantic Spaces')){
+      linker(dirs[['lspace']], '~/Latent Semantic Spaces')
+      message('created latent space link:\n  ', dirs[['lspace']], ' <<==>> ', path.expand('~/Latent Semantic Spaces'))
+    }
+  }
+  dirs
 }

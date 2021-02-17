@@ -4,13 +4,15 @@
 \alias{download.lspace}
 \title{Download Latent Semantic Spaces}
 \usage{
-download.lspace(space = "100k", include.terms = TRUE, decompress = TRUE,
-  check.md5 = TRUE, mode = "wb", dir = getOption("lingmatch.lspace.dir"))
+download.lspace(space = "100k_lsa", include.terms = TRUE,
+  decompress = TRUE, check.md5 = TRUE, mode = "wb",
+  dir = getOption("lingmatch.lspace.dir"))
 }
 \arguments{
-\item{space}{Name of one or more spaces you want to download, or \code{'all'} for all available. \code{'100k'} is
-the default, and some other common options might be \code{'google'}, \code{'facebook'}, or \code{'glove'}.
-See \href{https://osf.io/489he/wiki/home}{osf.io/489he/wiki} for more information, and a full list of spaces.}
+\item{space}{Name of one or more spaces you want to download, or \code{'all'} for all available.
+\code{'100k_lsa'} is the default, and some other common options might be \code{'google'}, \code{'facebook'},
+or \code{'glove'}. See \href{https://osf.io/489he/wiki/home}{osf.io/489he/wiki} for more information,
+and a full list of spaces.}
 
 \item{include.terms}{Logical; if \code{FALSE}, only the \code{.dat.bz2} file is downloaded
 (which only has numeric vectors).}
@@ -23,11 +25,11 @@ with the \code{bunzip2} system command assuming it is available \cr (as indicate
 and compares it with that calculated from the downloaded file to check its integrity.}
 
 \item{mode}{A character specifying the file write mode; default is 'wb'. See
-\code{\link{download.file}}.
 \code{\link{download.file}}.}
 
-\item{dir}{Directory in which to save the space; \cr default is
-\code{getOption('lingmatch.lspace.dir')}.}
+\item{dir}{Directory in which to save the space. Specify this here, or set the lspace directory option
+(e.g., \code{options(lingmatch.lspace.dir = '~/Latent Semantic Spaces')}), or use
+\code{\link{lma_initdirs}} to initialize a directory.}
 }
 \value{
 A character vector with paths to the [1] data and [2] term files.
@@ -38,7 +40,7 @@ Downloads the specified semantic space from \href{https://osf.io/489he}{osf.io/4
 \examples{
 \dontrun{
 
-download.lspace('glove_crawl')
+download.lspace('glove_crawl', dir = '~/Latent Semantic Spaces')
 }
 }
 \seealso{

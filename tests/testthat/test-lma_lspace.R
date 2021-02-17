@@ -14,7 +14,7 @@ test_that('svd works', {
   ))
 })
 
-dir = getOption('lingmatch.lspace.dir')
+dir = path.expand('~/Latent Semantic Spaces')
 map = paste0(dir, '/lma_term_map.rda')
 files = list.files(dir, '\\.dat$', full.names = TRUE)
 skip_if(

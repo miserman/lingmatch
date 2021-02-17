@@ -16,8 +16,9 @@
 <h3>Usage</h3>
 
 <pre>
-download.lspace(space = "100k", include.terms = TRUE, decompress = TRUE,
-  check.md5 = TRUE, mode = "wb", dir = getOption("lingmatch.lspace.dir"))
+download.lspace(space = "100k_lsa", include.terms = TRUE,
+  decompress = TRUE, check.md5 = TRUE, mode = "wb",
+  dir = getOption("lingmatch.lspace.dir"))
 </pre>
 
 
@@ -26,9 +27,10 @@ download.lspace(space = "100k", include.terms = TRUE, decompress = TRUE,
 <table summary="R argblock">
 <tr valign="top"><td><code>space</code></td>
 <td>
-<p>Name of one or more spaces you want to download, or <code>'all'</code> for all available. <code>'100k'</code> is
-the default, and some other common options might be <code>'google'</code>, <code>'facebook'</code>, or <code>'glove'</code>.
-See <a href="https://osf.io/489he/wiki/home">osf.io/489he/wiki</a> for more information, and a full list of spaces.</p>
+<p>Name of one or more spaces you want to download, or <code>'all'</code> for all available.
+<code>'100k_lsa'</code> is the default, and some other common options might be <code>'google'</code>, <code>'facebook'</code>,
+or <code>'glove'</code>. See <a href="https://osf.io/489he/wiki/home">osf.io/489he/wiki</a> for more information,
+and a full list of spaces.</p>
 </td></tr>
 <tr valign="top"><td><code>include.terms</code></td>
 <td>
@@ -49,13 +51,13 @@ and compares it with that calculated from the downloaded file to check its integ
 <tr valign="top"><td><code>mode</code></td>
 <td>
 <p>A character specifying the file write mode; default is 'wb'. See
-<code>download.file</code>.
 <code>download.file</code>.</p>
 </td></tr>
 <tr valign="top"><td><code>dir</code></td>
 <td>
-<p>Directory in which to save the space; <br /> default is
-<code>getOption('lingmatch.lspace.dir')</code>.</p>
+<p>Directory in which to save the space. Specify this here, or set the lspace directory option
+(e.g., <code>options(lingmatch.lspace.dir = '~/Latent Semantic Spaces')</code>), or use
+<code>lma_initdirs</code> to initialize a directory.</p>
 </td></tr>
 </table>
 
@@ -80,7 +82,7 @@ and compares it with that calculated from the downloaded file to check its integ
 <pre>
 ## Not run: 
 
-download.lspace('glove_crawl')
+download.lspace('glove_crawl', dir = '~/Latent Semantic Spaces')
 
 ## End(Not run)
 </pre>

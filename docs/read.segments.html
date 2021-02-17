@@ -17,7 +17,8 @@
 
 <pre>
 read.segments(path = ".", segment = NULL, ext = ".txt", subdir = FALSE,
-  segment.size = -1, bysentence = FALSE, text = NULL)
+  segment.size = -1, bysentence = FALSE, end_in_quotes = TRUE,
+  preclean = FALSE, text = NULL)
 </pre>
 
 
@@ -41,17 +42,27 @@ words.</p>
 </td></tr>
 <tr valign="top"><td><code>subdir</code></td>
 <td>
-<p>Logical: if <code>TRUE</code>, files in folders in <code>path</code> will also be included.</p>
+<p>Logical; if <code>TRUE</code>, files in folders in <code>path</code> will also be included.</p>
 </td></tr>
 <tr valign="top"><td><code>segment.size</code></td>
 <td>
-<p>Logical: if specified, <code>segment</code> will be ignored, and texts will be broken into segments containing
-roughly <code>segment.size</code> number of words.</p>
+<p>Logical; if specified, <code>segment</code> will be ignored, and texts will be broken into
+segments containing roughly <code>segment.size</code> number of words.</p>
 </td></tr>
 <tr valign="top"><td><code>bysentence</code></td>
 <td>
-<p>A number: if <code>TRUE</code>, and <code>segment</code> is a number or <code>segment.size</code> is specified, sentences will
-be kept together, rather than potentially being broken across segments.</p>
+<p>Logical; if <code>TRUE</code>, and <code>segment</code> is a number or <code>segment.size</code> is specified,
+sentences will be kept together, rather than potentially being broken across segments.</p>
+</td></tr>
+<tr valign="top"><td><code>end_in_quotes</code></td>
+<td>
+<p>Logical; if <code>FALSE</code>, sentence-ending marks (<code>.?!</code>) will not be considered when
+immediately followed by a quotation mark. For example, <code>'"Word." Word.'</code> would be considered one sentence.</p>
+</td></tr>
+<tr valign="top"><td><code>preclean</code></td>
+<td>
+<p>Logical; if <code>TRUE</code>, text will be cleaned with <code>lma_dict(special)</code> before
+segmentation.</p>
 </td></tr>
 <tr valign="top"><td><code>text</code></td>
 <td>

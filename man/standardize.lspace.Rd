@@ -21,7 +21,9 @@ Only applies to plain-text files.}
 
 \item{digits}{Number of digits to round values to; default is 9.}
 
-\item{dir}{Path to folder containing \code{infile}s; \cr default is \code{getOption('lingmatch.lspace.dir')}.}
+\item{dir}{Path to folder containing \code{infile}s. \cr Default is \code{getOption('lingmatch.lspace.dir')},
+which must be set in the current session. If this is not specified and \code{infile} is a full path,
+\code{dir} will be set to \code{infile}'s parent directory.}
 
 \item{outdir}{Path to folder in which to save standardized files; default is \code{dir}.}
 

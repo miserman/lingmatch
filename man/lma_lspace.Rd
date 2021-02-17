@@ -45,8 +45,8 @@ dimensions as columns is returned.}
 
 \item{use.scan}{Logical: if \code{TRUE}, reads in the rows of \code{space} with \code{\link{scan}}.}
 
-\item{dir}{Path to a folder containing spaces. \cr Default is \code{getOption('lingmatch.lspace.dir')}; \cr
-change with \code{options(lingmatch.lspace.dir = 'desired/path')}.}
+\item{dir}{Path to a folder containing spaces. \cr
+Set a session default with \code{options(lingmatch.lspace.dir = 'desired/path')}.}
 }
 \value{
 A matrix or sparse matrix with either (a) a row per term and column per latent dimension (a latent

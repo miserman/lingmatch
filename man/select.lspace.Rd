@@ -11,7 +11,8 @@ select.lspace(query = NULL, dir = getOption("lingmatch.lspace.dir"),
 \item{query}{A character matching a space name, or a character vector of terms, used
 to select spaces. If length is over 1, \code{get.map} is set to \code{TRUE}.}
 
-\item{dir}{Path to \code{lma_term_map.rda} and downloaded spaces.}
+\item{dir}{Path to a directory containing \code{lma_term_map.rda} and downloaded spaces; \cr will look in
+\code{getOption('lingmatch.lspace.dir')} and \code{'~/Latent Semantic Spaces'} by default.}
 
 \item{get.map}{Logical; if \code{TRUE} and \code{lma_term_map.rda} is not found in
 \code{dir}, the term map (\href{https://osf.io/xr7jv}{lma_term_map.rda}) is

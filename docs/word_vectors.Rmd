@@ -113,7 +113,7 @@ spaces$selected[, c('terms', 'coverage')]
 Another possible, though more intensive thing to look at might be similarities between words of particular interest. In our initial set of texts, for example, we were looking at animals in relation to attributes, so we might look at those relationships in whatever spaces you've downloaded:
 ```{r, fig.height=4, fig.width=10, dev='CairoSVG'}
 # retrieve names of downloaded spaces
-space_names = unique(sub('\\..*$', '', list.files(getOption('lingmatch.lspace.dir'), 'dat')))
+space_names = unique(sub('\\..*$', '', list.files('~/Latent Semantic Spaces', 'dat')))
 
 # define a few terms of interest
 terms = c('small', 'big', 'frogs', 'crickets', 'horses', 'whales')
