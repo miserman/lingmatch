@@ -20,10 +20,16 @@ An all-in-one R package for the assessment of linguistic matching and/or accommo
 ## installation
 Download R from [r-project.org](https://www.r-project.org/), then install the package from an R console:
 
+Release ([version 1.0.0](https://CRAN.R-project.org/package=lingmatch))
+```R
+install.packages('lingmatch')
+```
+Development (version 1.0.1)
 ```R
 install.packages('remotes')
 remotes::install_github('miserman/lingmatch')
 ```
+
 And load the package:
 ```R
 library(lingmatch)
