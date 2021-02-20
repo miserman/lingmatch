@@ -1,5 +1,6 @@
 context('utils')
 
+options(encoding = 'latin1', stringsAsFactors = FALSE)
 TEST_DOWNLOAD = FALSE
 texts = c(
   "And there with it isn't I think anyone would.",
@@ -239,7 +240,7 @@ test_that('read.segments works', {
 
   manual = vapply(files, function(f)
     gsub('\\s{2,}', ' ', paste(readLines(f), collapse = ' ')), '')
-  expect_true(all(tapply(segs$text, segs$input, paste, collapse = ' ') == manual))
+  expect_equal(as.character(tapply(segs$text, segs$input, paste, collapse = ' ')), as.character(manual))
 
   segs1 = read.segments(files, 1, ext = '')
   expect_equal(segs1, read.segments(files, 1, ext = '', bysentence = TRUE))
@@ -250,15 +251,15 @@ test_that('read.segments works', {
 
   segs5 = read.segments(files, 5, ext = '')
   expect_equal(segs5[, -1], read.segments(manual, 5)[, -1])
-  expect_true(all(table(segs5$input) == 5))
+  expect_true(all(table(segs5$input) <= 5))
   expect_true(sum(segs5$WC) == wc)
-  expect_true(all(tapply(segs5$text, segs5$input, paste, collapse = ' ') == manual))
+  expect_equal(as.character(tapply(segs5$text, segs5$input, paste, collapse = ' ')), as.character(manual))
 
   segs50w = read.segments(files, ext = '', segment.size = 50)
   expect_equal(segs50w[, -1], read.segments(manual, segment.size = 50)[, -1])
   expect_true(all(segs50w$WC <= 50))
   expect_true(sum(segs50w$WC) == wc)
-  expect_true(all(tapply(segs50w$text, segs50w$input, paste, collapse = ' ') == manual))
+  expect_equal(as.character(tapply(segs50w$text, segs50w$input, paste, collapse = ' ')), as.character(manual))
 })
 
 test_that('read.segments sentence parsing works', {

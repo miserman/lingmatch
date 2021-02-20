@@ -5,6 +5,7 @@
 #include <fstream>
 #include <limits>
 #include <regex>
+#include <cmath>
 using namespace std;
 using namespace Rcpp;
 using namespace RcppParallel;

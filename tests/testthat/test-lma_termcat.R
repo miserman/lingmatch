@@ -1,5 +1,6 @@
 context('lma_termcat')
 
+options(encoding = 'latin1', stringsAsFactors = FALSE)
 words = vapply(seq_len(5e3), function(w) paste0(sample(letters, 5), collapse = ''), '')
 
 test_that('term.weights work', {
@@ -18,7 +19,7 @@ test_that('term.weights work', {
   expect_equal(s2[, 1], score)
   expect_equal(s2[, 1], s2[, 2])
   sepcat$value = sepcat$weights * 2
-  expect_equal(lma_termcat(dtm, structure(sepcat[, -1], row.names = sepcat$terms))[, 1], score)
+  expect_equal(lma_termcat(dtm, structure(sepcat[, -1], row.names = as.character(sepcat$terms)))[, 1], score)
   expect_equal(lma_termcat(dtm, rbind(sepcat, sepcat[1:4,]))[, 2], score * 2)
   expect_equal(lma_termcat(dtm, sepcat$terms, as.matrix(unname(sepcat[, -1])))[, 2], score * 2)
   expect_equal(lma_termcat(dtm, list(cat = sepcat$terms), list(sepcat$weights))[, 1], score)
@@ -139,7 +140,6 @@ test_that('lma_termcat and lma_patcat are accurate', {
     as.numeric(dtm[, cd$term] %*% cd$weight) + bias[[cat]]
   }, numeric(nrow(dtm)))
   dict = rbind(dict, data.frame(term = '_intercept', category = names(bias), weight = bias))
-
   expect_equal(as.numeric(as.matrix(lma_process(text, dict = dict)[, names(bias)])), as.numeric(manual))
   expect_equal(as.numeric(lma_termcat(text, dict)), as.numeric(manual))
   expect_identical(as.numeric(lma_patcat(text, dict)), as.numeric(manual))
@@ -158,7 +158,7 @@ test_that('applied dictionaries work', {
   expect_identical(as.numeric(lma_termcat(dtm, read.dic(dicts[1]))), as.numeric(lma_termcat(dtm, dicts[1])))
   expect_identical(as.numeric(lma_patcat(text, read.dic(dicts[1]))), as.numeric(lma_patcat(text, dicts[1])))
   for(d in dicts){
-    dict = (if(grepl('.csv', d, fixed = TRUE)) read.csv else read.dic)(d)
+    dict = read.dic(d)
     opt = lma_termcat(dtm, dict)
     opp = lma_patcat(text, dict)
     expect_equal(dim(opt), dim(opp))

@@ -322,11 +322,11 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
         if(!all(opt$group %in% colnames(data)))
           stop('group appears to be column names, but were not found in data')
         group = data[, opt$group]
-        if(!is.list(group)) group = if(is.matrix(group)) as.data.frame(group) else list(group)
+        if(!is.list(group)) group = if(is.matrix(group)) as.data.frame(group, stringsAsFactors = FALSE) else list(group)
       }else{
         group=gv(opt$group,data)
         if(is.factor(group)) group=as.character(group) else if(is.matrix(group))
-          group = as.data.frame(group,row.names=FALSE)
+          group = as.data.frame(group, row.names = FALSE, stringsAsFactors = FALSE)
         if(is.null(dim(group))) list(group) else lapply(group,as.character)
       }
     }
@@ -342,7 +342,7 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
       }else{
         list(gv(cg, comp.data))
       }
-      if(is.list(cg) && length(cg) == 1 && !is.null(dim(cg[[1]]))) cg = as.data.frame(cg[[1]])
+      if(is.list(cg) && length(cg) == 1 && !is.null(dim(cg[[1]]))) cg = as.data.frame(cg[[1]], stringsAsFactors = FALSE)
       if(cc!=1) if(NROW(comp)!=length(cg[[1]]) || NROW(input)!=length(group[[1]]))
         stop('data and comp.data mismatch',call.=FALSE)
       if(all.levels){
@@ -410,7 +410,7 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
     comp.data=input[comp,,drop=FALSE]
     if(!missing(comp.group) && !all.levels){
       if(anyDuplicated(comp.group)){
-        comp.data = t(vapply(split(as.data.frame(comp.data), comp.group), colMeans,
+        comp.data = t(vapply(split(as.data.frame(comp.data, stringsAsFactors = FALSE), comp.group), colMeans,
           numeric(ncol(comp.data))))
         rownames(comp.data) = comp.group = unique(comp.group)
         opt$comp = paste(opt$comp, opt$group, 'group means')
@@ -473,7 +473,7 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
       gl = 1
     }
     if(gl){
-      sim = as.data.frame(group)
+      sim = as.data.frame(group, stringsAsFactors = FALSE)
       colnames(sim) = paste0('g', seq_len(gl))
       for(m in inp$metric) sim[, m] = NA
       mets = seq_along(inp$metric) + gl
@@ -520,7 +520,7 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
             s = speaker[su]
             r = if(length(su) < 2 || length(unique(s)) < 2){
               data.frame(group = g, structure(as.list(numeric(length(mets)) + 1),
-                names = inp$metric), row.names = paste(su, collapse = ', '))
+                names = inp$metric), row.names = paste(su, collapse = ', '), stringsAsFactors = FALSE)
             }else{
               sal$group = s
               r = do.call(lma_simets, c(list(input[su,, drop = FALSE]), sal))
@@ -528,7 +528,7 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
               rownames(r) = strsplit(do.call(sprintf, c(
                 paste(gsub('[0-9]+', '%i', rownames(r)), collapse = '|'), as.list(rs - 1 + su[1])
               )), '|', fixed = TRUE)[[1]]
-              data.frame(group = g, r)
+              data.frame(group = g, r, stringsAsFactors = FALSE)
             }
           }))
         }else{
@@ -541,7 +541,10 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
             }
             ckmc = TRUE
             opt$comp = paste0(if(length(opt$group) == 1) paste(opt$group, ''), 'group ', opt$comp)
-            comp.data = as.data.frame(matrix(NA, length(gs), nc, dimnames = list(gs, colnames(input))))
+            comp.data = as.data.frame(
+              matrix(NA, length(gs), nc, dimnames = list(gs, colnames(input))),
+              stringsAsFactors = FALSE
+            )
           }
           for(g in gs){
             su = sim[,1] == g
@@ -565,7 +568,7 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
         ug = unique(group[[1]])
         if(tomean){
           sal$symmetrical = TRUE
-          sim = data.frame(group[[1]], 1)
+          sim = data.frame(group[[1]], 1, stringsAsFactors = FALSE)
           colnames(sim) = c(opt$group, sal$metric)
           for(g in ug){
             su = group[[1]] == g
@@ -616,8 +619,8 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
             m=ll[[1]]
             su=lower.tri(m)
             as.data.frame(
-              comp=outer(n<-colnames(m),n,function(a,b)paste0(a,' <-> ',b))[su],
-              lapply(ll,function(m)m[su])
+              comp = outer(n <- colnames(m), n, function(a, b) paste0(a, ' <-> ', b))[su],
+              lapply(ll, '[', su), stringsAsFactors = FALSE
             )
           }))
         }else names(sim)=ug
@@ -1441,6 +1444,7 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
   st=proc.time()[[3]]
   if(ckd <- dir == '') dir = '~/Dictionaries'
   if(missing(dict)) dict = lma_dict(1:9)
+  if(is.factor(dict)) dict = as.character(dict)
   if(is.character(dict) && length(dict) == 1 && missing(term.weights) && !grepl('[\\s*]', dict)){
     if(!any(file.exists(dict)) && any(file.exists(normalizePath(paste0(dir, '/', dict), '/', FALSE))))
       dict = normalizePath(paste0(dir, '/', dict))
@@ -1456,7 +1460,7 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
         function(col) is.numeric(term.weights[, col]), TRUE)]
     }else if(any(su <- vapply(seq_len(ncol(dict)), function(col) is.numeric(dict[, col]), TRUE))){
       term.weights = dict[, su, drop = FALSE]
-      dict = if(all(su)) if(!is.null(rownames(dict))) data.frame(term = rownames(dict)) else{
+      dict = if(all(su)) if(!is.null(rownames(dict))) data.frame(term = rownames(dict), stringsAsFactors = FALSE) else{
         term.weights = if(ncol(term.weights) == 1) NULL else term.weights[, -1, drop = FALSE]
         dict[, 1, drop = FALSE]
       }else dict[, !su, drop = FALSE]
@@ -1484,9 +1488,10 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
     term.weights = dict
     dict = names(dict)
   }
+  if(is.factor(dict)) dict = as.character(dict)
   if(!is.null(dim(term.weights))){
     if(is.null(colnames(term.weights))) colnames(term.weights) = paste0('cat', seq_len(ncol(term.weights)))
-    if(!is.data.frame(term.weights)) term.weights = as.data.frame(term.weights)
+    if(!is.data.frame(term.weights)) term.weights = as.data.frame(term.weights, stringsAsFactors = FALSE)
     su = vapply(term.weights, is.numeric, TRUE)
     if(any(!su)){
       if(any(ssu <- !su & vapply(term.weights, anyDuplicated, 0) == 0))
@@ -1495,8 +1500,9 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
     }
     if(!length(term.weights)) stop('no numeric columns in term.weights')
   }
-  if(!is.list(dict)) dict = if(is.matrix(dict)) as.data.frame(dict) else if(is.character(dict) && length(dict) == 1 &&
-      (file.exists(dict) || dict %in% rownames(select.dict()$info))) read.dic(dict) else list(dict)
+  if(!is.list(dict)) dict = if(is.matrix(dict)) as.data.frame(dict, stringsAsFactors = FALSE) else
+    if(is.character(dict) && length(dict) == 1 && (file.exists(dict) || dict %in% rownames(select.dict()$info)))
+      read.dic(dict) else list(dict)
   if(is.list(dict) && is.null(names(dict))) names(dict) = paste0('cat', seq_along(dict))
   if(!is.null(term.weights)){
     if(is.null(dim(term.weights))){
@@ -1532,6 +1538,7 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
       }
     }else{
       if(length(dict) == 1 && length(dict[[1]]) == nrow(term.weights) && !any(rownames(term.weights) %in% dict[[1]])){
+        if(is.factor(dict[[1]])) dict[[1]] = as.character(dict[[1]])
         if(anyDuplicated(dict[[1]])){
           dt = unique(dict[[1]][duplicated(dict[[1]])])
           su = dict[[1]] %in% dt

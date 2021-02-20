@@ -51,10 +51,10 @@ lma_process = function(input = NULL, ..., meta = TRUE){
       if(!any(grepl('path|text', an))) arg_matches$read.segments$path = input
       do.call(read.segments, lapply(arg_matches$read.segments, eval.parent, 2))
     }else data.frame(
-      text = if(length(input) == 1 && file.exists(input)) readLines(input) else input
+      text = if(length(input) == 1 && file.exists(input)) readLines(input) else input, stringsAsFactors = FALSE
     )
   }else{
-    if(is.null(dim(input))) input = as.data.frame(input)
+    if(is.null(dim(input))) input = as.data.frame(input, stringsAsFactors = FALSE)
     op = input
   }
   # process
@@ -82,7 +82,10 @@ lma_process = function(input = NULL, ..., meta = TRUE){
   }
   if(!is.null(attr(x, 'categories'))){
     categories = attr(x, 'categories')
-    xc = as.data.frame(matrix(0, nrow(op), length(categories), dimnames = list(NULL, names(categories))))
+    xc = as.data.frame(
+      matrix(0, nrow(op), length(categories), dimnames = list(NULL, names(categories))),
+      stringsAsFactors = FALSE
+    )
     for(cat in names(categories)) xc[, cat] = rowSums(x[, categories[[cat]], drop = FALSE], na.rm = TRUE)
     x = xc
     ck_changed = TRUE
@@ -100,7 +103,7 @@ lma_process = function(input = NULL, ..., meta = TRUE){
     ck_changed = TRUE
   }
   if(any(grepl('Matrix', class(x), fixed = TRUE))) x = as.matrix(x)
-  if(is.matrix(x)) x = as.data.frame(x)
+  if(is.matrix(x)) x = as.data.frame(x, stringsAsFactors = FALSE)
   op = if(ck_text && ck_changed) cbind(op, x) else x
   if(ck_text && meta){
     opm = lma_meta(op[, 'text'])
@@ -200,7 +203,7 @@ read.dic = function(path, cats, type = 'asis', as.weighted = FALSE, dir = getOpt
       su = which(vapply(cats, function(cat) !is.numeric(path[, cat]), TRUE))
       if(!length(su)){
         if(!is.null(colnames(path))){
-          path = data.frame(term = colnames(path), t(path))
+          path = data.frame(term = colnames(path), t(path), stringsAsFactors = FALSE)
           terms = path$term
           cats = colnames(path)[-1]
           if(missing(as.weighted)) as.weighted = TRUE
@@ -237,7 +240,7 @@ read.dic = function(path, cats, type = 'asis', as.weighted = FALSE, dir = getOpt
               ))
             }else if(anyDuplicated(weights)) split(terms, weights) else list(category = terms)
           }else{
-            weights = as.data.frame(path[, cats])
+            weights = as.data.frame(path[, cats], stringsAsFactors = FALSE)
             if(any(weights > 0) && any(weights < 0)){
               for(cat in cats){
                 if(any(weights[, cat] > 0)) weights[, paste0(cat, '.positive')] = as.integer(weights[, cat] > 0)
@@ -283,7 +286,10 @@ read.dic = function(path, cats, type = 'asis', as.weighted = FALSE, dir = getOpt
           terms = unique(c(terms, path[[d]]$term))
           cats = c(cats, paste0(d, '.', colnames(path[[d]])[-1]))
         }
-        wl = as.data.frame(matrix(0, length(terms), length(cats), dimnames = list(terms, cats)))
+        wl = as.data.frame(
+          matrix(0, length(terms), length(cats), dimnames = list(terms, cats)),
+          stringsAsFactors = FALSE
+        )
         for(d in names(path)){
           cats = colnames(path[[d]])[-1] = paste0(d, '.', colnames(path[[d]])[-1])
           su = duplicated(path[[d]]$term)
@@ -296,13 +302,13 @@ read.dic = function(path, cats, type = 'asis', as.weighted = FALSE, dir = getOpt
           rownames(path[[d]]) = path[[d]]$term
           wl[path[[d]]$term, cats] = path[[d]][, cats]
         }
-        data.frame(term = rownames(wl), wl)
+        data.frame(term = rownames(wl), wl, stringsAsFactors = FALSE)
       }else if(any(vapply(path, is.list, TRUE))){
         do.call(c, path)
       }else{
         if(any(vapply(path, function(d) is.null(names(d)), TRUE))){
           if(all(vapply(path, length, 0) == length(path[[1]]))){
-            data.frame(term = names(path), do.call(rbind, path))
+            data.frame(term = names(path), do.call(rbind, path), stringsAsFactors = FALSE)
           }else stop('failed to resolve path; as a list, entries should contain character or named numeric vectors')
         }else{
           terms = unique(unlist(lapply(path, names), use.names = FALSE))
@@ -310,7 +316,7 @@ read.dic = function(path, cats, type = 'asis', as.weighted = FALSE, dir = getOpt
           data.frame(term = terms, vapply(path, function(d){
             v[names(d)] = d
             v
-          }, numeric(length(terms))))
+          }, numeric(length(terms))), stringsAsFactors = FALSE)
         }
       }
     }
@@ -336,8 +342,10 @@ read.dic = function(path, cats, type = 'asis', as.weighted = FALSE, dir = getOpt
     }else{
       if(missing(as.weighted) && length(path) == 1) as.weighted = TRUE
       wl = if(any(grepl('[\\s,]', di))) tryCatch(read.dic(
-        read.table(text = di, header = TRUE, sep = if(grepl('\t', di[[1]])) '\t' else ',',
-          quote = '"', comment.char = ''), cats = cats, type = type, as.weighted = as.weighted
+        read.table(
+          text = di, header = TRUE, sep = if(grepl('\t', di[[1]])) '\t' else ',',
+          quote = '"', comment.char = '', stringsAsFactors = FALSE
+        ), cats = cats, type = type, as.weighted = as.weighted
       ), error = function(e) e$message) else list(cat1 = di)
       if(length(wl) == 1 && is.character(wl))
         stop('assuming path is to a comma separated values file, but failed to read it in:\n', wl)
@@ -345,7 +353,7 @@ read.dic = function(path, cats, type = 'asis', as.weighted = FALSE, dir = getOpt
   }
   if(!missing(type) && !grepl('^[Aa]', type)) wl = to_regex(wl, grepl('^[poi]', type, TRUE))
   if(as.weighted && is.null(dim(wl))){
-    op = data.frame(term = unique(unlist(wl)))
+    op = data.frame(term = unique(unlist(wl)), stringsAsFactors = FALSE)
     for(cat in names(wl)) op[, cat] = as.integer(op$term %in% wl[[cat]])
     op
   }else wl
@@ -400,11 +408,11 @@ write.dic = function(dict, filename, type = 'asis', as.weighted = FALSE, save = 
     terms = terms[terms != '']
     if(!missing(type) && !grepl('^[Aa]', type)) dict = to_regex(dict, grepl('^[poi]', type, TRUE))
     if(as.weighted){
-      o = data.frame(term = terms)
+      o = data.frame(term = terms, stringsAsFactors = FALSE)
       for(cat in names(dict)) o[, cat] = as.integer(o$term %in% dict[[cat]])
     }else{
       l = length(dict)
-      m = as.data.frame(matrix('', length(terms) + l + 2, l + 1))
+      m = as.data.frame(matrix('', length(terms) + l + 2, l + 1), stringsAsFactors = FALSE)
       m[, 1] = c('%', seq_len(l), '%', terms)
       m[seq_len(l) + 1, 2] = if(is.null(names(dict))) seq_len(l) else names(dict)
       for(i in seq_along(dict)) m[which(m[-seq_len(l + 2), 1] %in% dict[[i]]) + l + 2, i + 1] = i
@@ -556,7 +564,7 @@ read.segments = function(path = '.', segment = NULL, ext = '.txt', subdir = FALS
       data.frame(
         input = if(ck_text) fi else f, segment = seq_along(lines),
         WC = if(is.null(WC)) vapply(strsplit(lines, '\\s+'), function(sp) sum(sp != ''), 0) else WC,
-        text = lines
+        text = lines, stringsAsFactors = FALSE
       )
     }))
   }else warning(
@@ -1157,7 +1165,7 @@ lma_patcat = function(text, dict = NULL, pattern.weights = 'weight', pattern.cat
     if(is.null(colnames(dict))){
       colnames(dict) = paste0('X', seq_len(ncol(dict)))
     }else{
-      if(!is.data.frame(dict)) dict = as.data.frame(as.matrix(dict))
+      if(!is.data.frame(dict)) dict = as.data.frame(as.matrix(dict), stringsAsFactors = FALSE)
       terms = if(name.map[['term']] %in% colnames(dict)) colnames(dict) != name.map[['term']] else !logical(ncol(dict))
       if(missing(pattern.weights) && !any(pattern.weights %in% colnames(dict))){
         if(any(su <- terms & vapply(dict, is.numeric, TRUE))){
@@ -1231,7 +1239,7 @@ lma_patcat = function(text, dict = NULL, pattern.weights = 'weight', pattern.cat
         if(!is.null(names(pattern.weights)) && is.character(dict) && all(dict %in% names(pattern.weights)))
           pattern.weights[dict] else pattern.weights else if(is.list(dict)) if(is.numeric(dict[[1]]))
         unlist(dict, use.names = FALSE) else if(is.list(pattern.weights) && is.numeric(pattern.weights[[1]]))
-          unlist(pattern.weights, use.names = FALSE) else 1 else 1
+          unlist(pattern.weights, use.names = FALSE) else 1 else 1, stringsAsFactors = FALSE
     )
   }else{
     term = if('term' %in% names(name.map)) name.map[['term']] else 'term'
@@ -1251,9 +1259,10 @@ lma_patcat = function(text, dict = NULL, pattern.weights = 'weight', pattern.cat
       category = if(length(pattern.categories) == nrow(dict)) pattern.categories else
         if(pattern.categories %in% en) dict[[pattern.categories]] else 'cat1',
       weights = if(length(pattern.weights) == nrow(dict)) pattern.weights else
-        if(all(pattern.weights %in% en)) dict[[pattern.weights]] else 1
+        if(all(pattern.weights %in% en)) dict[[pattern.weights]] else 1, stringsAsFactors = FALSE
     )
   }
+  if(is.factor(lex$term)) lex$term = as.character(lex$term)
   if(globtoregex){
     lex$term = to_regex(list(lex$term), TRUE)[[1]]
     if(missing(fixed)) fixed = FALSE
@@ -1318,7 +1327,7 @@ lma_patcat = function(text, dict = NULL, pattern.weights = 'weight', pattern.cat
   }else{
     op[[1]] = vapply(categories, function(cat){
       l = if(wide) data.frame(term = lex$term, weights = if(cat %in% colnames(lex$weights)) lex$weights[, cat] else
-        lex$weights) else lex[lex$category == cat,]
+        lex$weights, stringsAsFactors = FALSE) else lex[lex$category == cat,]
       as.numeric(op[[1]][, l$term, drop = FALSE] %*% l$weights + bias[[cat]])
     }, numeric(length(text)))
   }
@@ -1389,7 +1398,8 @@ lma_meta = function(text){
     words = rowSums(dwm),
     unique_words = rowSums(dwm != 0),
     clauses = vapply(strsplit(text, '([.?!\n,:;)}>-]|\\])([.?!\n,:;)}>\n\'"-]|\\s|\\])*'), length, 0),
-    sentences = vapply(strsplit(text, '[.?!\n]([.?!\n\'"]|\\s)*'), length, 0)
+    sentences = vapply(strsplit(text, '[.?!\n]([.?!\n\'"]|\\s)*'), length, 0),
+    stringsAsFactors = FALSE
   )
   cbind(res, with(res, data.frame(
     words_per_clause = words / clauses,
@@ -1408,7 +1418,8 @@ lma_meta = function(text){
     quotes = if(any(su <- grepl('^[\'"]', terms))) rowSums(dtm[, su, drop = FALSE]) else 0,
     apostrophes = vapply(strsplit(text, "[\u02bc]+|[a-zA-Z][\u0027\u0060\u2019]+[a-zA-Z]"), length, 0) - 1,
     brackets = if(any(su <- grepl('[(\\)<>{\\}[]|\\]', terms))) rowSums(dtm[, su, drop = FALSE]) else 0,
-    orgmarks = if(any(su <- grepl('[/:;-]', terms))) rowSums(dtm[, su, drop = FALSE]) else 0
+    orgmarks = if(any(su <- grepl('[/:;-]', terms))) rowSums(dtm[, su, drop = FALSE]) else 0,
+    stringsAsFactors = FALSE
   )))
 }
 
@@ -1662,8 +1673,8 @@ lma_dict = function(..., as.regex = TRUE, as.function = FALSE){
         dict = c(dict$special$CHARACTERS, dict$special$SYMBOLS)
         fun = as.function
         if(substitute(as.function) == 'gsub'){
-          charmap = as.data.frame(unlist(lapply(as.list(dict), strsplit, '')))
-          charmap = data.frame(to = sub('[0-9]+', '', rownames(charmap)), from = charmap[[1]])
+          charmap = as.data.frame(unlist(lapply(as.list(dict), strsplit, '')), stringsAsFactors = FALSE)
+          charmap = data.frame(to = sub('[0-9]+', '', rownames(charmap)), from = charmap[[1]], stringsAsFactors = FALSE)
           charmap = charmap[grepl('^\\w$', charmap$to) & !charmap$from %in% c('[', ']'),]
           dict = dict[!names(dict) %in% charmap$to]
           charmap = list(to = paste(charmap$to, collapse = ''), from = paste(charmap$from, collapse = ''))
