@@ -81,13 +81,13 @@ NumericVector vector_similarity(NumericVector &a, NumericVector &b, const Intege
   if(metrics[2]) op.push_back(ck ? 1 - sum(abs(a - b) / (abs(a) + abs(b))) / n : NA_REAL, "canberra");
   if(metrics[3]){
     op.push_back(ck ? sum(a * b) / sqrt(sum(pow(a, 2) * sum(pow(b, 2)))) : NA_REAL, "cosine");
-    if(isnan(op["cosine"])) op["cosine"] = NA_REAL;
+    if(isnan((float)op["cosine"])) op["cosine"] = NA_REAL;
   }
   if(metrics[4]){
     const double ma = sum(a) / n, mb = sum(b) / n;
     op.push_back(ck ? (sum(a * b) / n - (ma * mb)) / sqrt(sum(pow(a, 2)) / n - pow(ma, 2)) /
       sqrt(sum(pow(b, 2)) / n - pow(mb, 2)) : NA_REAL, "pearson");
-    if(isnan(op["pearson"])) op["pearson"] = NA_REAL;
+    if(isnan((float)op["pearson"])) op["pearson"] = NA_REAL;
   }
   return op;
 }
