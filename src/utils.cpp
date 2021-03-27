@@ -427,7 +427,7 @@ List pattern_search(const CharacterVector &texts, const CharacterVector &pattern
       txt = texts[r];
       for(i = 0, n = patterns.length(); i < n; i++){
         l = patterns[i].size(), cx = 0;
-        for(std::string::size_type r, p = 0; (r = txt.find(patterns[i], p)) != std::string::npos;){
+        if(l) for(std::string::size_type r, p = 0; (r = txt.find(patterns[i], p)) != std::string::npos;){
           if(exclusive){
             txt.replace(r, l, " ");
             p = r + 1;
@@ -452,7 +452,7 @@ List pattern_search(const CharacterVector &texts, const CharacterVector &pattern
       for(i = 0, n = pats.size(); i < n; i++){
         std::string::const_iterator start = txt.cbegin();
         cx = 0;
-        for(tp = 0; regex_search(start, txt.cend(), re, pats[i]);){
+        if(patterns[i].size()) for(tp = 0; regex_search(start, txt.cend(), re, pats[i]);){
           p = re.position(0);
           if(exclusive){
             txt.replace(tp + p, re.length(), " ");

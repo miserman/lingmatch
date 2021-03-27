@@ -1,3 +1,9 @@
+# version 1.0.2
+
+## Improvements
+* Better handles unrecognized weight and metric names.
+* Handles inconsistently named dictionaries.
+
 # version 1.0.1
 
 ## Bug Fixes

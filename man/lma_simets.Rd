@@ -63,7 +63,7 @@ Output varies based on the dimensions of \code{a} and \code{b}:
       specified, or \code{mean = TRUE}, and only one metric is requested.
     \item \strong{Out:} A data.frame with a column per metric. \cr
       \strong{In:} When multiple metrics are requested in the previous case.
-    \item \strong{Out:} A sparse matrix. \cr
+    \item \strong{Out:} A sparse matrix with a \code{metric} attribute with the metric name. \cr
       \strong{In:} Pairwise comparisons within an \code{a} matrix or between
       an \code{a} and \code{b} matrix, when only 1 metric is requested.
     \item \strong{Out:} A list with a sparse matrix per metric. \cr

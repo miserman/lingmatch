@@ -131,7 +131,8 @@ is Inf (no limit).</p>
 <h3>Value</h3>
 
 <p>A sparse matrix (or regular matrix if <code>sparse = FALSE</code>), with a row per <code>text</code>,
-and column per term.
+and column per term, or a list if <code>tokens.only = TRUE</code>. Includes an attribute with options (<code>opts</code>),
+and attributes with word count (<code>WC</code>) and column sums (<code>colsums</code>) if <code>tokens.only = FALSE</code>.
 </p>
 
 

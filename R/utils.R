@@ -1085,8 +1085,8 @@ standardize.lspace = function(infile, name, sep = ' ', digits = 9, dir = getOpti
 #'   \code{boundary} will be set to \code{' '}, avoiding pattern matches within words. By default, dictionary
 #'   terms are left as entered.
 #' @param fixed Logical; if \code{FALSE}, patterns are treated as regular expressions.
-#' @param globtoregex Logical; if \code{TRUE}, initial and terminal asterisks are replaced with \code{\\\\b\\\\w`*`}
-#'   and \code{\\\\w`*`\\\\b} respectively. This will also set \code{fixed} to \code{FALSE} unless fixed is specified.
+#' @param globtoregex Logical; if \code{TRUE}, initial and terminal asterisks are replaced with \code{\\\\b\\\\w*}
+#'   and \code{\\\\w*\\\\b} respectively. This will also set \code{fixed} to \code{FALSE} unless fixed is specified.
 #' @param name.map A named character vector:
 #'   \itemize{
 #'     \item \strong{\code{intname}}: term identifying category biases within the term list;
@@ -1100,7 +1100,9 @@ standardize.lspace = function(infile, name, sep = ' ', digits = 9, dir = getOpti
 #' @seealso For applying term-based dictionaries (to a document-term matrix) see \code{\link{lma_termcat}}.
 #' @family Dictionary functions
 #' @return A matrix with a row per \code{text} and columns per dictionary category, or (when \code{return.dtm = TRUE})
-#' a sparse matrix with a row per \code{text} and column per term.
+#' a sparse matrix with a row per \code{text} and column per term. Includes a \code{WC} attribute with original
+#' word counts, and a \code{categories} attribute with row indices associated with each category if
+#' \code{return.dtm = TRUE}.
 #' @examples
 #' # example text
 #' text = c(
@@ -1262,6 +1264,7 @@ lma_patcat = function(text, dict = NULL, pattern.weights = 'weight', pattern.cat
         if(all(pattern.weights %in% en)) dict[[pattern.weights]] else 1, stringsAsFactors = FALSE
     )
   }
+  if(any(lex$category == '')) lex[lex$category == '', 'category'] = 'cat_unnamed'
   if(is.factor(lex$term)) lex$term = as.character(lex$term)
   if(globtoregex){
     lex$term = to_regex(list(lex$term), TRUE)[[1]]

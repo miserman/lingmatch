@@ -41,8 +41,8 @@ terms are left as entered.}
 
 \item{fixed}{Logical; if \code{FALSE}, patterns are treated as regular expressions.}
 
-\item{globtoregex}{Logical; if \code{TRUE}, initial and terminal asterisks are replaced with \code{\\\\b\\\\w`*`}
-and \code{\\\\w`*`\\\\b} respectively. This will also set \code{fixed} to \code{FALSE} unless fixed is specified.}
+\item{globtoregex}{Logical; if \code{TRUE}, initial and terminal asterisks are replaced with \code{\\\\b\\\\w*}
+and \code{\\\\w*\\\\b} respectively. This will also set \code{fixed} to \code{FALSE} unless fixed is specified.}
 
 \item{name.map}{A named character vector:
 \itemize{
@@ -58,7 +58,9 @@ or only some can be specified by name (e.g., \code{c(term =} \code{'patterns')})
 }
 \value{
 A matrix with a row per \code{text} and columns per dictionary category, or (when \code{return.dtm = TRUE})
-a sparse matrix with a row per \code{text} and column per term.
+a sparse matrix with a row per \code{text} and column per term. Includes a \code{WC} attribute with original
+word counts, and a \code{categories} attribute with row indices associated with each category if
+\code{return.dtm = TRUE}.
 }
 \description{
 Categorize raw texts using a pattern-based dictionary.

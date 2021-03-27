@@ -50,7 +50,8 @@ will look in '~/Dictionaries' by default. \cr
 Set a session default with \code{options(lingmatch.dict.dir = 'desired/path')}.}
 }
 \value{
-A matrix with a row per \code{dtm} row and columns per dictionary category.
+A matrix with a row per \code{dtm} row and columns per dictionary category, and a \code{WC} attribute
+with original word counts.
 }
 \description{
 Reduces the dimensions of a document-term matrix by dictionary-based categorization.

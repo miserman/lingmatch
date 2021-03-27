@@ -183,6 +183,7 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
   }
   mets = c('jaccard', 'euclidean', 'canberra', 'cosine', 'pearson')
   inp$metric = if(!is.null(inp$metric)) match_metric(inp$metric)$selected else 'cosine'
+  if(!length(inp$metric) || is.null(inp$metric) || inp$metric == '') inp$metric = 'cosine'
   vs=c('input','comp','group','order','data','comp.data','comp.group')
   opt=as.list(match.call(expand.dots=FALSE))[vs]
   names(opt)=vs
@@ -744,7 +745,8 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
 #' may matter if you plan on categorizing with categories that have terms with look- ahead/behind assertions
 #' (like LIWC dictionaries). Otherwise, other methods may be faster, more memory efficient, and/or more featureful.
 #' @return A sparse matrix (or regular matrix if \code{sparse = FALSE}), with a row per \code{text},
-#' and column per term.
+#' and column per term, or a list if \code{tokens.only = TRUE}. Includes an attribute with options (\code{opts}),
+#' and attributes with word count (\code{WC}) and column sums (\code{colsums}) if \code{tokens.only = FALSE}.
 #' @examples
 #' text = c(
 #'   "Why, hello there! How are you this evening?",
@@ -983,7 +985,7 @@ lma_dtm = function(text, exclude = NULL, context = NULL, replace.special = TRUE,
 #' not apply any document weight, and document weights alone will apply a \code{'count'} term weight
 #' (unless \code{doc.only = TRUE}, in which case a term-named vector of document weights is returned
 #' instead of a weighted dtm).
-#' @return A weighted version of \code{dtm}.
+#' @return A weighted version of \code{dtm}, with a \code{type} attribute added (\code{attr(dtm, 'type')}).
 #' @examples
 #' # visualize term and document weights
 #'
@@ -1117,9 +1119,10 @@ lma_weight = function(dtm, weight = 'count', normalize = TRUE, wc.complete = TRU
           dw = tw
           tw = 'count'
         }else return(doc(dtm, tw))
-      }else stop(paste(weight), ' is not a recognized weight', call. = FALSE)
+      }else stop(paste(weight, collapse = ' * '), ' is not a recognized weight', call. = FALSE)
     }
     if(pdw) dw = if(length(weight) > 1) grep(substr(weight[2], 0, 4), dws, value = TRUE)[1] else 'none'
+    if(is.na(dw)) dw = 'none'
     if(missing(alpha) && tw == 'amplify') alpha = 1.1
     dtm = if(dw == 'none') term(dtm, tw) else term(dtm, tw) * rep(doc(dtm, dw), each = nr)
   }
@@ -1407,7 +1410,8 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, t
 #'   Set a session default with \code{options(lingmatch.dict.dir = 'desired/path')}.
 #' @seealso For applying pattern-based dictionaries (to raw text) see \code{\link{lma_patcat}}.
 #' @family Dictionary functions
-#' @return A matrix with a row per \code{dtm} row and columns per dictionary category.
+#' @return A matrix with a row per \code{dtm} row and columns per dictionary category, and a \code{WC} attribute
+#' with original word counts.
 #' @examples
 #' # Score texts with the NRC Affect Intensity Lexicon
 #' \dontrun{
@@ -1503,7 +1507,15 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
   if(!is.list(dict)) dict = if(is.matrix(dict)) as.data.frame(dict, stringsAsFactors = FALSE) else
     if(is.character(dict) && length(dict) == 1 && (file.exists(dict) || dict %in% rownames(select.dict()$info)))
       read.dic(dict) else list(dict)
-  if(is.list(dict) && is.null(names(dict))) names(dict) = paste0('cat', seq_along(dict))
+  if(is.list(dict)){
+    if(is.null(names(dict))){
+      names(dict) = paste0('cat', seq_along(dict))
+    }else if(any(su <- names(dict) == '')){
+      names(dict)[su] = if(sum(su) == 1) 'cat_unnamed' else paste0('cat_unnamed', seq_len(sum(su)))
+      if(!is.null(term.weights) && any(su <- names(term.weights) == ''))
+        names(term.weights)[su] = if(sum(su) == 1) 'cat_unnamed' else paste0('cat_unnamed', seq_len(sum(su)))
+    }
+  }
   if(!is.null(term.weights)){
     if(is.null(dim(term.weights))){
       if(is.list(term.weights)){
@@ -1747,7 +1759,8 @@ match_metric = function(x){
       stop('only internal metrics are available: ', paste(mets, collapse = ', '), call. = FALSE)
     }else{
       if(is.numeric(x)) mets[x] else{
-        su = grepl('^cor', x)
+        if(is.call(x)) x = eval(x)
+        su = grepl('^(?:cor|r)', x, TRUE)
         if(any(su)) x[su] = 'pearson'
         unique(unlist(lapply(substr(x, 1, 3), grep, mets, fixed = TRUE, value = TRUE)))
       }
@@ -1805,7 +1818,7 @@ match_metric = function(x){
 #'       specified, or \code{mean = TRUE}, and only one metric is requested.
 #'     \item \strong{Out:} A data.frame with a column per metric. \cr
 #'       \strong{In:} When multiple metrics are requested in the previous case.
-#'     \item \strong{Out:} A sparse matrix. \cr
+#'     \item \strong{Out:} A sparse matrix with a \code{metric} attribute with the metric name. \cr
 #'       \strong{In:} Pairwise comparisons within an \code{a} matrix or between
 #'       an \code{a} and \code{b} matrix, when only 1 metric is requested.
 #'     \item \strong{Out:} A list with a sparse matrix per metric. \cr
@@ -1845,6 +1858,8 @@ lma_simets=function(a, b = NULL, metric = NULL, group = NULL, lag = 0, agg = TRU
     b = NULL
   }
   met = match_metric(metric)
+  if(!length(met$selected)) stop('no recognized metric; should match one of ',
+    paste0(mets, collapse = ', '), ', or all')
   st = proc.time()[[3]]
   slots = c('i', 'p', 'x', 'Dim')
   if((is.character(a) || is.factor(a)) && any(grepl('[a-zA-Z]', a))) a = lma_dtm(a) else

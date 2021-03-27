@@ -64,7 +64,8 @@ is Inf (no limit).}
 }
 \value{
 A sparse matrix (or regular matrix if \code{sparse = FALSE}), with a row per \code{text},
-and column per term.
+and column per term, or a list if \code{tokens.only = TRUE}. Includes an attribute with options (\code{opts}),
+and attributes with word count (\code{WC}) and column sums (\code{colsums}) if \code{tokens.only = FALSE}.
 }
 \description{
 Creates a document-term matrix (dtm) from a set of texts.

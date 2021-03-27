@@ -79,8 +79,8 @@ terms are left as entered.</p>
 </td></tr>
 <tr valign="top"><td><code>globtoregex</code></td>
 <td>
-<p>Logical; if <code>TRUE</code>, initial and terminal asterisks are replaced with <code>\\b\\w`*`</code>
-and <code>\\w`*`\\b</code> respectively. This will also set <code>fixed</code> to <code>FALSE</code> unless fixed is specified.</p>
+<p>Logical; if <code>TRUE</code>, initial and terminal asterisks are replaced with <code>\\b\\w*</code>
+and <code>\\w*\\b</code> respectively. This will also set <code>fixed</code> to <code>FALSE</code> unless fixed is specified.</p>
 </td></tr>
 <tr valign="top"><td><code>name.map</code></td>
 <td>
@@ -110,7 +110,9 @@ or only some can be specified by name (e.g., <code>c(term =</code> <code>'patter
 <h3>Value</h3>
 
 <p>A matrix with a row per <code>text</code> and columns per dictionary category, or (when <code>return.dtm = TRUE</code>)
-a sparse matrix with a row per <code>text</code> and column per term.
+a sparse matrix with a row per <code>text</code> and column per term. Includes a <code>WC</code> attribute with original
+word counts, and a <code>categories</code> attribute with row indices associated with each category if
+<code>return.dtm = TRUE</code>.
 </p>
 
 
