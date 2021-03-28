@@ -1290,7 +1290,7 @@ lma_patcat = function(text, dict = NULL, pattern.weights = 'weight', pattern.cat
   if(exclusive){
     cls = tryCatch(-nchar(lex$term), error = function(e) NULL)
     if(is.null(cls)){
-      warning('dict appears to be miss-encoded, so results may not be as expected;\n',
+      warning('dict appears to be misencoded, so results may not be as expected;\n',
         'might try reading the dictionary in with encoding = "latin1"')
       lex$term = iconv(lex$term, sub = '#')
       cls = -nchar(lex$term)
@@ -1685,7 +1685,13 @@ lma_dict = function(..., as.regex = TRUE, as.function = FALSE){
         function(terms, ...){
           args = list(...)
           args$x = terms
-          if(!is.null(charmap)) args$x = chartr(charmap$from, charmap$to, args$x)
+          if(!is.null(charmap)){
+            args$x = tryCatch(chartr(charmap$from, charmap$to, args$x), error = function(e) NULL)
+            if(is.null(args$x)){
+              args$x = chartr(charmap$from, charmap$to, iconv(terms, sub = '#'))
+              warning('the input appears to be misencoded; it was converted, but may have errant #s')
+            }
+          }
           for(s in names(dict)){
             args$pattern = dict[s]
             args$replacement = s

@@ -1675,7 +1675,7 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
     for(cat in seq_along(dict)){
       ccls = tryCatch(nchar(dict[[cat]]), error = function(e) NULL)
       if(is.null(ccls)){
-        warning('dict appears to be miss-encoded, so results may not be as expected;\n',
+        warning('dict appears to be misencoded, so results may not be as expected;\n',
           'might try reading the dictionary in with encoding = "latin1"')
         dict[[cat]] = iconv(dict[[cat]], sub = '#')
         ccls = nchar(dict[[cat]])

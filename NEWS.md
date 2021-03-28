@@ -1,6 +1,7 @@
 # version 1.0.2
 
 ## Improvements
+* Handles special-character conversion on misencoded text.
 * Better handles unrecognized weight and metric names.
 * Handles inconsistently named dictionaries.
 
