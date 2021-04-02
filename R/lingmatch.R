@@ -1247,7 +1247,7 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, t
     s$v = t(s$v)
     k = cumsum(s$d) / sum(s$d)
     if(dim.cutoff > 1) dim.cutoff = 1
-    k = seq_len(if(any(k < dim.cutoff)) which(k >= dim.cutoff)[1] else 1)
+    k = if(length(k) == 1) 1 else seq_len(if(any(k < dim.cutoff)) which(k >= dim.cutoff)[1] else 1)
     if(keep.dim){
       dtm[] = s$u[, k] %*% (if(length(k) == 1) matrix(s$d[k]) else diag(s$d[k])) %*% s$v[k,]
     }else{
@@ -1261,7 +1261,7 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, t
       dtm
     }else colnames(dtm)
     if(is.character(space)){
-      if(space == 'default') space = '100k'
+      if(space == 'default') space = '100k_lsa'
       name = gsub('^.*[/\\]|\\.[^/\\]*$', '', space)[1]
       spaces = list.files(dir)
       ts = grep(space, spaces, fixed = TRUE, value = TRUE)
@@ -1271,7 +1271,8 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, t
           'would you like to download the ', ts, ' space? (press Enter for yes): ')))){
           download.lspace(ts, dir = dir)
           ts = paste0(ts, '.dat')
-        }else stop('space (', space, ') not found in dir (', dir, ')', call. = FALSE)
+        }else stop('space (', space, ') not found in dir (', dir, ')',
+          if(ckd) '\nspecify a directory (e.g., dir = "~") to locate or download; see ?download.lspace', call. = FALSE)
       }
       space_path = normalizePath(paste0(dir, '/', if(length(su <- grep('\\.dat$', ts))) ts[su[[1]]] else{
         use.scan = TRUE
@@ -1452,7 +1453,7 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
   if(is.character(dict) && length(dict) == 1 && missing(term.weights) && !grepl('[\\s*]', dict)){
     if(!any(file.exists(dict)) && any(file.exists(normalizePath(paste0(dir, '/', dict), '/', FALSE))))
       dict = normalizePath(paste0(dir, '/', dict))
-    td = tryCatch(read.dic(dict), error = function(e) NULL)
+    td = tryCatch(read.dic(dict, dir = if(ckd) '' else dir), error = function(e) NULL)
     dict = if(is.null(td)) list(cat1 = dict) else td
   }
   if(!is.null(dim(dict))){
@@ -1506,7 +1507,7 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
   }
   if(!is.list(dict)) dict = if(is.matrix(dict)) as.data.frame(dict, stringsAsFactors = FALSE) else
     if(is.character(dict) && length(dict) == 1 && (file.exists(dict) || dict %in% rownames(select.dict()$info)))
-      read.dic(dict) else list(dict)
+      read.dic(dict, dir = if(ckd) '' else dir) else list(dict)
   if(is.list(dict)){
     if(is.null(names(dict))){
       names(dict) = paste0('cat', seq_along(dict))
@@ -1743,6 +1744,10 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
       dict = formatdict(dict)
       op = vapply(names(dict), function(cat) rowSums(dtm[, grep(dict[[cat]], ws, perl = TRUE),
         drop = FALSE], na.rm = TRUE), numeric(nrow(dtm)))
+      if(nrow(dtm) == 1){
+        op = t(op)
+        rownames(op) = 1
+      }
     }
   }
   if(!is.null(bias)) for(n in names(bias)) if(n %in% colnames(op)) op[, n] = op[, n] + bias[[n]]

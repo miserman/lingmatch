@@ -37,6 +37,18 @@ test_that('lma_process works', {
   expect_equal(as.numeric(lma_process(dtm, dim.cutoff = .1)[, 1]), as.numeric(lma_lspace(dtm, dim.cutoff = .1)))
 })
 
+test_that('lma_process works with a single text', {
+  dtm = as.data.frame(lma_dtm(texts[1], sparse = FALSE))
+  pr = lma_process(lma_patcat(
+    texts[1], dict = lma_dict(as.regex = FALSE), return.dtm = TRUE, fixed = FALSE, globtoregex = TRUE
+  ))
+  expect_equal(pr, lma_process(texts[1], dict = lma_dict(as.regex = FALSE), return.dtm = TRUE, fixed = FALSE,
+    globtoregex = TRUE)[, names(pr)])
+  termcat = as.data.frame(lma_termcat(lma_weight(dtm)))
+  expect_equal(lma_process(texts[1], weight = 'count', dict = lma_dict(1:9), meta = FALSE)[, -1], termcat)
+  expect_equal(lma_process(dtm, weight = 'count', dict = lma_dict(1:9), meta = FALSE), termcat)
+})
+
 test_that('lma_dict works', {
   expect_equal(names(lma_dict(c('ppron', 'adv'))), c('ppron', 'adverb'))
   expect_equal(lma_dict(as.function = TRUE)(c('fefe', 'and', 'sksk')), c(FALSE, TRUE, FALSE))
@@ -115,6 +127,8 @@ test_that('read/write.dic works', {
 
 test_that('lma_initdirs works', {
   options(lingmatch.dict.dir = '', lingmatch.lspace.dir = '')
+  if(!'lusi.dic' %in% list.files('~/Dictionaries')) expect_error(read.dic('lusi'))
+  if(!any(grepl('^glove', list.files('~/Latent Semantic Spaces')))) expect_error(lma_lspace('glove'))
   dir = tempdir()
   new = lma_initdirs(dir, link = FALSE)
   expect_equal(names(new), c('dict', 'lspace'))

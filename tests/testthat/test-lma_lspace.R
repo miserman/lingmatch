@@ -56,7 +56,7 @@ test_that('mapping works', {
   expect_equal(mapped_sim, as.numeric(lingmatch(texts, space = space)$sim))
   expect_equal(mapped_sim, as.numeric(lingmatch(dtm, space = space)$sim))
   expect_equal(mapped_sim, as.numeric(lingmatch(mapped, space = space)$sim))
-  expect_identical(space, lma_lspace('default')[1:5000,])
+  expect_identical(space, lma_lspace(name)[1:5000,])
 })
 
 test_that('fill.missing works', {

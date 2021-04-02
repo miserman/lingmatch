@@ -53,10 +53,10 @@ text = c(
 Process the texts in one step:
 ```R
 # with a dictionary
-inquirer_cats = lma_process(text, dict = 'inquirer')
+inquirer_cats = lma_process(text, dict = 'inquirer', dir = '~')
 
 # with a latent semantic space
-glove_vectors = lma_process(text, space = 'glove')
+glove_vectors = lma_process(text, space = 'glove', dir = '~')
 ```
 
 Or process the texts step by step, then measure similarity between each:

@@ -35,12 +35,16 @@
 lma_process = function(input = NULL, ..., meta = TRUE){
   inp = as.list(substitute(...()))
   funs = c('read.segments', 'lma_dtm', 'lma_weight', 'lma_lspace', 'lma_termcat', 'lma_patcat')
-  arg_matches = lapply(funs, function(f){
+  allargs = NULL
+  arg_matches = list()
+  for(f in funs){
     a = names(as.list(args(f)))
-    a = a[-c(1, length(a))]
-    inp[a[a %in% names(inp)]]
-  })
-  names(arg_matches) = funs
+    a = a[c(FALSE, a[-1] %in% names(inp))]
+    allargs = c(allargs, a)
+    arg_matches[[f]] = inp[a]
+  }
+  dupargs = unique(allargs[duplicated(allargs)])
+  arg_checks = vapply(arg_matches, function(l) sum(!names(l) %in% dupargs), 0)
   # identify input
   op = NULL
   if(is.function(input)) stop('enter a character vector or matrix-like object as input')
@@ -61,8 +65,7 @@ lma_process = function(input = NULL, ..., meta = TRUE){
   ck_text = 'text' %in% colnames(op)
   ck_changed = FALSE
   if(ck_text){
-    if(!length(arg_matches$lma_dtm) && length(arg_matches$lma_patcat) &&
-        any(!names(arg_matches$lma_patcat) %in% names(arg_matches$lma_termcat))){
+    if(arg_checks[['lma_patcat']]){
       if(!'return.dtm' %in% names(arg_matches$lma_patcat) && length(arg_matches$lma_weight))
         arg_matches$lma_patcat$return.dtm = TRUE
       arg_matches$lma_patcat$text = op[, 'text']
@@ -74,7 +77,7 @@ lma_process = function(input = NULL, ..., meta = TRUE){
       ck_changed = TRUE
     }
   }else x = op
-  if(length(arg_matches$lma_weight)){
+  if(arg_checks[['lma_weight']]){
     arg_matches$lma_weight$dtm = x
     x = do.call(lma_weight, lapply(arg_matches$lma_weight, eval.parent, 2))
     attr(x, 'categories') = attr(arg_matches$lma_weight$dtm, 'categories')
@@ -89,12 +92,13 @@ lma_process = function(input = NULL, ..., meta = TRUE){
     for(cat in names(categories)) xc[, cat] = rowSums(x[, categories[[cat]], drop = FALSE], na.rm = TRUE)
     x = xc
     ck_changed = TRUE
-  }else if(length(arg_matches$lma_termcat)){
+  }else if(arg_checks[['lma_termcat']] || (length(arg_matches$lma_termcat) &&
+      any(names(arg_matches$lma_termcat) != 'dir'))){
     arg_matches$lma_termcat$dtm = x
     x = do.call(lma_termcat, lapply(arg_matches$lma_termcat, eval.parent, 2))
     ck_changed = TRUE
   }
-  if(length(arg_matches$lma_lspace)){
+  if(arg_checks[['lma_lspace']]){
     nr = NROW(x)
     arg_matches$lma_lspace$dtm = x
     x = do.call(lma_lspace, lapply(arg_matches$lma_lspace, eval.parent, 2))
@@ -104,10 +108,10 @@ lma_process = function(input = NULL, ..., meta = TRUE){
   }
   if(any(grepl('Matrix', class(x), fixed = TRUE))) x = as.matrix(x)
   if(is.matrix(x)) x = as.data.frame(x, stringsAsFactors = FALSE)
-  op = if(ck_text && ck_changed) cbind(op, x) else x
+  op = if(ck_text && ck_changed) cbind(op, if(is.null(dim(x))) t(x) else x) else x
   if(ck_text && meta){
     opm = lma_meta(op[, 'text'])
-    if(length(arg_matches$lma_weight) &&
+    if(arg_checks[['lma_weight']] &&
       (!'normalize' %in% names(arg_matches$lma_weight) || arg_matches$lma_weight$normalize)){
       cols = c(9, 14:23)
       opm_counts = opm[, cols]
@@ -173,14 +177,19 @@ read.dic = function(path, cats, type = 'asis', as.weighted = FALSE, dir = getOpt
     if(nrow(tp$selected) && length(path) <= nrow(tp$info)){
       if(any(tp$selected$downloaded == '')){
          td = rownames(tp$selected)[tp$selected$downloaded == '']
-         if(grepl('^$|^[yt1]|^ent', readline(paste0(
+         if(!ckd && grepl('^$|^[yt1]|^ent', readline(paste0(
            'would you like to download ', if(length(td) == 1) 'this dictionary' else 'these dictionaries', '?:\n',
            sub(',(?=[^,]+$)', if(length(td) == 2) ' and' else ', and', paste0(td, collapse = ', '), perl = TRUE),
            '\n(press Enter for yes): '
-         )))) tp$selected[td, 'downloaded'] = download.dict(td, dir = if(ckd) '' else dir)
+         )))) tp$selected[td, 'downloaded'] = unlist(download.dict(td, dir = dir), use.names = FALSE)
       }
       path = tp$selected[tp$selected[, 'downloaded'] != '', 'downloaded']
-      if(!length(path)) stop('none of the selected dictionaries are downloaded')
+      if(!length(path)) stop(
+        if(nrow(tp$selected) == 1) 'dictionary' else 'dictionaries', ' (',
+        paste(rownames(tp$selected), collapse = ', '), ') not found in dir (', dir,
+        '); specify a directory (e.g., dir = "~") to locate or download; see ?download.dict',
+        call. = FALSE
+      )
     }
   }
   if(is.character(path) && length(path) > 1 && any(file.exists(path))){
@@ -1333,6 +1342,10 @@ lma_patcat = function(text, dict = NULL, pattern.weights = 'weight', pattern.cat
         lex$weights, stringsAsFactors = FALSE) else lex[lex$category == cat,]
       as.numeric(op[[1]][, l$term, drop = FALSE] %*% l$weights + bias[[cat]])
     }, numeric(length(text)))
+    if(length(text) == 1){
+      op[[1]] = t(op[[1]])
+      rownames(op[[1]]) = 1
+    }
   }
   attr(op[[1]], 'WC') = op[[2]]
   attr(op[[1]], 'time') = c(patcat = proc.time()[[3]] - st)
@@ -1422,7 +1435,7 @@ lma_meta = function(text){
     apostrophes = vapply(strsplit(text, "[\u02bc]+|[a-zA-Z][\u0027\u0060\u2019]+[a-zA-Z]"), length, 0) - 1,
     brackets = if(any(su <- grepl('[(\\)<>{\\}[]|\\]', terms))) rowSums(dtm[, su, drop = FALSE]) else 0,
     orgmarks = if(any(su <- grepl('[/:;-]', terms))) rowSums(dtm[, su, drop = FALSE]) else 0,
-    stringsAsFactors = FALSE
+    row.names = seq_len(nrow(res)), stringsAsFactors = FALSE
   )))
 }
 
