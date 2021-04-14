@@ -21,10 +21,6 @@ extract_indices <- function(indices, file, sep = ' ') {
     .Call(`_lingmatch_extract_indices`, indices, file, sep)
 }
 
-extract_matches <- function(terms, file, sep = ' ') {
-    .Call(`_lingmatch_extract_matches`, terms, file, sep)
-}
-
 pattern_search <- function(texts, patterns, terms, fixed, exclusive) {
     .Call(`_lingmatch_pattern_search`, texts, patterns, terms, fixed, exclusive)
 }

@@ -51,5 +51,7 @@ test_that('tokens.only lines up', {
   expect_equal(texts, vapply(tokens$indices, function(inds)
     paste(names(tokens$tokens)[inds], collapse = ' '), ''))
   expect_equal(as.numeric(lma_dtm(tokens)), as.numeric(dtm))
+  dtm = lma_dtm(texts, lma_dict(), dc.min = 2, dc.max = 5)
+  tokens = lma_dtm(texts, lma_dict(), dc.min = 2, dc.max = 5, tokens.only = TRUE)
+  expect_equal(as.numeric(lma_dtm(tokens)), as.numeric(dtm))
 })
-

@@ -48,6 +48,7 @@ lma_process = function(input = NULL, ..., meta = TRUE){
   # identify input
   op = NULL
   if(is.function(input)) stop('enter a character vector or matrix-like object as input')
+  if(is.null(dim(input)) && is.list(input) && is.character(input[[1]])) input = unlist(input, use.names = FALSE)
   if(is.character(input) || is.factor(input)){
     ck_paths = length(input) != 1 && all(file.exists(input))
     op = if(length(arg_matches$read.segments) || ck_paths){
@@ -58,7 +59,11 @@ lma_process = function(input = NULL, ..., meta = TRUE){
       text = if(length(input) == 1 && file.exists(input)) readLines(input) else input, stringsAsFactors = FALSE
     )
   }else{
-    if(is.null(dim(input))) input = as.data.frame(input, stringsAsFactors = FALSE)
+    if(is.null(dim(input))){
+      if(is.null(names(input)) || (is.list(input) && !all(vapply(input, length, 0) == length(input[[1]]))))
+        stop('input is not of a recognized format -- should be text or a dtm-like object')
+      input = if(is.list(input)) as.data.frame(input, stringsAsFactors = FALSE) else t(input)
+    }
     op = input
   }
   # process

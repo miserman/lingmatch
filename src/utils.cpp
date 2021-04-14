@@ -365,55 +365,6 @@ NumericVector extract_indices(const IntegerVector &indices, const std::string &f
 }
 
 // [[Rcpp::export]]
-NumericVector extract_matches(const CharacterVector &terms, const std::string &file, const char &sep = ' '){
-  int n, nc = 0, ck = 1e3, i = terms.length();
-  CharacterVector used;
-  NumericVector r;
-  std::string line, term, value;
-  unordered_map<String, int> dict;
-  for(; i--;) dict.insert({terms[i], i});
-  ifstream d(file);
-  getline(d, line);
-  for(n = i = line.length(), value = ""; i--;){
-    if(line[i] == sep){
-      if(i != n - 1) nc++;
-    }else if(!nc) value.insert(value.begin(), line[i]);
-  }
-  nc == 1 ? nc = atoi(value.c_str()) : nc++;
-  IntegerVector dims = {nc, 0};
-  d.seekg(0, d.beg);
-  for(; getline(d, line);){
-    for(term = "", n = line.length(), i = 0; i < n; i++){
-      if(line[i] == sep) break;
-      term.push_back(line[i]);
-    }
-    if(dict.find(term) != dict.end()){
-      used.push_back(term);
-      for(value = "", i++; i < n; i++){
-        if(line[i] == sep){
-          r.push_back(atof(value.c_str()));
-          value = "";
-        }else{
-          value.push_back(line[i]);
-        }
-      }
-      if(value != "") r.push_back(atof(value.c_str()));
-      if(used.length() == terms.length()) break;
-      if(!--ck){
-        checkUserInterrupt();
-        ck = 1e3;
-      }
-    }
-  }
-  d.close();
-  dims[1] = used.length();
-  r.attr("dim") = dims;
-  r.attr("colnames") = used;
-  colnames(r) = used;
-  return r;
-}
-
-// [[Rcpp::export]]
 List pattern_search(const CharacterVector &texts, const CharacterVector &patterns, const IntegerVector &terms,
   const bool &fixed, const bool &exclusive){
   int cx, r, l, i = 0, n = patterns.length(), tn = texts.length();

@@ -77,19 +77,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// extract_matches
-NumericVector extract_matches(const CharacterVector& terms, const std::string& file, const char& sep);
-RcppExport SEXP _lingmatch_extract_matches(SEXP termsSEXP, SEXP fileSEXP, SEXP sepSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const CharacterVector& >::type terms(termsSEXP);
-    Rcpp::traits::input_parameter< const std::string& >::type file(fileSEXP);
-    Rcpp::traits::input_parameter< const char& >::type sep(sepSEXP);
-    rcpp_result_gen = Rcpp::wrap(extract_matches(terms, file, sep));
-    return rcpp_result_gen;
-END_RCPP
-}
 // pattern_search
 List pattern_search(const CharacterVector& texts, const CharacterVector& patterns, const IntegerVector& terms, const bool& fixed, const bool& exclusive);
 RcppExport SEXP _lingmatch_pattern_search(SEXP textsSEXP, SEXP patternsSEXP, SEXP termsSEXP, SEXP fixedSEXP, SEXP exclusiveSEXP) {
@@ -112,7 +99,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_lingmatch_calculate_similarities", (DL_FUNC) &_lingmatch_calculate_similarities, 4},
     {"_lingmatch_reformat_embedding", (DL_FUNC) &_lingmatch_reformat_embedding, 7},
     {"_lingmatch_extract_indices", (DL_FUNC) &_lingmatch_extract_indices, 3},
-    {"_lingmatch_extract_matches", (DL_FUNC) &_lingmatch_extract_matches, 3},
     {"_lingmatch_pattern_search", (DL_FUNC) &_lingmatch_pattern_search, 5},
     {NULL, NULL, 0}
 };

@@ -761,10 +761,17 @@ lingmatch=function(input=NULL,comp=mean,data=NULL,group=NULL,...,comp.data=NULL,
 lma_dtm = function(text, exclude = NULL, context = NULL, replace.special = TRUE, numbers = FALSE,
   punct = FALSE, urls = TRUE, emojis = FALSE, to.lower = TRUE, word.break = ' +', dc.min = 0,
   dc.max = Inf, sparse = TRUE, tokens.only = FALSE){
+  if(!is.null(dim(text))){
+    if(is.character(text[, 1]) || is.factor(text[, 1])){
+      text = text[, 1]
+    }else stop('enter a vector of texts as the first argument')
+  }
   if(is.list(text) && all(c('tokens', 'indices') %in% names(text))){
     m = do.call(rbind, lapply(seq_along(text$indices), function(i){
-      inds = as.factor(text$indices[[i]])
-      cbind(i, as.integer(levels(inds)), tabulate(inds))
+      if(length(text$indices[[i]])){
+        inds = as.factor(text$indices[[i]])
+        cbind(i, as.integer(levels(inds)), tabulate(inds))
+      }
     }))
     dtm = sparseMatrix(m[, 1], m[, 2], x = m[, 3], dimnames = list(NULL,
       if(is.character(text$tokens)) text$tokens else names(text$tokens)))
@@ -838,24 +845,46 @@ lma_dtm = function(text, exclude = NULL, context = NULL, replace.special = TRUE,
   text = strsplit(text, word.break)
   words = sort(unique(unlist(text)))
   words = words[!words == '']
+  if(!is.null(exclude)){
+    if(is.list(exclude)) exclude = unlist(exclude, use.names = FALSE)
+    if(!any(grepl('^', exclude, fixed = TRUE))) exclude = gsub('\\^\\*|\\*\\$', '', paste0('^', exclude, '$'))
+    if(any(ck <- grepl('[[({]', exclude) + grepl('[})]|\\]', exclude) == 1))
+      exclude[ck] = gsub('([([{}\\])])', '\\\\\\1', exclude[ck], perl = TRUE)
+    words = grep(paste(exclude, collapse = '|'), words, value = TRUE, invert = TRUE)
+  }
   if(tokens.only){
     m = match_terms(
       text, words, !grepl('^[[:punct:]]$|^repellipsis$', words),
       c(length(text), length(words)), is.null(exclude), TRUE
     )
     names(m) = c('tokens', 'frequencies', 'WC', 'indices')
-    m$tokens = m$tokens + 1
+    m$tokens = m$tokens + 1L
     m$tokens = sort(m$tokens)
-    names(m$frequencies) = names(m$tokens)
-    m$indices = unname(split(m$indices + 1, rep(seq_along(text), m$WC)))
-  }else{
-    if(!is.null(exclude)){
-      if(is.list(exclude)) exclude = unlist(exclude, use.names = FALSE)
-      if(!any(grepl('^', exclude, fixed = TRUE))) exclude = gsub('\\^\\*|\\*\\$', '', paste0('^', exclude, '$'))
-      if(any(ck <- grepl('[[({]', exclude) + grepl('[})]|\\]', exclude) == 1))
-        exclude[ck] = gsub('([([{}\\])])', '\\\\\\1', exclude[ck], perl = TRUE)
-      words = grep(paste(exclude, collapse = '|'), words, value = TRUE, invert = TRUE)
+    m$indices = unname(split(m$indices + 1L, rep(seq_along(text), m$WC)))
+    if(dc.min > 0 || dc.max < Inf){
+      su = m$frequencies > dc.min & m$frequencies < dc.max
+      if(any(!su)){
+        if(!any(su)){
+          warning(
+            'document count bounds [', dc.min, ', ', dc.max, '] exlcuded all terms, so they were ignored',
+            call. = FALSE
+          )
+        }else{
+          m$frequencies = m$frequencies[su]
+          ex = m$tokens[!su]
+          m$tokens = m$tokens[su]
+          new_inds = structure(seq_along(m$tokens), names = m$tokens)
+          m$tokens[] = new_inds
+          for(i in seq_along(m$indices)){
+            inds = m$indices[[i]]
+            m$indices[[i]] = unname(new_inds[as.character(inds[!inds %in% ex])])
+            m$WC[i] = length(m$indices[[i]])
+          }
+        }
+      }
     }
+    names(m$frequencies) = names(m$tokens)
+  }else{
     msu = match_terms(
       text, words, !grepl('^[[:punct:]]$|^repellipsis$', words),
       c(length(text), length(words)), is.null(exclude), FALSE
@@ -863,7 +892,14 @@ lma_dtm = function(text, exclude = NULL, context = NULL, replace.special = TRUE,
     m = if(sparse) as(msu[[1]], 'dgCMatrix') else as.matrix(msu[[1]])
     su = msu[[3]] > dc.min & msu[[3]] < dc.max
     names(msu[[3]]) = words
-    if(any(!su)) m = m[, su]
+    if(any(!su)){
+      if(!any(su)){
+        warning(
+          'document count bounds [', dc.min, ', ', dc.max, '] exlcuded all terms, so they were ignored',
+          call. = FALSE
+        )
+      }else m = m[, su, drop = FALSE]
+    }
     attr(m, 'WC') = unlist(msu[[2]], use.names = FALSE)
     attr(m, 'colsums') = msu[[3]]
     attr(m, 'type') = 'count'
@@ -916,11 +952,11 @@ lma_dtm = function(text, exclude = NULL, context = NULL, replace.special = TRUE,
 #'     Where \code{x = t(dtm) / colSums(dtm > 0)}; entropy of term-conditional term distribution.
 #'
 #'     \item \strong{\code{ppois}} \cr
-#'     \code{1 - ppois(alpha,} \code{colSums(dtm) / nrow(dtm))} \cr
+#'     \code{1 - ppois(pois.x,} \code{colSums(dtm) / nrow(dtm))} \cr
 #'     Poisson-predicted term distribution.
 #'
 #'     \item \strong{\code{dpois}} \cr
-#'     \code{1 - dpois(alpha, colSums(dtm) / nrow(dtm))} \cr
+#'     \code{1 - dpois(pois.x, colSums(dtm) / nrow(dtm))} \cr
 #'     Poisson-predicted term density.
 #'
 #'     \item \strong{\code{dfmlog}} \cr
@@ -960,9 +996,9 @@ lma_dtm = function(text, exclude = NULL, context = NULL, replace.special = TRUE,
 #' @param log.base The base of logs, applied to any weight using \code{\link[base]{log}}.
 #'   Default is 10.
 #' @param alpha A scaling factor applied to document frequency as part of pointwise mutual
-#'   information weighting, or amplify's power (\code{dtm ^ alpha}, which defaults to 1.1), or the
-#'   specified quantile of the poisson distribution (\code{dpois(alpha,}
-#'   \code{colSums(x,} \code{na.rm = TRUE) /} \code{nrow(x))}).
+#'   information weighting, or amplify's power (\code{dtm ^ alpha}, which defaults to 1.1).
+#' @param pois.x integer; quantile or probability of the poisson distribution (\code{dpois(pois.x,}
+#'   \code{colSums(x, na.rm = TRUE) / nrow(x))}).
 #' @param doc.only Logical: if \code{TRUE}, only document weights are returned (a single value for
 #'   each term).
 #' @param percent Logical; if \code{TRUE}, frequencies are multiplied by 100.
@@ -1032,7 +1068,7 @@ lma_dtm = function(text, exclude = NULL, context = NULL, replace.special = TRUE,
 #' @export
 
 lma_weight = function(dtm, weight = 'count', normalize = TRUE, wc.complete = TRUE,
-  log.base = 10, alpha = 1, doc.only = FALSE, percent = FALSE){
+  log.base = 10, alpha = 1, pois.x = 1L, doc.only = FALSE, percent = FALSE){
   if(is.null(dim(dtm))) dtm = if(is.character(dtm) || is.factor(dtm)) lma_dtm(dtm) else matrix(dtm, 1)
   ck = attr(dtm, 'type')
   if(!is.null(ck) && length(ck) == 3 && (ck[1] == 'TRUE' || ck[2] != 'count' || ck[3] != 'NA')){
@@ -1090,8 +1126,8 @@ lma_weight = function(dtm, weight = 'count', normalize = TRUE, wc.complete = TRU
         dfmlog = log(diag(x[max.col(t(x)),]), base = log.base),
         idf = log(nrow(x) / colSums(x > 0, na.rm = TRUE), base = log.base),
         normal = sqrt(1 / colSums(x ^ 2, na.rm = TRUE)),
-        dpois = 1 - dpois(alpha, colSums(x, na.rm = TRUE) / nrow(x)),
-        ppois = 1 - ppois(alpha, colSums(x, na.rm = TRUE) / nrow(x)),
+        dpois = 1 - dpois(pois.x, colSums(x, na.rm = TRUE) / nrow(x)),
+        ppois = 1 - ppois(pois.x, colSums(x, na.rm = TRUE) / nrow(x)),
         ridf = doc(x, 'idf') - log(doc(x, 'dpois'), base = log.base),
         entropy = {
           x = t(x) / colSums(x > 0, na.rm = TRUE)
@@ -1108,7 +1144,7 @@ lma_weight = function(dtm, weight = 'count', normalize = TRUE, wc.complete = TRU
     }
     if(grepl('^(?:t|na|non|f)', weight[1])) weight[1] = 'count'
     tws = c('binary', 'log', 'sqrt', 'count', 'amplify')
-    tw = grep(substr(weight[1], 0, 4), tws, value = TRUE)[1]
+    tw = if(weight[1] == '') 'count' else grep(substr(weight[1], 0, 4), tws, value = TRUE)[1]
     pdw = TRUE
     dws = c('df', 'dflog', 'dfmax', 'dfmlog', 'idf', 'normal', 'dpois', 'ppois', 'ridf', 'entropy')
     if(is.na(tw)){
@@ -1229,7 +1265,7 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, t
   dim.cutoff = .5, keep.dim = FALSE, use.scan = FALSE, dir = getOption('lingmatch.lspace.dir')){
   if(ckd <- dir == '') dir = '~/Latent Semantic Spaces'
   if(is.character(dtm) || is.factor(dtm)){
-    if(length(dtm) > 1 && missing(space)){
+    if(length(dtm) > 1 && missing(space) && any(grepl(' ', dtm, fixed = TRUE))){
       dtm = lma_dtm(dtm)
     }else if(length(dtm) == 1 && dtm != ''){
       if(missing(use.scan)) use.scan = TRUE
@@ -1751,9 +1787,10 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
     }
   }
   if(!is.null(bias)) for(n in names(bias)) if(n %in% colnames(op)) op[, n] = op[, n] + bias[[n]]
-  attr(op,'WC')=if('WC'%in%atsn) ats$WC else rowSums(dtm,na.rm=TRUE)
+  attr(op, 'WC') = if('WC' %in% atsn) ats$WC else if(all(vapply(seq_len(ncol(dtm)), function(i)
+    is.numeric(dtm[, i]) || is.integer(dtm[, i]), TRUE))) rowSums(dtm, na.rm = TRUE) else NULL
   attr(op, 'time') = c(attr(dtm, 'time'), termcat = proc.time()[[3]] - st)
-  if('type'%in%atsn) attr(op,'type')=ats$type
+  if('type' %in% atsn) attr(op, 'type') = ats$type
   op
 }
 

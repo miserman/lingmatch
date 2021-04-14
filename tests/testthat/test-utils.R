@@ -8,51 +8,62 @@ texts = c(
 )
 
 test_that('lma_process works', {
+  expect_error(lma_process(text))
   files = c(tempfile(fileext = '.txt'), tempfile(fileext = '.txt'))
   dtm = as.data.frame(lma_dtm(texts, sparse = FALSE))
   meta = lma_meta(texts)
   colnames(meta) = paste0('meta_', colnames(meta))
   manual = cbind(text = texts, dtm, meta)
-  expect_equal(lma_process(texts), manual)
+  expect_identical(lma_process(texts), manual)
   pr = lma_process(lma_patcat(
     texts, dict = lma_dict(as.regex = FALSE), return.dtm = TRUE, fixed = FALSE, globtoregex = TRUE
-  ))
-  expect_equal(pr, lma_process(texts, dict = lma_dict(as.regex = FALSE), return.dtm = TRUE, fixed = FALSE,
-    globtoregex = TRUE)[, names(pr)])
+  ), weight = 'count')
+  expect_identical(pr, lma_process(texts, dict = lma_dict(as.regex = FALSE), fixed = FALSE,
+    globtoregex = TRUE, weight = 'count')[, names(pr)])
   write(texts[1], files[1])
   write(texts[2], files[2])
-  expect_equal(lma_process(files)[, -(1:3)], manual)
-  expect_equal(lma_process(read.segments(files))[, -(1:3)], manual)
-  expect_equal(as.numeric(lma_termcat(texts[1])), as.numeric(lma_termcat(files[1])))
-  expect_equal(as.numeric(lma_patcat(texts[1])), as.numeric(lma_patcat(files[1])))
+  expect_identical(lma_process(files)[, -(1:3)], manual)
+  expect_identical(lma_process(read.segments(files))[, -(1:3)], manual)
+  expect_identical(as.numeric(lma_termcat(texts[1])), as.numeric(lma_termcat(files[1])))
+  expect_identical(as.numeric(lma_patcat(texts[1])), as.numeric(lma_patcat(files[1])))
   file.remove(files)
   manual[, colnames(dtm)] = lma_weight(dtm, 'tfidf', normalize = FALSE)
-  expect_equal(lma_process(texts, weight = 'tfidf', normalize = FALSE), manual)
+  expect_identical(lma_process(texts, weight = 'tfidf', normalize = FALSE), manual)
   wmeta = meta
   wmeta[, c(9, 14:23)] = wmeta[, c(9, 14:23)] / wmeta$meta_words
-  expect_equal(lma_process(texts, weight = 'count')[, colnames(meta)], wmeta)
+  expect_identical(lma_process(texts, weight = 'count')[, colnames(meta)], wmeta)
   termcat = as.data.frame(lma_termcat(lma_weight(dtm)))
-  expect_equal(lma_process(texts, weight = 'count', dict = lma_dict(1:9), meta = FALSE)[, -1], termcat)
-  expect_equal(lma_process(dtm, weight = 'count', dict = lma_dict(1:9), meta = FALSE), termcat)
-  expect_equal(as.numeric(lma_process(dtm, dim.cutoff = .1)[, 1]), as.numeric(lma_lspace(dtm, dim.cutoff = .1)))
+  expect_identical(lma_process(texts, weight = 'count', dict = lma_dict(1:9), meta = FALSE)[, -1], termcat)
+  expect_identical(lma_process(dtm, weight = 'count', dict = lma_dict(1:9), meta = FALSE), termcat)
+  expect_identical(as.numeric(lma_process(dtm, dim.cutoff = .1)[, 1]), as.numeric(lma_lspace(dtm, dim.cutoff = .1)))
+  dict = list(ab = c('a', 'b'), c = 'c')
+  expect_identical(
+    lma_process(list(a = c(1, 0), b = c(2, 1), c = c(3, 2)), dict = dict),
+    lma_process(list('a b b c c c', 'c c b'), dict = dict)[, names(dict)],
+  )
 })
 
 test_that('lma_process works with a single text', {
   dtm = as.data.frame(lma_dtm(texts[1], sparse = FALSE))
   pr = lma_process(lma_patcat(
     texts[1], dict = lma_dict(as.regex = FALSE), return.dtm = TRUE, fixed = FALSE, globtoregex = TRUE
-  ))
-  expect_equal(pr, lma_process(texts[1], dict = lma_dict(as.regex = FALSE), return.dtm = TRUE, fixed = FALSE,
-    globtoregex = TRUE)[, names(pr)])
+  ), weight = 'count')
+  expect_identical(pr, lma_process(texts[1], dict = lma_dict(as.regex = FALSE), fixed = FALSE,
+    globtoregex = TRUE, weight = 'count')[, names(pr)])
   termcat = as.data.frame(lma_termcat(lma_weight(dtm)))
-  expect_equal(lma_process(texts[1], weight = 'count', dict = lma_dict(1:9), meta = FALSE)[, -1], termcat)
-  expect_equal(lma_process(dtm, weight = 'count', dict = lma_dict(1:9), meta = FALSE), termcat)
+  expect_identical(lma_process(texts[1], weight = 'count', dict = lma_dict(1:9), meta = FALSE)[, -1], termcat)
+  expect_identical(lma_process(dtm, weight = 'count', dict = lma_dict(1:9), meta = FALSE), termcat)
+  dict = list(ab = c('a', 'b'), c = 'c')
+  expect_identical(
+    lma_process(c(a = 1, b = 2, c = 3), dict = dict),
+    lma_process(list('a b b c c c'), dict = dict)[, names(dict)],
+  )
 })
 
 test_that('lma_dict works', {
-  expect_equal(names(lma_dict(c('ppron', 'adv'))), c('ppron', 'adverb'))
-  expect_equal(lma_dict(as.function = TRUE)(c('fefe', 'and', 'sksk')), c(FALSE, TRUE, FALSE))
-  expect_equal('wdk kdls loe (cc)', lma_dict(special, as.function = gsub)('wdk \u0137dls lo\u00cb \u00A9'))
+  expect_identical(names(lma_dict(c('ppron', 'adv'))), c('ppron', 'adverb'))
+  expect_identical(lma_dict(as.function = TRUE)(c('fefe', 'and', 'sksk')), c(FALSE, TRUE, FALSE))
+  expect_identical('wdk kdls loe (cc)', lma_dict(special, as.function = gsub)('wdk \u0137dls lo\u00cb \u00A9'))
 })
 
 test_that('read/write.dic works', {
@@ -65,7 +76,7 @@ test_that('read/write.dic works', {
     faces = c(': )', ':(', ':]', ': [', ': }', ':{')
   )
   write.dic(dict, file_dic)
-  expect_equal(read.dic(file_dic), dict)
+  expect_identical(read.dic(file_dic), dict)
   expect_true(all(vapply(read.dic(file_dic, type = 'term'), function(cat){
     sum(grepl(paste(cat, collapse = '|'), unlist(dict))) >= length(cat)
   }, TRUE)))

@@ -1,12 +1,17 @@
 # version 1.0.2
 
 ## Improvements
+* Enables term exclusions for token-only lma_dtm.
 * Makes output formats more consistent.
 * Handles special-character conversion on misencoded text.
 * Better handles unrecognized weight and metric names.
 * Handles inconsistently named dictionaries.
 
 ## Bug Fixes
+* Term weights correctly default to count given an empty weight.
+* Adds the pois.x argument to lma_weight to allow for separately specified augment alphas
+  and d/ppois quantiles or probabilities.
+* Corrects handling of empty texts in some cases.
 * Corrects lma_process routing and argument passing in some cases.
 
 # version 1.0.1
