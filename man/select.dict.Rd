@@ -80,7 +80,7 @@ A list with varying entries:
             all other terms, \code{[](){}*.^$+?\|} are counted as regex characters. These could be
             escaped in R with \code{gsub('([][)(}{*.^$+?\\\\|])', '\\\\\\1', terms)} if \code{terms}
             is a character vector, and in Python with (importing re)
-            \code{[re.sub(r'([][(){}*.^$+?\|])', r'\\\1', term) for term in terms]} if \code{terms}
+            \code{[re.sub(r'([][(){}*.^$+?\|])', r'\\\1', term)} \code{for term in terms]} if \code{terms}
             is a list.
           \item \strong{\code{categories}}: Category names in the order in which they appear in the dictionary
             file, separated by commas.

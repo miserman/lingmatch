@@ -23,7 +23,6 @@ vignettes/
 *.utf8.md
 *.knit.md
 *.Rproj
-*.Rbuildignore
 # Utilities
 build.R
 .Rproj.user

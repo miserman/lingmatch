@@ -104,7 +104,7 @@ value decomposition of a dtm (<code>svd(dtm)$v[, 1:k]</code>, where <code>k</cod
 dimensions, decided here by <code>dim.cutoff</code>).
 </p>
 <p>Mapping a new dtm into a latent semantic space consists of multiplying common terms:
-<code>dtm[, ct] %*% space[ct,]</code>, where <code>ct</code> <code>=</code> <code>colnames(dtm)[colnames(dtm)</code>
+<code>dtm[, ct]</code> <code>%*% space[ct,]</code>, where <code>ct</code> <code>=</code> <code>colnames(dtm)[colnames(dtm)</code>
 <code>%in%</code> <code>rownames(space)]</code> &ndash; the terms common between the dtm and the space. This
 results in a matrix with documents as rows, and dimensions as columns, replacing terms.
 </p>

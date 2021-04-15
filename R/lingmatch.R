@@ -948,7 +948,7 @@ lma_dtm = function(text, exclude = NULL, context = NULL, replace.special = TRUE,
 #'     Log of binary term sum.
 #'
 #'     \item \strong{\code{entropy}} \cr
-#'     \code{1 - rowSums(x *} \code{log(x + 1, log.base) /} \code{log(ncol(x),} \code{log.base), na.rm = TRUE)} \cr
+#'     \code{1 - rowSums(x *} \code{log(x + 1, log.base) /} \code{log(ncol(x), log.base),} \code{na.rm = TRUE)} \cr
 #'     Where \code{x = t(dtm) / colSums(dtm > 0)}; entropy of term-conditional term distribution.
 #'
 #'     \item \strong{\code{ppois}} \cr
@@ -997,8 +997,8 @@ lma_dtm = function(text, exclude = NULL, context = NULL, replace.special = TRUE,
 #'   Default is 10.
 #' @param alpha A scaling factor applied to document frequency as part of pointwise mutual
 #'   information weighting, or amplify's power (\code{dtm ^ alpha}, which defaults to 1.1).
-#' @param pois.x integer; quantile or probability of the poisson distribution (\code{dpois(pois.x,}
-#'   \code{colSums(x, na.rm = TRUE) / nrow(x))}).
+#' @param pois.x integer; quantile or probability of the poisson distribution (\code{dpois(pois.x,
+#'   colSums(x,} \code{na.rm = TRUE) / nrow(x))}).
 #' @param doc.only Logical: if \code{TRUE}, only document weights are returned (a single value for
 #'   each term).
 #' @param percent Logical; if \code{TRUE}, frequencies are multiplied by 100.
@@ -1208,7 +1208,7 @@ lma_weight = function(dtm, weight = 'count', normalize = TRUE, wc.complete = TRU
 #' dimensions, decided here by \code{dim.cutoff}).
 #'
 #' Mapping a new dtm into a latent semantic space consists of multiplying common terms:
-#' \code{dtm[, ct] \%*\% space[ct,]}, where \code{ct} \code{=} \code{colnames(dtm)[colnames(dtm)}
+#' \code{dtm[, ct]} \code{\%*\% space[ct,]}, where \code{ct} \code{=} \code{colnames(dtm)[colnames(dtm)}
 #' \code{\%in\%} \code{rownames(space)]} -- the terms common between the dtm and the space. This
 #' results in a matrix with documents as rows, and dimensions as columns, replacing terms.
 #' @family Latent Semantic Space functions

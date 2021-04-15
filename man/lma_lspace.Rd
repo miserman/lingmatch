@@ -66,7 +66,7 @@ value decomposition of a dtm (\code{svd(dtm)$v[, 1:k]}, where \code{k} is the se
 dimensions, decided here by \code{dim.cutoff}).
 
 Mapping a new dtm into a latent semantic space consists of multiplying common terms:
-\code{dtm[, ct] \%*\% space[ct,]}, where \code{ct} \code{=} \code{colnames(dtm)[colnames(dtm)}
+\code{dtm[, ct]} \code{\%*\% space[ct,]}, where \code{ct} \code{=} \code{colnames(dtm)[colnames(dtm)}
 \code{\%in\%} \code{rownames(space)]} -- the terms common between the dtm and the space. This
 results in a matrix with documents as rows, and dimensions as columns, replacing terms.
 }

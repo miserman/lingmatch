@@ -8,6 +8,7 @@
 * Handles inconsistently named dictionaries.
 
 ## Bug Fixes
+* Appropriately allows read.dic to read urls.
 * Term weights correctly default to count given an empty weight.
 * Adds the pois.x argument to lma_weight to allow for separately specified augment alphas
   and d/ppois quantiles or probabilities.

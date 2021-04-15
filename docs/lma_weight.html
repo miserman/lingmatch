@@ -74,7 +74,7 @@ Log of binary term sum.
 </p>
 </li>
 <li> <p><strong><code>entropy</code></strong> <br />
-<code>1 - rowSums(x *</code> <code>log(x + 1, log.base) /</code> <code>log(ncol(x),</code> <code>log.base), na.rm = TRUE)</code> <br />
+<code>1 - rowSums(x *</code> <code>log(x + 1, log.base) /</code> <code>log(ncol(x), log.base),</code> <code>na.rm = TRUE)</code> <br />
 Where <code>x = t(dtm) / colSums(dtm &gt; 0)</code>; entropy of term-conditional term distribution.
 </p>
 </li>
@@ -147,8 +147,8 @@ information weighting, or amplify's power (<code>dtm ^ alpha</code>, which defau
 </td></tr>
 <tr valign="top"><td><code>pois.x</code></td>
 <td>
-<p>integer; quantile or probability of the poisson distribution (<code>dpois(pois.x,</code>
-<code>colSums(x, na.rm = TRUE) / nrow(x))</code>).</p>
+<p>integer; quantile or probability of the poisson distribution (<code>dpois(pois.x,
+colSums(x,</code> <code>na.rm = TRUE) / nrow(x))</code>).</p>
 </td></tr>
 <tr valign="top"><td><code>doc.only</code></td>
 <td>

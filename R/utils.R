@@ -335,8 +335,12 @@ read.dic = function(path, cats, type = 'asis', as.weighted = FALSE, dir = getOpt
       }
     }
   }else{
-    di = if(length(path) != 1) path else if(file.exists(path)) readLines(path, warn = FALSE, ...) else
-      stop('assumed path is to a file, but ', path, ' it does not exist', call. = FALSE)
+    if(length(path) != 1){
+      di = path
+    }else{
+      di = tryCatch(readLines(path, warn = FALSE, ...), error = function(e) NULL)
+      if(is.null(di)) stop('assumed path (', path, ') is to a file, but failed to read it in', call. = FALSE)
+    }
     lst = grep('%', di, fixed = TRUE)
     if(length(lst) > 1 && !grepl(',', di[lst[1]], fixed = TRUE)){
       if(length(lst) < 2) stop('could not identify the end of the header -- ',
@@ -869,7 +873,7 @@ download.lspace = function(space = '100k_lsa', include.terms = TRUE, decompress 
 #'             all other terms, \code{[](){}*.^$+?\|} are counted as regex characters. These could be
 #'             escaped in R with \code{gsub('([][)(}{*.^$+?\\\\|])', '\\\\\\1', terms)} if \code{terms}
 #'             is a character vector, and in Python with (importing re)
-#'             \code{[re.sub(r'([][(){}*.^$+?\|])', r'\\\1', term) for term in terms]} if \code{terms}
+#'             \code{[re.sub(r'([][(){}*.^$+?\|])', r'\\\1', term)} \code{for term in terms]} if \code{terms}
 #'             is a list.
 #'           \item \strong{\code{categories}}: Category names in the order in which they appear in the dictionary
 #'             file, separated by commas.

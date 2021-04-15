@@ -164,7 +164,7 @@ closed, indicating preceding or following words), and initial and terminal aster
 all other terms, <code>[](){}*.^$+?\|</code> are counted as regex characters. These could be
 escaped in R with <code>gsub('([][)(}{*.^$+?\\|])', '\\\1', terms)</code> if <code>terms</code>
 is a character vector, and in Python with (importing re)
-<code>[re.sub(r'([][(){}*.^$+?\|])', r'\\1', term) for term in terms]</code> if <code>terms</code>
+<code>[re.sub(r'([][(){}*.^$+?\|])', r'\\1', term)</code> <code>for term in terms]</code> if <code>terms</code>
 is a list.
 </p>
 </li>

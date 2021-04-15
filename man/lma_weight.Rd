@@ -44,7 +44,7 @@ lma_weight(dtm, weight = "count", normalize = TRUE, wc.complete = TRUE,
     Log of binary term sum.
 
     \item \strong{\code{entropy}} \cr
-    \code{1 - rowSums(x *} \code{log(x + 1, log.base) /} \code{log(ncol(x),} \code{log.base), na.rm = TRUE)} \cr
+    \code{1 - rowSums(x *} \code{log(x + 1, log.base) /} \code{log(ncol(x), log.base),} \code{na.rm = TRUE)} \cr
     Where \code{x = t(dtm) / colSums(dtm > 0)}; entropy of term-conditional term distribution.
 
     \item \strong{\code{ppois}} \cr
@@ -98,8 +98,8 @@ Default is 10.}
 \item{alpha}{A scaling factor applied to document frequency as part of pointwise mutual
 information weighting, or amplify's power (\code{dtm ^ alpha}, which defaults to 1.1).}
 
-\item{pois.x}{integer; quantile or probability of the poisson distribution (\code{dpois(pois.x,}
-\code{colSums(x, na.rm = TRUE) / nrow(x))}).}
+\item{pois.x}{integer; quantile or probability of the poisson distribution (\code{dpois(pois.x,
+colSums(x,} \code{na.rm = TRUE) / nrow(x))}).}
 
 \item{doc.only}{Logical: if \code{TRUE}, only document weights are returned (a single value for
 each term).}
