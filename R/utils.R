@@ -191,8 +191,8 @@ read.dic = function(path, cats, type = 'asis', as.weighted = FALSE, dir = getOpt
       path = tp$selected[tp$selected[, 'downloaded'] != '', 'downloaded']
       if(!length(path)) stop(
         if(nrow(tp$selected) == 1) 'dictionary' else 'dictionaries', ' (',
-        paste(rownames(tp$selected), collapse = ', '), ') not found in dir (', dir,
-        '); specify a directory (e.g., dir = "~") to locate or download; see ?download.dict',
+        paste(rownames(tp$selected), collapse = ', '), ') not found in dir (', dir, ')',
+        if(ckd) '\nspecify a directory (e.g., dir = "~") to locate or download; see ?download.dict',
         call. = FALSE
       )
     }
@@ -359,12 +359,18 @@ read.dic = function(path, cats, type = 'asis', as.weighted = FALSE, dir = getOpt
       wl = wl[cats[cats %in% names(wl)]]
     }else{
       if(missing(as.weighted) && length(path) == 1) as.weighted = TRUE
-      wl = if(any(grepl('[\\s,]', di))) tryCatch(read.dic(
-        read.table(
+      wl = if(any(grepl('[\\s,]', di))){
+        di = read.table(
           text = di, header = TRUE, sep = if(grepl('\t', di[[1]])) '\t' else ',',
           quote = '"', comment.char = '', stringsAsFactors = FALSE
-        ), cats = cats, type = type, as.weighted = as.weighted
-      ), error = function(e) e$message) else list(cat1 = di)
+        )
+        if(!missing(as.weighted) || (!'term' %in% colnames(di) && !any(vapply(di, is.character, TRUE)) &&
+            !any(grepl('[a-z]', rownames(di), TRUE)))) di = tryCatch(
+          read.dic(di, cats = cats, type = type, as.weighted = as.weighted),
+          error = function(e) e$message
+        )
+        di
+      }else list(cat1 = di)
       if(length(wl) == 1 && is.character(wl))
         stop('assuming path is to a comma separated values file, but failed to read it in:\n', wl)
     }
@@ -914,7 +920,7 @@ select.dict = function(query = NULL, dir = getOption('lingmatch.dict.dir'),
       if(!length(sel <- grep(query, collapsed, TRUE)))
         sel <- grep(paste(strsplit(query, '[[:space:],|]+')[[1]], collapse = '|'), collapsed, TRUE)
     }
-    if(length(sel)) r$selected = r$info[sel,]
+    if(length(sel)) r$selected = r$info[sel,, drop = FALSE]
   }
   r
 }
@@ -1095,10 +1101,11 @@ standardize.lspace = function(infile, name, sep = ' ', digits = 9, dir = getOpti
 #'   on the intercept included in each category (defined by \code{name.map['intname']}).
 #' @param to.lower Logical indicating whether \code{text} should be converted to lowercase before processing.
 #' @param return.dtm Logical; if \code{TRUE}, only a document-term matrix will be returned, rather than the
-#'   summed and biased category values.
+#'   weighted, summed, and biased category values.
 #' @param exclusive Logical; if \code{FALSE}, each dictionary term is searched for in the original text.
 #'   Otherwise (by default), terms are sorted by length (with longer terms being searched for first), and
 #'   matches are removed from the text (avoiding subsequent matches to matched patterns).
+#' @param drop.zeros logical; if \code{TRUE}, categories or terms with no matches will be removed.
 #' @param boundary A string to add to the beginning and end of each dictionary term. If \code{TRUE},
 #'   \code{boundary} will be set to \code{' '}, avoiding pattern matches within words. By default, dictionary
 #'   terms are left as entered.
@@ -1166,8 +1173,8 @@ standardize.lspace = function(infile, name, sep = ' ', digits = 9, dir = getOpti
 #' @export
 
 lma_patcat = function(text, dict = NULL, pattern.weights = 'weight', pattern.categories = 'category', bias = NULL,
-  to.lower = TRUE, return.dtm = FALSE, exclusive = TRUE, boundary = NULL, fixed = TRUE, globtoregex = FALSE,
-  name.map = c(intname = '_intercept', term = 'term'), dir = getOption('lingmatch.dict.dir')){
+  to.lower = TRUE, return.dtm = FALSE, drop.zeros = FALSE, exclusive = TRUE, boundary = NULL, fixed = TRUE,
+  globtoregex = FALSE, name.map = c(intname = '_intercept', term = 'term'), dir = getOption('lingmatch.dict.dir')){
   if(is.factor(text)) text = as.character(text)
   if(!is.character(text)) stop('enter a character vector as the first argument')
   text = paste(' ', text, ' ')
@@ -1289,8 +1296,8 @@ lma_patcat = function(text, dict = NULL, pattern.weights = 'weight', pattern.cat
     if(missing(fixed)) fixed = FALSE
   }
   if(wide && return.dtm){
-    return.dtm = FALSE
-    warning('cannot return dtm when multiple weights are specified -- remove weights for a dtm')
+    wide = FALSE
+    lex = data.frame(term = lex$term, category = if(length(lex$category) == 1) lex$category else 'all')
   }
   if(is.null(bias)){
     if(!'intname' %in% names(name.map)) name.map[['intname']] = '_intercept'
@@ -1298,7 +1305,7 @@ lma_patcat = function(text, dict = NULL, pattern.weights = 'weight', pattern.cat
       if(wide){
         bias = structure(lex$weights[su,], names = lex$categories[su])
         lex$term = lex$term[!su]
-        lex$weights = lex$weights[!su,]
+        lex$weights = lex$weights[!su,, drop = FALSE]
       }else{
         bias = structure(lex[su, 'weights'], names = lex[su, 'category'])
         lex = lex[!su,]
@@ -1358,6 +1365,7 @@ lma_patcat = function(text, dict = NULL, pattern.weights = 'weight', pattern.cat
   }
   attr(op[[1]], 'WC') = op[[2]]
   attr(op[[1]], 'time') = c(patcat = proc.time()[[3]] - st)
+  if(drop.zeros) op[[1]] = op[[1]][, colSums(op[[1]]) != 0, drop = FALSE]
   op[[1]]
 }
 

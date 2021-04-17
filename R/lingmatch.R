@@ -1243,20 +1243,20 @@ lma_weight = function(dtm, weight = 'count', normalize = TRUE, wc.complete = TRU
 #' \dontrun{
 #'
 #' # map to a pretrained space
-#' ddm = lma_lspace(dtm, '100k')
+#' ddm = lma_lspace(dtm, '100k', dir = '~')
 #'
 #' # load the matching subset of the space
 #' # without mapping
-#' lss_100k_part = lma_lspace(colnames(dtm), '100k')
+#' lss_100k_part = lma_lspace(colnames(dtm), '100k', dir = '~')
 #'
 #' ## or
-#' lss_100k_part = lma_lspace(dtm, '100k', map.space = FALSE)
+#' lss_100k_part = lma_lspace(dtm, '100k', map.space = FALSE, dir = '~')
 #'
 #' # load the full space
-#' lss_100k = lma_lspace('100k')
+#' lss_100k = lma_lspace('100k', dir = '~')
 #'
 #' ## or
-#' lss_100k = lma_lspace(space = '100k')
+#' lss_100k = lma_lspace(space = '100k', dir = '~')
 #'
 #' }
 #' @export
@@ -1425,9 +1425,11 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, t
 #'   vectors in \code{dict}, used to weight the terms in each \code{dict} vector. If a category in
 #'   \code{dict} is not specified in \code{term.weights}, or the \code{dict} and \code{term.weights}
 #'   vectors aren't the same length, the weights for that category will be 1.
-#' @param bias A list or named vector specifying a constant to add to the named category. If an
-#'   '_intercept' is included in a category, it will be removed from the category, and the associated
-#'   \code{weight} will be used as the \code{bias} for that category.
+#' @param bias A list or named vector specifying a constant to add to the named category. If a term
+#'   matching \code{bias.name} is included in a category, it's associated \code{weight} will be used
+#'   as the \code{bias} for that category.
+#' @param bias.name A character specifying a term to be used as a category bias; default is
+#'   \code{'_intercept'}.
 #' @param escape Logical indicating whether the terms in \code{dict} should not be treated as plain
 #'   text (including asterisk wild cards). If \code{TRUE}, regular expression related characters are
 #'   escaped. Set to \code{TRUE} if you get PCRE compilation errors.
@@ -1443,7 +1445,7 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, t
 #' @param term.break If a category has more than \code{term.break} characters, it will be processed
 #'   in chunks. Reduce from 20000 if you get a PCRE compilation error.
 #' @param dir Path to a folder in which to look for \code{dict}; \cr
-#'   will look in '~/Dictionaries' by default. \cr
+#'   will look in \code{'~/Dictionaries'} by default. \cr
 #'   Set a session default with \code{options(lingmatch.dict.dir = 'desired/path')}.
 #' @seealso For applying pattern-based dictionaries (to raw text) see \code{\link{lma_patcat}}.
 #' @family Dictionary functions
@@ -1480,14 +1482,15 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, t
 #' }
 #' @export
 
-lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE, partial = FALSE,
-  glob = TRUE, term.filter = NULL, term.break = 2e4, to.lower = FALSE, dir = getOption('lingmatch.dict.dir')){
+lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, bias.name = '_intercept',
+  escape = TRUE, partial = FALSE, glob = TRUE, term.filter = NULL, term.break = 2e4,
+  to.lower = FALSE, dir = getOption('lingmatch.dict.dir')){
   st=proc.time()[[3]]
   if(ckd <- dir == '') dir = '~/Dictionaries'
   if(missing(dict)) dict = lma_dict(1:9)
   if(is.factor(dict)) dict = as.character(dict)
-  if(is.character(dict) && length(dict) == 1 && missing(term.weights) && !grepl('[\\s*]', dict)){
-    if(!any(file.exists(dict)) && any(file.exists(normalizePath(paste0(dir, '/', dict), '/', FALSE))))
+  if(is.character(dict) && length(dict) == 1 && missing(term.weights) && (file.exists(dict) || !grepl('\\s', dict))){
+    if(!file.exists(dict) && any(file.exists(normalizePath(paste0(dir, '/', dict), '/', FALSE))))
       dict = normalizePath(paste0(dir, '/', dict))
     td = tryCatch(read.dic(dict, dir = if(ckd) '' else dir), error = function(e) NULL)
     dict = if(is.null(td)) list(cat1 = dict) else td
@@ -1531,7 +1534,8 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
   }
   if(is.factor(dict)) dict = as.character(dict)
   if(!is.null(dim(term.weights))){
-    if(is.null(colnames(term.weights))) colnames(term.weights) = paste0('cat', seq_len(ncol(term.weights)))
+    if(is.null(colnames(term.weights))) colnames(term.weights) =
+      if(length(dict) == length(term.weights)) names(dict) else  paste0('cat', seq_len(ncol(term.weights)))
     if(!is.data.frame(term.weights)) term.weights = as.data.frame(term.weights, stringsAsFactors = FALSE)
     su = vapply(term.weights, is.numeric, TRUE)
     if(any(!su)){
@@ -1546,13 +1550,14 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
       read.dic(dict, dir = if(ckd) '' else dir) else list(dict)
   if(is.list(dict)){
     if(is.null(names(dict))){
-      names(dict) = paste0('cat', seq_along(dict))
+      tn = if(!is.null(colnames(term.weights))) colnames(term.weights) else names(term.weights)
+      names(dict) = if(!is.null(tn) && length(tn) == length(dict)) tn else paste0('cat', seq_along(dict))
     }else if(any(su <- names(dict) == '')){
       names(dict)[su] = if(sum(su) == 1) 'cat_unnamed' else paste0('cat_unnamed', seq_len(sum(su)))
       if(!is.null(term.weights) && any(su <- names(term.weights) == ''))
         names(term.weights)[su] = if(sum(su) == 1) 'cat_unnamed' else paste0('cat_unnamed', seq_len(sum(su)))
     }
-  }
+  }else dict = list(dict)
   if(!is.null(term.weights)){
     if(is.null(dim(term.weights))){
       if(is.list(term.weights)){
@@ -1569,24 +1574,19 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
             term.weights[[cat]] = structure(rep(1, length(dict[[cat]])), names = dict[[cat]])
       }else{
         if(is.null(names(term.weights))){
-          if(is.list(dict)){
-            if(length(dict[[1]]) == length(term.weights)){
-              term.weights = list(term.weights)
-              names(term.weights) = names(dict)
-              names(term.weights[[1]]) = dict[[1]]
-            }else{
-              term.weights = NULL
-              warning('term.weights were dropped as they could not be aligned with dict')
-            }
-          }else if(length(term.weights) == length(dict)) names(term.weights) = dict else{
-            if(length(term.weights) != 1) warning('term.weights were adjusted to match the length of dict')
-            term.weights = rep_len(term.weights)
-            names(term.weights) = dict
+          if(length(dict[[1]]) == length(term.weights)){
+            term.weights = list(term.weights)
+            names(term.weights) = names(dict)
+            names(term.weights[[1]]) = dict[[1]]
+          }else{
+            term.weights = NULL
+            warning('term.weights were dropped as they could not be aligned with dict')
           }
         }
       }
     }else{
-      if(length(dict) == 1 && length(dict[[1]]) == nrow(term.weights) && !any(rownames(term.weights) %in% dict[[1]])){
+      if(length(dict) == 1 && length(dict[[1]]) == nrow(term.weights) &&
+          !any(grepl('[a-z]', rownames(term.weights), TRUE))){
         if(is.factor(dict[[1]])) dict[[1]] = as.character(dict[[1]])
         if(anyDuplicated(dict[[1]])){
           dt = unique(dict[[1]][duplicated(dict[[1]])])
@@ -1613,10 +1613,10 @@ lma_termcat=function(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
     if(is.null(names(cat))) as.character(cat) else names(cat) else cat)
   if(!is.null(bias) && is.null(names(bias)))
     names(bias) = if(length(bias) == length(dict)) names(dict) else seq_along(bias)
-  for(n in names(dict)) if(!n %in% names(bias) && any(ii <- !is.na(dict[[n]]) & dict[[n]] == '_intercept')){
-    dict[[n]] = dict[[n]][!ii]
+  if(!is.null(names(term.weights)) && length(names(term.weights)) == length(dict)) names(dict) = names(term.weights)
+  for(n in names(dict)) if(!n %in% names(bias) && any(ii <- !is.na(dict[[n]]) & dict[[n]] == bias.name)){
     bias[n] = term.weights[[n]][ii]
-    term.weights[[n]] = term.weights[[n]][!ii]
+    term.weights[[n]][ii] = 0
   }
   dict_chars = list(
     all = paste(unique(strsplit(paste0(unique(unlist(dict, use.names = FALSE)), collapse = ''), '')[[1]]),

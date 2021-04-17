@@ -16,8 +16,9 @@
 <h3>Usage</h3>
 
 <pre>
-lma_termcat(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
-  partial = FALSE, glob = TRUE, term.filter = NULL, term.break = 20000,
+lma_termcat(dtm, dict, term.weights = NULL, bias = NULL,
+  bias.name = "_intercept", escape = TRUE, partial = FALSE,
+  glob = TRUE, term.filter = NULL, term.break = 20000,
   to.lower = FALSE, dir = getOption("lingmatch.dict.dir"))
 </pre>
 
@@ -45,9 +46,14 @@ vectors aren't the same length, the weights for that category will be 1.</p>
 </td></tr>
 <tr valign="top"><td><code>bias</code></td>
 <td>
-<p>A list or named vector specifying a constant to add to the named category. If an
-'_intercept' is included in a category, it will be removed from the category, and the associated
-<code>weight</code> will be used as the <code>bias</code> for that category.</p>
+<p>A list or named vector specifying a constant to add to the named category. If a term
+matching <code>bias.name</code> is included in a category, it's associated <code>weight</code> will be used
+as the <code>bias</code> for that category.</p>
+</td></tr>
+<tr valign="top"><td><code>bias.name</code></td>
+<td>
+<p>A character specifying a term to be used as a category bias; default is
+<code>'_intercept'</code>.</p>
 </td></tr>
 <tr valign="top"><td><code>escape</code></td>
 <td>
@@ -84,7 +90,7 @@ always keep dictionary terms as entered.</p>
 <tr valign="top"><td><code>dir</code></td>
 <td>
 <p>Path to a folder in which to look for <code>dict</code>; <br />
-will look in '~/Dictionaries' by default. <br />
+will look in <code>'~/Dictionaries'</code> by default. <br />
 Set a session default with <code>options(lingmatch.dict.dir = 'desired/path')</code>.</p>
 </td></tr>
 </table>

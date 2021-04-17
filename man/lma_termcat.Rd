@@ -4,8 +4,9 @@
 \alias{lma_termcat}
 \title{Document-Term Matrix Categorization}
 \usage{
-lma_termcat(dtm, dict, term.weights = NULL, bias = NULL, escape = TRUE,
-  partial = FALSE, glob = TRUE, term.filter = NULL, term.break = 20000,
+lma_termcat(dtm, dict, term.weights = NULL, bias = NULL,
+  bias.name = "_intercept", escape = TRUE, partial = FALSE,
+  glob = TRUE, term.filter = NULL, term.break = 20000,
   to.lower = FALSE, dir = getOption("lingmatch.dict.dir"))
 }
 \arguments{
@@ -21,9 +22,12 @@ vectors in \code{dict}, used to weight the terms in each \code{dict} vector. If 
 \code{dict} is not specified in \code{term.weights}, or the \code{dict} and \code{term.weights}
 vectors aren't the same length, the weights for that category will be 1.}
 
-\item{bias}{A list or named vector specifying a constant to add to the named category. If an
-'_intercept' is included in a category, it will be removed from the category, and the associated
-\code{weight} will be used as the \code{bias} for that category.}
+\item{bias}{A list or named vector specifying a constant to add to the named category. If a term
+matching \code{bias.name} is included in a category, it's associated \code{weight} will be used
+as the \code{bias} for that category.}
+
+\item{bias.name}{A character specifying a term to be used as a category bias; default is
+\code{'_intercept'}.}
 
 \item{escape}{Logical indicating whether the terms in \code{dict} should not be treated as plain
 text (including asterisk wild cards). If \code{TRUE}, regular expression related characters are
@@ -46,7 +50,7 @@ terms will be converted to match the terms if they are single-cased. Set to \cod
 always keep dictionary terms as entered.}
 
 \item{dir}{Path to a folder in which to look for \code{dict}; \cr
-will look in '~/Dictionaries' by default. \cr
+will look in \code{'~/Dictionaries'} by default. \cr
 Set a session default with \code{options(lingmatch.dict.dir = 'desired/path')}.}
 }
 \value{

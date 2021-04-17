@@ -18,8 +18,9 @@
 <pre>
 lma_patcat(text, dict = NULL, pattern.weights = "weight",
   pattern.categories = "category", bias = NULL, to.lower = TRUE,
-  return.dtm = FALSE, exclusive = TRUE, boundary = NULL, fixed = TRUE,
-  globtoregex = FALSE, name.map = c(intname = "_intercept", term = "term"),
+  return.dtm = FALSE, drop.zeros = FALSE, exclusive = TRUE,
+  boundary = NULL, fixed = TRUE, globtoregex = FALSE,
+  name.map = c(intname = "_intercept", term = "term"),
   dir = getOption("lingmatch.dict.dir"))
 </pre>
 
@@ -59,7 +60,11 @@ on the intercept included in each category (defined by <code>name.map['intname']
 <tr valign="top"><td><code>return.dtm</code></td>
 <td>
 <p>Logical; if <code>TRUE</code>, only a document-term matrix will be returned, rather than the
-summed and biased category values.</p>
+weighted, summed, and biased category values.</p>
+</td></tr>
+<tr valign="top"><td><code>drop.zeros</code></td>
+<td>
+<p>logical; if <code>TRUE</code>, categories or terms with no matches will be removed.</p>
 </td></tr>
 <tr valign="top"><td><code>exclusive</code></td>
 <td>

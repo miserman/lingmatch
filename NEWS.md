@@ -1,6 +1,10 @@
 # version 1.0.2
 
+## Features
+* Adds an option to remove unmatched categories or terms in lma_patcat.
+
 ## Improvements
+* Improves handling of weighted dictionaries.
 * Enables term exclusions for token-only lma_dtm.
 * Makes output formats more consistent.
 * Handles special-character conversion on misencoded text.

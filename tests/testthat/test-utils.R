@@ -8,7 +8,7 @@ texts = c(
 )
 
 test_that('lma_process works', {
-  expect_error(lma_process(text))
+  expect_error(lma_process(function(){}))
   files = c(tempfile(fileext = '.txt'), tempfile(fileext = '.txt'))
   dtm = as.data.frame(lma_dtm(texts, sparse = FALSE))
   meta = lma_meta(texts)
@@ -19,7 +19,7 @@ test_that('lma_process works', {
     texts, dict = lma_dict(as.regex = FALSE), return.dtm = TRUE, fixed = FALSE, globtoregex = TRUE
   ), weight = 'count')
   expect_identical(pr, lma_process(texts, dict = lma_dict(as.regex = FALSE), fixed = FALSE,
-    globtoregex = TRUE, weight = 'count')[, names(pr)])
+    globtoregex = TRUE, weight = 'count', drop.zeros = FALSE)[, names(pr)])
   write(texts[1], files[1])
   write(texts[2], files[2])
   expect_identical(lma_process(files)[, -(1:3)], manual)
@@ -246,6 +246,8 @@ test_that('lma_patcat wide dict format works', {
   expect_true(all(lma_patcat(text, pattern.weights = structure(dict, row.names = dict$term)) == manual))
   expect_true(all(lma_patcat(text, dict$term, dict) == manual))
   expect_true(all(lma_patcat(text, dict$term, pattern.categories = dict) == manual))
+  expect_identical(colnames(lma_patcat('', dict$term, pattern.categories = dict)), colnames(dict)[-1])
+  expect_true(ncol(lma_patcat('', dict$term, pattern.categories = dict, drop.zeros = TRUE)) == 0)
 })
 
 test_that('read.segments works', {

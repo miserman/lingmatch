@@ -6,8 +6,9 @@
 \usage{
 lma_patcat(text, dict = NULL, pattern.weights = "weight",
   pattern.categories = "category", bias = NULL, to.lower = TRUE,
-  return.dtm = FALSE, exclusive = TRUE, boundary = NULL, fixed = TRUE,
-  globtoregex = FALSE, name.map = c(intname = "_intercept", term = "term"),
+  return.dtm = FALSE, drop.zeros = FALSE, exclusive = TRUE,
+  boundary = NULL, fixed = TRUE, globtoregex = FALSE,
+  name.map = c(intname = "_intercept", term = "term"),
   dir = getOption("lingmatch.dict.dir"))
 }
 \arguments{
@@ -29,7 +30,9 @@ on the intercept included in each category (defined by \code{name.map['intname']
 \item{to.lower}{Logical indicating whether \code{text} should be converted to lowercase before processing.}
 
 \item{return.dtm}{Logical; if \code{TRUE}, only a document-term matrix will be returned, rather than the
-summed and biased category values.}
+weighted, summed, and biased category values.}
+
+\item{drop.zeros}{logical; if \code{TRUE}, categories or terms with no matches will be removed.}
 
 \item{exclusive}{Logical; if \code{FALSE}, each dictionary term is searched for in the original text.
 Otherwise (by default), terms are sorted by length (with longer terms being searched for first), and

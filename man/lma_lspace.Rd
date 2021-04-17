@@ -97,20 +97,20 @@ sapply(spaces, lma_simets, metric = 'cosine')
 \dontrun{
 
 # map to a pretrained space
-ddm = lma_lspace(dtm, '100k')
+ddm = lma_lspace(dtm, '100k', dir = '~')
 
 # load the matching subset of the space
 # without mapping
-lss_100k_part = lma_lspace(colnames(dtm), '100k')
+lss_100k_part = lma_lspace(colnames(dtm), '100k', dir = '~')
 
 ## or
-lss_100k_part = lma_lspace(dtm, '100k', map.space = FALSE)
+lss_100k_part = lma_lspace(dtm, '100k', map.space = FALSE, dir = '~')
 
 # load the full space
-lss_100k = lma_lspace('100k')
+lss_100k = lma_lspace('100k', dir = '~')
 
 ## or
-lss_100k = lma_lspace(space = '100k')
+lss_100k = lma_lspace(space = '100k', dir = '~')
 
 }
 }

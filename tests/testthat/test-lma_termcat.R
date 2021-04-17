@@ -36,6 +36,7 @@ test_that('bias works', {
   expect_equal(lma_termcat(dtm, list(a = category), list(a = category))[, 1], score)
   expect_equal(lma_termcat(dtm, sepcat$terms, sepcat$weights)[, 1], score)
   expect_equal(lma_termcat(dtm, sepcat$terms[-1], sepcat$weights[-1], 5)[, 1], score)
+  expect_equal(lma_termcat(dtm, as.data.frame(sepcat))[, 1], score)
 })
 
 test_that('escape works', {

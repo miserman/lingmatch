@@ -11,8 +11,9 @@ An all-in-one R package for the assessment of linguistic matching and/or accommo
 ## resources
 * Documentation and guides: [miserman.github.io/lingmatch](https://miserman.github.io/lingmatch/)
   * [Quick start](https://miserman.github.io/lingmatch/#quick_start)
-  * [Introduction to text analysis](https://miserman.github.io/lingmatch/#text_analysis)
   * [Comparisons](https://miserman.github.io/lingmatch/#comparisons)
+  * [Introduction to text analysis](https://miserman.github.io/lingmatch/#text_analysis)
+  * [Text Classification](https://miserman.github.io/lingmatch/#classification)
   * [Word vectors](https://miserman.github.io/lingmatch/#word_vectors)
 * Dictionary repository: [osf.io/y6g5b](https://osf.io/y6g5b/wiki/home/)
 * Latent semantic space repository: [osf.io/489he](https://osf.io/489he/wiki/home/)
