@@ -18,7 +18,8 @@ Linguistic Inquiry and Word Count (.dic; non-weighted) format.
 
 <pre>
 read.dic(path, cats, type = "asis", as.weighted = FALSE,
-  dir = getOption("lingmatch.dict.dir"), ...)
+  dir = getOption("lingmatch.dict.dir"), ..., term.name = "term",
+  category.name = "category")
 
 write.dic(dict, filename, type = "asis", as.weighted = FALSE, save = TRUE)
 </pre>
@@ -60,6 +61,11 @@ passed to <code>select.dict</code> and/or <code>download.dict</code>.</p>
 <tr valign="top"><td><code>...</code></td>
 <td>
 <p>Passes arguments to <code>readLines</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>term.name, category.name</code></td>
+<td>
+<p>Strings identifying column names in <code>path</code> containing terms and categories
+respectively.</p>
 </td></tr>
 <tr valign="top"><td><code>dict</code></td>
 <td>

@@ -107,8 +107,10 @@ lma_process = function(input = NULL, ..., meta = TRUE){
     nr = NROW(x)
     arg_matches$lma_lspace$dtm = x
     x = do.call(lma_lspace, lapply(arg_matches$lma_lspace, eval.parent, 2))
-    colnames(x) = paste0('dim', seq_len(ncol(x)))
-    if(nrow(x) != nr) return(x)
+    if(nrow(x) != nr){
+      colnames(x) = paste0('dim', seq_len(ncol(x)))
+      return(x)
+    }
     ck_changed = TRUE
   }
   if(any(grepl('Matrix', class(x), fixed = TRUE))) x = as.matrix(x)
@@ -164,6 +166,8 @@ to_regex = function(dict, intext = FALSE){
 #' @param dir Path to a folder containing dictionaries, or where you would like dictionaries to be downloaded;
 #'   passed to \code{\link{select.dict}} and/or \code{\link{download.dict}}.
 #' @param ... Passes arguments to \code{\link{readLines}}.
+#' @param term.name,category.name Strings identifying column names in \code{path} containing terms and categories
+#'   respectively.
 #' @return \code{read.dic}: A \code{list} (unweighted) with an entry for each category containing
 #'   character vectors of terms, or a \code{data.frame} (weighted) with columns for terms (first, "term") and
 #'   weights (all subsequent, with category labels as names).
@@ -171,7 +175,8 @@ to_regex = function(dict, intext = FALSE){
 #' @importFrom utils read.table write.table
 #' @export
 
-read.dic = function(path, cats, type = 'asis', as.weighted = FALSE, dir = getOption('lingmatch.dict.dir'), ...){
+read.dic = function(path, cats, type = 'asis', as.weighted = FALSE, dir = getOption('lingmatch.dict.dir'), ...,
+  term.name = 'term', category.name = 'category'){
   if(ckd <- dir == '') dir = '~/Dictionaries'
   if(missing(path)) path = file.choose()
   if(is.character(path) && !any(file.exists(path)) &&
@@ -208,9 +213,9 @@ read.dic = function(path, cats, type = 'asis', as.weighted = FALSE, dir = getOpt
   if(!is.null(dim(path))){
     if(anyNA(path)) path[is.na(path)] = 0
     cats = colnames(path)
-    if('term' %in% cats){
-      terms = path[, 'term']
-      cats = cats[cats != 'term']
+    if(term.name %in% cats){
+      terms = path[, term.name]
+      cats = cats[cats != term.name]
     }else if(!is.null(rownames(path)) && any(grepl('[a-z]', rownames(path), TRUE))){
       terms = rownames(path)
     }else{
@@ -224,26 +229,53 @@ read.dic = function(path, cats, type = 'asis', as.weighted = FALSE, dir = getOpt
         }else stop('no non-numeric columns found in path')
       }else{
         if(length(su) > 1){
-          ssu = vapply(su, function(col) !anyDuplicated(path[, col]), TRUE)
-          if(any(!ssu)) cats = path[, su[which(!ssu)[[1]]]]
-          su = if(any(ssu)) su[which(ssu)[[1]]] else su[[1]]
+          ssu = vapply(su, function(col) if(!anyDuplicated(path[, col])) 1 else
+            if(all(path[, col] == path[1, col])) 0 else 2, 0)
+          if(length(su) == ncol(path) && !any(ssu == 0)){
+            path = data.frame(
+              term = unlist(path[, su], use.names = FALSE),
+              category = rep(colnames(path), each = nrow(path))
+            )
+            su = 1
+          }else{
+            if(any(ssu == 2)){
+              cats = colnames(path)[su[which(ssu == 2)]]
+              if(length(cats) > 1 && length(su) != ncol(path)) cats = cats[1]
+            }
+            su = if(any(ssu == 1)) su[which(ssu == 1)[[1]]] else su[[1]]
+          }
         }
         terms = path[, su]
       }
     }
-    if('category' %in% colnames(path)) cats = path[, 'category']
-    if(length(cats) == nrow(path)){
+    if(category.name %in% colnames(path)) cats = path[, category.name]
+    if(length(cats) == nrow(path) && !all(cats %in% colnames(path))){
       wl = split(terms, cats)
     }else{
-      su = vapply(cats, function(col) !is.numeric(path[, col]) && anyDuplicated(path[, col]), TRUE)
-      wl = if(any(su)){
-        split(terms, path[, names(which(su))[[1]]])
+      su = vapply(cats, function(col)
+        if(is.numeric(path[, col])) 1 else if(anyDuplicated(path[, col]))
+          if(!all(path[, col] == path[1, col])) 2 else 3 else 0, 0)
+      wl = if(!1 %in% su && any(su == 2) && any(su != 2)){
+        cats = cats[su == 2]
+        wl = lapply(cats, function(cat) split(terms, path[, cat]))
+        names(wl) = cats
+        wl
       }else{
-        cats = cats[vapply(cats, function(cat) is.numeric(path[, cat]), TRUE)]
-        if(!length(cats)) stop('no numeric columns found in path')
-        if(as.weighted){
-          cbind(term = terms, path[, cats, drop = FALSE])
+        if(!any(su == 1)){
+          if(any(su > 1)){
+            cats = cats[su > 1]
+            if(length(cats) == 1){
+              split(terms, path[, cats])
+            }else{
+              wl = lapply(cats, function(cat) split(terms, path[, cat]))
+              names(wl) = cats
+              unlist(wl, FALSE)
+            }
+          }else stop('no numeric columns found in path')
+        }else if(as.weighted){
+          cbind(term = terms, path[, cats[su == 1], drop = FALSE])
         }else{
+          cats = cats[su == 1]
           if(length(cats) == 1){
             weights = path[, cats]
             if(any(weights < 0) && any(weights > 0)){
@@ -270,11 +302,7 @@ read.dic = function(path, cats, type = 'asis', as.weighted = FALSE, dir = getOpt
               names(wl) = cats
               wl = Filter(length, wl)
             }else{
-              wl = list()
-              for(r in seq_len(nrow(path))){
-                m = max(weights[r,])
-                if(m != 0) for(cat in cats[weights[r,] == m]) wl[[cat]] = c(wl[[cat]], terms[r])
-              }
+              wl = split(terms, colnames(weights)[max.col(weights, 'first')])
             }
             wl
           }
@@ -282,6 +310,7 @@ read.dic = function(path, cats, type = 'asis', as.weighted = FALSE, dir = getOpt
       }
     }
   }else if(is.list(path)){
+    path = Filter(length, path)
     if(all(vapply(path, function(d) is.character(d) || is.factor(d), TRUE))){
       wl = path
       if(is.null(names(wl))) names(wl) = paste0('cat', seq_along(wl))
@@ -295,30 +324,33 @@ read.dic = function(path, cats, type = 'asis', as.weighted = FALSE, dir = getOpt
         terms = NULL
         cats = NULL
         for(d in names(path)){
-          if(is.null(dim(path[[d]]))) path[[d]] = read.dic(path[[d]], as.weighted = TRUE)
-          if(!'term' %in% colnames(path[[d]])) path[[d]] = read.dic(path[[d]])
-          terms = unique(c(terms, path[[d]]$term))
-          cats = c(cats, paste0(d, '.', colnames(path[[d]])[-1]))
-        }
-        wl = as.data.frame(
-          matrix(0, length(terms), length(cats), dimnames = list(terms, cats)),
-          stringsAsFactors = FALSE
-        )
-        for(d in names(path)){
-          cats = colnames(path[[d]])[-1] = paste0(d, '.', colnames(path[[d]])[-1])
-          su = duplicated(path[[d]]$term)
-          if(any(su)){
-            su = path[[d]]$term %in% path[[d]]$term[su]
-            td = path[[d]][su,, drop = FALSE]
-            for(term in unique(td$term)) wl[term, cats] = colMeans(td[td$term == term, cats])
+          path[[d]] = read.dic(path[[d]], as.weighted = as.weighted)
+          if(as.weighted){
+            terms = unique(c(terms, path[[d]]$term))
+            cats = c(cats, paste0(d, '.', colnames(path[[d]])[-1]))
           }
-          if(any(!su)) path[[d]] = path[[d]][!su,]
-          rownames(path[[d]]) = path[[d]]$term
-          wl[path[[d]]$term, cats] = path[[d]][, cats]
         }
-        data.frame(term = rownames(wl), wl, stringsAsFactors = FALSE)
+        if(as.weighted){
+          wl = as.data.frame(
+            matrix(0, length(terms), length(cats), dimnames = list(terms, cats)),
+            stringsAsFactors = FALSE
+          )
+          for(d in names(path)){
+            cats = colnames(path[[d]])[-1] = paste0(d, '.', colnames(path[[d]])[-1])
+            su = duplicated(path[[d]]$term)
+            if(any(su)){
+              su = path[[d]]$term %in% path[[d]]$term[su]
+              td = path[[d]][su,, drop = FALSE]
+              for(term in unique(td$term)) wl[term, cats] = colMeans(td[td$term == term, cats])
+            }
+            if(any(!su)) path[[d]] = path[[d]][!su,]
+            rownames(path[[d]]) = path[[d]]$term
+            wl[path[[d]]$term, cats] = path[[d]][, cats]
+          }
+          data.frame(term = rownames(wl), wl, stringsAsFactors = FALSE)
+        }else unlist(path, FALSE)
       }else if(any(vapply(path, is.list, TRUE))){
-        do.call(c, path)
+        unlist(path, FALSE)
       }else{
         if(any(vapply(path, function(d) is.null(names(d)), TRUE))){
           if(all(vapply(path, length, 0) == length(path[[1]]))){
@@ -348,7 +380,7 @@ read.dic = function(path, cats, type = 'asis', as.weighted = FALSE, dir = getOpt
       lst = lst[2]
       h = grep('^\\d', gsub('^\\s+|\\s*%+\\s*|\\s+$', '', di[seq_len(lst)]), value = TRUE)
       ci = character()
-      for(cat in h) ci[sub('\\s.*$', '', cat)] = sub('^[^\\s]+\\s+', '', cat)
+      for(cat in h) ci[sub('\\s.*$', '', cat)] = sub('^[^\\s]+\\s+', '', cat, perl = TRUE)
       if(missing(cats)) cats = ci
       sep = if(grepl('\t', di[lst + 1], fixed = TRUE)) '\t' else '\\s'
       cb = paste0('(?:', sep, '+(?:', paste(names(ci), collapse = '|'), ')(?=', sep, '|$))*$')
@@ -359,12 +391,12 @@ read.dic = function(path, cats, type = 'asis', as.weighted = FALSE, dir = getOpt
       wl = wl[cats[cats %in% names(wl)]]
     }else{
       if(missing(as.weighted) && length(path) == 1) as.weighted = TRUE
-      wl = if(any(grepl('[\\s,]', di))){
+      wl = if(any(grepl('[\\s,]', di, perl = TRUE))){
         di = read.table(
           text = di, header = TRUE, sep = if(grepl('\t', di[[1]])) '\t' else ',',
           quote = '"', comment.char = '', stringsAsFactors = FALSE
         )
-        if(!missing(as.weighted) || (!'term' %in% colnames(di) && !any(vapply(di, is.character, TRUE)) &&
+        if(!missing(as.weighted) || (!term.name %in% colnames(di) && !any(vapply(di, is.character, TRUE)) &&
             !any(grepl('[a-z]', rownames(di), TRUE)))) di = tryCatch(
           read.dic(di, cats = cats, type = type, as.weighted = as.weighted),
           error = function(e) e$message

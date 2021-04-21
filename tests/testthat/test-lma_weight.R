@@ -1,6 +1,8 @@
 context('lma_weights')
 
 dtm = sparseMatrix(sample(50, 900, TRUE), sample(100, 900, TRUE), x = rpois(900, 2) + 1)
+su = colSums(dtm) == 0
+if(any(su)) for(i in which(su)) dtm[sample(nrow(dtm), 1), i] = 1
 
 test_that('weights are the same as manual', {
   alpha = 1.1

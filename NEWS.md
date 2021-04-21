@@ -1,10 +1,11 @@
 # version 1.0.2
 
 ## Features
+* Adds options to specify term and category names in read.dic.
 * Adds an option to remove unmatched categories or terms in lma_patcat.
 
 ## Improvements
-* Improves handling of weighted dictionaries.
+* Improves input-handling of dictionaries.
 * Enables term exclusions for token-only lma_dtm.
 * Makes output formats more consistent.
 * Handles special-character conversion on misencoded text.

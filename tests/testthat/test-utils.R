@@ -9,6 +9,7 @@ texts = c(
 
 test_that('lma_process works', {
   expect_error(lma_process(function(){}))
+  expect_error(lma_process(0))
   files = c(tempfile(fileext = '.txt'), tempfile(fileext = '.txt'))
   dtm = as.data.frame(lma_dtm(texts, sparse = FALSE))
   meta = lma_meta(texts)
@@ -36,6 +37,10 @@ test_that('lma_process works', {
   expect_identical(lma_process(texts, weight = 'count', dict = lma_dict(1:9), meta = FALSE)[, -1], termcat)
   expect_identical(lma_process(dtm, weight = 'count', dict = lma_dict(1:9), meta = FALSE), termcat)
   expect_identical(as.numeric(lma_process(dtm, dim.cutoff = .1)[, 1]), as.numeric(lma_lspace(dtm, dim.cutoff = .1)))
+  expect_identical(
+    as.matrix(lma_process(dtm, dim.cutoff = .1, keep.dim = TRUE)),
+    lma_lspace(dtm, dim.cutoff = .1, keep.dim = TRUE)
+  )
   dict = list(ab = c('a', 'b'), c = 'c')
   expect_identical(
     lma_process(list(a = c(1, 0), b = c(2, 1), c = c(3, 2)), dict = dict),
@@ -67,6 +72,8 @@ test_that('lma_dict works', {
 })
 
 test_that('read/write.dic works', {
+  expect_error(read.dic(0))
+  expect_error(read.dic(matrix(0)))
   file_dic = tempfile(fileext = '.dic')
   file_csv = tempfile(fileext = '.csv')
   dict = list(
@@ -90,11 +97,11 @@ test_that('read/write.dic works', {
   ), as.weighted = TRUE), dict_weighted)
   files = sub('^.*\\\\', '', c(file_dic, file_csv))
   dir = sub('\\\\[^\\]+$', '', file_dic)
-  expect_true(all(read.dic(files, dir = dir) == read.dic(list(dict_weighted, dict_weighted))))
+  expect_identical(unname(read.dic(files, dir = dir)), unname(read.dic(list(dict_weighted, dict_weighted))))
   expect_equal(dim(dict_weighted), c(length(unique(unlist(dict))), length(dict) + 1))
-  expect_equal(write.dic(dict, file_dic, as.weighted = TRUE), dict_weighted)
-  expect_equal(read.dic(file_dic, as.weighted = FALSE), dict)
-  expect_equal(read.dic(file_dic), dict_weighted)
+  expect_identical(write.dic(dict, file_dic, as.weighted = TRUE), dict_weighted)
+  expect_identical(read.dic(file_dic, as.weighted = FALSE), dict)
+  expect_identical(read.dic(file_dic), dict_weighted)
   wdict = data.frame(
     term = sample(unlist(dict, use.names = FALSE), 50),
     cat1 = rnorm(50), cat2 = rpois(50, 1)
@@ -102,7 +109,7 @@ test_that('read/write.dic works', {
   write.dic(wdict, file_csv)
   expect_equal(read.dic(file_csv), wdict)
   expect_equivalent(read.dic(files, dir = dir), read.dic(list(dict, wdict)))
-  expect_equal(
+  expect_identical(
     read.dic(list(a = c(1, 2, 3), b = c(0, 2, 4))),
     read.dic(data.frame(a = c(1, 2, 3), b = c(0, 2, 4)))
   )
@@ -113,27 +120,51 @@ test_that('read/write.dic works', {
     neutral = c('what', 'hey'),
     negative = c('bad', 'horrible')
   )
-  expect_equal(dict, read.dic(data.frame(unlist(dict, use.names = FALSE),
+  expect_identical(dict, read.dic(data.frame(unlist(dict, use.names = FALSE),
     c(1, 1.5, 0, 0, -1, -1.5))))
-  expect_equal(dict[c(1, 3)], read.dic(data.frame(unlist(dict[c(1, 3)], use.names = FALSE),
+  expect_identical(dict[c(1, 3)], read.dic(data.frame(unlist(dict[c(1, 3)], use.names = FALSE),
     c(1, 1.5, -1, -1.5))))
-  expect_equal(c(a = dict, b = dict)[c(3, 2, 1, 6, 5, 4)], read.dic(data.frame(unlist(dict, use.names = FALSE),
+  expect_identical(c(a = dict, b = dict)[c(3, 2, 1, 6, 5, 4)], read.dic(data.frame(unlist(dict, use.names = FALSE),
     a = c(1, 1.5, 0, 0, -1, -1.5), b = c(1, 1.5, 0, 0, -1, -1.5))))
-  expect_equal(read.dic(data.frame(
+  expect_identical(read.dic(data.frame(
     term = unlist(dict, use.names = FALSE), sentiment = rep(c(1, 0, -1), each = 2)
   )), dict)
-  expect_equal(read.dic(data.frame(
+  expect_identical(read.dic(data.frame(
     term = unlist(dict, use.names = FALSE), category = rep(names(dict), each = 2)
   ))[names(dict)], dict)
   dicts = select.dict(dir = '~/Dictionaries')$info
   if(!is.na(d <- which(dicts$downloaded != '')[1])) expect_equal(
     read.dic(rownames(dicts)[d]), read.dic(dicts[d, 'downloaded'])
   )
-  expect_equal(
-    data.frame(term = c('a', 'b', 'c', 'f', 'g'), a = c(1, 2, 3, 0, 0), b = c(4, 0, 0, 5, 0),
-      row.names = c('a', 'b', 'c', 'f', 'g')),
-    read.dic(list(a = c(a = 1, b = 2, c = 3), b = c(a = 4, f = 5, g = 0)))
+  dict = dict2 = data.frame(term = c('a', 'b', 'c', 'f', 'g'), a = c(1, 2, 3, 0, 0), b = c(4, 0, 0, 5, 0),
+    row.names = c('a', 'b', 'c', 'f', 'g'))
+  expect_identical(dict, read.dic(list(a = c(a = 1, b = 2, c = 3), b = c(a = 4, f = 5, g = 0))))
+  dict2[5, 3] = NA
+  expect_identical(dict, read.dic(dict2, as.weighted = TRUE))
+  expect_identical(dict, read.dic(dict[, -1], as.weighted = TRUE))
+  expect_identical(list(x = dict$term), read.dic(data.frame(dict$term, 'x')))
+  dict[, -1] = rep(c(1, 2, 1), c(2, 5, 3))
+  dict2 = list(a = c('c', 'f', 'g'), b = c('a', 'b'))
+  expect_identical(dict2, read.dic(dict))
+  expect_identical(dict2, read.dic(cbind(dict, letters[1:5])))
+  expect_identical(read.dic(list(c('a', 'b'), NULL), cats = 'cat1'), list(cat1 = c('a', 'b')))
+  expect_identical(read.dic(list(c('a', 'b'), c('c', 'd')), cats = 'cat1'), list(cat1 = c('a', 'b')))
+  expect_identical(unname(read.dic(list(dict2, dict2))), unname(unlist(list(dict2, dict2), FALSE)))
+  dict2 = data.frame(dict, dict[, -1])
+  dict2[5, 2] = 1.5
+  expect_identical(
+    unname(read.dic(list(rbind(dict, data.frame(term = 'g', a = 1, b =1)), dict), as.weighted = TRUE)),
+    unname(dict2)
   )
+  dict = list(a = c('a', 'b'), b = c('c', 'd'))
+  expect_identical(read.dic(as.data.frame(dict)), dict)
+  dict = data.frame(t = c('a', 'b', 'c'), c1 = c('a', 'a', 'b'), c2 = c('b', 'a', 'a'))
+  expect_identical(read.dic(dict), as.list(dict)[c('c1', 'c2', 't')])
+  expect_identical(
+    read.dic(data.frame(term = c('a', 'b', 'c'), weight = c(1, 1, 2))),
+    list(`1` = c('a', 'b'), `2` = 'c')
+  )
+  expect_identical(read.dic(rep('xxx', 3)), list(cat1 = rep('xxx', 3)))
 })
 
 test_that('lma_initdirs works', {
