@@ -1,7 +1,7 @@
 Package: lingmatch
 Type: Package
 Title: Linguistic Matching and Accommodation
-Version: 1.0.2
+Version: 1.0.3
 Author: Micah Iserman
 Maintainer: Micah Iserman <micah.iserman@gmail.com>
 Description: Measure similarity between texts. Offers a variety of processing
