@@ -773,8 +773,8 @@ lma_dtm = function(text, exclude = NULL, context = NULL, replace.special = TRUE,
         cbind(i, as.integer(levels(inds)), tabulate(inds))
       }
     }))
-    dtm = sparseMatrix(m[, 1], m[, 2], x = m[, 3], dimnames = list(NULL,
-      if(is.character(text$tokens)) text$tokens else names(text$tokens)))
+    dtm = sparseMatrix(m[, 1], m[, 2], x = m[, 3], dims = c(length(text$indices), length(text$tokens)),
+      dimnames = list(NULL, if(is.character(text$tokens)) text$tokens else names(text$tokens)))
     if(!sparse) dtm = as.matrix(dtm)
     attr(dtm, 'colsums') = text$frequencies
     attr(dtm, 'type') = 'count'
@@ -1242,21 +1242,25 @@ lma_weight = function(dtm, weight = 'count', normalize = TRUE, wc.complete = TRU
 #'
 #' \dontrun{
 #'
+#' # specify a directory containing spaces,
+#' # or where you would like to download spaces
+#' space_dir = '~/Latent Semantic Spaces'
+#'
 #' # map to a pretrained space
-#' ddm = lma_lspace(dtm, '100k', dir = '~')
+#' ddm = lma_lspace(dtm, '100k', dir = space_dir)
 #'
 #' # load the matching subset of the space
 #' # without mapping
-#' lss_100k_part = lma_lspace(colnames(dtm), '100k', dir = '~')
+#' lss_100k_part = lma_lspace(colnames(dtm), '100k', dir = space_dir)
 #'
 #' ## or
-#' lss_100k_part = lma_lspace(dtm, '100k', map.space = FALSE, dir = '~')
+#' lss_100k_part = lma_lspace(dtm, '100k', map.space = FALSE, dir = space_dir)
 #'
 #' # load the full space
-#' lss_100k = lma_lspace('100k', dir = '~')
+#' lss_100k = lma_lspace('100k', dir = space_dir)
 #'
 #' ## or
-#' lss_100k = lma_lspace(space = '100k', dir = '~')
+#' lss_100k = lma_lspace(space = '100k', dir = space_dir)
 #'
 #' }
 #' @export
@@ -1452,8 +1456,9 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, t
 #' @return A matrix with a row per \code{dtm} row and columns per dictionary category, and a \code{WC} attribute
 #' with original word counts.
 #' @examples
-#' # Score texts with the NRC Affect Intensity Lexicon
 #' \dontrun{
+#'
+#' # Score texts with the NRC Affect Intensity Lexicon
 #'
 #' dict = readLines('https://saifmohammad.com/WebDocs/NRC-AffectIntensity-Lexicon.txt')
 #' dict = read.table(
@@ -1478,6 +1483,12 @@ lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, t
 #' )
 #'
 #' emotion_scores = lma_termcat(text, dict)
+#' if(require('splot')) splot(emotion_scores ~ names(text), leg = 'out')
+#'
+#' ## or use the standardized version (which includes more categories)
+#'
+#' emotion_scores = lma_termcat(text, 'nrc_eil', dir = '~/Dictionaries')
+#' emotion_scores = emotion_scores[, c('anger', 'fear', 'joy', 'sadness')]
 #' if(require('splot')) splot(emotion_scores ~ names(text), leg = 'out')
 #' }
 #' @export

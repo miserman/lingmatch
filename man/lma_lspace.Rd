@@ -96,21 +96,25 @@ sapply(spaces, lma_simets, metric = 'cosine')
 
 \dontrun{
 
+# specify a directory containing spaces,
+# or where you would like to download spaces
+space_dir = '~/Latent Semantic Spaces'
+
 # map to a pretrained space
-ddm = lma_lspace(dtm, '100k', dir = '~')
+ddm = lma_lspace(dtm, '100k', dir = space_dir)
 
 # load the matching subset of the space
 # without mapping
-lss_100k_part = lma_lspace(colnames(dtm), '100k', dir = '~')
+lss_100k_part = lma_lspace(colnames(dtm), '100k', dir = space_dir)
 
 ## or
-lss_100k_part = lma_lspace(dtm, '100k', map.space = FALSE, dir = '~')
+lss_100k_part = lma_lspace(dtm, '100k', map.space = FALSE, dir = space_dir)
 
 # load the full space
-lss_100k = lma_lspace('100k', dir = '~')
+lss_100k = lma_lspace('100k', dir = space_dir)
 
 ## or
-lss_100k = lma_lspace(space = '100k', dir = '~')
+lss_100k = lma_lspace(space = '100k', dir = space_dir)
 
 }
 }

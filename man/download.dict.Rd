@@ -29,7 +29,7 @@ Downloads the specified dictionaries from \href{https://osf.io/y6g5b}{osf.io/y6g
 \examples{
 \dontrun{
 
-download.dict('lusi')
+download.dict('lusi', dir = '~/Dictionaries')
 }
 }
 \seealso{

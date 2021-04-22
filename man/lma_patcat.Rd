@@ -109,6 +109,17 @@ lma_patcat(
 tempori = read.csv('https://wwbp.org/downloads/public_data/temporalOrientationLexicon.csv')
 
 lma_patcat(text, tempori)
+
+# or use the standardized version
+tempori_std = read.dic('wwbp_prospection', dir = '~/Dictionaries')
+
+lma_patcat(text, tempori_std)
+
+## get scores on the same scale by adjusting the standardized values
+tempori_std[, -1] = tempori_std[, -1] / 100 *
+  select.dict('wwbp_prospection')$selected[, 'original_max']
+
+lma_patcat(text, tempori_std)[, unique(tempori$category)]
 }
 }
 \seealso{

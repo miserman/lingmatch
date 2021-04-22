@@ -160,10 +160,11 @@ test_that('read/write.dic works', {
   expect_identical(read.dic(as.data.frame(dict)), dict)
   dict = data.frame(t = c('a', 'b', 'c'), c1 = c('a', 'a', 'b'), c2 = c('b', 'a', 'a'))
   expect_identical(read.dic(dict), as.list(dict)[c('c1', 'c2', 't')])
-  expect_identical(
-    read.dic(data.frame(term = c('a', 'b', 'c'), weight = c(1, 1, 2))),
-    list(`1` = c('a', 'b'), `2` = 'c')
-  )
+  dict = data.frame(term = c('a', 'b', 'c'), weight = c(2, 2, 3))
+  expect_identical(read.dic(dict), list(`2` = c('a', 'b'), `3` = 'c'))
+  expect_identical(read.dic(dict, as.weighted = TRUE), dict)
+  dict$category = c('c1', 'c2', 'c1')
+  expect_identical(read.dic(dict, as.weighted = TRUE), data.frame(term = dict$term, c1 = c(2, 0, 3), c2 = c(0, 2, 0)))
   expect_identical(read.dic(rep('xxx', 3)), list(cat1 = rep('xxx', 3)))
 })
 

@@ -54,10 +54,10 @@ text = c(
 Process the texts in one step:
 ```R
 # with a dictionary
-inquirer_cats = lma_process(text, dict = 'inquirer', dir = '~')
+inquirer_cats = lma_process(text, dict = 'inquirer', dir = '~/Dictionaries')
 
 # with a latent semantic space
-glove_vectors = lma_process(text, space = 'glove', dir = '~')
+glove_vectors = lma_process(text, space = 'glove', dir = '~/Latent Semantic Spaces')
 ```
 
 Or process the texts step by step, then measure similarity between each:
@@ -72,10 +72,10 @@ Or do that within a single function call:
 ```R
 similarity = lingmatch(
   text, weight = 'frequency', dict = lma_dict(1:9), metric = 'canberra'
-)
+)$sim
 ```
 
 Or, if you want a standard form (as in this example), specify a default:
 ```R
-similarity = lingmatch(text, type = 'lsm')
+similarity = lingmatch(text, type = 'lsm')$sim
 ```

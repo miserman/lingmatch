@@ -236,6 +236,7 @@ read.dic = function(path, cats, type = 'asis', as.weighted = FALSE, dir = getOpt
               term = unlist(path[, su], use.names = FALSE),
               category = rep(colnames(path), each = nrow(path))
             )
+            category.name = cats = 'category'
             su = 1
           }else{
             if(any(ssu == 2)){
@@ -248,9 +249,20 @@ read.dic = function(path, cats, type = 'asis', as.weighted = FALSE, dir = getOpt
         terms = path[, su]
       }
     }
-    if(category.name %in% colnames(path)) cats = path[, category.name]
-    if(length(cats) == nrow(path) && !all(cats %in% colnames(path))){
-      wl = split(terms, cats)
+    if(category.name %in% colnames(path)){
+      su = which(vapply(cats, function(cat) is.numeric(path[, cat]), TRUE))
+      cats = path[, category.name]
+      if(length(su) == 1){
+        weights = path[, names(su)]
+        wl = data.frame(term = terms)
+        v = numeric(nrow(path))
+        for(cat in unique(cats)){
+          su = cats == cat
+          v[su] = weights[su]
+          wl[, cat] = v
+          v[] = 0
+        }
+      }else wl = split(terms, cats)
     }else{
       su = vapply(cats, function(col)
         if(is.numeric(path[, col])) 1 else if(anyDuplicated(path[, col]))
@@ -444,11 +456,11 @@ read.dic = function(path, cats, type = 'asis', as.weighted = FALSE, dir = getOpt
 #' read.dic('murder.dic')
 #'
 #' # read in the Moral Foundations or LUSI dictionaries from urls
-#' moral_dict = read.dic('http://bit.ly/MoralFoundations2')
-#' lusi_dict = read.dic('http://bit.ly/lusi_dict')
+#' moral_dict = read.dic('https://osf.io/download/whjt2')
+#' lusi_dict = read.dic('https://www.depts.ttu.edu/psy/lusi/files/lusi_dict.txt')
 #'
 #' # save and read in a version of the General Inquirer dictionary
-#' inquirer = read.dic('inquirer')
+#' inquirer = read.dic('inquirer', dir = '~/Dictionaries')
 #' }
 #' @export
 
@@ -974,7 +986,7 @@ select.dict = function(query = NULL, dir = getOption('lingmatch.dict.dir'),
 #' @examples
 #' \dontrun{
 #'
-#' download.dict('lusi')
+#' download.dict('lusi', dir = '~/Dictionaries')
 #' }
 #' @export
 
@@ -1201,6 +1213,17 @@ standardize.lspace = function(infile, name, sep = ' ', digits = 9, dir = getOpti
 #' tempori = read.csv('https://wwbp.org/downloads/public_data/temporalOrientationLexicon.csv')
 #'
 #' lma_patcat(text, tempori)
+#'
+#' # or use the standardized version
+#' tempori_std = read.dic('wwbp_prospection', dir = '~/Dictionaries')
+#'
+#' lma_patcat(text, tempori_std)
+#'
+#' ## get scores on the same scale by adjusting the standardized values
+#' tempori_std[, -1] = tempori_std[, -1] / 100 *
+#'   select.dict('wwbp_prospection')$selected[, 'original_max']
+#'
+#' lma_patcat(text, tempori_std)[, unique(tempori$category)]
 #' }
 #' @export
 
@@ -1331,7 +1354,7 @@ lma_patcat = function(text, dict = NULL, pattern.weights = 'weight', pattern.cat
     wide = FALSE
     lex = data.frame(term = lex$term, category = if(length(lex$category) == 1) lex$category else 'all')
   }
-  if(is.null(bias)){
+  if(!return.dtm && is.null(bias)){
     if(!'intname' %in% names(name.map)) name.map[['intname']] = '_intercept'
     if(any(su <- lex$term == name.map[['intname']])){
       if(wide){

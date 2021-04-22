@@ -61,8 +61,9 @@ with original word counts.
 Reduces the dimensions of a document-term matrix by dictionary-based categorization.
 }
 \examples{
-# Score texts with the NRC Affect Intensity Lexicon
 \dontrun{
+
+# Score texts with the NRC Affect Intensity Lexicon
 
 dict = readLines('https://saifmohammad.com/WebDocs/NRC-AffectIntensity-Lexicon.txt')
 dict = read.table(
@@ -87,6 +88,12 @@ text = c(
 )
 
 emotion_scores = lma_termcat(text, dict)
+if(require('splot')) splot(emotion_scores ~ names(text), leg = 'out')
+
+## or use the standardized version (which includes more categories)
+
+emotion_scores = lma_termcat(text, 'nrc_eil', dir = '~/Dictionaries')
+emotion_scores = emotion_scores[, c('anger', 'fear', 'joy', 'sadness')]
 if(require('splot')) splot(emotion_scores ~ names(text), leg = 'out')
 }
 }
