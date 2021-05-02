@@ -328,7 +328,7 @@ div.tocify {
 </div>
 
 
-<p><em>Built with R 4.0.5 on April 14 2021</em></p>
+<p><em>Built with R 4.0.5 on May 02 2021</em></p>
 <hr />
 <p>These examples assume the lingmatch package is loaded:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&#39;lingmatch&#39;</span>)</span></code></pre></div>
@@ -356,7 +356,7 @@ div.tocify {
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># otherwise, enter just the columns you want a part of the comparison</span></span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>sims <span class="ot">=</span> <span class="fu">lingmatch</span>(data[, <span class="fu">c</span>(<span class="st">&#39;cat1&#39;</span>, <span class="st">&#39;cat2&#39;</span>, <span class="st">&#39;catn&#39;</span>)])<span class="sc">$</span>sim</span></code></pre></div>
-<p>Continue for more about <strong>loading text into R</strong>, <strong>processing texts</strong>, and <strong>measuring similarity</strong>, or see the <a href="https://miserman.github.io/lingmatch/#comparisons" target="_blank">comparisons guide</a> for more about defining comparisons.</p>
+<p>Continue for more about <strong>loading text into R</strong>, <strong>processing texts</strong>, and <strong>measuring similarity</strong>, or see the <a href="https://miserman.github.io/lingmatch/#comparisons" target="_blank" rel="nofollow">comparisons guide</a> for more about defining comparisons.</p>
 <div id="loading-your-texts" class="section level1">
 <h1>Loading your texts</h1>
 <p>You will need a path to the file containing your texts. You could…</p>
@@ -444,11 +444,11 @@ div.tocify {
 <p>Other structural features are <strong>function word categories</strong>, which would give a sense of how stylistically similar texts are:</p>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>function_cats <span class="ot">=</span> <span class="fu">lma_termcat</span>(texts, <span class="fu">lma_dict</span>())</span></code></pre></div>
 <p>To get at similarity in something like <strong>tone</strong>, you could use a sentiment dictionary:</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>sentiment <span class="ot">=</span> <span class="fu">lma_termcat</span>(texts, <span class="st">&#39;huliu&#39;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>sentiment <span class="ot">=</span> <span class="fu">lma_termcat</span>(texts, <span class="st">&#39;huliu&#39;</span>, <span class="at">dir =</span> <span class="st">&#39;~/Dictionaries&#39;</span>)</span></code></pre></div>
 <p>To get at similarity in <strong>overall meaning</strong>, you could use a content analysis focused dictionary like the General Inquirer:</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>inquirer_cats <span class="ot">=</span> <span class="fu">lma_termcat</span>(texts, <span class="st">&#39;inquirer&#39;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>inquirer_cats <span class="ot">=</span> <span class="fu">lma_termcat</span>(texts, <span class="st">&#39;inquirer&#39;</span>, <span class="at">dir =</span> <span class="st">&#39;~/Dictionaries&#39;</span>)</span></code></pre></div>
 <p>Or a set of embeddings:</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>glove_dimensions <span class="ot">=</span> <span class="fu">lma_lspace</span>(<span class="fu">lma_dtm</span>(texts), <span class="st">&#39;glove&#39;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>glove_dimensions <span class="ot">=</span> <span class="fu">lma_lspace</span>(<span class="fu">lma_dtm</span>(texts), <span class="st">&#39;glove&#39;</span>, <span class="at">dir =</span> <span class="st">&#39;~/Latent Semantic Spaces&#39;</span>)</span></code></pre></div>
 </div>
 <div id="measuring-matching" class="section level1">
 <h1>Measuring matching</h1>

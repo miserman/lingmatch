@@ -31,18 +31,18 @@ text = c(
 
 ## Manual Processing
 
-We'll be taking a 'bag of words' approach to this text, meaning we don't care about sentence structure or the like, so we'll want to standardize the texts and split them into words.
+We'll be taking a 'bag of words' approach to this text, which means standardizing and aggregating words for the sake of simplicity.
 
 The first step can be to convert all of the characters to lower case:
 ```{r}
-# we'll call the processed text words since it will eventually be single words
+# we'll name the processed text "words" since it will eventually be single words
 words = tolower(text)
 words[1]
 ```
 
-Just to simplify things, we can also just remove punctuation, which will involve some regular expression.
+Another standardizing step can be to remove punctuation, which will involve some regular expression.
 
-[Regular expression](https://en.wikipedia.org/wiki/Regular_expression) is a way to parse strings of characters in a refined way. Forms of regular expression are implemented in most programming languages. It can be tricky to think with, but offers a great deal of control when it comes to parsing text.
+[Regular expression](https://en.wikipedia.org/wiki/Regular_expression) is a refined way to parse strings of characters. Forms of regular expression are implemented in most programming languages. It can be tricky to think with, but offers a great deal of control when it comes to parsing text.
 
 We can use the gsub function to replace all of the characters we specify with nothing.
 ```{r}
@@ -236,7 +236,9 @@ wdtm = lma_weight(dtm)
 
 # Dimension Reduction
 
-A more thorough way to change the dtm space is by reducing its dimensions. This is effectively what LIWC (or any dictionary-based approach) does -- reducing the number of terms by combining them into categories:
+A more thorough way to change the dtm space is by reducing its dimensions. This is effectively what [LIWC](http://liwc.wpengine.com) (or any dictionary-based approach) does -- reducing the number of terms by combining them into categories.
+
+The default, internal dictionary (`?lma_dict`) contains function word categories:
 ```{r}
 rwdtm = lma_termcat(wdtm)
 rwdtm[, 1:6]
@@ -244,19 +246,22 @@ rwdtm[, 1:6]
 
 # Language Style Matching
 
-The way we've set things up allows us to look at the standard LSM calculation:
+The way we've set things up allows us to look at the standard Language Style Matching calculation:
 ```{r}
 lma_simets(rwdtm, 'canberra')
+
+# you could get the same thing from the lsm default
+lingmatch(text, type = 'lsm')$sim
 ```
 
-What makes language style matching "language style matching" is our choice of weighting, dimension reduction, and similarity metric.
+What makes language style matching "Language Style Matching" is our choice of weighting, dimension reduction, and similarity metric.
 
 # Latent Semantic Similarity
 For example, if we were to exclude function words, weight by term frequency - inverse document frequency, use a latent semantic space to reduce dimensions, and cosine similarity to measure matching, it would be "latent semantic similarity":
 ```{r}
 dtm = lma_dtm(text, 'function')
 wdtm = lma_weight(dtm, 'tf-idf')
-rwdtm = lma_lspace(wdtm, space = '100k')
+rwdtm = lma_lspace(wdtm, space = '100k', dir = '~/Latent Semantic Spaces')
 lma_simets(rwdtm, 'cosine')
 ```
 

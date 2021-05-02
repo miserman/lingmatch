@@ -52,7 +52,7 @@ sims = lingmatch(data[, c('cat1', 'cat2', 'catn')])$sim
 ```
 
 Continue for more about **loading text into R**, **processing texts**,
-and **measuring similarity**, or see the <a href='https://miserman.github.io/lingmatch/#comparisons' target='_blank'>comparisons guide</a> for more about defining comparisons.
+and **measuring similarity**, or see the <a href='https://miserman.github.io/lingmatch/#comparisons' target='_blank' rel='nofollow'>comparisons guide</a> for more about defining comparisons.
 
 # Loading your texts
 
@@ -172,18 +172,18 @@ function_cats = lma_termcat(texts, lma_dict())
 
 To get at similarity in something like **tone**, you could use a sentiment dictionary:
 ```r
-sentiment = lma_termcat(texts, 'huliu')
+sentiment = lma_termcat(texts, 'huliu', dir = '~/Dictionaries')
 ```
 
 To get at similarity in **overall meaning**, you could use a content analysis focused dictionary
 like the General Inquirer:
 ```r
-inquirer_cats = lma_termcat(texts, 'inquirer')
+inquirer_cats = lma_termcat(texts, 'inquirer', dir = '~/Dictionaries')
 ```
 
 Or a set of embeddings:
 ```r
-glove_dimensions = lma_lspace(lma_dtm(texts), 'glove')
+glove_dimensions = lma_lspace(lma_dtm(texts), 'glove', dir = '~/Latent Semantic Spaces')
 ```
 
 # Measuring matching

@@ -1,3 +1,8 @@
+# version 1.0.3
+
+## Bug Fixes
+* Fixes lma_dtm tokens.only when one text ends up empty.
+
 # version 1.0.2
 
 ## Features

@@ -43,15 +43,16 @@ test_that('emojis works', {
 test_that('tokens.only lines up', {
   words = vapply(seq_len(200), function(w)
     paste0(sample(letters, sample(9, 1)), collapse = ''), '')
-  texts = c(vapply(seq_len(9), function(d){
+  texts = c('a.a', vapply(seq_len(13), function(d){
     paste0(sample(words, sample(100, 1), TRUE), collapse = ' ')
-  }, ''), 'x.x')
+  }, ''), 'c.c')
   dtm = lma_dtm(texts)
   tokens = lma_dtm(texts, tokens.only = TRUE)
   expect_equal(texts, vapply(tokens$indices, function(inds)
     paste(names(tokens$tokens)[inds], collapse = ' '), ''))
   expect_equal(as.numeric(lma_dtm(tokens)), as.numeric(dtm))
-  dtm = lma_dtm(texts, lma_dict(), dc.min = 2, dc.max = 5)
-  tokens = lma_dtm(texts, lma_dict(), dc.min = 2, dc.max = 5, tokens.only = TRUE)
+  ex = c(lma_dict(), unique = c('a.a', 'c.c'))
+  dtm = lma_dtm(texts, ex, dc.min = 2, dc.max = 5)
+  tokens = lma_dtm(texts, ex, dc.min = 2, dc.max = 5, tokens.only = TRUE)
   expect_equal(as.numeric(lma_dtm(tokens)), as.numeric(dtm))
 })

@@ -860,7 +860,16 @@ lma_dtm = function(text, exclude = NULL, context = NULL, replace.special = TRUE,
     names(m) = c('tokens', 'frequencies', 'WC', 'indices')
     m$tokens = m$tokens + 1L
     m$tokens = sort(m$tokens)
-    m$indices = unname(split(m$indices + 1L, rep(seq_along(text), m$WC)))
+    # m$indices = unname(split(m$indices + 1L, rep(seq_along(text), m$WC)))
+    inds = vector('list', length(text))
+    l = 0
+    for(i in seq_along(inds)){
+      if(m$WC[i]){
+        inds[[i]] = m$indices[seq_len(m$WC[i]) + l] + 1L
+        l = l + m$WC[i]
+      }else inds[[i]] = integer()
+    }
+    m$indices = inds
     if(dc.min > 0 || dc.max < Inf){
       su = m$frequencies > dc.min & m$frequencies < dc.max
       if(any(!su)){

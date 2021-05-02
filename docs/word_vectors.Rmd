@@ -22,7 +22,7 @@ When loadings onto dimensions, sets of word vectors are sometimes called somethi
 
 ***
 # In-sample vectors
-The [introduction](index.html#introduction) mostly focused on the representation of documents as vectors within a common document-term space. With that same representation, we can focus on the term vectors instead. 
+The <a href='https://miserman.github.io/lingmatch/#introduction' target='_blank' rel='nofollow'>introduction</a> mostly focused on the representation of documents as vectors within a common document-term space. With that same representation, we can focus on the term vectors instead. 
 ```{r}
 library(splot)
 library(lingmatch)
@@ -73,7 +73,7 @@ lma_simets(ddm, 'canberra')
 # Pretrained vectors
 This is a very tidy and narrow example in terms of the texts and semantic space creation, but it illustrates the kind of co-occurrence information that is being used in more abstracted examples. To get appropriate co-occurrence information for a larger set of words, you need many and diverse observations of their use, which is why large corpora are usually used to train embeddings. The latent dimensions of general-use spaces are also not usually similarities to single seed words, but are instead optimized, such as by some form of matrix factorization or a neural network.
 
-Pretrained spaces like this are available on Open Science Framework ([osf.io/489he](https://osf.io/489he/wiki/home)), and will be downloaded if necessary when you run the functions that depend on them.
+Pretrained spaces like this are available on Open Science Framework ([osf.io/489he](https://osf.io/489he/wiki/home)), and will be downloaded if necessary when you run the functions that depend on them if you specify a directory or set the directory options (you can run `lma_initdirs('~')` to initialize the default locations).
 
 ## Embeddings-mapped similarity
 Similarity between documents that have been mapped to embeddings is sometimes called Latent Semantic Similarity [@landauer:1997] or Word Centroid (inverse) Distance [@kusner:2015]. Both of these measures have common parameter decisions associated with them.
@@ -83,7 +83,7 @@ For Latent Semantic Similarity, the Document-Term Matrix is usually initially we
 lingmatch(texts, type = 'lsa')$sim
 ```
 
-For Word Centroid Distance, a space usually also has stop words removed, but might then be frequency weighted (normalized), mapped to a word2vec space, and have distances measured by Euclidean distance (which is inverted here for similarity):
+For Word Centroid Distance, the DTM usually also has stop words removed, but might then be frequency weighted (normalized), mapped to a word2vec space, and have distances measured by Euclidean distance (which is inverted here for similarity):
 ```{r}
 lingmatch(
   texts, exclude = 'function', weight = 'freq',
@@ -91,7 +91,7 @@ lingmatch(
 )$sim
 ```
 
-These parameter decisions are often left unexamined, but have some potential to affect the ultimate characterization of the texts. One of `lingmatch`'s goals is to make some of these parameters easy to play with.
+These parameter decisions are often left unexamined, but have some potential to affect the ultimate characterization of the texts. One of `lingmatch`'s goals is to make some of these parameters easy to play with. See the <a href='https://miserman.github.io/lingmatch/#classification' rel='nofollow' target='_blank'>text classification vignette</a> for an example of this.
 
 ## Choosing a space
 
