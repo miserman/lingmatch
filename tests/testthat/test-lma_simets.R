@@ -43,6 +43,10 @@ test_that('many a to one b comparisons work', {
   expect_equal(as.numeric(as.matrix(sims_ab)), as.numeric(sims_m))
 })
 
+test_that('a vector to b matrix works', {
+  expect_equal(as.numeric(lma_simets(c(0, 1, 1), matrix(c(0, 0, 1, 1, 1, 0, 1, 1, 0), 3), 'cor')), c(1, 1, -1))
+})
+
 test_that('a row to b row comparisons work', {
   dtm = Matrix(rpois(200, .5), 4, sparse = TRUE)
   comp = Matrix(rpois(200, .5), 4, sparse = TRUE)

@@ -22,7 +22,7 @@ When loadings onto dimensions, sets of word vectors are sometimes called somethi
 
 ***
 # In-sample vectors
-The <a href='https://miserman.github.io/lingmatch/#introduction' target='_blank' rel='nofollow'>introduction</a> mostly focused on the representation of documents as vectors within a common document-term space. With that same representation, we can focus on the term vectors instead. 
+The <a href='https://miserman.github.io/lingmatch/#text_analysis' target='_blank' rel='nofollow'>introduction</a> mostly focused on the representation of documents as vectors within a common document-term space. With that same representation, we can focus on the term vectors instead. 
 ```{r}
 library(splot)
 library(lingmatch)
@@ -38,7 +38,7 @@ texts = c(
 Here, columns represent words in terms of their occurrence in 4 contexts (here, sentences), and rows provide co-occurrence information.
 
 ## Similarity-based latent dimensions
-Comparing word vectors can provide semantic information. For example, we can see which animals co-occur with different attribute:
+Comparing word vectors can provide semantic information. For example, we can see which animals co-occur with different attributes:
 ```{r, fig.height=4, fig.width=10, dev='CairoSVG'}
 # the t function transposes the document-term matrix
 # such that terms are in rows and documents in columns

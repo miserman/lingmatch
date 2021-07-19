@@ -309,12 +309,12 @@ div.tocify {
 
 <!-- setup 3col/9col grid for toc_float and main content  -->
 <div class="row">
-<div class="col-sm-12 col-md-4 col-lg-3">
+<div class="col-xs-12 col-sm-4 col-md-3">
 <div id="TOC" class="tocify">
 </div>
 </div>
 
-<div class="toc-content col-sm-12 col-md-8 col-lg-9">
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
 
 
 
@@ -328,7 +328,7 @@ div.tocify {
 </div>
 
 
-<p><em>Built with R 4.0.5 on May 02 2021</em></p>
+<p><em>Built with R 4.1.0 on July 19 2021</em></p>
 <hr />
 <p>These examples assume the lingmatch package is loaded:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&#39;lingmatch&#39;</span>)</span></code></pre></div>
@@ -337,10 +337,10 @@ div.tocify {
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>data <span class="ot">=</span> <span class="fu">lma_process</span>(texts)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># with a dictionary</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>data <span class="ot">=</span> <span class="fu">lma_process</span>(texts, <span class="at">dict =</span> <span class="st">&#39;inquirer&#39;</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>data <span class="ot">=</span> <span class="fu">lma_process</span>(texts, <span class="at">dict =</span> <span class="st">&#39;inquirer&#39;</span>, <span class="at">dir =</span> <span class="st">&#39;~/Dictionaries&#39;</span>)</span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># with a latent semantic space</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>data <span class="ot">=</span> <span class="fu">lma_process</span>(texts, <span class="at">space =</span> <span class="st">&#39;glove&#39;</span>)</span></code></pre></div>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>data <span class="ot">=</span> <span class="fu">lma_process</span>(texts, <span class="at">space =</span> <span class="st">&#39;glove&#39;</span>, <span class="at">dir =</span> <span class="st">&#39;~/Latent Semantic Spaces&#39;</span>)</span></code></pre></div>
 <p>Or, you can just <strong>calculate similarity</strong>:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># pairwise cosine similarity in terms of all words</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>sims <span class="ot">=</span> <span class="fu">lingmatch</span>(texts)<span class="sc">$</span>sim</span>
@@ -503,6 +503,9 @@ $(document).ready(function () {
 
 <script>
 $(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
 
     // move toc-ignore selectors from section div to header
     $('div.section.toc-ignore')

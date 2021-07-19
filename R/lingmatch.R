@@ -860,7 +860,6 @@ lma_dtm = function(text, exclude = NULL, context = NULL, replace.special = TRUE,
     names(m) = c('tokens', 'frequencies', 'WC', 'indices')
     m$tokens = m$tokens + 1L
     m$tokens = sort(m$tokens)
-    # m$indices = unname(split(m$indices + 1L, rep(seq_along(text), m$WC)))
     inds = vector('list', length(text))
     l = 0
     for(i in seq_along(inds)){
@@ -1967,7 +1966,7 @@ lma_simets=function(a, b = NULL, metric = NULL, group = NULL, lag = 0, agg = TRU
       if(is.data.frame(b)) b = Matrix(as.matrix(b), sparse = TRUE)
     bn = if(is.null(dim(b))) length(b) else dim(b)[1]
     if(lag && abs(lag) >= bn) lag = if(lag < 0) -bn + 1 else bn - 1
-    res = if((is.null(dim(a)) || any(dim(a) == 1)) && (length(a) == bn)){
+    res = if(is.null(dim(b)) && length(a) == bn && (is.null(dim(a)) || any(dim(a) == 1))){
       b = as.numeric(b)
       if(lag) b = if(lag < 0) c(b[-seq_len(-lag)], numeric(-lag)) else c(numeric(lag), b)[seq_len(bn)]
       vector_similarity(as.numeric(a), b, met$dummy)

@@ -24,10 +24,10 @@ If the **text you want to analyze** is already in R, you can process it:
 data = lma_process(texts)
 
 # with a dictionary
-data = lma_process(texts, dict = 'inquirer')
+data = lma_process(texts, dict = 'inquirer', dir = '~/Dictionaries')
 
 # with a latent semantic space
-data = lma_process(texts, space = 'glove')
+data = lma_process(texts, space = 'glove', dir = '~/Latent Semantic Spaces')
 ```
 
 Or, you can just **calculate similarity**:
