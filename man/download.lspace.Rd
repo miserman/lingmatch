@@ -41,6 +41,7 @@ Downloads the specified semantic space from \href{https://osf.io/489he}{osf.io/4
 \dontrun{
 
 download.lspace('glove_crawl', dir = '~/Latent Semantic Spaces')
+
 }
 }
 \seealso{

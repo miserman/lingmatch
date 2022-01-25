@@ -168,6 +168,9 @@ to_regex = function(dict, intext = FALSE){
 #' @param ... Passes arguments to \code{\link{readLines}}.
 #' @param term.name,category.name Strings identifying column names in \code{path} containing terms and categories
 #'   respectively.
+#' @param raw Logical or a character. As logical, indicates if \code{path} should be treated
+#'   as a raw dictionary (as might be read in from a .dic file). As a character, replaces \code{path}
+#'   as if it were read in from a file.
 #' @return \code{read.dic}: A \code{list} (unweighted) with an entry for each category containing
 #'   character vectors of terms, or a \code{data.frame} (weighted) with columns for terms (first, "term") and
 #'   weights (all subsequent, with category labels as names).
@@ -176,39 +179,45 @@ to_regex = function(dict, intext = FALSE){
 #' @export
 
 read.dic = function(path, cats, type = 'asis', as.weighted = FALSE, dir = getOption('lingmatch.dict.dir'), ...,
-  term.name = 'term', category.name = 'category'){
+  term.name = 'term', category.name = 'category', raw = FALSE){
   if(ckd <- dir == '') dir = '~/Dictionaries'
-  if(missing(path)) path = file.choose()
-  if(is.character(path) && !any(file.exists(path)) &&
-      any(file.exists(normalizePath(paste0(dir, '/', path), '/', FALSE))))
-    path = normalizePath(paste0(dir, '/', path), '/', FALSE)
-  if(is.character(path) && !any(file.exists(path))){
-    tp = select.dict(path, dir = if(ckd) '' else dir)
-    if(nrow(tp$selected) && length(path) <= nrow(tp$info)){
-      if(any(tp$selected$downloaded == '')){
-         td = rownames(tp$selected)[tp$selected$downloaded == '']
-         if(!ckd && grepl('^$|^[yt1]|^ent', readline(paste0(
-           'would you like to download ', if(length(td) == 1) 'this dictionary' else 'these dictionaries', '?:\n',
-           sub(',(?=[^,]+$)', if(length(td) == 2) ' and' else ', and', paste0(td, collapse = ', '), perl = TRUE),
-           '\n(press Enter for yes): '
-         )))) tp$selected[td, 'downloaded'] = unlist(download.dict(td, dir = dir), use.names = FALSE)
-      }
-      path = tp$selected[tp$selected[, 'downloaded'] != '', 'downloaded']
-      if(!length(path)) stop(
-        if(nrow(tp$selected) == 1) 'dictionary' else 'dictionaries', ' (',
-        paste(rownames(tp$selected), collapse = ', '), ') not found in dir (', dir, ')',
-        if(ckd) '\nspecify a directory (e.g., dir = "~") to locate or download; see ?download.dict',
-        call. = FALSE
-      )
-    }
+  if(!is.logical(raw)){
+    path = raw
+    raw = TRUE
   }
-  if(is.character(path) && length(path) > 1 && any(file.exists(path))){
-    dicts = list()
-    for(p in path) if(file.exists(p)){
-      name = gsub('^.*[/\\]+|\\.[^.]+$', '', p)
-      dicts[[name]] = read.dic(p)
+  if(missing(path)) path = file.choose()
+  if(!raw){
+    if(is.character(path) && !any(file.exists(path)) &&
+        any(file.exists(normalizePath(paste0(dir, '/', path), '/', FALSE))))
+      path = normalizePath(paste0(dir, '/', path), '/', FALSE)
+    if(is.character(path) && !any(file.exists(path))){
+      tp = select.dict(path, dir = if(ckd) '' else dir)
+      if(nrow(tp$selected) && length(path) <= nrow(tp$info)){
+        if(any(tp$selected$downloaded == '')){
+           td = rownames(tp$selected)[tp$selected$downloaded == '']
+           if(!ckd && grepl('^$|^[yt1]|^ent', readline(paste0(
+             'would you like to download ', if(length(td) == 1) 'this dictionary' else 'these dictionaries', '?:\n',
+             sub(',(?=[^,]+$)', if(length(td) == 2) ' and' else ', and', paste0(td, collapse = ', '), perl = TRUE),
+             '\n(press Enter for yes): '
+           )))) tp$selected[td, 'downloaded'] = unlist(download.dict(td, dir = dir), use.names = FALSE)
+        }
+        path = tp$selected[tp$selected[, 'downloaded'] != '', 'downloaded']
+        if(!length(path)) stop(
+          if(nrow(tp$selected) == 1) 'dictionary' else 'dictionaries', ' (',
+          paste(rownames(tp$selected), collapse = ', '), ') not found in dir (', dir, ')',
+          if(ckd) '\nspecify a directory (e.g., dir = "~") to locate or download; see ?download.dict',
+          call. = FALSE
+        )
+      }
     }
-    path = if(length(dicts) == 1) dicts[[1]] else dicts
+    if(is.character(path) && length(path) > 1 && any(file.exists(path))){
+      dicts = list()
+      for(p in path) if(file.exists(p)){
+        name = gsub('^.*[/\\]+|\\.[^.]+$', '', p)
+        dicts[[name]] = read.dic(p)
+      }
+      path = if(length(dicts) == 1) dicts[[1]] else dicts
+    }
   }
   if(!is.null(dim(path))){
     if(anyNA(path)) path[is.na(path)] = 0
@@ -379,7 +388,8 @@ read.dic = function(path, cats, type = 'asis', as.weighted = FALSE, dir = getOpt
       }
     }
   }else{
-    if(length(path) != 1){
+    if(raw || length(path) != 1){
+      if(length(path) == 1) path = strsplit(path, '\n')[[1]]
       di = path
     }else{
       di = tryCatch(readLines(path, warn = FALSE, ...), error = function(e) NULL)
@@ -442,10 +452,16 @@ read.dic = function(path, cats, type = 'asis', as.weighted = FALSE, dir = getOpt
 #' )
 #'
 #' # convert it to a weighted format
-#' dict_weighted = read.dic(dict, as.weighted = TRUE)
+#' (dict_weighted = read.dic(dict, as.weighted = TRUE))
 #'
 #' # categorize it back
 #' read.dic(dict_weighted)
+#'
+#' # convert it to a string without writing to a file
+#' (raw_dict = write.dic(dict, save = FALSE))
+#'
+#' # parse it back in
+#' read.dic(raw = raw_dict)
 #'
 #' \dontrun{
 #'
@@ -461,6 +477,7 @@ read.dic = function(path, cats, type = 'asis', as.weighted = FALSE, dir = getOpt
 #'
 #' # save and read in a version of the General Inquirer dictionary
 #' inquirer = read.dic('inquirer', dir = '~/Dictionaries')
+#'
 #' }
 #' @export
 
@@ -524,11 +541,11 @@ write.dic = function(dict, filename, type = 'asis', as.weighted = FALSE, save = 
 #' # split preloaded text
 #' read.segments('split this text into two segments', 2)
 #'
+#' \dontrun{
+#'
 #' # read in all files from the package directory
 #' texts = read.segments(path.package('lingmatch'), ext = '')
 #' texts[, -4]
-#'
-#' \dontrun{
 #'
 #' # segment .txt files in dir in a few ways:
 #' dir = 'path/to/files'
@@ -544,6 +561,7 @@ write.dic = function(dict, filename, type = 'asis', as.weighted = FALSE, save = 
 #'
 #' ## into 1 sentence segments
 #' texts_1sent = read.segments(dir, segment.size = 1, bysentence = TRUE)
+#'
 #' }
 #' @export
 
@@ -685,10 +703,10 @@ read.segments = function(path = '.', segment = NULL, ext = '.txt', subdir = FALS
 #' @family Latent Semantic Space functions
 #' @examples
 #' # just retrieve information about available spaces
-#' spaces = select.lspace()
+#' (spaces = select.lspace())
 #'
 #' # retrieve all spaces that used word2vec
-#' w2v_spaces = select.lspace('word2vec')$selected
+#' (w2v_spaces = select.lspace('word2vec')$selected)
 #'
 #' \dontrun{
 #'
@@ -696,6 +714,7 @@ read.segments = function(path = '.', segment = NULL, ext = '.txt', subdir = FALS
 #' select.lspace(c(
 #'   'part-time', 'i/o', "'cause", 'brexit', 'debuffs'
 #' ))$selected[, c('terms', 'coverage')]
+#'
 #' }
 #' @export
 
@@ -783,6 +802,7 @@ select.lspace = function(query = NULL, dir = getOption('lingmatch.lspace.dir'),
 #' \dontrun{
 #'
 #' download.lspace('glove_crawl', dir = '~/Latent Semantic Spaces')
+#'
 #' }
 #' @export
 #' @importFrom utils download.file
@@ -941,10 +961,10 @@ download.lspace = function(space = '100k_lsa', include.terms = TRUE, decompress 
 #' @family Dictionary functions
 #' @examples
 #' # just retrieve information about available dictionaries
-#' dicts = select.dict()$info
+#' (dicts = select.dict()$info)
 #'
 #' # select all dictionaries mentioning sentiment or emotion
-#' sentiment_dicts = select.dict('sentiment emotion')$selected
+#' (sentiment_dicts = select.dict('sentiment emotion')$selected)
 #' @export
 
 select.dict = function(query = NULL, dir = getOption('lingmatch.dict.dir'),
@@ -987,6 +1007,7 @@ select.dict = function(query = NULL, dir = getOption('lingmatch.dict.dir'),
 #' \dontrun{
 #'
 #' download.dict('lusi', dir = '~/Dictionaries')
+#'
 #' }
 #' @export
 
@@ -1210,7 +1231,9 @@ standardize.lspace = function(infile, name, sep = ' ', digits = 9, dir = getOpti
 #' \dontrun{
 #'
 #' # read in the temporal orientation lexicon from the World Well-Being Project
-#' tempori = read.csv('https://wwbp.org/downloads/public_data/temporalOrientationLexicon.csv')
+#' tempori = read.csv(
+#'   'https://wwbp.org/downloads/public_data/temporalOrientationLexicon.csv'
+#' )
 #'
 #' lma_patcat(text, tempori)
 #'
@@ -1224,6 +1247,7 @@ standardize.lspace = function(infile, name, sep = ' ', digits = 9, dir = getOpti
 #'   select.dict('wwbp_prospection')$selected[, 'original_max']
 #'
 #' lma_patcat(text, tempori_std)[, unique(tempori$category)]
+#'
 #' }
 #' @export
 
@@ -1464,7 +1488,17 @@ lma_patcat = function(text, dict = NULL, pattern.weights = 'weight', pattern.cat
 #'     \item \strong{\code{orgmarks}}: Number of characters used for organization or structuring (including
 #'       dashes, foreword slashes, colons, and semicolons).
 #'   }
-#'
+#' @examples
+#' text = c(
+#'   succinct = "It is here.",
+#'   verbose = "Hear me now. I shall tell you about it. It is here. Do you hear?",
+#'   couched = "I might be wrong, but it seems to me that it might be here.",
+#'   bigwords = "Object located thither.",
+#'   excited = "It's there! It's there! It's there!",
+#'   drippy = "It's 'there', right? Not 'here'? 'there'? Are you Sure?",
+#'   struggly = "It's here -- in that place where it is. Like... the 1st place (here)."
+#' )
+#' lma_meta(text)
 #' @export
 
 lma_meta = function(text){
@@ -1829,6 +1863,7 @@ lma_dict = function(..., as.regex = TRUE, as.function = FALSE){
 #' # create just a dictionaries directory and set the
 #' # lingmatch.dict.dir option without creating a link
 #' lma_initdirs(dict = 'z:/external_dictionaries', link = FALSE)
+#'
 #' }
 #' @export
 

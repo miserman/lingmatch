@@ -87,6 +87,7 @@ test_that('read/write.dic works', {
   expect_true(all(vapply(read.dic(file_dic, type = 'term'), function(cat){
     sum(grepl(paste(cat, collapse = '|'), unlist(dict))) >= length(cat)
   }, TRUE)))
+  expect_identical(read.dic(raw = write.dic(dict, save = FALSE)), dict)
   dict_weighted = read.dic(dict, as.weighted = TRUE)
   write.dic(dict_weighted, file_csv)
   expect_equal(read.dic(file_csv), dict_weighted)

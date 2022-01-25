@@ -1,0 +1,214 @@
+---
+title: "Lingmatch Quick Start"
+output: rmarkdown::html_document
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+*Built with R 
+`r getRversion()`
+on 
+`r format(Sys.time(),'%B %d %Y')`*
+
+***
+
+These examples assume the lingmatch package is loaded:
+```r
+library('lingmatch')
+```
+
+If the **text you want to analyze** is already in R, you can process it:
+```r
+# individual words
+data = lma_process(texts)
+
+# with a dictionary
+data = lma_process(texts, dict = 'inquirer', dir = '~/Dictionaries')
+
+# with a latent semantic space
+data = lma_process(texts, space = 'glove', dir = '~/Latent Semantic Spaces')
+```
+
+Or, you can just **calculate similarity**:
+```r
+# pairwise cosine similarity in terms of all words
+sims = lingmatch(texts)$sim
+
+# pairwise Canberra similarity in terms of function word categories
+sims = lingmatch(texts, type = 'lsm')$sim
+
+# pairwise cosine similarity in terms of latent semantic space dimensions
+sims = lingmatch(texts, type = 'lss')$sim
+```
+
+Or, if you have **processed data** (such as LIWC output), you can enter that:
+```r
+# if all dictionary categories are found in the input, only those variables
+# will be used
+sims = lingmatch(data, dict = 'function')$sim
+
+# otherwise, enter just the columns you want a part of the comparison
+sims = lingmatch(data[, c('cat1', 'cat2', 'catn')])$sim
+```
+
+Continue for more about **loading text into R**, **processing texts**,
+and **measuring similarity**, or see the <a href='https://miserman.github.io/lingmatch/#comparisons' target='_blank' rel='nofollow'>comparisons guide</a> for more about defining comparisons.
+
+# Loading your texts
+
+You will need a path to the file containing your texts. You could...
+
+* Select interactively with `file.choose()`, which returns the path.
+* Give the full path (you can use `/` or `\\` as separators), e.g.,
+  + Windows: `'c:/users/name/documents/texts.txt'`
+  + Linux: `'/home/Name/Documents/texts.txt'`
+  + Mac: `'/users/name/documents/texts.txt'`
+* Give a relative path (use `normalizePath('example')` to see the full path):
+  + with a tilde (see what that starts at with `path.expand('~')`), e.g., `'~/texts.txt'`
+  + from the working directory (see what that is with `getwd()`, set it with `setwd()`), e.g., `'texts.txt'`
+  + from the parent of the working directory, e.g., `'../texts.txt'`
+
+In the following examples, just the relative path to the file will be shown. This would be like if you set the working
+directory to the folder containing the files.
+
+## From plain-text files
+
+When there is one entry per line:
+```r
+texts = readLines('texts.txt')
+```
+
+When you want to segment a single file:
+```r
+# with multiple lines between entries
+segs = read.segments('texts.txt')
+
+# into 5 even segments
+segs = read.segments('texts.txt', 5)
+
+# into 100 word chunks
+segs = read.segments('texts.txt', segment.size = 100)
+
+# then get texts from segs
+texts = segs$text
+```
+
+When you want to read in multiple files from a folder:
+```r
+texts = read.segments('foldername')$text
+```
+
+When your files are just text, you could also enter the path into lingmatch functions, without first loading them:
+```r
+results = lingmatch('texts.txt')
+```
+
+## From a delimited plain-text file
+
+When texts are in a column of a spreadsheet, stored in a plain-text file:
+```r
+# comma delimited
+data = read.csv('data.csv')
+
+# tab delimited (sometimes with extension .tsv)
+data = read.delim('data.txt')
+
+# Other delimiters; define with the sep argument.
+# might also need to change the quote or other arguments
+# depending on your file's format
+data = read.delim('data.txt', sep = 'delimiting character')
+
+# then get texts from data
+texts = data$name_of_text_column
+```
+
+## From a Microsoft Office file
+
+Install and load the `readtext` package:
+```r
+install.packages('readtext')
+library('readtext')
+```
+
+From a .doc or .docx file:
+```r
+texts = readtext('texts.docx')$text
+
+# this returns all lines in one, so you could
+# use read.segments to split them up if needed
+texts = read.segments(texts)$text
+```
+From a .xls or .xlsx file:
+```r
+texts = readtext('data.xlsx')$name_of_text_column
+```
+# Processing text
+
+Processing texts represents them numerically, and this representation defines matching between them.
+
+For example, matching between **structural features** (e.g., number of words and their average length) gives a sense
+of how similar the text itself is between texts:
+```r
+structural_features = lma_meta(texts)
+```
+
+You could also look at exact matching between **words** by making a document-term matrix:
+```r
+# all words
+dtm = lma_dtm(texts)
+
+# excluding stop words (function words) and rare words (those appearing in
+# fewer than 3 texts)
+dtm = lma_dtm(texts, exclude = 'function', dc.min = 2)
+```
+
+The raw texts in the next examples are processed with the `lma_dtm` function, using its defaults, but you could also
+enter a document-term matrix in place of texts, processed separately as in the previous examples.
+
+Other structural features are **function word categories**, which would give a sense of how stylistically
+similar texts are:
+```r
+function_cats = lma_termcat(texts, lma_dict())
+```
+
+To get at similarity in something like **tone**, you could use a sentiment dictionary:
+```r
+sentiment = lma_termcat(texts, 'huliu', dir = '~/Dictionaries')
+```
+
+To get at similarity in **overall meaning**, you could use a content analysis focused dictionary
+like the General Inquirer:
+```r
+inquirer_cats = lma_termcat(texts, 'inquirer', dir = '~/Dictionaries')
+```
+
+Or a set of embeddings:
+```r
+glove_dimensions = lma_lspace(
+  lma_dtm(texts), 'glove', dir = '~/Latent Semantic Spaces'
+)
+```
+
+# Measuring matching
+
+Once you have processed texts, you can measure matching between them.
+
+You could calculate similarity between each of them with different metrics:
+```r
+# Inverse Canberra distance
+can_sims = lma_simets(function_cats, metric = 'canberra')
+
+# Cosine similarity
+cos_sims = lma_simets(function_cats, metric = 'cosine')
+```
+
+Or between each text and the average across texts, with all available metrics:
+```r
+sims_to_mean = lma_simets(function_cats, colMeans(function_cats))
+```
+
+Or just between the first and second text:
+```r
+lma_simets(function_cats[1,], function_cats[2,])
+```

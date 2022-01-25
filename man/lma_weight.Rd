@@ -56,11 +56,11 @@ lma_weight(dtm, weight = "count", normalize = TRUE, wc.complete = TRUE,
     Poisson-predicted term density.
 
     \item \strong{\code{dfmlog}} \cr
-    \code{log(diag(dtm[max.col(t(dtm)),]), log.base)} \cr
+    \code{log(diag(dtm[max.col(t(dtm)), ]), log.base)} \cr
     Log of maximum term frequency.
 
     \item \strong{\code{dfmax}} \cr
-    \code{diag(dtm[max.col(t(dtm)),])} \cr
+    \code{diag(dtm[max.col(t(dtm)), ])} \cr
     Maximum term frequency.
 
     \item \strong{\code{df}} \cr

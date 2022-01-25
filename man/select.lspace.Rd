@@ -58,10 +58,10 @@ and optionally download their term mappings (\href{https://osf.io/xr7jv}{osf.io/
 }
 \examples{
 # just retrieve information about available spaces
-spaces = select.lspace()
+(spaces = select.lspace())
 
 # retrieve all spaces that used word2vec
-w2v_spaces = select.lspace('word2vec')$selected
+(w2v_spaces = select.lspace('word2vec')$selected)
 
 \dontrun{
 
@@ -69,6 +69,7 @@ w2v_spaces = select.lspace('word2vec')$selected
 select.lspace(c(
   'part-time', 'i/o', "'cause", 'brexit', 'debuffs'
 ))$selected[, c('terms', 'coverage')]
+
 }
 }
 \seealso{

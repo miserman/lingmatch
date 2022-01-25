@@ -44,5 +44,6 @@ lma_initdirs('~/NLP_Resources', 'Dicts', 'Dicts/Embeddings')
 # create just a dictionaries directory and set the
 # lingmatch.dict.dir option without creating a link
 lma_initdirs(dict = 'z:/external_dictionaries', link = FALSE)
+
 }
 }

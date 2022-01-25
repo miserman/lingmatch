@@ -10,11 +10,11 @@ An all-in-one R package for the assessment of linguistic matching and/or accommo
 
 ## resources
 * Documentation and guides: [miserman.github.io/lingmatch](https://miserman.github.io/lingmatch/)
-  * [Quick start](https://miserman.github.io/lingmatch/#quick_start)
-  * [Comparisons](https://miserman.github.io/lingmatch/#comparisons)
-  * [Introduction to text analysis](https://miserman.github.io/lingmatch/#text_analysis)
-  * [Text Classification](https://miserman.github.io/lingmatch/#classification)
-  * [Word vectors](https://miserman.github.io/lingmatch/#word_vectors)
+  * [Quick start](https://miserman.github.io/lingmatch/articles/quickstart.html)
+  * [Comparisons](https://miserman.github.io/lingmatch/articles/groups.html)
+  * [Introduction to text analysis](https://miserman.github.io/lingmatch/articles/introduction.html)
+  * [Word vectors](https://miserman.github.io/lingmatch/articles/word_vectors.html)
+  * [Text Classification](https://miserman.github.io/lingmatch/articles/text_classification.html)
 * Dictionary repository: [osf.io/y6g5b](https://osf.io/y6g5b/wiki/home/)
 * Latent semantic space repository: [osf.io/489he](https://osf.io/489he/wiki/home/)
 
@@ -27,7 +27,7 @@ install.packages('lingmatch')
 ```
 Development (version 1.0.3)
 ```R
-install.packages('remotes')
+# install.packages('remotes')
 remotes::install_github('miserman/lingmatch')
 ```
 

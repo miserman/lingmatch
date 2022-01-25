@@ -7,7 +7,7 @@
 \usage{
 read.dic(path, cats, type = "asis", as.weighted = FALSE,
   dir = getOption("lingmatch.dict.dir"), ..., term.name = "term",
-  category.name = "category")
+  category.name = "category", raw = FALSE)
 
 write.dic(dict, filename, type = "asis", as.weighted = FALSE, save = TRUE)
 }
@@ -37,6 +37,10 @@ passed to \code{\link{select.dict}} and/or \code{\link{download.dict}}.}
 \item{term.name, category.name}{Strings identifying column names in \code{path} containing terms and categories
 respectively.}
 
+\item{raw}{Logical or a character. As logical, indicates if \code{path} should be treated
+as a raw dictionary (as might be read in from a .dic file). As a character, replaces \code{path}
+as if it were read in from a file.}
+
 \item{dict}{A \code{list} with a named entry of terms for each category, or a \code{data.frame}
 with terms in one column, and categories or weights in the rest.}
 
@@ -64,10 +68,16 @@ dict = list(
 )
 
 # convert it to a weighted format
-dict_weighted = read.dic(dict, as.weighted = TRUE)
+(dict_weighted = read.dic(dict, as.weighted = TRUE))
 
 # categorize it back
 read.dic(dict_weighted)
+
+# convert it to a string without writing to a file
+(raw_dict = write.dic(dict, save = FALSE))
+
+# parse it back in
+read.dic(raw = raw_dict)
 
 \dontrun{
 
@@ -83,6 +93,7 @@ lusi_dict = read.dic('https://www.depts.ttu.edu/psy/lusi/files/lusi_dict.txt')
 
 # save and read in a version of the General Inquirer dictionary
 inquirer = read.dic('inquirer', dir = '~/Dictionaries')
+
 }
 }
 \seealso{

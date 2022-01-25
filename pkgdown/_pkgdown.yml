@@ -1,0 +1,77 @@
+template:
+  bootswatch: cyborg
+  theme: arrow-dark
+  bootstrap: 5
+  bslib:
+    bg: "#000"
+    fg: "#c3c3c3"
+    link-color: "#fff"
+    navbar-dark-active-color: "#fff !important"
+    border-color: "#3e3e3e"
+    dropdown-header-color: "#fff"
+
+navbar:
+  structure:
+    left: [reference, news, articles]
+    right: [github]
+  components:
+    articles:
+      text: Articles
+      menu:
+      - text: Guides
+      - text: Quick Start
+        href: articles/quickstart.html
+      - text: Group Comparisons
+        href: articles/groups.html
+      - text: -------
+      - text: Introductions
+      - text: Text Analysis
+        href: articles/introduction.html
+      - text: Word Vectors
+        href: articles/word_vectors.html
+      - text: Text Classification
+        href: articles/text_classification.html
+
+home:
+  sidebar:
+    structure: links
+  links:
+  - text: Test Coverage
+    href: coverage.html
+
+reference:
+  - title: Top-Level Functions
+    desc: These are entry-level functions that try to be easy to use by automating things.
+  - contents:
+    - lingmatch
+    - lma_process
+    - lma_meta
+
+  - title: Component Functions
+    desc: These are the build blocks of the top-level functions.
+  - contents:
+    - lma_dtm
+    - lma_weight
+    - lma_lspace
+    - lma_termcat
+    - lma_patcat
+    - lma_simets
+
+  - title: Utilities
+    desc: These help prepare your environment are data if needed, or do additional analysis.
+  - contents:
+    - starts_with('read')
+    - lma_initdirs
+    - lma_dict
+    - select.dict
+    - download.dict
+    - select.lspace
+    - download.lspace
+    - standardize.lspace
+
+footer:
+  structure:
+    left: none
+    right: none
+  components:
+    none: ""

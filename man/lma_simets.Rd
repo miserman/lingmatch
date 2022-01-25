@@ -31,7 +31,7 @@ or a number or vector of numbers indicating the metric by index:
 comparisons between rows of \code{a}, as modified by \code{agg} and \code{agg.mean}.}
 
 \item{lag}{Amount to adjust the \code{b} index; either rows if \code{b} has multiple rows (e.g.,
-for \code{lag = 1}, \code{a[1,]} is compared with \code{b[2,]}), or values otherwise (e.g.,
+for \code{lag = 1}, \code{a[1, ]} is compared with \code{b[2, ]}), or values otherwise (e.g.,
 for \code{lag = 1}, \code{a[1]} is compared with \code{b[2]}). If \code{b} is not supplied,
 \code{b} is a copy of \code{a}, resulting in lagged self-comparisons or autocorrelations.}
 

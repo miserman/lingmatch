@@ -66,20 +66,29 @@ value decomposition of a dtm (\code{svd(dtm)$v[, 1:k]}, where \code{k} is the se
 dimensions, decided here by \code{dim.cutoff}).
 
 Mapping a new dtm into a latent semantic space consists of multiplying common terms:
-\code{dtm[, ct]} \code{\%*\% space[ct,]}, where \code{ct} \code{=} \code{colnames(dtm)[colnames(dtm)}
+\code{dtm[, ct]} \code{\%*\% space[ct, ]}, where \code{ct} \code{=} \code{colnames(dtm)[colnames(dtm)}
 \code{\%in\%} \code{rownames(space)]} -- the terms common between the dtm and the space. This
 results in a matrix with documents as rows, and dimensions as columns, replacing terms.
 }
 \examples{
-
 text = c(
-  "Hey, I like kittens. I think all kinds of cats really are just the best pet ever.",
-  "Oh year? Well I really like cars. All the wheels and the turbos... I think that's the best
-    ever.",
-  "You know what? Poo on you. Cats, dogs, rabbits -- you know, living creatures... to think
-    you'd care about anything else!",
-  "You can stick to your opinion. You can be wrong if you want. You know what life's about?
-    Supercharging, diesel guzzling, exhaust spewing, piston moving ignitions."
+  paste(
+    "Hey, I like kittens. I think all kinds of cats really are just the",
+    "best pet ever."
+  ),
+  paste(
+    "Oh year? Well I really like cars. All the wheels and the turbos...",
+    "I think that's the best ever."
+  ),
+  paste(
+    "You know what? Poo on you. Cats, dogs, rabbits -- you know, living",
+    "creatures... to think you'd care about anything else!"
+  ),
+  paste(
+    "You can stick to your opinion. You can be wrong if you want. You know",
+    "what life's about? Supercharging, diesel guzzling, exhaust spewing,",
+    "piston moving ignitions."
+  )
 )
 
 dtm = lma_dtm(text)

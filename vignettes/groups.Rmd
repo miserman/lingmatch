@@ -1,0 +1,146 @@
+---
+title: "Specifying comparisons and groups in lingmatch"
+output: rmarkdown::html_document
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+This example demonstrates a few ways to specify comparisons and groups in lingmatch.
+
+*Built with R 
+`r getRversion()`
+on 
+`r format(Sys.time(),'%B %d %Y')`*
+
+***
+# Setup
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  dev = "CairoSVG",
+  fig.ext = "svg"
+)
+library(lingmatch)
+```
+
+We'll generate some word category output, in a sort of experimental design that allows for all available comparison types: 
+
+Imagine in two studies we paired up participants, then had them have a series of interactions after reading one of a set of prompts:
+```{r}
+# load lingmatch
+library('lingmatch')
+
+# first, we have simple representations (function word category use frequencies)
+# of our prompts (3 prompts per study):
+prompts = data.frame(
+  study = rep(paste('study', 1:2), each = 3),
+  prompt = rep(paste('prompt', 1:3), 2),
+  matrix(rnorm(3 * 2 * 7, 10, 4), 3 * 2, dimnames = list(NULL, names(lma_dict(1:7))))
+)
+prompts[1:5, 1:8]
+
+# then, the same representation of the language the participants produced:
+data = data.frame(
+  study = sort(sample(paste('study', 1:2), 100, TRUE)),
+  pair = sort(sample(paste('pair', formatC(1:20, width = 2, flag = 0)), 100, TRUE)),
+  prompt = sample(paste('prompt', 1:3), 100, TRUE),
+  speaker = sample(c('a', 'b'), 100, TRUE),
+  matrix(rnorm(100 * 7, 10, 4), 100, dimnames = list(NULL, colnames(prompts)[-(1:2)]))
+)
+data[1:5, 1:8]
+```
+
+# Matching with a standard
+
+## Sample means
+Compare each row (here representing a turn in an conversation) with the sample's mean:
+```{r}
+# the `lsm` (Language Style Matching) type specifies the columns to consider,
+# and the metric to use (Canberra similarity)
+lsm_mean = lingmatch(data, mean, type = 'lsm')
+
+# look at comparison information
+lsm_mean[c('comp.type', 'comp')]
+
+# and maybe the average similarity score
+mean(lsm_mean$sim)
+```
+
+This could be considered a baseline for the sample.
+
+## Stored means
+These LSM categories have some standard means stored internally, as found in the [LIWC manual](https://liwc.wpengine.com/wp-content/uploads/2015/11/LIWC2015_LanguageManual.pdf).
+```{r}
+# compare with means from a set of tweets
+lsm_twitter = lingmatch(data, 'twitter', type = 'lsm')
+lsm_twitter[c('comp.type', 'comp')]
+mean(lsm_twitter$sim)
+
+# or the means of the set that is most similar to the current set
+lsm_auto = lingmatch(data, 'auto', type = 'lsm')
+lsm_auto[c('comp.type', 'comp')]
+mean(lsm_auto$sim)
+```
+
+## External means
+If you have another set of data, you can also use its means as the comparison:
+```{r}
+lsm_prmed = lingmatch(data, colMeans(prompts[, -(1:2)]), type = 'lsm')
+lsm_prmed[c('comp.type', 'comp')]
+mean(lsm_prmed$sim)
+```
+
+
+## Group means
+You can also compare to means within groups. Here, studies might be considered groups:
+```{r}
+lsm_topics = lingmatch(data, group = study, type = 'lsm')
+lsm_topics[c('comp.type', 'comp')]
+tapply(lsm_topics$sim[, 2], lsm_topics$sim[, 1], mean)
+```
+
+This type of group variable is just splitting the data, and performing the same comparisons within splits.
+
+# Matching with other texts
+
+The previous comparisons were all with standards, where the LSM score could be interpreted as indicating a more or less
+generic language style (as defined by the comparison and grouping).
+
+## Condition ID
+Here, prompts constitute our experimental conditions. We have 3 unique prompt IDs, but 6 unique prompts, since each study had its own set, so we need the study and prompt ID to appropriately match prompts:
+```{r}
+lsm = lingmatch(data, prompts, group = c('study', 'prompt'), type = 'lsm')
+lsm$comp.type
+lsm$comp[, 1:6]
+lsm$sim[1:10,]
+```
+
+Here, the `group` argument is just pasting together the included variables, and using the resulting string to identify a single comparison for each text (acting as a condition ID).
+
+## Participant ID
+Similarly, participants are only uniquely identified by pair ID and speaker ID (though this could just as well be a single column with unique IDs).
+```{r}
+interlsm = lingmatch(data, group = c('pair', 'speaker'), type = 'lsm')
+interlsm$comp[1:10,]
+interlsm$sim[1:10,]
+```
+
+# Matching in sequence
+Since participants are having interactions in sequence, we might compare each turn in sequence. The last entry in the `group` argument specifies the speaker:
+```{r}
+seqlsm = lingmatch(data, 'seq', group = c('pair', 'speaker'), type = 'lsm')
+seqlsm$sim[1:10,]
+```
+The rownames of `sim` show the row numbers that are being compared, with some being aggregated if the same speaker takes multiple turns in a row. You could also just compare edges by adding `agg = FALSE`:
+```{r}
+lingmatch(
+  data, 'seq', group = c('pair', 'speaker'), type = 'lsm', agg = FALSE
+)$sim[1:10,]
+```
+***
+<div style='text-align:center'>
+![Brought to you by the <a href="https://www.depts.ttu.edu/psy/lusi/resources.php" target="_blank">Language Use and Social Interaction</a> lab at Texas Tech University](https://www.depts.ttu.edu/psy/lusi/files/lusi_transp.png)
+</div>

@@ -1,0 +1,11 @@
+pandoc: 2.14.0.3
+pkgdown: 2.0.2
+pkgdown_sha: ~
+articles:
+  groups: groups.html
+  introduction: introduction.html
+  quickstart: quickstart.html
+  text_classification: text_classification.html
+  word_vectors: word_vectors.html
+last_built: 2022-01-25T08:08Z
+

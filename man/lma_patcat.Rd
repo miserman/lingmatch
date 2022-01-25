@@ -106,7 +106,9 @@ lma_patcat(
 \dontrun{
 
 # read in the temporal orientation lexicon from the World Well-Being Project
-tempori = read.csv('https://wwbp.org/downloads/public_data/temporalOrientationLexicon.csv')
+tempori = read.csv(
+  'https://wwbp.org/downloads/public_data/temporalOrientationLexicon.csv'
+)
 
 lma_patcat(text, tempori)
 
@@ -120,6 +122,7 @@ tempori_std[, -1] = tempori_std[, -1] / 100 *
   select.dict('wwbp_prospection')$selected[, 'original_max']
 
 lma_patcat(text, tempori_std)[, unique(tempori$category)]
+
 }
 }
 \seealso{

@@ -29,7 +29,7 @@ or path to a file (.txt or .csv, with texts separated by one or more lines/rows)
   \item If a \strong{vector}, either (a) logical or factor-like (having n levels < length) and of the same length as
     \code{nrow(input)}, or (b) numeric or logical of length less than \code{nrow(input)}, this will be used to
     select a subset of \code{input} (e.g., \code{comp = 1:10} would treat the first 10 rows of \code{input} as the
-    comparison; \code{comp = type=='prompt'} would make a logical vector identifying prompts, assuming "type" was
+    comparison; \code{comp = type == 'prompt'} would make a logical vector identifying prompts, assuming "type" was
     the name of a column in \code{data}, or a variable in the global environment, and the value "prompt" marked the
     prompts).
   \item If a \strong{matrix-like object} (having multiple rows and columns), or a named vector, this will
@@ -38,7 +38,7 @@ or path to a file (.txt or .csv, with texts separated by one or more lines/rows)
 }}
 
 \item{data}{A matrix-like object as a reference for column names, if variables are referred to in
-other arguments (e.g., \code{lingmatch(text, data=data)} would be the same as
+other arguments (e.g., \code{lingmatch(text, data = data)} would be the same as
 \code{lingmatch(data$text)}.}
 
 \item{group}{A logical or factor-like vector the same length as \code{NROW(input)}, used to defined
@@ -66,8 +66,8 @@ Comparisons section.}
 \item{type}{A character at least partially matching 'lsm' or 'lsa'; applies default settings
 aligning with the standard calculations of each type:
 \tabular{ll}{
-  LSM \tab \code{lingmatch(text, weight='freq', dict=lma_dict(1:9), metric='canberra')}\cr
-  LSA \tab \code{lingmatch(text, weight='tfidf', space='100k_lsa', metric='cosine')}\cr
+  LSM \tab \code{lingmatch(text, weight = 'freq', dict = lma_dict(1:9), metric = 'canberra')}\cr
+  LSA \tab \code{lingmatch(text, weight = 'tfidf', space = '100k_lsa', metric = 'cosine')}\cr
 }}
 }
 \value{

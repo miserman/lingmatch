@@ -102,10 +102,10 @@ Retrieve information and links to dictionaries
 }
 \examples{
 # just retrieve information about available dictionaries
-dicts = select.dict()$info
+(dicts = select.dict()$info)
 
 # select all dictionaries mentioning sentiment or emotion
-sentiment_dicts = select.dict('sentiment emotion')$selected
+(sentiment_dicts = select.dict('sentiment emotion')$selected)
 }
 \seealso{
 Other Dictionary functions: 

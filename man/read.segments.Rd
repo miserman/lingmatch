@@ -46,11 +46,11 @@ Split texts by word count or specific characters. Input texts directly, or read 
 # split preloaded text
 read.segments('split this text into two segments', 2)
 
+\dontrun{
+
 # read in all files from the package directory
 texts = read.segments(path.package('lingmatch'), ext = '')
 texts[, -4]
-
-\dontrun{
 
 # segment .txt files in dir in a few ways:
 dir = 'path/to/files'
@@ -66,5 +66,6 @@ texts_50words = read.segments(dir, segment.size = 50)
 
 ## into 1 sentence segments
 texts_1sent = read.segments(dir, segment.size = 1, bysentence = TRUE)
+
 }
 }

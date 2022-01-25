@@ -49,3 +49,15 @@ A data.frame:
 \description{
 Calculate simple descriptive statistics from text.
 }
+\examples{
+text = c(
+  succinct = "It is here.",
+  verbose = "Hear me now. I shall tell you about it. It is here. Do you hear?",
+  couched = "I might be wrong, but it seems to me that it might be here.",
+  bigwords = "Object located thither.",
+  excited = "It's there! It's there! It's there!",
+  drippy = "It's 'there', right? Not 'here'? 'there'? Are you Sure?",
+  struggly = "It's here -- in that place where it is. Like... the 1st place (here)."
+)
+lma_meta(text)
+}
