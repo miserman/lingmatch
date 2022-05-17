@@ -178,6 +178,7 @@ term_weights = c('binary', 'log', 'sqrt', 'count', 'amplify')
 Weighted = sapply(term_weights, function(w) lma_weight(1:20, w, FALSE))
 
 # plot weighted ~ raw term frequencies
+## note that dark = TRUE makes the text white, so you might need to remove it
 splot(Weighted ~ 1:20, labx = 'Raw Count', lines = 'connected', dark = TRUE)
 ```
 

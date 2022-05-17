@@ -87,12 +87,13 @@
 
     
     
-<p><em>Built with R 4.1.2 on January 25 2022</em></p>
+<p><em>Built with R 4.2.0 on May 17 2022</em></p>
 <hr>
 <p>These examples assume the lingmatch package is loaded:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/miserman/lingmatch" class="external-link">'lingmatch'</a></span><span class="op">)</span></code></pre></div>
-<p>If the <strong>text you want to analyze</strong> is already in R, you can process it:</p>
+<p>If the <strong>text you want to analyze</strong> is already in R, you
+can process it:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># individual words</span>
 <span class="va">data</span> <span class="op">=</span> <span class="fu"><a href="../reference/lma_process.html">lma_process</a></span><span class="op">(</span><span class="va">texts</span><span class="op">)</span>
@@ -112,7 +113,8 @@
 
 <span class="co"># pairwise cosine similarity in terms of latent semantic space dimensions</span>
 <span class="va">sims</span> <span class="op">=</span> <span class="fu"><a href="../reference/lingmatch.html">lingmatch</a></span><span class="op">(</span><span class="va">texts</span>, type <span class="op">=</span> <span class="st">'lss'</span><span class="op">)</span><span class="op">$</span><span class="va">sim</span></code></pre></div>
-<p>Or, if you have <strong>processed data</strong> (such as LIWC output), you can enter that:</p>
+<p>Or, if you have <strong>processed data</strong> (such as LIWC
+output), you can enter that:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># if all dictionary categories are found in the input, only those variables</span>
 <span class="co"># will be used</span>
@@ -120,14 +122,21 @@
 
 <span class="co"># otherwise, enter just the columns you want a part of the comparison</span>
 <span class="va">sims</span> <span class="op">=</span> <span class="fu"><a href="../reference/lingmatch.html">lingmatch</a></span><span class="op">(</span><span class="va">data</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'cat1'</span>, <span class="st">'cat2'</span>, <span class="st">'catn'</span><span class="op">)</span><span class="op">]</span><span class="op">)</span><span class="op">$</span><span class="va">sim</span></code></pre></div>
-<p>Continue for more about <strong>loading text into R</strong>, <strong>processing texts</strong>, and <strong>measuring similarity</strong>, or see the <a href="https://miserman.github.io/lingmatch/#comparisons" target="_blank" rel="nofollow" class="external-link">comparisons guide</a> for more about defining comparisons.</p>
+<p>Continue for more about <strong>loading text into R</strong>,
+<strong>processing texts</strong>, and <strong>measuring
+similarity</strong>, or see the
+<a href="https://miserman.github.io/lingmatch/#comparisons" target="_blank" rel="nofollow" class="external-link">comparisons
+guide</a> for more about defining comparisons.</p>
 <div class="section level2">
 <h2 id="loading-your-texts">Loading your texts<a class="anchor" aria-label="anchor" href="#loading-your-texts"></a>
 </h2>
-<p>You will need a path to the file containing your texts. You could…</p>
+<p>You will need a path to the file containing your texts. You
+could…</p>
 <ul>
-<li>Select interactively with <code><a href="https://rdrr.io/r/base/file.choose.html" class="external-link">file.choose()</a></code>, which returns the path.</li>
-<li>Give the full path (you can use <code>/</code> or <code>\\</code> as separators), e.g.,
+<li>Select interactively with <code><a href="https://rdrr.io/r/base/file.choose.html" class="external-link">file.choose()</a></code>, which returns
+the path.</li>
+<li>Give the full path (you can use <code>/</code> or <code>\\</code> as
+separators), e.g.,
 <ul>
 <li>Windows: <code>'c:/users/name/documents/texts.txt'</code>
 </li>
@@ -137,18 +146,25 @@
 </li>
 </ul>
 </li>
-<li>Give a relative path (use <code>normalizePath('example')</code> to see the full path):
+<li>Give a relative path (use <code>normalizePath('example')</code> to
+see the full path):
 <ul>
-<li>with a tilde (see what that starts at with <code>path.expand('~')</code>), e.g., <code>'~/texts.txt'</code>
+<li>with a tilde (see what that starts at with
+<code>path.expand('~')</code>), e.g., <code>'~/texts.txt'</code>
 </li>
-<li>from the working directory (see what that is with <code><a href="https://rdrr.io/r/base/getwd.html" class="external-link">getwd()</a></code>, set it with <code><a href="https://rdrr.io/r/base/getwd.html" class="external-link">setwd()</a></code>), e.g., <code>'texts.txt'</code>
+<li>from the working directory (see what that is with
+<code><a href="https://rdrr.io/r/base/getwd.html" class="external-link">getwd()</a></code>, set it with <code><a href="https://rdrr.io/r/base/getwd.html" class="external-link">setwd()</a></code>), e.g.,
+<code>'texts.txt'</code>
 </li>
-<li>from the parent of the working directory, e.g., <code>'../texts.txt'</code>
+<li>from the parent of the working directory, e.g.,
+<code>'../texts.txt'</code>
 </li>
 </ul>
 </li>
 </ul>
-<p>In the following examples, just the relative path to the file will be shown. This would be like if you set the working directory to the folder containing the files.</p>
+<p>In the following examples, just the relative path to the file will be
+shown. This would be like if you set the working directory to the folder
+containing the files.</p>
 <div class="section level3">
 <h3 id="from-plain-text-files">From plain-text files<a class="anchor" aria-label="anchor" href="#from-plain-text-files"></a>
 </h3>
@@ -171,14 +187,16 @@
 <p>When you want to read in multiple files from a folder:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">texts</span> <span class="op">=</span> <span class="fu"><a href="../reference/read.segments.html">read.segments</a></span><span class="op">(</span><span class="st">'foldername'</span><span class="op">)</span><span class="op">$</span><span class="va">text</span></code></pre></div>
-<p>When your files are just text, you could also enter the path into lingmatch functions, without first loading them:</p>
+<p>When your files are just text, you could also enter the path into
+lingmatch functions, without first loading them:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">results</span> <span class="op">=</span> <span class="fu"><a href="../reference/lingmatch.html">lingmatch</a></span><span class="op">(</span><span class="st">'texts.txt'</span><span class="op">)</span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="from-a-delimited-plain-text-file">From a delimited plain-text file<a class="anchor" aria-label="anchor" href="#from-a-delimited-plain-text-file"></a>
 </h3>
-<p>When texts are in a column of a spreadsheet, stored in a plain-text file:</p>
+<p>When texts are in a column of a spreadsheet, stored in a plain-text
+file:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># comma delimited</span>
 <span class="va">data</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">'data.csv'</span><span class="op">)</span>
@@ -203,24 +221,28 @@
 <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/quanteda/readtext" class="external-link">'readtext'</a></span><span class="op">)</span></code></pre></div>
 <p>From a .doc or .docx file:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">texts</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/readtext/man/readtext.html" class="external-link">readtext</a></span><span class="op">(</span><span class="st">'texts.docx'</span><span class="op">)</span><span class="op">$</span><span class="va">text</span>
+<code class="sourceCode R"><span class="va">texts</span> <span class="op">=</span> <span class="fu">readtext</span><span class="op">(</span><span class="st">'texts.docx'</span><span class="op">)</span><span class="op">$</span><span class="va">text</span>
 
 <span class="co"># this returns all lines in one, so you could</span>
 <span class="co"># use read.segments to split them up if needed</span>
 <span class="va">texts</span> <span class="op">=</span> <span class="fu"><a href="../reference/read.segments.html">read.segments</a></span><span class="op">(</span><span class="va">texts</span><span class="op">)</span><span class="op">$</span><span class="va">text</span></code></pre></div>
 <p>From a .xls or .xlsx file:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">texts</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/readtext/man/readtext.html" class="external-link">readtext</a></span><span class="op">(</span><span class="st">'data.xlsx'</span><span class="op">)</span><span class="op">$</span><span class="va">name_of_text_column</span></code></pre></div>
+<code class="sourceCode R"><span class="va">texts</span> <span class="op">=</span> <span class="fu">readtext</span><span class="op">(</span><span class="st">'data.xlsx'</span><span class="op">)</span><span class="op">$</span><span class="va">name_of_text_column</span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
 <h2 id="processing-text">Processing text<a class="anchor" aria-label="anchor" href="#processing-text"></a>
 </h2>
-<p>Processing texts represents them numerically, and this representation defines matching between them.</p>
-<p>For example, matching between <strong>structural features</strong> (e.g., number of words and their average length) gives a sense of how similar the text itself is between texts:</p>
+<p>Processing texts represents them numerically, and this representation
+defines matching between them.</p>
+<p>For example, matching between <strong>structural features</strong>
+(e.g., number of words and their average length) gives a sense of how
+similar the text itself is between texts:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">structural_features</span> <span class="op">=</span> <span class="fu"><a href="../reference/lma_meta.html">lma_meta</a></span><span class="op">(</span><span class="va">texts</span><span class="op">)</span></code></pre></div>
-<p>You could also look at exact matching between <strong>words</strong> by making a document-term matrix:</p>
+<p>You could also look at exact matching between <strong>words</strong>
+by making a document-term matrix:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># all words</span>
 <span class="va">dtm</span> <span class="op">=</span> <span class="fu"><a href="../reference/lma_dtm.html">lma_dtm</a></span><span class="op">(</span><span class="va">texts</span><span class="op">)</span>
@@ -228,14 +250,21 @@
 <span class="co"># excluding stop words (function words) and rare words (those appearing in</span>
 <span class="co"># fewer than 3 texts)</span>
 <span class="va">dtm</span> <span class="op">=</span> <span class="fu"><a href="../reference/lma_dtm.html">lma_dtm</a></span><span class="op">(</span><span class="va">texts</span>, exclude <span class="op">=</span> <span class="st">'function'</span>, dc.min <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></code></pre></div>
-<p>The raw texts in the next examples are processed with the <code>lma_dtm</code> function, using its defaults, but you could also enter a document-term matrix in place of texts, processed separately as in the previous examples.</p>
-<p>Other structural features are <strong>function word categories</strong>, which would give a sense of how stylistically similar texts are:</p>
+<p>The raw texts in the next examples are processed with the
+<code>lma_dtm</code> function, using its defaults, but you could also
+enter a document-term matrix in place of texts, processed separately as
+in the previous examples.</p>
+<p>Other structural features are <strong>function word
+categories</strong>, which would give a sense of how stylistically
+similar texts are:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">function_cats</span> <span class="op">=</span> <span class="fu"><a href="../reference/lma_termcat.html">lma_termcat</a></span><span class="op">(</span><span class="va">texts</span>, <span class="fu"><a href="../reference/lma_dict.html">lma_dict</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<p>To get at similarity in something like <strong>tone</strong>, you could use a sentiment dictionary:</p>
+<p>To get at similarity in something like <strong>tone</strong>, you
+could use a sentiment dictionary:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">sentiment</span> <span class="op">=</span> <span class="fu"><a href="../reference/lma_termcat.html">lma_termcat</a></span><span class="op">(</span><span class="va">texts</span>, <span class="st">'huliu'</span>, dir <span class="op">=</span> <span class="st">'~/Dictionaries'</span><span class="op">)</span></code></pre></div>
-<p>To get at similarity in <strong>overall meaning</strong>, you could use a content analysis focused dictionary like the General Inquirer:</p>
+<p>To get at similarity in <strong>overall meaning</strong>, you could
+use a content analysis focused dictionary like the General Inquirer:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">inquirer_cats</span> <span class="op">=</span> <span class="fu"><a href="../reference/lma_termcat.html">lma_termcat</a></span><span class="op">(</span><span class="va">texts</span>, <span class="st">'inquirer'</span>, dir <span class="op">=</span> <span class="st">'~/Dictionaries'</span><span class="op">)</span></code></pre></div>
 <p>Or a set of embeddings:</p>
@@ -247,15 +276,18 @@
 <div class="section level2">
 <h2 id="measuring-matching">Measuring matching<a class="anchor" aria-label="anchor" href="#measuring-matching"></a>
 </h2>
-<p>Once you have processed texts, you can measure matching between them.</p>
-<p>You could calculate similarity between each of them with different metrics:</p>
+<p>Once you have processed texts, you can measure matching between
+them.</p>
+<p>You could calculate similarity between each of them with different
+metrics:</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Inverse Canberra distance</span>
 <span class="va">can_sims</span> <span class="op">=</span> <span class="fu"><a href="../reference/lma_simets.html">lma_simets</a></span><span class="op">(</span><span class="va">function_cats</span>, metric <span class="op">=</span> <span class="st">'canberra'</span><span class="op">)</span>
 
 <span class="co"># Cosine similarity</span>
 <span class="va">cos_sims</span> <span class="op">=</span> <span class="fu"><a href="../reference/lma_simets.html">lma_simets</a></span><span class="op">(</span><span class="va">function_cats</span>, metric <span class="op">=</span> <span class="st">'cosine'</span><span class="op">)</span></code></pre></div>
-<p>Or between each text and the average across texts, with all available metrics:</p>
+<p>Or between each text and the average across texts, with all available
+metrics:</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">sims_to_mean</span> <span class="op">=</span> <span class="fu"><a href="../reference/lma_simets.html">lma_simets</a></span><span class="op">(</span><span class="va">function_cats</span>, <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">function_cats</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p>Or just between the first and second text:</p>

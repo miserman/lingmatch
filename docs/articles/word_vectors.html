@@ -87,17 +87,41 @@
 
     
     
-<p>Introduces the concept of word vectors and their use in measures of text similarity.</p>
-<p><em>Built with R 4.1.2 on January 25 2022</em></p>
+<p>Introduces the concept of word vectors and their use in measures of
+text similarity.</p>
+<p><em>Built with R 4.2.0 on May 17 2022</em></p>
 <hr>
-<p>A vector in this context is any set of values that represent one thing, so word vectors are fundamental to a bag-of-words framework. Usually, “word vectors” refers to sets of loadings onto calculated or learned latent dimensions (factors, clusters, components), but as part of a bag-of-words framework, vectors can range from those in a standard document-term matrix (as term counts within or between documents), to weightings and reductions of that space.</p>
-<p>When loadings onto dimensions, sets of word vectors are sometimes called something along the lines of latent semantic spaces, embeddings, or distributed word representations. <em>Latent</em> loosely refers to the way information is stored within a dimension (the same concept as in factor or cluster analysis generally, as in Latent Dirichlet Allocation). <em>Semantic</em> refers to the word meanings that can be captured by dimensions, as seen in similarity between word vectors; the word’s more precise meaning is represented across dimensions of more general and more latent meaning (in which sense it is also a <em>distributed</em> representation, though that could apply to any vector representation). <em>Embedding</em> either generally refers to the way word vectors are contained within the broader vector space, or, more specifically, to the way word meanings are contained within the broader semantic space.</p>
+<p>A vector in this context is any set of values that represent one
+thing, so word vectors are fundamental to a bag-of-words framework.
+Usually, “word vectors” refers to sets of loadings onto calculated or
+learned latent dimensions (factors, clusters, components), but as part
+of a bag-of-words framework, vectors can range from those in a standard
+document-term matrix (as term counts within or between documents), to
+weightings and reductions of that space.</p>
+<p>When loadings onto dimensions, sets of word vectors are sometimes
+called something along the lines of latent semantic spaces, embeddings,
+or distributed word representations. <em>Latent</em> loosely refers to
+the way information is stored within a dimension (the same concept as in
+factor or cluster analysis generally, as in Latent Dirichlet
+Allocation). <em>Semantic</em> refers to the word meanings that can be
+captured by dimensions, as seen in similarity between word vectors; the
+word’s more precise meaning is represented across dimensions of more
+general and more latent meaning (in which sense it is also a
+<em>distributed</em> representation, though that could apply to any
+vector representation). <em>Embedding</em> either generally refers to
+the way word vectors are contained within the broader vector space, or,
+more specifically, to the way word meanings are contained within the
+broader semantic space.</p>
 <div class="section level2">
 <h2 id="in-sample-vectors">In-sample vectors<a class="anchor" aria-label="anchor" href="#in-sample-vectors"></a>
 </h2>
-<p>The <a href="https://miserman.github.io/lingmatch/#text_analysis" target="_blank" rel="nofollow" class="external-link">introduction</a> mostly focused on the representation of documents as vectors within a common document-term space. With that same representation, we can focus on the term vectors instead.</p>
+<p>The
+<a href="https://miserman.github.io/lingmatch/#text_analysis" target="_blank" rel="nofollow" class="external-link">introduction</a>
+mostly focused on the representation of documents as vectors within a
+common document-term space. With that same representation, we can focus
+on the term vectors instead.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://miserman.github.io/splot" class="external-link">splot</a></span><span class="op">)</span>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://miserman.github.io/splot/" class="external-link">splot</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/miserman/lingmatch" class="external-link">lingmatch</a></span><span class="op">)</span>
 
 <span class="va">texts</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>
@@ -113,11 +137,14 @@
 <span class="co">#&gt; [2,]   1   .        1     .      .     1      .</span>
 <span class="co">#&gt; [3,]   1   1        .     .      1     .      .</span>
 <span class="co">#&gt; [4,]   1   1        .     .      .     .      1</span></code></pre></div>
-<p>Here, columns represent words in terms of their occurrence in 4 contexts (here, sentences), and rows provide co-occurrence information.</p>
+<p>Here, columns represent words in terms of their occurrence in 4
+contexts (here, sentences), and rows provide co-occurrence
+information.</p>
 <div class="section level3">
 <h3 id="similarity-based-latent-dimensions">Similarity-based latent dimensions<a class="anchor" aria-label="anchor" href="#similarity-based-latent-dimensions"></a>
 </h3>
-<p>Comparing word vectors can provide semantic information. For example, we can see which animals co-occur with different attributes:</p>
+<p>Comparing word vectors can provide semantic information. For example,
+we can see which animals co-occur with different attributes:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># the t function transposes the document-term matrix</span>
 <span class="co"># such that terms are in rows and documents in columns</span>
@@ -132,6 +159,8 @@
 <span class="co">#&gt; horses    0.25 0.75</span>
 <span class="co">#&gt; small     1.00 0.00</span>
 <span class="co">#&gt; whales    0.25 0.75</span>
+
+<span class="co"># note that dark = TRUE makes the text white, so you might need to remove it</span>
 <span class="fu"><a href="https://rdrr.io/pkg/splot/man/splot.html" class="external-link">splot</a></span><span class="op">(</span>
   <span class="va">attribute_loadings</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span> <span class="op">~</span> <span class="va">attribute_loadings</span><span class="op">[</span>, <span class="fl">2</span><span class="op">]</span>, type <span class="op">=</span> <span class="st">'scatter'</span>,
   lines <span class="op">=</span> <span class="cn">FALSE</span>, laby <span class="op">=</span> <span class="st">'smallness'</span>, labx <span class="op">=</span> <span class="st">'bigness'</span>, dark <span class="op">=</span> <span class="cn">TRUE</span>,
@@ -141,7 +170,10 @@
   <span class="op">)</span>
 <span class="op">)</span></code></pre></div>
 <p><img src="word_vectors_files/figure-html/unnamed-chunk-3-1.svg" width="960"></p>
-<p>The similarity measures between raw occurrence vectors form new, collapsed vectors—instead of corresponding to documents, columns in this new space represent attributes. These new vectors can then be used to make document comparisons more flexible.</p>
+<p>The similarity measures between raw occurrence vectors form new,
+collapsed vectors—instead of corresponding to documents, columns in this
+new space represent attributes. These new vectors can then be used to
+make document comparisons more flexible.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># documents are already similar as expected</span>
 <span class="co"># (with 1 &lt;-&gt; 2 and 3 &lt;-&gt; 4 being more, the rest less similar)</span>
@@ -177,13 +209,35 @@
 <div class="section level2">
 <h2 id="pretrained-vectors">Pretrained vectors<a class="anchor" aria-label="anchor" href="#pretrained-vectors"></a>
 </h2>
-<p>This is a very tidy and narrow example in terms of the texts and semantic space creation, but it illustrates the kind of co-occurrence information that is being used in more abstracted examples. To get appropriate co-occurrence information for a larger set of words, you need many and diverse observations of their use, which is why large corpora are usually used to train embeddings. The latent dimensions of general-use spaces are also not usually similarities to single seed words, but are instead optimized, such as by some form of matrix factorization or a neural network.</p>
-<p>Pretrained spaces like this are available on Open Science Framework (<a href="https://osf.io/489he/wiki/home" class="external-link">osf.io/489he</a>), and will be downloaded if necessary when you run the functions that depend on them if you specify a directory or set the directory options (you can run <code>lma_initdirs('~')</code> to initialize the default locations).</p>
+<p>This is a very tidy and narrow example in terms of the texts and
+semantic space creation, but it illustrates the kind of co-occurrence
+information that is being used in more abstracted examples. To get
+appropriate co-occurrence information for a larger set of words, you
+need many and diverse observations of their use, which is why large
+corpora are usually used to train embeddings. The latent dimensions of
+general-use spaces are also not usually similarities to single seed
+words, but are instead optimized, such as by some form of matrix
+factorization or a neural network.</p>
+<p>Pretrained spaces like this are available on Open Science Framework
+(<a href="https://osf.io/489he/wiki/home" class="external-link">osf.io/489he</a>), and will be
+downloaded if necessary when you run the functions that depend on them
+if you specify a directory or set the directory options (you can run
+<code>lma_initdirs('~')</code> to initialize the default locations).</p>
 <div class="section level3">
 <h3 id="embeddings-mapped-similarity">Embeddings-mapped similarity<a class="anchor" aria-label="anchor" href="#embeddings-mapped-similarity"></a>
 </h3>
-<p>Similarity between documents that have been mapped to embeddings is sometimes called Latent Semantic Similarity <span class="citation">(<a href="#ref-landauer:1997" role="doc-biblioref">Landauer &amp; Dumais, 1997</a>)</span> or Word Centroid (inverse) Distance <span class="citation">(<a href="#ref-kusner:2015" role="doc-biblioref">Kusner et al., 2015</a>)</span>. Both of these measures have common parameter decisions associated with them.</p>
-<p>For Latent Semantic Similarity, the Document-Term Matrix is usually initially weighted (as by Term-Frequency Inverse Document Frequency or Pointwise Mutual Information schemes), and has stop words removed (though that isn’t relevant in this case, since “are” appears in all documents), then mapped to a Singular Value Decomposition space, and similarity is measured by cosine similarity. These settings are default for the <code>'lsa'</code> type (using the “100k_lsa” space):</p>
+<p>Similarity between documents that have been mapped to embeddings is
+sometimes called Latent Semantic Similarity <span class="citation">(<a href="#ref-landauer:1997" role="doc-biblioref">Landauer &amp; Dumais,
+1997</a>)</span> or Word Centroid (inverse) Distance <span class="citation">(<a href="#ref-kusner:2015" role="doc-biblioref">Kusner
+et al., 2015</a>)</span>. Both of these measures have common parameter
+decisions associated with them.</p>
+<p>For Latent Semantic Similarity, the Document-Term Matrix is usually
+initially weighted (as by Term-Frequency Inverse Document Frequency or
+Pointwise Mutual Information schemes), and has stop words removed
+(though that isn’t relevant in this case, since “are” appears in all
+documents), then mapped to a Singular Value Decomposition space, and
+similarity is measured by cosine similarity. These settings are default
+for the <code>'lsa'</code> type (using the “100k_lsa” space):</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/lingmatch.html">lingmatch</a></span><span class="op">(</span><span class="va">texts</span>, type <span class="op">=</span> <span class="st">'lsa'</span><span class="op">)</span><span class="op">$</span><span class="va">sim</span>
 <span class="co">#&gt; 4 x 4 sparse Matrix of class "dtCMatrix" (unitriangular)</span>
@@ -192,7 +246,10 @@
 <span class="co">#&gt; [2,] 0.9958587 I         .        .</span>
 <span class="co">#&gt; [3,] 0.3360165 0.3182474 I        .</span>
 <span class="co">#&gt; [4,] 0.4092065 0.3831958 0.751225 I</span></code></pre></div>
-<p>For Word Centroid Distance, the DTM usually also has stop words removed, but might then be frequency weighted (normalized), mapped to a word2vec space, and have distances measured by Euclidean distance (which is inverted here for similarity):</p>
+<p>For Word Centroid Distance, the DTM usually also has stop words
+removed, but might then be frequency weighted (normalized), mapped to a
+word2vec space, and have distances measured by Euclidean distance (which
+is inverted here for similarity):</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/lingmatch.html">lingmatch</a></span><span class="op">(</span>
   <span class="va">texts</span>, exclude <span class="op">=</span> <span class="st">'function'</span>, weight <span class="op">=</span> <span class="st">'freq'</span>,
@@ -204,7 +261,12 @@
 <span class="co">#&gt; [2,] 0.01980396 I          .          .</span>
 <span class="co">#&gt; [3,] 0.01233601 0.01213053 I          .</span>
 <span class="co">#&gt; [4,] 0.01169420 0.01111124 0.01187304 I</span></code></pre></div>
-<p>These parameter decisions are often left unexamined, but have some potential to affect the ultimate characterization of the texts. One of <code>lingmatch</code>’s goals is to make some of these parameters easy to play with. See the <a href="https://miserman.github.io/lingmatch/#classification" rel="nofollow" target="_blank" class="external-link">text classification vignette</a> for an example of this.</p>
+<p>These parameter decisions are often left unexamined, but have some
+potential to affect the ultimate characterization of the texts. One of
+<code>lingmatch</code>’s goals is to make some of these parameters easy
+to play with. See the
+<a href="https://miserman.github.io/lingmatch/#classification" rel="nofollow" target="_blank" class="external-link">text
+classification vignette</a> for an example of this.</p>
 </div>
 <div class="section level3">
 <h3 id="choosing-a-space">Choosing a space<a class="anchor" aria-label="anchor" href="#choosing-a-space"></a>
@@ -212,7 +274,11 @@
 <div class="section level4">
 <h4 id="term-coverage">Term coverage<a class="anchor" aria-label="anchor" href="#term-coverage"></a>
 </h4>
-<p>One simple thing to look at when choosing a space is its coverage of the terms that appear in your set of texts. You can do this without downloading all spaces by looking at the <a href="https://osf.io/yauzm" class="external-link">common term map</a>, which is what the <code>select.lspace</code> function does when terms are entered as the first argument:</p>
+<p>One simple thing to look at when choosing a space is its coverage of
+the terms that appear in your set of texts. You can do this without
+downloading all spaces by looking at the <a href="https://osf.io/yauzm" class="external-link">common term map</a>, which is what the
+<code>select.lspace</code> function does when terms are entered as the
+first argument:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># some relatively rare terms for their formatting or narrow uses</span>
 <span class="va">terms</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'part-time'</span>, <span class="st">'i/o'</span>, <span class="st">"'cause"</span>, <span class="st">'brexit'</span>, <span class="st">'debuffs'</span><span class="op">)</span>
@@ -233,7 +299,11 @@
 <div class="section level4">
 <h4 id="term-similarity">Term similarity<a class="anchor" aria-label="anchor" href="#term-similarity"></a>
 </h4>
-<p>Another possible, though more intensive thing to look at might be similarities between words of particular interest. In our initial set of texts, for example, we were looking at animals in relation to attributes, so we might look at those relationships in whatever spaces you’ve downloaded:</p>
+<p>Another possible, though more intensive thing to look at might be
+similarities between words of particular interest. In our initial set of
+texts, for example, we were looking at animals in relation to
+attributes, so we might look at those relationships in whatever spaces
+you’ve downloaded:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># retrieve names of downloaded spaces</span>
 <span class="va">space_names</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span><span class="st">'\\..*$'</span>, <span class="st">''</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="st">'~/Latent Semantic Spaces'</span>, <span class="st">'dat'</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
@@ -280,14 +350,18 @@
 <span class="co"># and look at where the animal words fall within that attribute space</span>
 <span class="fu"><a href="https://rdrr.io/pkg/splot/man/splot.html" class="external-link">splot</a></span><span class="op">(</span>
   <span class="va">smallness</span> <span class="op">~</span> <span class="va">bigness</span>, <span class="va">sims_best</span>, type <span class="op">=</span> <span class="st">'scatter'</span>, dark <span class="op">=</span> <span class="cn">TRUE</span>,
-  lines <span class="op">=</span> <span class="cn">FALSE</span>, add <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/graphics/text.html" class="external-link">text</a></span><span class="op">(</span><span class="va">y</span> <span class="op">+</span> <span class="fl">.0017</span> <span class="op">~</span> <span class="va">x</span>, labels <span class="op">=</span> <span class="va">terms</span><span class="op">[</span><span class="op">-</span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span><span class="op">]</span><span class="op">)</span>
+  lines <span class="op">=</span> <span class="cn">FALSE</span>, add <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/graphics/text.html" class="external-link">text</a></span><span class="op">(</span><span class="va">y</span> <span class="op">+</span> <span class="fl">.0017</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/AsIs.html" class="external-link">I</a></span><span class="op">(</span><span class="va">x</span> <span class="op">+</span> <span class="fl">3e-4</span><span class="op">)</span>, labels <span class="op">=</span> <span class="va">terms</span><span class="op">[</span><span class="op">-</span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span><span class="op">]</span><span class="op">)</span>
 <span class="op">)</span></code></pre></div>
 <p><img src="word_vectors_files/figure-html/unnamed-chunk-8-1.svg" width="960"></p>
 </div>
 <div class="section level4">
 <h4 id="concept-capture">Concept capture<a class="anchor" aria-label="anchor" href="#concept-capture"></a>
 </h4>
-<p>One of the problems embeddings try to solve is the crispiness of single terms—there may be many terms that are strictly different but have similar meanings. With that in mind, it might also make sense to fuzzify target dimensions in the above example with something like synonym centroids or concept vectors:</p>
+<p>One of the problems embeddings try to solve is the crispiness of
+single terms—there may be many terms that are strictly different but
+have similar meanings. With that in mind, it might also make sense to
+fuzzify target dimensions in the above example with something like
+synonym centroids or concept vectors:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># now our attributes will be sets of terms</span>
 <span class="va">concepts</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
@@ -313,14 +387,24 @@
   lines <span class="op">=</span> <span class="cn">FALSE</span>, laby <span class="op">=</span> <span class="st">'smallness'</span>, labx <span class="op">=</span> <span class="st">'bigness'</span>, dark <span class="op">=</span> <span class="cn">TRUE</span>,
   add <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/graphics/text.html" class="external-link">text</a></span><span class="op">(</span><span class="va">y</span> <span class="op">+</span> <span class="fl">.0014</span> <span class="op">~</span> <span class="va">x</span>, labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">sims_best_fuz</span><span class="op">)</span><span class="op">)</span>
 <span class="op">)</span></code></pre></div>
-<p><img src="word_vectors_files/figure-html/unnamed-chunk-9-1.svg" width="960"> The best way to learn animal attributes in general would probably come down to the training texts, which might start to look like research in personality psychology on clusters in words used to describe people <span class="citation">(e.g., <a href="#ref-thurstone:1934" role="doc-biblioref">Thurstone, 1934</a>)</span>.</p>
+<p><img src="word_vectors_files/figure-html/unnamed-chunk-9-1.svg" width="960">
+The best way to learn animal attributes in general would probably come
+down to the training texts, which might start to look like research in
+personality psychology on clusters in words used to describe people
+<span class="citation">(e.g., <a href="#ref-thurstone:1934" role="doc-biblioref">Thurstone, 1934</a>)</span>.</p>
 </div>
 </div>
 </div>
 <div class="section level2">
 <h2 id="dimensions-as-topics">Dimensions as topics<a class="anchor" aria-label="anchor" href="#dimensions-as-topics"></a>
 </h2>
-<p>Topic extraction tends to use models fit within a sample, and considers fewer dimensions. Its goal is often to interpret dimensions directly by inspecting the highest loading terms, which can result in something like a dictionary—sets of topics or categories containing associated terms. By loading in a full space (as opposed to just a selection of vectors, as we’ve been doing), we can look at the same thing in pretrained embeddings:</p>
+<p>Topic extraction tends to use models fit within a sample, and
+considers fewer dimensions. Its goal is often to interpret dimensions
+directly by inspecting the highest loading terms, which can result in
+something like a dictionary—sets of topics or categories containing
+associated terms. By loading in a full space (as opposed to just a
+selection of vectors, as we’ve been doing), we can look at the same
+thing in pretrained embeddings:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># load in the full "100k" space</span>
 <span class="va">lss</span> <span class="op">=</span> <span class="fu"><a href="../reference/lma_lspace.html">lma_lspace</a></span><span class="op">(</span><span class="st">'100k'</span><span class="op">)</span>
@@ -350,7 +434,8 @@
 <code class="sourceCode R"><span class="co"># even across all dimensions</span>
 <span class="fu">top_terms</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">lss</span><span class="op">)</span><span class="op">)</span>, <span class="va">lss</span><span class="op">)</span></code></pre></div>
 <p><img src="word_vectors_files/figure-html/unnamed-chunk-10-5.svg" width="960"></p>
-<p>It can also be interesting to use a term to select dimensions to look at:</p>
+<p>It can also be interesting to use a term to select dimensions to look
+at:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># this selects the 10 dimensions on which "whales" loads most</span>
 <span class="fu">top_terms</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="op">-</span><span class="va">lss</span><span class="op">[</span><span class="st">'whales'</span>,<span class="op">]</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span>, <span class="va">lss</span><span class="op">)</span></code></pre></div>
@@ -359,7 +444,9 @@
 <div class="section level2">
 <h2 id="dictionaries-as-embeddings">Dictionaries as embeddings<a class="anchor" aria-label="anchor" href="#dictionaries-as-embeddings"></a>
 </h2>
-<p>It can also be kind of interesting to think of dictionaries as forms of embeddings, either as binary or with weighted regions and sharp drop-offs:</p>
+<p>It can also be kind of interesting to think of dictionaries as forms
+of embeddings, either as binary or with weighted regions and sharp
+drop-offs:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># take a small, weighted, sexed family dictionary</span>
 <span class="va">family</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
@@ -385,7 +472,9 @@
 <span class="co">#&gt; brother    0.8      0    1</span>
 <span class="co">#&gt; grandpa    0.7      0    1</span>
 <span class="co">#&gt; uncle      0.6      0    1</span></code></pre></div>
-<p>In this simple space, you can solve analogies like you can in pretrained spaces <span class="citation">(as in <a href="#ref-mikolov:2013" role="doc-biblioref">Mikolov et al., 2013</a>)</span>:</p>
+<p>In this simple space, you can solve analogies like you can in
+pretrained spaces <span class="citation">(as in <a href="#ref-mikolov:2013" role="doc-biblioref">Mikolov et al.,
+2013</a>)</span>:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># function to abstract the process</span>
 <span class="va">guess_analog</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">asx</span>, <span class="va">space</span>, <span class="va">metric</span> <span class="op">=</span> <span class="st">'canberra'</span><span class="op">)</span><span class="op">{</span>
@@ -412,16 +501,25 @@
 </h2>
 <div id="refs" class="references csl-bib-body hanging-indent" line-spacing="2">
 <div id="ref-kusner:2015" class="csl-entry">
-Kusner, M., Sun, Y., Kolkin, N., &amp; Weinberger, K. (2015). From word embeddings to document distances. <em>International Conference on Machine Learning</em>, 957–966. <a href="http://proceedings.mlr.press/v37/kusnerb15.pdf" class="external-link">http://proceedings.mlr.press/v37/kusnerb15.pdf</a>
+Kusner, M., Sun, Y., Kolkin, N., &amp; Weinberger, K. (2015). From word
+embeddings to document distances. <em>International Conference on
+Machine Learning</em>, 957–966. <a href="http://proceedings.mlr.press/v37/kusnerb15.pdf" class="external-link">http://proceedings.mlr.press/v37/kusnerb15.pdf</a>
 </div>
 <div id="ref-landauer:1997" class="csl-entry">
-Landauer, T. K., &amp; Dumais, S. T. (1997). A solution to plato’s problem: The latent semantic analysis theory of acquisition, induction, and representation of knowledge. <em>Psychological Review</em>, <em>104</em>, 211. <a href="https://www.cis.upenn.edu/~ungar/dbmwiki/LSA.pdf" class="external-link">https://www.cis.upenn.edu/~ungar/dbmwiki/LSA.pdf</a>
+Landauer, T. K., &amp; Dumais, S. T. (1997). A solution to plato’s
+problem: The latent semantic analysis theory of acquisition, induction,
+and representation of knowledge. <em>Psychological Review</em>,
+<em>104</em>, 211. <a href="https://www.cis.upenn.edu/~ungar/dbmwiki/LSA.pdf" class="external-link">https://www.cis.upenn.edu/~ungar/dbmwiki/LSA.pdf</a>
 </div>
 <div id="ref-mikolov:2013" class="csl-entry">
-Mikolov, T., Yih, W., &amp; Zweig, G. (2013). Linguistic regularities in continuous space word representations. <em>Proceedings of the 2013 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies</em>, 746–751. <a href="https://www.aclweb.org/anthology/N13-1090.pdf" class="external-link">https://www.aclweb.org/anthology/N13-1090.pdf</a>
+Mikolov, T., Yih, W., &amp; Zweig, G. (2013). Linguistic regularities in
+continuous space word representations. <em>Proceedings of the 2013
+Conference of the North American Chapter of the Association for
+Computational Linguistics: Human Language Technologies</em>, 746–751. <a href="https://www.aclweb.org/anthology/N13-1090.pdf" class="external-link">https://www.aclweb.org/anthology/N13-1090.pdf</a>
 </div>
 <div id="ref-thurstone:1934" class="csl-entry">
-Thurstone, L. L. (1934). The vectors of mind. <em>Psychological Review</em>, <em>41</em>, 1. <a href="https://pdfs.semanticscholar.org/9cf4/f58f7f8e8e42b743834b540481ef5cb5903d.pdf" class="external-link">https://pdfs.semanticscholar.org/9cf4/f58f7f8e8e42b743834b540481ef5cb5903d.pdf</a>
+Thurstone, L. L. (1934). The vectors of mind. <em>Psychological
+Review</em>, <em>41</em>, 1. <a href="https://pdfs.semanticscholar.org/9cf4/f58f7f8e8e42b743834b540481ef5cb5903d.pdf" class="external-link">https://pdfs.semanticscholar.org/9cf4/f58f7f8e8e42b743834b540481ef5cb5903d.pdf</a>
 </div>
 </div>
 </div>

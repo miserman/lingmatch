@@ -725,11 +725,14 @@ select.lspace = function(query = NULL, dir = getOption('lingmatch.lspace.dir'),
   if(missing(get.map) && !missing(query) && length(query) > 1) get.map = TRUE
   if(!exists('lma_term_map')) lma_term_map = NULL
   if(get.map && !ckd && !(file.exists(map_path) || !is.null(lma_term_map))){
-    if(!file.exists(map_path)){
+    fi = tryCatch(
+      strsplit(readLines('https://api.osf.io/v2/files/xr7jv', 1, TRUE, FALSE, 'utf-8'), '[:,{}"]+')[[1]],
+      error = function(e) NULL
+    )
+    if(!file.exists(map_path) || (!is.null(fi) && md5sum(map_path) != fi[which(fi == 'md5') + 1])){
       status = tryCatch(download.file('https://osf.io/download/xr7jv',
         map_path, mode = mode), error = function(e) 1)
-      if(!status && check.md5){
-        fi = strsplit(readLines('https://api.osf.io/v2/files/xr7jv', 1, TRUE, FALSE, 'utf-8'), '[:,{}"]+')[[1]]
+      if(!status && check.md5 && !is.null(fi)){
         ck = md5sum(map_path)
         if(fi[which(fi == 'md5') + 1] == ck){
           load(map_path)
@@ -740,7 +743,8 @@ select.lspace = function(query = NULL, dir = getOption('lingmatch.lspace.dir'),
         ))
       }
     }
-  }
+  } else if (!file.exists(map_path) && !is.null(query))
+    stop("The term map could not be found; specify dir or run lma_initdirs('~') to download it")
   r = list(info = lss_info, selected = lss_info[NULL,])
   r$info[, 'wiki'] = paste0('https://osf.io/489he/wiki/', rownames(lss_info))
   r$info[, 'downloaded'] = normalizePath(paste0(dir, '/', rownames(r$info), '.dat'), '/', FALSE)

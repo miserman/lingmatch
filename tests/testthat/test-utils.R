@@ -1,7 +1,7 @@
 context('utils')
 
 options(encoding = 'latin1', stringsAsFactors = FALSE)
-TEST_DOWNLOAD = FALSE
+TEST_DOWNLOAD = grepl("R_LIBS", getwd(), fixed = TRUE)
 texts = c(
   "And there with it isn't I think anyone would.",
   "Command lands of a few I two of it is."

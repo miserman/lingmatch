@@ -58,7 +58,7 @@ reference:
     - lma_simets
 
   - title: Utilities
-    desc: These help prepare your environment are data if needed, or do additional analysis.
+    desc: These help prepare your environment or data if needed, or do additional analysis.
   - contents:
     - starts_with('read')
     - lma_initdirs

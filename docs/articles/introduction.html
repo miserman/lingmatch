@@ -87,13 +87,15 @@
 
     
     
-<p>This introduction uses lingmatch to illustrate a few of the many branching paths of text analysis.</p>
-<p><em>Built with R 4.1.2 on January 25 2022</em></p>
+<p>This introduction uses lingmatch to illustrate a few of the many
+branching paths of text analysis.</p>
+<p><em>Built with R 4.2.0 on May 17 2022</em></p>
 <hr>
 <div class="section level2">
 <h2 id="setup">Setup<a class="anchor" aria-label="anchor" href="#setup"></a>
 </h2>
-<p>First, we need some text – anything that results in a vector of text will do.</p>
+<p>First, we need some text – anything that results in a vector of text
+will do.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">text</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>
   <span class="st">"Hey, I like kittens. I think all kinds of cats really are just the best pet ever."</span>,
@@ -108,16 +110,24 @@
 <div class="section level3">
 <h3 id="manual-processing">Manual Processing<a class="anchor" aria-label="anchor" href="#manual-processing"></a>
 </h3>
-<p>We’ll be taking a ‘bag of words’ approach to this text, which means standardizing and aggregating words for the sake of simplicity.</p>
-<p>The first step can be to convert all of the characters to lower case:</p>
+<p>We’ll be taking a ‘bag of words’ approach to this text, which means
+standardizing and aggregating words for the sake of simplicity.</p>
+<p>The first step can be to convert all of the characters to lower
+case:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># we'll name the processed text "words" since it will eventually be single words</span>
 <span class="va">words</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/chartr.html" class="external-link">tolower</a></span><span class="op">(</span><span class="va">text</span><span class="op">)</span>
 <span class="va">words</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>
 <span class="co">#&gt; [1] "hey, i like kittens. i think all kinds of cats really are just the best pet ever."</span></code></pre></div>
-<p>Another standardizing step can be to remove punctuation, which will involve some regular expression.</p>
-<p><a href="https://en.wikipedia.org/wiki/Regular_expression" class="external-link">Regular expression</a> is a refined way to parse strings of characters. Forms of regular expression are implemented in most programming languages. It can be tricky to think with, but offers a great deal of control when it comes to parsing text.</p>
-<p>We can use the gsub function to replace all of the characters we specify with nothing.</p>
+<p>Another standardizing step can be to remove punctuation, which will
+involve some regular expression.</p>
+<p><a href="https://en.wikipedia.org/wiki/Regular_expression" class="external-link">Regular
+expression</a> is a refined way to parse strings of characters. Forms of
+regular expression are implemented in most programming languages. It can
+be tricky to think with, but offers a great deal of control when it
+comes to parsing text.</p>
+<p>We can use the gsub function to replace all of the characters we
+specify with nothing.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># you can get a feel for the way gsub works by entering an example string;</span>
 <span class="co"># the first argument is the expression to match, the second is what to replace it with,</span>
@@ -131,11 +141,13 @@
 <span class="va">words</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span><span class="st">'[,.?!\n-]+'</span>, <span class="st">''</span>, <span class="va">words</span><span class="op">)</span>
 <span class="va">words</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>
 <span class="co">#&gt; [1] "hey i like kittens i think all kinds of cats really are just the best pet ever"</span></code></pre></div>
-<p>The strsplit function splits one string into many based on a regular expression string.</p>
+<p>The strsplit function splits one string into many based on a regular
+expression string.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># this applies to each element of the vector, and returns a list of vectors</span>
 <span class="va">words</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/strsplit.html" class="external-link">strsplit</a></span><span class="op">(</span><span class="va">words</span>, <span class="st">' +'</span><span class="op">)</span></code></pre></div>
-<p>Now we have a list of tokens (the <code>words</code> object) which corresponds to our original text:</p>
+<p>Now we have a list of tokens (the <code>words</code> object) which
+corresponds to our original text:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># the first text</span>
 <span class="va">text</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>
@@ -146,8 +158,11 @@
 <span class="co">#&gt;  [1] "hey"     "i"       "like"    "kittens" "i"       "think"   "all"    </span>
 <span class="co">#&gt;  [8] "kinds"   "of"      "cats"    "really"  "are"     "just"    "the"    </span>
 <span class="co">#&gt; [15] "best"    "pet"     "ever"</span></code></pre></div>
-<p>Now that we have all of our words separated, we can translate the original texts into numerical vectors, resulting in a document-term matrix (DTM).</p>
-<p>The first step can be to set up an empty matrix, with a row for each text, and a column for each unique word:</p>
+<p>Now that we have all of our words separated, we can translate the
+original texts into numerical vectors, resulting in a document-term
+matrix (DTM).</p>
+<p>The first step can be to set up an empty matrix, with a row for each
+text, and a column for each unique word:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># since our words are in a list, we need to unlist them, then get only the unique ones</span>
 <span class="co"># you don't need to sort the words, but it can make it easier to look through</span>
@@ -163,7 +178,9 @@
 <span class="co">#&gt; [2,]     0   0   0        0   0  0    0   0    0    0</span>
 <span class="co">#&gt; [3,]     0   0   0        0   0  0    0   0    0    0</span>
 <span class="co">#&gt; [4,]     0   0   0        0   0  0    0   0    0    0</span></code></pre></div>
-<p>Now we can fill the matrix with counts for each word for each text. We can count up all of the words at once, so we only have to loop through texts:</p>
+<p>Now we can fill the matrix with counts for each word for each text.
+We can count up all of the words at once, so we only have to loop
+through texts:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># this will perform what's inside the curly brackets as many times as there are texts</span>
 <span class="co"># i will be set to each number in the sequence, so i will equal 1 on the first run</span>
@@ -191,7 +208,8 @@
 <div class="section level3">
 <h3 id="processing-with-lingmatch">Processing with lingmatch<a class="anchor" aria-label="anchor" href="#processing-with-lingmatch"></a>
 </h3>
-<p>The lma_dtm function from the lingmatch package will do the same sort of processing we just walked through.</p>
+<p>The lma_dtm function from the lingmatch package will do the same sort
+of processing we just walked through.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># load in the lingmatch package</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/miserman/lingmatch" class="external-link">lingmatch</a></span><span class="op">)</span>
@@ -203,7 +221,8 @@
 <span class="co">#&gt; [2,]     0   1   1        0   0  0    1   0    0    1</span>
 <span class="co">#&gt; [3,]     1   0   0        1   0  0    0   0    1    0</span>
 <span class="co">#&gt; [4,]     1   0   0        0   0  1    0   2    0    0</span></code></pre></div>
-<p>With even this simple level of processing, we can get some fun information:</p>
+<p>With even this simple level of processing, we can get some fun
+information:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># a count of words across documents (total/global term count; collection frequency)</span>
 <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums.html" class="external-link">colSums</a></span><span class="op">(</span><span class="va">dtm</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>
@@ -231,24 +250,41 @@
 <span class="co">#&gt; [2,]  0.4322086  I         .        .</span>
 <span class="co">#&gt; [3,] -0.2319170 -0.2721224 I        .</span>
 <span class="co">#&gt; [4,] -0.4062182 -0.3727363 0.309349 I</span></code></pre></div>
-<p>This is getting into the fundamentals of information extraction/retrieval, where, for example, term similarity can be used to enhance searches, and document similarity can be the search criteria. Document similarity is also secretly linguistic similarity.</p>
+<p>This is getting into the fundamentals of information
+extraction/retrieval, where, for example, term similarity can be used to
+enhance searches, and document similarity can be the search criteria.
+Document similarity is also secretly linguistic similarity.</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="documentterm-weighting">Document/Term Weighting<a class="anchor" aria-label="anchor" href="#documentterm-weighting"></a>
 </h2>
-<p>Using just raw word counts, common words have more weight – potentially many times more. Often, we’re more interested in less common words, as those tend to be more meaningful (they tend to be content words, as opposed to function words, and can better distinguish relevant texts to a search).</p>
-<p>The most simple, straightforward way to adjust the weight of words is to transform their count values. For example, log transformations reduce the difference between values, and increase that reduction as values increase:</p>
+<p>Using just raw word counts, common words have more weight –
+potentially many times more. Often, we’re more interested in less common
+words, as those tend to be more meaningful (they tend to be content
+words, as opposed to function words, and can better distinguish relevant
+texts to a search).</p>
+<p>The most simple, straightforward way to adjust the weight of words is
+to transform their count values. For example, log transformations reduce
+the difference between values, and increase that reduction as values
+increase:</p>
 <p><code>log(2) - log(1)</code> = 0.6931472</p>
 <p><code>log(5) - log(4)</code> = 0.2231436</p>
-<p>Another source of weighting can come from matrix-wide information, such as document or term counts. For example, dividing a term by its document frequency reduces the weight of more frequent terms:</p>
+<p>Another source of weighting can come from matrix-wide information,
+such as document or term counts. For example, dividing a term by its
+document frequency reduces the weight of more frequent terms:</p>
 <p><code>c(1, 1, 0) / sum(c(1, 1, 0))</code> = 0.5, 0.5, 0</p>
-<p><code>c(1, 1, 1) / sum(c(1, 1, 1))</code> = 0.3333333, 0.3333333, 0.3333333</p>
-<p>Different weighting schemes work to either amplify or dampen difference in values or in document or term frequencies. See <code><a href="../reference/lma_weight.html">?lma_weight</a></code> for more about available schemes.</p>
-<p>To get a better sense of the effects each scheme component might have, we can plot weighted by raw word counts across a range of document frequencies:</p>
+<p><code>c(1, 1, 1) / sum(c(1, 1, 1))</code> = 0.3333333, 0.3333333,
+0.3333333</p>
+<p>Different weighting schemes work to either amplify or dampen
+difference in values or in document or term frequencies. See
+<code><a href="../reference/lma_weight.html">?lma_weight</a></code> for more about available schemes.</p>
+<p>To get a better sense of the effects each scheme component might
+have, we can plot weighted by raw word counts across a range of document
+frequencies:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># load in the splot package</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://miserman.github.io/splot" class="external-link">splot</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://miserman.github.io/splot/" class="external-link">splot</a></span><span class="op">)</span>
 
 <span class="co"># available term weight types</span>
 <span class="va">term_weights</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'binary'</span>, <span class="st">'log'</span>, <span class="st">'sqrt'</span>, <span class="st">'count'</span>, <span class="st">'amplify'</span><span class="op">)</span>
@@ -257,9 +293,13 @@
 <span class="va">Weighted</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">term_weights</span>, <span class="kw">function</span><span class="op">(</span><span class="va">w</span><span class="op">)</span> <span class="fu"><a href="../reference/lma_weight.html">lma_weight</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">20</span>, <span class="va">w</span>, <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span>
 
 <span class="co"># plot weighted ~ raw term frequencies</span>
+<span class="co">## note that dark = TRUE makes the text white, so you might need to remove it</span>
 <span class="fu"><a href="https://rdrr.io/pkg/splot/man/splot.html" class="external-link">splot</a></span><span class="op">(</span><span class="va">Weighted</span> <span class="op">~</span> <span class="fl">1</span><span class="op">:</span><span class="fl">20</span>, labx <span class="op">=</span> <span class="st">'Raw Count'</span>, lines <span class="op">=</span> <span class="st">'connected'</span>, dark <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
 <p><img src="introduction_files/figure-html/unnamed-chunk-11-1.svg" width="960"></p>
-<p>And plot weighted by a range of variants of raw document frequencies. The y-axis shows relative values (z-scores), with positive being higher than the weight’s mean. From this, you can see what types of terms the scheme gives more weight:</p>
+<p>And plot weighted by a range of variants of raw document frequencies.
+The y-axis shows relative values (z-scores), with positive being higher
+than the weight’s mean. From this, you can see what types of terms the
+scheme gives more weight:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># available document weight types</span>
 <span class="va">doc_weights</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'df'</span>, <span class="st">'dflog'</span>, <span class="st">'dfmax'</span>, <span class="st">'dfmlog'</span>, <span class="st">'normal'</span>,
@@ -291,7 +331,8 @@
   sud <span class="op">=</span> <span class="st">'All term frequencies are 1.'</span>
 <span class="op">)</span></code></pre></div>
 <p><img src="introduction_files/figure-html/unnamed-chunk-12-1.svg" width="960"></p>
-<p>Some document weight types are sensitive to term frequency, so it can be interesting to see two extremes:</p>
+<p>Some document weight types are sensitive to term frequency, so it can
+be interesting to see two extremes:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># here, counts increase from 1 to 20, and appear in 1 to 20 documents,</span>
 <span class="co"># so less common terms also have lower term frequencies</span>
@@ -310,7 +351,8 @@
   sud <span class="op">=</span> <span class="st">'Non-zero terms are the number of zero terms + 1.'</span>
 <span class="op">)</span></code></pre></div>
 <p><img src="introduction_files/figure-html/unnamed-chunk-13-2.svg" width="960"></p>
-<p>We can weight our example dtm and see how it affects the correlation between documents:</p>
+<p>We can weight our example dtm and see how it affects the correlation
+between documents:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># idf dampens common words</span>
 <span class="fu"><a href="../reference/lma_simets.html">lma_simets</a></span><span class="op">(</span><span class="fu"><a href="../reference/lma_weight.html">lma_weight</a></span><span class="op">(</span><span class="va">dtm</span>, <span class="st">'idf'</span><span class="op">)</span>, <span class="st">'pearson'</span><span class="op">)</span>
@@ -329,15 +371,20 @@
 <span class="co">#&gt; [2,]  0.85434575  I          .         .</span>
 <span class="co">#&gt; [3,] -0.03475687 -0.03813932 I         .</span>
 <span class="co">#&gt; [4,] -0.05282330 -0.04472950 0.9891512 I</span></code></pre></div>
-<p>For now, we’ll just apply standard word count (frequency) weighting, sometimes called normalization:</p>
+<p>For now, we’ll just apply standard word count (frequency) weighting,
+sometimes called normalization:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">wdtm</span> <span class="op">=</span> <span class="fu"><a href="../reference/lma_weight.html">lma_weight</a></span><span class="op">(</span><span class="va">dtm</span><span class="op">)</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="dimension-reduction">Dimension Reduction<a class="anchor" aria-label="anchor" href="#dimension-reduction"></a>
 </h2>
-<p>A more thorough way to change the dtm space is by reducing its dimensions. This is effectively what <a href="http://liwc.wpengine.com" class="external-link">LIWC</a> (or any dictionary-based approach) does – reducing the number of terms by combining them into categories.</p>
-<p>The default, internal dictionary (<code><a href="../reference/lma_dict.html">?lma_dict</a></code>) contains function word categories:</p>
+<p>A more thorough way to change the dtm space is by reducing its
+dimensions. This is effectively what <a href="http://liwc.wpengine.com" class="external-link">LIWC</a> (or any dictionary-based
+approach) does – reducing the number of terms by combining them into
+categories.</p>
+<p>The default, internal dictionary (<code><a href="../reference/lma_dict.html">?lma_dict</a></code>) contains
+function word categories:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">rwdtm</span> <span class="op">=</span> <span class="fu"><a href="../reference/lma_termcat.html">lma_termcat</a></span><span class="op">(</span><span class="va">wdtm</span><span class="op">)</span>
 <span class="va">rwdtm</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">]</span>
@@ -350,7 +397,8 @@
 <div class="section level2">
 <h2 id="language-style-matching">Language Style Matching<a class="anchor" aria-label="anchor" href="#language-style-matching"></a>
 </h2>
-<p>The way we’ve set things up allows us to look at the standard Language Style Matching calculation:</p>
+<p>The way we’ve set things up allows us to look at the standard
+Language Style Matching calculation:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/lma_simets.html">lma_simets</a></span><span class="op">(</span><span class="va">rwdtm</span>, <span class="st">'canberra'</span><span class="op">)</span>
 <span class="co">#&gt; 4 x 4 sparse Matrix of class "dtCMatrix" (unitriangular)</span>
@@ -368,12 +416,16 @@
 <span class="co">#&gt; [2,] 0.4862434 I         .         .</span>
 <span class="co">#&gt; [3,] 0.2560134 0.4837410 I         .</span>
 <span class="co">#&gt; [4,] 0.3273152 0.3350735 0.5571444 I</span></code></pre></div>
-<p>What makes language style matching “Language Style Matching” is our choice of weighting, dimension reduction, and similarity metric.</p>
+<p>What makes language style matching “Language Style Matching” is our
+choice of weighting, dimension reduction, and similarity metric.</p>
 </div>
 <div class="section level2">
 <h2 id="latent-semantic-similarity">Latent Semantic Similarity<a class="anchor" aria-label="anchor" href="#latent-semantic-similarity"></a>
 </h2>
-<p>For example, if we were to exclude function words, weight by term frequency - inverse document frequency, use a latent semantic space to reduce dimensions, and cosine similarity to measure matching, it would be “latent semantic similarity”:</p>
+<p>For example, if we were to exclude function words, weight by term
+frequency - inverse document frequency, use a latent semantic space to
+reduce dimensions, and cosine similarity to measure matching, it would
+be “latent semantic similarity”:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">dtm</span> <span class="op">=</span> <span class="fu"><a href="../reference/lma_dtm.html">lma_dtm</a></span><span class="op">(</span><span class="va">text</span>, <span class="st">'function'</span><span class="op">)</span>
 <span class="va">wdtm</span> <span class="op">=</span> <span class="fu"><a href="../reference/lma_weight.html">lma_weight</a></span><span class="op">(</span><span class="va">dtm</span>, <span class="st">'tf-idf'</span><span class="op">)</span>
@@ -388,7 +440,9 @@
 <hr>
 <div style="text-align:center">
 <div class="figure">
-<img src="https://www.depts.ttu.edu/psy/lusi/files/lusi_transp.png" alt=""><p class="caption">Brought to you by the <a href="https://www.depts.ttu.edu/psy/lusi/resources.php" target="_blank" class="external-link">Language Use and Social Interaction</a> lab at Texas Tech University</p>
+<img src="https://www.depts.ttu.edu/psy/lusi/files/lusi_transp.png" alt=""><p class="caption">Brought to you by the
+<a href="https://www.depts.ttu.edu/psy/lusi/resources.php" target="_blank" class="external-link">Language
+Use and Social Interaction</a> lab at Texas Tech University</p>
 </div>
 </div>
 </div>

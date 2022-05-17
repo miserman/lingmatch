@@ -168,7 +168,7 @@ rbind(
 ## Decision Tree classifier
 
 Decision trees (learned by a recursive partitioning algorithm) are similar to the previous methods,
-but considering conditional differences in terms.
+but consider conditional differences in terms.
 
 ```{r, fig.height=4.5}
 library(rpart)
@@ -181,7 +181,7 @@ weight_dtree = rpart(data[train_ids, 'Recall'] ~ ., as.data.frame(as.matrix(dtm)
 rpart.plot(
   weight_dtree, extra = 2, mar = c(0, 0, 0, 0),
   branch.col = "white", split.box.col = "black", split.col = "white",
-  nn.box.col = "black", nn.col = "white"
+  nn.box.col = "black", nn.col = "white", space = 2
 )
 ```
 
@@ -193,7 +193,7 @@ but have the potential to pick up on different features.
 You can easily apply a range of other classifiers with the `caret` package (see
 [topepo.github.io/caret](https://topepo.github.io/caret)), which also adds some parameter tuning.
 
-Many models also have regularizing version available (that effectively select features),
+Many models also have regularizing versions available (that effectively select features),
 which is particularly useful when there are many features, as is often the case with text.
 
 ```{r}
@@ -328,9 +328,9 @@ by trying each option and measuring accuracy of the model within sample.
 ## Weight schemes
 
 For example, we might see if keeping or excluding stop words is best with
-different weighting schemes on the term-based model:
+different weighting schemes in the term-based model:
 
-```{r, fig.height=4}
+```{r, fig.height=5}
 # list every combination of term and document weights
 weights = c('pmi', 'ppmi', as.character(outer(
   c('binary', 'log', 'sqrt', 'count', 'amplify'),
@@ -374,12 +374,12 @@ for(exclude in c(TRUE, FALSE)){
   }
 }
 
+# note that dark = TRUE makes the text white, so you might need to remove it
 splot(
   weight_accuracies ~ weights, type = 'point', title = FALSE,
   leg.title = 'Stop words', laby = 'Overall Accuracy', labx = 'Weight Scheme',
-  lpos = 'bottomleft', note = FALSE, sort = TRUE, dark = TRUE
+  lpos = 'bottomleft', note = FALSE, sort = TRUE, mai = c(1.7, .5, 0, 0), dark = TRUE
 )
-
 ```
 
 ## Train-test splits

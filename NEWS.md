@@ -1,5 +1,8 @@
 # version 1.0.3
 
+### Improvements
+* Improves feedback when a directory has not been specified.
+
 ### Bug Fixes
 * Fixes lma_simets vector to matrix comparisons in some cases.
 * Fixes lma_dtm tokens.only when one text ends up empty.

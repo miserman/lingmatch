@@ -55,6 +55,8 @@ Comparing word vectors can provide semantic information. For example, we can see
 # such that terms are in rows and documents in columns
 tdm = t(dtm)
 (attribute_loadings = lma_simets(tdm, tdm[c('small', 'big'),], 'canberra'))
+
+# note that dark = TRUE makes the text white, so you might need to remove it
 splot(
   attribute_loadings[, 1] ~ attribute_loadings[, 2], type = 'scatter',
   lines = FALSE, laby = 'smallness', labx = 'bigness', dark = TRUE,
@@ -161,7 +163,7 @@ sims_best = cbind(
 # and look at where the animal words fall within that attribute space
 splot(
   smallness ~ bigness, sims_best, type = 'scatter', dark = TRUE,
-  lines = FALSE, add = text(y + .0017 ~ x, labels = terms[-(1:2)])
+  lines = FALSE, add = text(y + .0017 ~ I(x + 3e-4), labels = terms[-(1:2)])
 )
 ```
 
