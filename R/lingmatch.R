@@ -569,7 +569,7 @@ lingmatch = function(input = NULL, comp = mean, data = NULL, group = NULL, ..., 
         ug = unique(group[[1]])
         if(tomean){
           sal$symmetrical = TRUE
-          sim = data.frame(group[[1]], 1, stringsAsFactors = FALSE)
+          sim = data.frame(group[[1]], NA, stringsAsFactors = FALSE)
           colnames(sim) = c(opt$group, sal$metric)
           for(g in ug){
             su = group[[1]] == g
@@ -579,7 +579,7 @@ lingmatch = function(input = NULL, comp = mean, data = NULL, group = NULL, ..., 
               sim[su, -1] = if(length(sal$metric) == 1){
                 (colSums(gsim) - 1) / (ssu - 1)
               }else{
-                vapply(sal$metic, function(i) (colSums(gsim[[sal$metic[i]]]) - 1) / (ssu - 1), 0)
+                vapply(sal$metric, function(i) (colSums(gsim[[sal$metric[i]]]) - 1) / (ssu - 1), 0)
               }
             }
           }
@@ -588,7 +588,7 @@ lingmatch = function(input = NULL, comp = mean, data = NULL, group = NULL, ..., 
           sim = lapply(ug, function(g){
             su = group[[1]] == g
             if(sum(su) != 1) do.call(lma_simets, c(list(input[su, ]), sal)) else
-              numeric(length(sal$metric)) + 1
+              rep(NA, length(sal$metric))
           })
           names(sim) = ug
         }
@@ -784,7 +784,7 @@ lma_dtm = function(text, exclude = NULL, context = NULL, replace.special = TRUE,
     return(dtm)
   }
   if(is.null(text)) stop(substitute(text), ' not found')
-  if(is.character(text) && all(file.exists(text))){
+  if(is.character(text) && all(nchar(text) < 500) && all(file.exists(text))){
     text = if(length(text) != 1 || dir.exists(text)) read.segments(text) else readLines(text)
   }
   text = paste(' ', text, ' ')

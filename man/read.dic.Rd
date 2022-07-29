@@ -9,7 +9,8 @@ read.dic(path, cats, type = "asis", as.weighted = FALSE,
   dir = getOption("lingmatch.dict.dir"), ..., term.name = "term",
   category.name = "category", raw = FALSE)
 
-write.dic(dict, filename, type = "asis", as.weighted = FALSE, save = TRUE)
+write.dic(dict, filename, type = "asis", as.weighted = FALSE,
+  save = TRUE)
 }
 \arguments{
 \item{path}{Path to a file, a name corresponding to a file in \code{getOption('lingmatch.dict.dir')}

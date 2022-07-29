@@ -126,7 +126,8 @@ The dictionary contains the learned word-associations which will be used later t
 these for a sense of which terms are most important.
 
 ```{r, fig.height=5}
-# words sized by frequency, colored by speaker, and shaded by absolute difference
+# words sized by frequency, colored by associated gender,
+# and shaded by absolute difference
 library(wordcloud)
 library(splot)
 
@@ -393,7 +394,7 @@ Depending on the data and model, this can be slow, so we'll also parallelize it:
 ```{r, fig.height=4}
 library(parallel)
 
-# make an full dtm
+# make a full dtm
 full_dtm = lma_dtm(data$Recall_Text, lma_dict(), dc.min = 5)
 
 # make clusters

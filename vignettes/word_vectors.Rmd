@@ -33,7 +33,7 @@ A vector in this context is any set of values that represent one thing, so word 
 When loadings onto dimensions, sets of word vectors are sometimes called something along the lines of latent semantic spaces, embeddings, or distributed word representations. *Latent* loosely refers to the way information is stored within a dimension (the same concept as in factor or cluster analysis generally, as in Latent Dirichlet Allocation). *Semantic* refers to the word meanings that can be captured by dimensions, as seen in similarity between word vectors; the word's more precise meaning is represented across dimensions of more general and more latent meaning (in which sense it is also a *distributed* representation, though that could apply to any vector representation). *Embedding* either generally refers to the way word vectors are contained within the broader vector space, or, more specifically, to the way word meanings are contained within the broader semantic space.
 
 # In-sample vectors
-The <a href='https://miserman.github.io/lingmatch/#text_analysis' target='_blank' rel='nofollow'>introduction</a> mostly focused on the representation of documents as vectors within a common document-term space. With that same representation, we can focus on the term vectors instead. 
+The <a href='https://miserman.github.io/lingmatch/articles/introduction.html' target='_blank' rel='nofollow'>introduction</a> mostly focused on the representation of documents as vectors within a common document-term space. With that same representation, we can focus on the term vectors instead. 
 ```{r}
 library(splot)
 library(lingmatch)
@@ -104,7 +104,7 @@ lingmatch(
 )$sim
 ```
 
-These parameter decisions are often left unexamined, but have some potential to affect the ultimate characterization of the texts. One of `lingmatch`'s goals is to make some of these parameters easy to play with. See the <a href='https://miserman.github.io/lingmatch/#classification' rel='nofollow' target='_blank'>text classification vignette</a> for an example of this.
+These parameter decisions are often left unexamined, but have some potential to affect the ultimate characterization of the texts. One of `lingmatch`'s goals is to make some of these parameters easy to play with. See the <a href='https://miserman.github.io/lingmatch/articles/text_classification.html' rel='nofollow' target='_blank'>text classification vignette</a> for an example of this.
 
 ## Choosing a space
 

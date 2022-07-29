@@ -1,9 +1,12 @@
 library(lingmatch)
 library(splot)
 
+# unload to rebuild
+dyn.unload(system.file("libs/x64/lingmatch.dll", package = "lingmatch"))
+
 # builds documentation and site
 devtools::document()
-pkgdown::build_site()
+pkgdown::build_site(lazy = TRUE)
 covr::report(covr::package_coverage(quiet = FALSE), "docs/coverage.html")
 
 # makes sysdata.rda

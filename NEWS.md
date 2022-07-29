@@ -1,7 +1,11 @@
-# version 1.0.3
+# version 1.0.4
 
 ### Improvements
+* Avoids checking if long texts are files.
 * Improves feedback when a directory has not been specified.
+* Changes results of singular pairwise comparisons from 1 to NA.
+
+# version 1.0.3
 
 ### Bug Fixes
 * Fixes lma_simets vector to matrix comparisons in some cases.
