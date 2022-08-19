@@ -7,5 +7,8 @@ articles:
   quickstart: quickstart.html
   text_classification: text_classification.html
   word_vectors: word_vectors.html
-last_built: 2022-07-29T03:47Z
+last_built: 2022-08-19T04:21Z
+urls:
+  reference: https://miserman.github.io/lingmatch/reference
+  article: https://miserman.github.io/lingmatch/articles
 

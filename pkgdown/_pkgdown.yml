@@ -1,3 +1,5 @@
+url: https://miserman.github.io/lingmatch
+
 template:
   bootswatch: cyborg
   theme: arrow-dark
@@ -9,6 +11,7 @@ template:
     navbar-dark-active-color: "#fff !important"
     border-color: "#3e3e3e"
     dropdown-header-color: "#fff"
+    text-muted: "#747474"
 
 navbar:
   structure:
