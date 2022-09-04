@@ -289,8 +289,13 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
     dn <- gv(inp$dict)
     if (is.list(dn)) dn <- names(dn)
     if (any(!(ck <- dn %in% cn))) {
-      if ("prep" %in% dn && !"prep" %in% cn) colnames(input)[cn == "preps"] <- "prep"
-      if ("article" %in% dn && !"article" %in% cn) colnames(input)[cn == "articles"] <- "article"
+      cat_map <- structure(c(rep(colnames(lsm_profiles), 2), "article", "prep"), names = c(
+        colnames(lsm_profiles), "personal_pronouns", "impersonal_pronouns", "articles", "auxiliary_verbs",
+        "adverbs", "prepositions", "conjunctions", "negations", "quantifiers", "articles", "preps"
+      ))
+      cn <- sub("^liwc[ .:_-]+", "", tolower(cn))
+      tr <- cn %in% names(cat_map)
+      if (any(tr)) colnames(input)[tr] <- cat_map[cn[tr]]
       ck <- dn %in% colnames(input)
     }
     if (sum(ck) / length(ck) > .75) {

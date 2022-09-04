@@ -15,7 +15,7 @@
 #'   dictionary would only include one or another version of a word (e.g., the LIWC 2015 dictionary
 #'   does something like this with \emph{like}, and LIWC 2007 did something like this with
 #'   \emph{kind (of)}, both to try and clean up the posemo category).
-#' @param replace.special Logical: if \code{TRUE} (default), special characters are replaced with regular
+#' @param replace.special Logical: if \code{TRUE}, special characters are replaced with regular
 #'   equivalents using the \code{\link{lma_dict}} special function.
 #' @param numbers Logical: if \code{TRUE}, numbers are preserved.
 #' @param punct Logical: if \code{TRUE}, punctuation is preserved.
@@ -61,7 +61,7 @@
 #' lma_dtm(text)
 #' @export
 
-lma_dtm <- function(text, exclude = NULL, context = NULL, replace.special = TRUE, numbers = FALSE,
+lma_dtm <- function(text, exclude = NULL, context = NULL, replace.special = FALSE, numbers = FALSE,
                     punct = FALSE, urls = TRUE, emojis = FALSE, to.lower = TRUE, word.break = " +", dc.min = 0,
                     dc.max = Inf, sparse = TRUE, tokens.only = FALSE) {
   if (!is.null(dim(text))) {
@@ -96,10 +96,8 @@ lma_dtm <- function(text, exclude = NULL, context = NULL, replace.special = TRUE
   }
   text <- paste(" ", text, " ")
   st <- proc.time()[[3]]
-  if (replace.special) {
-    text <- lma_dict("special", as.function = gsub)(text)
-    text <- gsub("(?<=[^a-z0-9])'|'(?=[^a-z0-9])", '"', text, TRUE, TRUE)
-  }
+  if (replace.special) text <- lma_dict("special", as.function = gsub)(text)
+  text <- gsub("(?<=[^a-z0-9])'|'(?=[^a-z0-9])", '"', text, TRUE, TRUE)
   if (!urls) {
     text <- gsub(paste0(
       "\\s[a-z]+://[^\\s]*|www\\.[^\\s]*|\\s[a-z_~-]+\\.[a-z_~-]{2,}[^\\s]*|\\s[a-z_~-]+\\.",
@@ -107,8 +105,8 @@ lma_dtm <- function(text, exclude = NULL, context = NULL, replace.special = TRUE
     ), " repurl ", text, TRUE, TRUE)
     text <- gsub("(?<=[A-Z])\\.\\s", " ", text, perl = TRUE)
   }
-  text <- gsub("\\s+", " ", text, perl = TRUE)
-  text <- gsub("\\s(etc|st|rd|ft|feat|dr|drs|mr|ms|mrs|messrs|jr|prof)\\.", " \\1tempperiod", text)
+  text <- gsub("\\s+", " ", text)
+  text <- gsub("\\s(etc|st|rd|ft|feat|dr|drs|mr|ms|mrs|messrs|jr|prof)\\.", " \\1tempperiod", text, TRUE)
   text <- gsub("\\s\\.|\\.\\s", " . ", text)
   if (any(punct, emojis, !is.null(context))) {
     special <- lma_dict(special)[[1]]

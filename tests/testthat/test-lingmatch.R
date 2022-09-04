@@ -44,6 +44,11 @@ test_that("different input formats have the same results (LSM)", {
   expect_equal(as.numeric(lingmatch(cdtm, type = "lsm")$sim), manual)
   colnames(cdtm)[c(3, 6)] <- c("articles", "preps")
   expect_equal(as.numeric(lingmatch(cdtm, type = "lsm")$sim), manual)
+  colnames(cdtm) <- paste0("liwc.", c(
+    "personal_pronouns", "impersonal_pronouns", "articles", "auxiliary_verbs",
+    "adverbs", "prepositions", "conjunctions", "negations", "quantifiers"
+  ))
+  expect_equal(as.numeric(lingmatch(cdtm, type = "lsm")$sim), manual)
 })
 
 test_that("different input formats have the same results (LSA)", {

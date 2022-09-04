@@ -4,7 +4,7 @@
 \alias{lma_dtm}
 \title{Document-Term Matrix Creation}
 \usage{
-lma_dtm(text, exclude = NULL, context = NULL, replace.special = TRUE,
+lma_dtm(text, exclude = NULL, context = NULL, replace.special = FALSE,
   numbers = FALSE, punct = FALSE, urls = TRUE, emojis = FALSE,
   to.lower = TRUE, word.break = " +", dc.min = 0, dc.max = Inf,
   sparse = TRUE, tokens.only = FALSE)
@@ -27,7 +27,7 @@ dictionary would only include one or another version of a word (e.g., the LIWC 2
 does something like this with \emph{like}, and LIWC 2007 did something like this with
 \emph{kind (of)}, both to try and clean up the posemo category).}
 
-\item{replace.special}{Logical: if \code{TRUE} (default), special characters are replaced with regular
+\item{replace.special}{Logical: if \code{TRUE}, special characters are replaced with regular
 equivalents using the \code{\link{lma_dict}} special function.}
 
 \item{numbers}{Logical: if \code{TRUE}, numbers are preserved.}

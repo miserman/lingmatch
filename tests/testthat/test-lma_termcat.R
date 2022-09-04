@@ -4,10 +4,12 @@ options(encoding = "latin1", stringsAsFactors = FALSE)
 words <- vapply(seq_len(5e3), function(w) paste0(sample(letters, 5), collapse = ""), "")
 
 test_that("term.weights work", {
+  words <- vapply(seq_len(5e3), function(w) paste0(sample(letters, 7), collapse = ""), "")
+  words <- words[!duplicated(substr(words, 1, 6))]
   category <- structure(rnorm(100), names = sample(words, 100))
   dtm <- matrix(rpois(100 * 10, 1), 100, dimnames = list(NULL, sample(names(category), 10)))
   score <- (dtm %*% category[colnames(dtm)])[, 1]
-  names(category) <- sub("\\w$", "*", names(category))
+  names(category) <- paste0(substr(names(category), 1, 6), "*")
   sepcat <- data.frame(terms = names(category), weights = as.numeric(category))
   expect_equal(lma_termcat(dtm, category)[, 1], score)
   expect_equal(lma_termcat(dtm, list(a = category), list(a = category))[, 1], score)
