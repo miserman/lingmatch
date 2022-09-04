@@ -38,13 +38,13 @@ The <a href='https://miserman.github.io/lingmatch/articles/introduction.html' ta
 library(splot)
 library(lingmatch)
 
-texts = c(
-  'Frogs are small.',
-  'Crickets are small.',
-  'Horses are big.',
-  'Whales are big.'
+texts <- c(
+  "Frogs are small.",
+  "Crickets are small.",
+  "Horses are big.",
+  "Whales are big."
 )
-(dtm = lma_dtm(texts))
+(dtm <- lma_dtm(texts))
 ```
 Here, columns represent words in terms of their occurrence in 4 contexts (here, sentences), and rows provide co-occurrence information.
 
@@ -53,13 +53,14 @@ Comparing word vectors can provide semantic information. For example, we can see
 ```{r, fig.height=4, fig.width=10}
 # the t function transposes the document-term matrix
 # such that terms are in rows and documents in columns
-tdm = t(dtm)
-(attribute_loadings = lma_simets(tdm, tdm[c('small', 'big'),], 'canberra'))
+tdm <- t(dtm)
+(attribute_loadings <- lma_simets(tdm, tdm[c("small", "big"), ], "canberra"))
 
 # note that dark = TRUE makes the text white, so you might need to remove it
 splot(
-  attribute_loadings[, 1] ~ attribute_loadings[, 2], type = 'scatter',
-  lines = FALSE, laby = 'smallness', labx = 'bigness', dark = TRUE,
+  attribute_loadings[, 1] ~ attribute_loadings[, 2],
+  type = "scatter",
+  lines = FALSE, laby = "smallness", labx = "bigness", dark = TRUE,
   add = text(
     y + .05 + c(0, 0, 0, -.09, 0, 0, -.09) ~ x,
     labels = rownames(attribute_loadings)
@@ -72,14 +73,14 @@ The similarity measures between raw occurrence vectors form new, collapsed vecto
 # documents are already similar as expected
 # (with 1 <-> 2 and 3 <-> 4 being more, the rest less similar)
 # due to their overlap in the attribute words
-lma_simets(dtm, 'canberra')
+lma_simets(dtm, "canberra")
 
 # but mapping them to the attribute space
 # (dtm %*% space, forming a Document-Dimension Matrix)
-(ddm = lma_lspace(dtm, space = attribute_loadings))
+(ddm <- lma_lspace(dtm, space = attribute_loadings))
 
 # the similarity between animal words can also contribute
-lma_simets(ddm, 'canberra')
+lma_simets(ddm, "canberra")
 ```
 
 
@@ -93,14 +94,15 @@ Similarity between documents that have been mapped to embeddings is sometimes ca
 
 For Latent Semantic Similarity, the Document-Term Matrix is usually initially weighted (as by Term-Frequency Inverse Document Frequency or Pointwise Mutual Information schemes), and has stop words removed (though that isn't relevant in this case, since "are" appears in all documents), then mapped to a Singular Value Decomposition space, and similarity is measured by cosine similarity. These settings are default for the `'lsa'` type (using the "100k_lsa" space):
 ```{r}
-lingmatch(texts, type = 'lsa')$sim
+lingmatch(texts, type = "lsa")$sim
 ```
 
 For Word Centroid Distance, the DTM usually also has stop words removed, but might then be frequency weighted (normalized), mapped to a word2vec space, and have distances measured by Euclidean distance (which is inverted here for similarity):
 ```{r}
 lingmatch(
-  texts, exclude = 'function', weight = 'freq',
-  space = 'google', metric = 'euclidean'
+  texts,
+  exclude = "function", weight = "freq",
+  space = "google", metric = "euclidean"
 )$sim
 ```
 
@@ -112,57 +114,60 @@ These parameter decisions are often left unexamined, but have some potential to 
 One simple thing to look at when choosing a space is its coverage of the terms that appear in your set of texts. You can do this without downloading all spaces by looking at the [common term map](https://osf.io/yauzm), which is what the `select.lspace` function does when terms are entered as the first argument:
 ```{R}
 # some relatively rare terms for their formatting or narrow uses
-terms = c('part-time', 'i/o', "'cause", 'brexit', 'debuffs')
+terms <- c("part-time", "i/o", "'cause", "brexit", "debuffs")
 
 # select.lspace returns more information about each space,
 # as well as the full common term map
-spaces = select.lspace(terms)
+spaces <- select.lspace(terms)
 
 # the "selected" entry contains the top 5 spaces in terms of coverage
-spaces$selected[, c('terms', 'coverage')]
+spaces$selected[, c("terms", "coverage")]
 ```
 
 ### Term similarity
 Another possible, though more intensive thing to look at might be similarities between words of particular interest. In our initial set of texts, for example, we were looking at animals in relation to attributes, so we might look at those relationships in whatever spaces you've downloaded:
 ```{r, fig.height=4, fig.width=10}
 # retrieve names of downloaded spaces
-space_names = unique(sub('\\..*$', '', list.files('~/Latent Semantic Spaces', 'dat')))
+space_names <- unique(sub("\\..*$", "", list.files("~/Latent Semantic Spaces", "dat")))
 
 # define a few terms of interest
-terms = c('small', 'big', 'frogs', 'crickets', 'horses', 'whales')
+terms <- c("small", "big", "frogs", "crickets", "horses", "whales")
 
 # retrieve the terms from each space,
 # and calculate their similarities if all are found
-similarities = do.call(rbind, lapply(space_names, function(name){
-  lss = tryCatch(lma_lspace(terms, name), error = function(e) NULL)
-  if(all(terms %in% rownames(lss))){
-    lma_simets(lss, 'canberra')@x
-  }else numeric(length(terms) * (length(terms) - 1) / 2)
+similarities <- do.call(rbind, lapply(space_names, function(name) {
+  lss <- tryCatch(lma_lspace(terms, name), error = function(e) NULL)
+  if (all(terms %in% rownames(lss))) {
+    lma_simets(lss, "canberra")@x
+  } else {
+    numeric(length(terms) * (length(terms) - 1) / 2)
+  }
 }))
-dimnames(similarities) = list(
+dimnames(similarities) <- list(
   space_names,
-  outer(terms, terms, paste, sep = ' <-> ')[lower.tri(diag(length(terms)))]
+  outer(terms, terms, paste, sep = " <-> ")[lower.tri(diag(length(terms)))]
 )
 
 # sort by relationships of interest,
 # where, e.g., horses <-> big and frogs <-> small should be big,
 # and frogs <-> horses should be small
-weights = structure(
+weights <- structure(
   c(-1, 1, 1, -.5, -.5, -.5, -.5, 1, 1, 1, -.5, -.5, -.5, -.5, 1),
   names = colnames(similarities)
 )
-similarities = similarities[order(-similarities %*% weights),]
+similarities <- similarities[order(-similarities %*% weights), ]
 t(similarities[1, weights == 1, drop = FALSE])
 
 # retrieve the attribute similarities in the best space
-sims_best = cbind(
-  smallness = similarities[1, grep('small', colnames(similarities))[-1]],
-  bigness = similarities[1, grep('big', colnames(similarities))[-1]]
+sims_best <- cbind(
+  smallness = similarities[1, grep("small", colnames(similarities))[-1]],
+  bigness = similarities[1, grep("big", colnames(similarities))[-1]]
 )
 
 # and look at where the animal words fall within that attribute space
 splot(
-  smallness ~ bigness, sims_best, type = 'scatter', dark = TRUE,
+  smallness ~ bigness, sims_best,
+  type = "scatter", dark = TRUE,
   lines = FALSE, add = text(y + .0017 ~ I(x + 3e-4), labels = terms[-(1:2)])
 )
 ```
@@ -171,27 +176,29 @@ splot(
 One of the problems embeddings try to solve is the crispiness of single terms---there may be many terms that are strictly different but have similar meanings. With that in mind, it might also make sense to fuzzify target dimensions in the above example with something like synonym centroids or concept vectors:
 ```{r, fig.height=4, fig.width=10}
 # now our attributes will be sets of terms
-concepts = list(
-  small = c('small', 'little', 'tiny', 'miniscule', 'diminutive'),
-  big = c('big', 'large', 'huge', 'massive', 'enormous', 'gigantic')
+concepts <- list(
+  small = c("small", "little", "tiny", "miniscule", "diminutive"),
+  big = c("big", "large", "huge", "massive", "enormous", "gigantic")
 )
 
 # extract all single terms from the space
-lss_exp = lma_lspace(c(terms, unlist(concepts)), rownames(similarities)[1])
+lss_exp <- lma_lspace(c(terms, unlist(concepts)), rownames(similarities)[1])
 
 # then replace the initial seed word vectors with their aggregated versions
-lss_exp['small',] = colMeans(lss_exp[rownames(lss_exp) %in% concepts$small,])
-lss_exp['big',] = colMeans(lss_exp[rownames(lss_exp) %in% concepts$big,])
+lss_exp["small", ] <- colMeans(lss_exp[rownames(lss_exp) %in% concepts$small, ])
+lss_exp["big", ] <- colMeans(lss_exp[rownames(lss_exp) %in% concepts$big, ])
 
 # calculate similarities to those new aggregate vectors
-sims_best_fuz = lma_simets(
-  lss_exp[terms,], 'canberra', symmetrical = TRUE
-)[-(1:2), c('small', 'big')]
+sims_best_fuz <- lma_simets(
+  lss_exp[terms, ], "canberra",
+  symmetrical = TRUE
+)[-(1:2), c("small", "big")]
 
 # and see if animal relationships are improved
 splot(
-  sims_best_fuz[, 'small'] ~ sims_best_fuz[, 'big'], type = 'scatter',
-  lines = FALSE, laby = 'smallness', labx = 'bigness', dark = TRUE,
+  sims_best_fuz[, "small"] ~ sims_best_fuz[, "big"],
+  type = "scatter",
+  lines = FALSE, laby = "smallness", labx = "bigness", dark = TRUE,
   add = text(y + .0014 ~ x, labels = rownames(sims_best_fuz))
 )
 ```
@@ -201,22 +208,27 @@ The best way to learn animal attributes in general would probably come down to t
 Topic extraction tends to use models fit within a sample, and considers fewer dimensions. Its goal is often to interpret dimensions directly by inspecting the highest loading terms, which can result in something like a dictionary---sets of topics or categories containing associated terms. By loading in a full space (as opposed to just a selection of vectors, as we've been doing), we can look at the same thing in pretrained embeddings:
 ```{r, fig.height=2, fig.width=10}
 # load in the full "100k" space
-lss = lma_lspace('100k')
-structure(dim(lss), names = c('terms', 'dimensions'))
+lss <- lma_lspace("100k")
+structure(dim(lss), names = c("terms", "dimensions"))
 
 # make a function to more easily retrieve terms
-top_terms = function(dims, space, nterms = 30){
-  terms = sort(rowMeans(space[, dims, drop = FALSE]), TRUE)[seq_len(nterms)]
+top_terms <- function(dims, space, nterms = 30) {
+  terms <- sort(rowMeans(space[, dims, drop = FALSE]), TRUE)[seq_len(nterms)]
   splot(
-    terms ~ names(terms), colorby = terms, leg = FALSE, sort = TRUE, dark = TRUE,
-    type = 'bar', laby = FALSE, labx = FALSE, title = paste('dimension',
-      if(length(dims) != 1 && sum(dims) == sum(seq_along(dims)))
-        paste0(dims[1], '-', dims[length(dims)]) else paste(dims, collapse = ', ')
+    terms ~ names(terms),
+    colorby = terms, leg = FALSE, sort = TRUE, dark = TRUE,
+    type = "bar", laby = FALSE, labx = FALSE, title = paste(
+      "dimension",
+      if (length(dims) != 1 && sum(dims) == sum(seq_along(dims))) {
+        paste0(dims[1], "-", dims[length(dims)])
+      } else {
+        paste(dims, collapse = ", ")
+      }
     )
   )
 }
 # now we can see the top-loading terms on single dimensions
-for(d in 1:3) top_terms(d, lss)
+for (d in 1:3) top_terms(d, lss)
 # or top-loading terms on aggregated dimensions
 top_terms(1:5, lss)
 # even across all dimensions
@@ -226,21 +238,21 @@ top_terms(seq_len(ncol(lss)), lss)
 It can also be interesting to use a term to select dimensions to look at:
 ```{r, fig.height=2.5, fig.width=10}
 # this selects the 10 dimensions on which "whales" loads most
-top_terms(order(-lss['whales',])[1:10], lss)
+top_terms(order(-lss["whales", ])[1:10], lss)
 ```
 
 # Dictionaries as embeddings
 It can also be kind of interesting to think of dictionaries as forms of embeddings, either as binary or with weighted regions and sharp drop-offs:
 ```{r}
 # take a small, weighted, sexed family dictionary
-family = list(
+family <- list(
   female = c(mother = 1, wife = .9, sister = .8, grandma = .7, aunt = .6),
   male = c(father = 1, husband = .9, brother = .8, grandpa = .7, uncle = .6)
 )
-family_terms = unlist(lapply(family, names), use.names = FALSE)
+family_terms <- unlist(lapply(family, names), use.names = FALSE)
 
 # then make a latent space out of it
-(family_space = cbind(
+(family_space <- cbind(
   family = structure(unlist(family), names = family_terms),
   female = family_terms %in% names(family$female),
   male = family_terms %in% names(family$male)
@@ -250,19 +262,19 @@ family_terms = unlist(lapply(family, names), use.names = FALSE)
 In this simple space, you can solve analogies like you can in pretrained spaces [as in @mikolov:2013]:
 ```{r}
 # function to abstract the process
-guess_analog = function(x, y, asx, space, metric = 'canberra'){
+guess_analog <- function(x, y, asx, space, metric = "canberra") {
   sort(lma_simets(
-    space, space[y,] - space[x,] + space[asx,], metric
+    space, space[y, ] - space[x, ] + space[asx, ], metric
   ), TRUE)
 }
 
 ## i.e., sister is to brother as aunt is to _____.
-guess_analog('sister', 'brother', 'aunt', family_space)[1:3]
+guess_analog("sister", "brother", "aunt", family_space)[1:3]
 
 # compare with a pretrained space in the same restricted term set
 guess_analog(
-  'sister', 'brother', 'aunt',
-  lma_lspace(family_terms, 'google')
+  "sister", "brother", "aunt",
+  lma_lspace(family_terms, "google")
 )[1:3]
 ```
 

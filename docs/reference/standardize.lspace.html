@@ -58,7 +58,7 @@ are processed line-by-line, so large spaces can be reformatted RAM-conservativel
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Standardize a Latent Semantic Space</h1>
-      <small class="dont-index">Source: <a href="https://github.com/miserman/lingmatch/blob/HEAD/R/utils.R" class="external-link"><code>R/utils.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/miserman/lingmatch/blob/HEAD/R/standardize.lspace.R" class="external-link"><code>R/standardize.lspace.R</code></a></small>
       <div class="d-none name"><code>standardize.lspace.Rd</code></div>
     </div>
 
@@ -143,13 +143,12 @@ Only applies to plain-text files.</p></dd>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># from https://sites.google.com/site/fritzgntr/software-resources/semantic_spaces</span></span></span>
-<span class="r-in"><span><span class="fu">standardize.lspace</span><span class="op">(</span><span class="st">'EN_100k_lsa.rda'</span>, <span class="st">'100k_lsa'</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">standardize.lspace</span><span class="op">(</span><span class="st">"EN_100k_lsa.rda"</span>, <span class="st">"100k_lsa"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># from https://fasttext.cc/docs/en/english-vectors.html</span></span></span>
-<span class="r-in"><span><span class="fu">standardize.lspace</span><span class="op">(</span><span class="st">'crawl-300d-2M.vec'</span>, <span class="st">'facebook_crawl'</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">standardize.lspace</span><span class="op">(</span><span class="st">"crawl-300d-2M.vec"</span>, <span class="st">"facebook_crawl"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Standardized versions of these spaces can also be downloaded with download.lspace.</span></span></span>
-<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>

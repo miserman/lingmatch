@@ -43,10 +43,10 @@ With these examples, we can train a classifier to predict whether a text is desc
 
 ```{r}
 # download and load the data
-data = read.csv('https://osf.io/download/vyste')
+data <- read.csv("https://osf.io/download/vyste")
 
 # remove duplicate and empty texts
-data = data[data$phase == 'Pre' & data$Recall_Text != '',]
+data <- data[data$phase == "Pre" & data$Recall_Text != "", ]
 ```
 
 ## Make a train-test split
@@ -61,17 +61,17 @@ held-out portion of our sample can make for a guess at the classifier's future p
 table(data$Recall) / nrow(data)
 
 # define a train sample by drawing 70% of each class
-classes = sort(unique(data$Recall))
-train_ids = unlist(lapply(classes, function(class){
-  class_ids = which(data$Recall == class)
+classes <- sort(unique(data$Recall))
+train_ids <- unlist(lapply(classes, function(class) {
+  class_ids <- which(data$Recall == class)
   sample(class_ids, length(class_ids) * .7)
 }), use.names = FALSE)
 
 # now you have two datasets with similar class distributions
 data.frame(
-  rbind(table(data[-train_ids, 'Recall']), table(data[train_ids, 'Recall'])),
+  rbind(table(data[-train_ids, "Recall"]), table(data[train_ids, "Recall"])),
   total = c(nrow(data) - length(train_ids), length(train_ids)),
-  row.names = c('test', 'train')
+  row.names = c("test", "train")
 )
 ```
 
@@ -89,14 +89,14 @@ library(lingmatch)
 
 # lma_dict() in the second position excludes function words
 # dc.min excludes terms with document-frequencies less than or equal to the set value
-dtm = lma_dtm(data$Recall_Text, lma_dict(), dc.min = 5)
+dtm <- lma_dtm(data$Recall_Text, lma_dict(), dc.min = 5)
 
 # extract the test rows
 # splitting after creating a dtm ensures features are consistent between splits,
 # but be cognizant of information passing between splits (such as if you were to
 # document weight before splitting)
-test_dtm = dtm[-train_ids,]
-dtm = dtm[train_ids,]
+test_dtm <- dtm[-train_ids, ]
+dtm <- dtm[train_ids, ]
 ```
 
 # Train a classifier
@@ -112,11 +112,12 @@ each class, containing class-related terms.
 
 ```{r}
 # calculate differences in binary document counts (probabilities) between classes
-feminine_texts = data[train_ids, 'Recall'] == 'Feminine'
-term_diffs = colMeans(dtm[feminine_texts,] != 0) - colMeans(dtm[!feminine_texts,] != 0)
+feminine_texts <- data[train_ids, "Recall"] == "Feminine"
+term_diffs <- colMeans(dtm[feminine_texts, ] != 0) -
+  colMeans(dtm[!feminine_texts, ] != 0)
 
 # make a dictionary from the 40 most differing terms for each class
-dict = list(
+dict <- list(
   Feminine = sort(term_diffs, TRUE)[1:40],
   Masculine = -sort(term_diffs)[1:40]
 )
@@ -131,9 +132,10 @@ these for a sense of which terms are most important.
 library(wordcloud)
 library(splot)
 
-terms = unlist(lapply(dict, names), use.names = FALSE)
+terms <- unlist(lapply(dict, names), use.names = FALSE)
 wordcloud(
-  terms, sqrt(colSums(dtm[, terms])), scale = c(4, 1),
+  terms, sqrt(colSums(dtm[, terms])),
+  scale = c(4, 1),
   min.freq = 0, random.order = FALSE,
   random.color = FALSE, rot.per = 0, ordered.colors = TRUE, fixed.asp = FALSE,
   colors = splot.color(
@@ -142,8 +144,9 @@ wordcloud(
   )
 )
 legend(
-  'topleft', legend = names(dict), text.col = splot.color(),
-  text.font = 2, bty = 'n'
+  "topleft",
+  legend = names(dict), text.col = splot.color(),
+  text.font = 2, bty = "n"
 )
 ```
 
@@ -153,16 +156,18 @@ The Bernoulli Naïve Bayes classifier uses the same information, but will often 
 
 ```{r}
 library(naivebayes)
-weights_nb = bernoulli_naive_bayes(
-  (dtm != 0) * 1, data[train_ids, 'Recall'], laplace = 1
+weights_nb <- bernoulli_naive_bayes(
+  (dtm != 0) * 1, data[train_ids, "Recall"],
+  laplace = 1
 )
 
 # what's returned is just the smoothed, conditional probability of each term
-laplace = 1
+laplace <- 1
 rbind(
-  manual = tapply(dtm[, 'dress'] != 0, data[train_ids, 'Recall'], function(x)
-    (sum(x) + laplace) / (length(x) + laplace * 2)),
-  package = weights_nb$prob1['dress',]
+  manual = tapply(dtm[, "dress"] != 0, data[train_ids, "Recall"], function(x) {
+    (sum(x) + laplace) / (length(x) + laplace * 2)
+  }),
+  package = weights_nb$prob1["dress", ]
 )
 ```
 
@@ -175,12 +180,13 @@ but consider conditional differences in terms.
 library(rpart)
 library(rpart.plot)
 
-weight_dtree = rpart(data[train_ids, 'Recall'] ~ ., as.data.frame(as.matrix(dtm)))
+weight_dtree <- rpart(data[train_ids, "Recall"] ~ ., as.data.frame(as.matrix(dtm)))
 
 # default settings often select very few features,
 # making these models particularly interpretable
 rpart.plot(
-  weight_dtree, extra = 2, mar = c(0, 0, 0, 0),
+  weight_dtree,
+  extra = 2, mar = c(0, 0, 0, 0),
   branch.col = "white", split.box.col = "black", split.col = "white",
   nn.box.col = "black", nn.col = "white", space = 2
 )
@@ -199,7 +205,7 @@ which is particularly useful when there are many features, as is often the case 
 
 ```{r}
 library(caret)
-weights_svm = train(as.matrix(dtm), data[train_ids, 'Recall'], 'svmLinear3')
+weights_svm <- train(as.matrix(dtm), data[train_ids, "Recall"], "svmLinear3")
 ```
 
 ## Neural Network classifiers
@@ -218,10 +224,10 @@ library(keras)
 
 # process texts in the same way, but add tokens.only = TRUE to preserve sequence
 # information
-tokenized = lma_dtm(data$Recall_Text, lma_dict(), dc.min = 5, tokens.only = TRUE)
+tokenized <- lma_dtm(data$Recall_Text, lma_dict(), dc.min = 5, tokens.only = TRUE)
 
 # specify your layers
-weights_neural = keras_model_sequential(list(
+weights_neural <- keras_model_sequential(list(
   # this set of layers translates input sequences of word indices to
   # small embeddings, which are learned on the fly,
   # then averages over the set of embeddings for a single text-centroid vector
@@ -229,18 +235,19 @@ weights_neural = keras_model_sequential(list(
   layer_global_average_pooling_1d(),
 
   # these are more or less arbitrary layers that can be played with more freely
-  layer_dense(units = 16, activation = 'relu'),
+  layer_dense(units = 16, activation = "relu"),
   layer_dropout(rate = 0.5),
 
   # this is the final prediction layer, which converts the previous arbitrary layers
   # to a binary classification
-  layer_dense(units = 1, activation = 'sigmoid')
+  layer_dense(units = 1, activation = "sigmoid")
 ))
 
 # then compile the model (this changes the weights_neural object)
 compile(
-  weights_neural, loss = 'binary_crossentropy',
-  optimizer = 'adam', metrics = 'accuracy'
+  weights_neural,
+  loss = "binary_crossentropy",
+  optimizer = "adam", metrics = "accuracy"
 )
 
 # and train the model on the training sample
@@ -260,9 +267,9 @@ we can first use a convolution layer to calculated weighted sums over word windo
 ```{r}
 # load a set of pre-trained embeddings, with unrecognized terms added with
 # weights of 0
-space = lma_lspace(names(tokenized$tokens), 'glove', fill.missing = TRUE)
+space <- lma_lspace(names(tokenized$tokens), "glove", fill.missing = TRUE)
 
-weights_neural_glove = keras_model_sequential(list(
+weights_neural_glove <- keras_model_sequential(list(
   # this layer contains the loaded embeddings, which will not be adjusted
   # during training
   layer_embedding(
@@ -273,17 +280,18 @@ weights_neural_glove = keras_model_sequential(list(
 
   # this layer convolves (calculates weighted sums) over the
   # embeddings vectors within a window (set by kernel_size)
-  layer_conv_1d(filters = 16, kernel_size = 5, activation = 'relu'),
+  layer_conv_1d(filters = 16, kernel_size = 5, activation = "relu"),
 
   # same final layers as the initial model
   layer_global_average_pooling_1d(),
-  layer_dense(units = 16, activation = 'relu'),
+  layer_dense(units = 16, activation = "relu"),
   layer_dropout(rate = 0.5),
-  layer_dense(units = 1, activation = 'sigmoid')
+  layer_dense(units = 1, activation = "sigmoid")
 ))
 compile(
-  weights_neural_glove, loss = 'binary_crossentropy',
-  optimizer = 'adam', metrics = 'accuracy'
+  weights_neural_glove,
+  loss = "binary_crossentropy",
+  optimizer = "adam", metrics = "accuracy"
 )
 fit(
   weights_neural_glove,
@@ -300,13 +308,13 @@ then measure accuracy (percent of real test labels guessed correctly).
 
 ```{r}
 # prepare the testset index sequences for the neural predictions
-test_sequences = pad_sequences(tokenized$indices[-train_ids], max(tokenized$WC))
+test_sequences <- pad_sequences(tokenized$indices[-train_ids], max(tokenized$WC))
 
 # get predicted labels from each model
-predictions = data.frame(
+predictions <- data.frame(
   terms = classes[max.col(lma_termcat(test_dtm, dict))],
   bayes = predict(weights_nb, (test_dtm != 0) * 1),
-  dtree = predict(weight_dtree, as.data.frame(as.matrix(test_dtm)), 'class'),
+  dtree = predict(weight_dtree, as.data.frame(as.matrix(test_dtm)), "class"),
   svm = predict(weights_svm, test_dtm),
   neural = classes[(predict(weights_neural, test_sequences) < .5) + 1],
   neural_glove = classes[(predict(weights_neural_glove, test_sequences) < .5) + 1]
@@ -314,10 +322,10 @@ predictions = data.frame(
 
 # when you have multiple classifiers, you can also add an ensemble classifier based
 # on them by, for example, taking the most-predicted class
-predictions$ensemble = classes[(rowMeans(predictions == classes[1]) < .5) + 1]
+predictions$ensemble <- classes[(rowMeans(predictions == classes[1]) < .5) + 1]
 
 # overall accuracies
-data.frame(accuracy = colMeans(predictions == data[-train_ids, 'Recall']))
+data.frame(accuracy = colMeans(predictions == data[-train_ids, "Recall"]))
 ```
 
 # Testing decisions
@@ -333,53 +341,59 @@ different weighting schemes in the term-based model:
 
 ```{r, fig.height=5}
 # list every combination of term and document weights
-weights = c('pmi', 'ppmi', as.character(outer(
-  c('binary', 'log', 'sqrt', 'count', 'amplify'),
-  c('dflog', 'entropy', 'ppois', 'dpois', 'dfmlog', 'dfmax', 'df', 'idf',
-    'ridf', 'normal'),
-  paste, sep = '-'
+weights <- c("pmi", "ppmi", as.character(outer(
+  c("binary", "log", "sqrt", "count", "amplify"),
+  c(
+    "dflog", "entropy", "ppois", "dpois", "dfmlog", "dfmax", "df", "idf",
+    "ridf", "normal"
+  ),
+  paste,
+  sep = "-"
 )))
 
 # set up an empty matrix for results
-weight_accuracies = matrix(
-  numeric(length(weights) * 2), ncol = 2,
-  dimnames = list(weights, c('keep', 'exclude'))
+weight_accuracies <- matrix(
+  numeric(length(weights) * 2),
+  ncol = 2,
+  dimnames = list(weights, c("keep", "exclude"))
 )
 
 # loop through each stop word option
-for(exclude in c(TRUE, FALSE)){
+for (exclude in c(TRUE, FALSE)) {
   # reprocess texts with or without stop words removed
-  tdtm = lma_dtm(
-    data[train_ids, 'Recall_Text'], if(exclude) lma_dict() else NULL, dc.min = 5
+  tdtm <- lma_dtm(
+    data[train_ids, "Recall_Text"], if (exclude) lma_dict() else NULL,
+    dc.min = 5
   )
 
   # loop through each weighting scheme
-  for(weight in weights){
+  for (weight in weights) {
     # apply the weighting scheme
-    wdtm = lma_weight(tdtm, weight)
+    wdtm <- lma_weight(tdtm, weight)
 
     # calculate mean differences between classes for each term
-    wterm_diffs = colMeans(wdtm[feminine_texts,]) - colMeans(wdtm[!feminine_texts,])
+    wterm_diffs <- colMeans(wdtm[feminine_texts, ]) - colMeans(wdtm[!feminine_texts, ])
 
     # make dictionaries from the top 40 terms in each class
     # then calculate category scores (applying the same weight
     # scheme and taking the biggest as the class prediction)
-    wterm_preds = classes[max.col(lma_termcat(wdtm, list(
+    wterm_preds <- classes[max.col(lma_termcat(wdtm, list(
       Feminine = sort(wterm_diffs, TRUE)[1:40],
       Masculine = -sort(wterm_diffs)[1:40]
     )))]
 
     # add the resulting accuracy to the set of results
-    weight_accuracies[weight, exclude + 1] =
-      mean(wterm_preds == data[train_ids, 'Recall'])
+    weight_accuracies[weight, exclude + 1] <-
+      mean(wterm_preds == data[train_ids, "Recall"])
   }
 }
 
 # note that dark = TRUE makes the text white, so you might need to remove it
 splot(
-  weight_accuracies ~ weights, type = 'point', title = FALSE,
-  leg.title = 'Stop words', laby = 'Overall Accuracy', labx = 'Weight Scheme',
-  lpos = 'bottomleft', note = FALSE, sort = TRUE, mai = c(1.7, .5, 0, 0), dark = TRUE
+  weight_accuracies ~ weights,
+  type = "point", title = FALSE,
+  leg.title = "Stop words", laby = "Overall Accuracy", labx = "Weight Scheme",
+  lpos = "bottomleft", note = FALSE, sort = TRUE, mai = c(1.7, .5, 0, 0), dark = TRUE
 )
 ```
 
@@ -395,15 +409,15 @@ Depending on the data and model, this can be slow, so we'll also parallelize it:
 library(parallel)
 
 # make a full dtm
-full_dtm = lma_dtm(data$Recall_Text, lma_dict(), dc.min = 5)
+full_dtm <- lma_dtm(data$Recall_Text, lma_dict(), dc.min = 5)
 
 # make clusters
-cl = makeCluster(detectCores() - 2)
+cl <- makeCluster(detectCores() - 2)
 
 # load objects into clusters
-clusterExport(cl, c('classes', 'data', 'full_dtm'))
+clusterExport(cl, c("classes", "data", "full_dtm"))
 
-Model_Accuracies = do.call(rbind, parLapply(cl, seq_len(100), function(i){
+Model_Accuracies <- do.call(rbind, parLapply(cl, seq_len(100), function(i) {
   # reload packages each time
   library(lingmatch)
   library(naivebayes)
@@ -411,22 +425,23 @@ Model_Accuracies = do.call(rbind, parLapply(cl, seq_len(100), function(i){
   library(caret)
 
   # draw a new set of training ids
-  ids = unlist(lapply(classes, function(class){
-    class_ids = which(data$Recall == class)
+  ids <- unlist(lapply(classes, function(class) {
+    class_ids <- which(data$Recall == class)
     sample(class_ids, length(class_ids) * .7)
   }), use.names = FALSE)
-  train_dtm = full_dtm[ids,]
-  feminine_texts = data[ids, 'Recall'] == 'Feminine'
-  test_dtm = full_dtm[-ids,]
-  
+  train_dtm <- full_dtm[ids, ]
+  feminine_texts <- data[ids, "Recall"] == "Feminine"
+  test_dtm <- full_dtm[-ids, ]
+
   # train models
-  terms = colMeans(train_dtm[feminine_texts,] != 0) -
-    colMeans(train_dtm[!feminine_texts,] != 0)
-  bayes = bernoulli_naive_bayes(
-    (train_dtm != 0) * 1, data[ids, 'Recall'], laplace = 1
+  terms <- colMeans(train_dtm[feminine_texts, ] != 0) -
+    colMeans(train_dtm[!feminine_texts, ] != 0)
+  bayes <- bernoulli_naive_bayes(
+    (train_dtm != 0) * 1, data[ids, "Recall"],
+    laplace = 1
   )
-  dtree = rpart(data[ids, 'Recall'] ~ ., as.data.frame(as.matrix(train_dtm)))
-  svm = train(as.matrix(train_dtm), data[ids, 'Recall'], 'svmLinear3')
+  dtree <- rpart(data[ids, "Recall"] ~ ., as.data.frame(as.matrix(train_dtm)))
+  svm <- train(as.matrix(train_dtm), data[ids, "Recall"], "svmLinear3")
 
   # test models
   colMeans(data.frame(
@@ -434,12 +449,12 @@ Model_Accuracies = do.call(rbind, parLapply(cl, seq_len(100), function(i){
       test_dtm, list(sort(terms, TRUE)[1:40], -sort(terms)[1:40])
     ))],
     bayes = predict(bayes, (test_dtm != 0) * 1),
-    dtree = predict(dtree, as.data.frame(as.matrix(test_dtm)), 'class'),
+    dtree = predict(dtree, as.data.frame(as.matrix(test_dtm)), "class"),
     svm = predict(svm, test_dtm)
-  ) == data[-ids, 'Recall'])
+  ) == data[-ids, "Recall"])
 }))
 stopCluster(cl)
 
 data.frame(Average = colMeans(Model_Accuracies))
-splot(Model_Accuracies, title = FALSE, leg.title = 'Model', dark = TRUE)
+splot(Model_Accuracies, title = FALSE, leg.title = "Model", dark = TRUE)
 ```

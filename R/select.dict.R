@@ -1,0 +1,122 @@
+#' Select Dictionaries
+#'
+#' Retrieve information and links to dictionaries
+#' (lexicons/word lists) available at \href{https://osf.io/y6g5b}{osf.io/y6g5b}.
+#'
+#' @param query A character matching a dictionary name, or a set of keywords to search for in
+#'   dictionary information.
+#' @param dir Path to a folder containing dictionaries, or where you want them to be saved.
+#'   Will look in getOption('lingmatch.dict.dir') and '~/Dictionaries' by default.
+#' @param check.md5 Logical; if \code{TRUE} (default), retrieves the MD5 checksum from OSF,
+#'   and compares it with that calculated from the downloaded file to check its integrity.
+#' @param mode Passed to \code{\link{download.file}} when downloading files.
+#' @return A list with varying entries:
+#'   \itemize{
+#'     \item \strong{\code{info}}: The version of \href{https://osf.io/kjqb8}{osf.io/kjqb8} stored internally; a
+#'       \code{data.frame}  with dictionary names as row names, and information about each dictionary in columns. \cr
+#'         Also described at
+#'         \href{https://osf.io/y6g5b/wiki/dict_variables}{osf.io/y6g5b/wiki/dict_variables},
+#'         here \code{short} (corresponding to the file name [\code{{short}.(csv|dic)}] and
+#'         wiki urls [\code{https://osf.io/y6g5b/wiki/{short}}]) is set as row names and removed:
+#'         \itemize{
+#'           \item \strong{\code{name}}: Full name of the dictionary.
+#'           \item \strong{\code{description}}: Description of the dictionary, relating to its purpose and
+#'             development.
+#'           \item \strong{\code{note}}: Notes about processing decisions that additionally alter the original.
+#'           \item \strong{\code{constructor}}: How the dictionary was constructed:
+#'             \itemize{
+#'               \item \strong{\code{algorithm}}: Terms were selected by some automated process, potentially
+#'                 learned from data or other resources.
+#'               \item \strong{\code{crowd}}: Several individuals rated the terms, and in aggregate those ratings
+#'                 translate to categories and weights.
+#'               \item \strong{\code{mixed}}: Some combination of the other methods, usually in some iterative
+#'                 process.
+#'               \item \strong{\code{team}}: One of more individuals make decisions about term inclusions,
+#'                 categories, and weights.
+#'             }
+#'           \item \strong{\code{subject}}: Broad, rough subject or purpose of the dictionary:
+#'             \itemize{
+#'               \item \strong{\code{emotion}}: Terms relate to emotions, potentially exemplifying or expressing
+#'                 them.
+#'               \item \strong{\code{general}}: A large range of categories, aiming to capture the content of the
+#'                 text.
+#'               \item \strong{\code{impression}}: Terms are categorized and weighted based on the impression they
+#'                 might give.
+#'               \item \strong{\code{language}}: Terms are categorized or weighted based on their linguistic
+#'                 features, such as part of speech, specificity, or area of use.
+#'               \item \strong{\code{social}}: Terms relate to social phenomena, such as characteristics or concerns
+#'                 of social entities.
+#'             }
+#'           \item \strong{\code{terms}}: Number of unique terms across categories.
+#'           \item \strong{\code{term_type}}: Format of the terms:
+#'             \itemize{
+#'               \item \strong{\code{glob}}: Include asterisks which denote inclusion of any characters until a
+#'                 word boundary.
+#'               \item \strong{\code{glob+}}: Glob-style asterisks with regular expressions within terms.
+#'               \item \strong{\code{ngram}}: Includes any number of words as a term, separated by spaces.
+#'               \item \strong{\code{pattern}}: A string of characters, potentially within or between words, or
+#'                 spanning words.
+#'               \item \strong{\code{regex}}: Regular expressions.
+#'               \item \strong{\code{stem}}: Unigrams with common endings removed.
+#'               \item \strong{\code{unigram}}: Complete single words.
+#'             }
+#'           \item \strong{\code{weighted}}: Indicates whether weights are associated with terms. This
+#'             determines the file type of the dictionary: dictionaries with weights are stored
+#'             as .csv, and those without are stored as .dic files.
+#'           \item \strong{\code{regex_characters}}: Logical indicating whether special regular expression
+#'             characters are present in any term, which might need to be escaped if the terms are used
+#'             in regular expressions. Glob-type terms allow complete parens (at least one open and one
+#'             closed, indicating preceding or following words), and initial and terminal asterisks. For
+#'             all other terms, \code{[](){}*.^$+?\|} are counted as regex characters. These could be
+#'             escaped in R with \code{gsub('([][)(}{*.^$+?\\\\|])', '\\\\\\1', terms)} if \code{terms}
+#'             is a character vector, and in Python with (importing re)
+#'             \code{[re.sub(r'([][(){}*.^$+?\|])', r'\\\1', term)} \code{for term in terms]} if \code{terms}
+#'             is a list.
+#'           \item \strong{\code{categories}}: Category names in the order in which they appear in the dictionary
+#'             file, separated by commas.
+#'           \item \strong{\code{ncategories}}: Number of categories.
+#'           \item \strong{\code{original_max}}: Maximum value of the original dictionary before standardization:
+#'             \code{original values / max(original values) * 100}. Dictionaries with no weights are
+#'             considered to have a max of \code{1}.
+#'           \item \strong{\code{osf}}: ID of the file on OSF, translating to the file's URL:
+#'             https://osf.io/\code{osf}.
+#'           \item \strong{\code{wiki}}: URL of the dictionary's wiki.
+#'           \item \strong{\code{downloaded}}: Path to the file if downloaded, and \code{''} otherwise.
+#'         }
+#'     \item \strong{\code{selected}}: A subset of \code{info} selected by \code{query}.
+#'   }
+#' @family Dictionary functions
+#' @examples
+#' # just retrieve information about available dictionaries
+#' dicts <- select.dict()$info
+#' dicts[1:10, 4:9]
+#'
+#' # select all dictionaries mentioning sentiment or emotion
+#' sentiment_dicts <- select.dict("sentiment emotion")$selected
+#' sentiment_dicts[1:10, 4:9]
+#' @export
+
+select.dict <- function(query = NULL, dir = getOption("lingmatch.dict.dir"),
+                        check.md5 = TRUE, mode = "wb") {
+  if (dir == "") dir <- "~/Dictionaries"
+  r <- list(info = dict_info, selected = dict_info[NULL, ])
+  r$info[, "wiki"] <- paste0("https://osf.io/y6g5b/wiki/", rownames(dict_info))
+  r$info[, "downloaded"] <- normalizePath(paste0(
+    dir, "/", rownames(r$info), ifelse(r$info$weighted, ".csv", ".dic")
+  ), "/", FALSE)
+  r$info[!file.exists(r$info[, "downloaded"]), "downloaded"] <- ""
+  if (!missing(query) && length(query) < nrow(dict_info) * 2) {
+    query <- paste0(query, collapse = "|")
+    if (!length(sel <- grep(query, rownames(dict_info), TRUE))) {
+      collapsed <- vapply(
+        seq_len(nrow(dict_info)),
+        function(r) paste(c(rownames(dict_info)[r], dict_info[r, ]), collapse = " "), ""
+      )
+      if (!length(sel <- grep(query, collapsed, TRUE))) {
+        sel <- grep(paste(strsplit(query, "[[:space:],|]+")[[1]], collapse = "|"), collapsed, TRUE)
+      }
+    }
+    if (length(sel)) r$selected <- r$info[sel, , drop = FALSE]
+  }
+  r
+}

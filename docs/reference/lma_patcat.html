@@ -54,7 +54,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Categorize Texts</h1>
-      <small class="dont-index">Source: <a href="https://github.com/miserman/lingmatch/blob/HEAD/R/utils.R" class="external-link"><code>R/utils.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/miserman/lingmatch/blob/HEAD/R/lma_patcat.R" class="external-link"><code>R/lma_patcat.R</code></a></small>
       <div class="d-none name"><code>lma_patcat.Rd</code></div>
     </div>
 
@@ -168,7 +168,7 @@ word counts, and a <code>categories</code> attribute with row indices associated
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># example text</span></span></span>
-<span class="r-in"><span><span class="va">text</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span><span class="va">text</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    <span class="st">"Oh, what youth was! What I had and gave away."</span>,</span></span>
 <span class="r-in"><span>    <span class="st">"What I took and spent and saw. What I lost. And now? Ruin."</span></span></span>
@@ -184,7 +184,7 @@ word counts, and a <code>categories</code> attribute with row indices associated
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># make a document-term matrix with pre-specified terms only</span></span></span>
-<span class="r-in"><span><span class="fu">lma_patcat</span><span class="op">(</span><span class="va">text</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'bored?!'</span>, <span class="st">'i lo'</span>, <span class="st">'. '</span><span class="op">)</span>, return.dtm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">lma_patcat</span><span class="op">(</span><span class="va">text</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"bored?!"</span>, <span class="st">"i lo"</span>, <span class="st">". "</span><span class="op">)</span>, return.dtm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3 x 3 sparse Matrix of class "dgTMatrix"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      bored?! i lo . </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1,]       .    1  4</span>
@@ -192,7 +192,7 @@ word counts, and a <code>categories</code> attribute with row indices associated
 <span class="r-out co"><span class="r-pr">#&gt;</span> [3,]       .    .  3</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># get counts of sets of letter</span></span></span>
-<span class="r-in"><span><span class="fu">lma_patcat</span><span class="op">(</span><span class="va">text</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'a'</span>, <span class="st">'b'</span>, <span class="st">'c'</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'d'</span>, <span class="st">'e'</span>, <span class="st">'f'</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">lma_patcat</span><span class="op">(</span><span class="va">text</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"a"</span>, <span class="st">"b"</span>, <span class="st">"c"</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"d"</span>, <span class="st">"e"</span>, <span class="st">"f"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      cat1 cat2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1,]   14    7</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [2,]    8    8</span>
@@ -204,7 +204,7 @@ word counts, and a <code>categories</code> attribute with row indices associated
 <span class="r-out co"><span class="r-pr">#&gt;</span>      0 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># same thing with regular expressions</span></span></span>
-<span class="r-in"><span><span class="fu">lma_patcat</span><span class="op">(</span><span class="va">text</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">'[abc]'</span>, <span class="st">'[def]'</span><span class="op">)</span>, fixed <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">lma_patcat</span><span class="op">(</span><span class="va">text</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"[abc]"</span>, <span class="st">"[def]"</span><span class="op">)</span>, fixed <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      cat1 cat2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1,]   14    7</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [2,]    8    8</span>
@@ -213,10 +213,10 @@ word counts, and a <code>categories</code> attribute with row indices associated
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 21 16 19</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"time")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> patcat </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      0 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   0.02 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># match only words</span></span></span>
-<span class="r-in"><span><span class="fu">lma_patcat</span><span class="op">(</span><span class="va">text</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">'i'</span><span class="op">)</span>, boundary <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">lma_patcat</span><span class="op">(</span><span class="va">text</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"i"</span><span class="op">)</span>, boundary <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      category</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1,]        3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [2,]        2</span>
@@ -229,8 +229,9 @@ word counts, and a <code>categories</code> attribute with row indices associated
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># match only words, ignoring punctuation</span></span></span>
 <span class="r-in"><span><span class="fu">lma_patcat</span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="va">text</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'you'</span>, <span class="st">'tomorrow'</span>, <span class="st">'was'</span><span class="op">)</span>, fixed <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
-<span class="r-in"><span>  boundary <span class="op">=</span> <span class="st">'\\b'</span>, return.dtm <span class="op">=</span> <span class="cn">TRUE</span></span></span>
+<span class="r-in"><span>  <span class="va">text</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"you"</span>, <span class="st">"tomorrow"</span>, <span class="st">"was"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  fixed <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>  boundary <span class="op">=</span> <span class="st">"\\b"</span>, return.dtm <span class="op">=</span> <span class="cn">TRUE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3 x 3 sparse Matrix of class "dgTMatrix"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      tomorrow you was</span>
@@ -241,23 +242,22 @@ word counts, and a <code>categories</code> attribute with row indices associated
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># read in the temporal orientation lexicon from the World Well-Being Project</span></span></span>
-<span class="r-in"><span><span class="va">tempori</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="st">'https://wwbp.org/downloads/public_data/temporalOrientationLexicon.csv'</span></span></span>
+<span class="r-in"><span><span class="va">tempori</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="st">"https://wwbp.org/downloads/public_data/temporalOrientationLexicon.csv"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">lma_patcat</span><span class="op">(</span><span class="va">text</span>, <span class="va">tempori</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># or use the standardized version</span></span></span>
-<span class="r-in"><span><span class="va">tempori_std</span> <span class="op">=</span> <span class="fu"><a href="read.dic.html">read.dic</a></span><span class="op">(</span><span class="st">'wwbp_prospection'</span>, dir <span class="op">=</span> <span class="st">'~/Dictionaries'</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">tempori_std</span> <span class="op">&lt;-</span> <span class="fu"><a href="read.dic.html">read.dic</a></span><span class="op">(</span><span class="st">"wwbp_prospection"</span>, dir <span class="op">=</span> <span class="st">"~/Dictionaries"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">lma_patcat</span><span class="op">(</span><span class="va">text</span>, <span class="va">tempori_std</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## get scores on the same scale by adjusting the standardized values</span></span></span>
-<span class="r-in"><span><span class="va">tempori_std</span><span class="op">[</span>, <span class="op">-</span><span class="fl">1</span><span class="op">]</span> <span class="op">=</span> <span class="va">tempori_std</span><span class="op">[</span>, <span class="op">-</span><span class="fl">1</span><span class="op">]</span> <span class="op">/</span> <span class="fl">100</span> <span class="op">*</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="select.dict.html">select.dict</a></span><span class="op">(</span><span class="st">'wwbp_prospection'</span><span class="op">)</span><span class="op">$</span><span class="va">selected</span><span class="op">[</span>, <span class="st">'original_max'</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="va">tempori_std</span><span class="op">[</span>, <span class="op">-</span><span class="fl">1</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">tempori_std</span><span class="op">[</span>, <span class="op">-</span><span class="fl">1</span><span class="op">]</span> <span class="op">/</span> <span class="fl">100</span> <span class="op">*</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="select.dict.html">select.dict</a></span><span class="op">(</span><span class="st">"wwbp_prospection"</span><span class="op">)</span><span class="op">$</span><span class="va">selected</span><span class="op">[</span>, <span class="st">"original_max"</span><span class="op">]</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">lma_patcat</span><span class="op">(</span><span class="va">text</span>, <span class="va">tempori_std</span><span class="op">)</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">tempori</span><span class="op">$</span><span class="va">category</span><span class="op">)</span><span class="op">]</span></span></span>
-<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>

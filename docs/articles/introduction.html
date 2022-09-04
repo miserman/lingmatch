@@ -90,7 +90,7 @@
     
 <p>This introduction uses lingmatch to illustrate a few of the many
 branching paths of text analysis.</p>
-<p><em>Built with R 4.2.1 on August 19 2022</em></p>
+<p><em>Built with R 4.2.1 on September 03 2022</em></p>
 <hr>
 <div class="section level2">
 <h2 id="setup">Setup<a class="anchor" aria-label="anchor" href="#setup"></a>
@@ -98,7 +98,7 @@ branching paths of text analysis.</p>
 <p>First, we need some text – anything that results in a vector of text
 will do.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">text</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">text</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>  <span class="st">"Hey, I like kittens. I think all kinds of cats really are just the best pet ever."</span>,</span>
 <span>  <span class="st">"Oh yeah? Well I really like cars. All the wheels and the turbos... I think that's</span></span>
 <span><span class="st">   the best ever."</span>,</span>
@@ -117,7 +117,7 @@ standardizing and aggregating words for the sake of simplicity.</p>
 case:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># we'll name the processed text "words" since it will eventually be single words</span></span>
-<span><span class="va">words</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/chartr.html" class="external-link">tolower</a></span><span class="op">(</span><span class="va">text</span><span class="op">)</span></span>
+<span><span class="va">words</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/chartr.html" class="external-link">tolower</a></span><span class="op">(</span><span class="va">text</span><span class="op">)</span></span>
 <span><span class="va">words</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span>
 <span><span class="co">#&gt; [1] "hey, i like kittens. i think all kinds of cats really are just the best pet ever."</span></span></code></pre></div>
 <p>Another standardizing step can be to remove punctuation, which will
@@ -133,20 +133,20 @@ specify with nothing.</p>
 <code class="sourceCode R"><span><span class="co"># you can get a feel for the way gsub works by entering an example string;</span></span>
 <span><span class="co"># the first argument is the expression to match, the second is what to replace it with,</span></span>
 <span><span class="co"># and the third is the text, so this will replace the blank space with an asterisk</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span><span class="st">' '</span>, <span class="st">'*'</span>, <span class="st">'a b'</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span><span class="st">" "</span>, <span class="st">"*"</span>, <span class="st">"a b"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "a*b"</span></span>
 <span></span>
 <span><span class="co"># []s define a set of single characters, and the + will match any repeats,</span></span>
 <span><span class="co"># so one or more of the characters inside the brackets will be replaced with nothing.</span></span>
 <span><span class="co"># entering a vector into the third position will apply the replacement to each element</span></span>
-<span><span class="va">words</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span><span class="st">'[,.?!\n-]+'</span>, <span class="st">''</span>, <span class="va">words</span><span class="op">)</span></span>
+<span><span class="va">words</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span><span class="st">"[,.?!\n-]+"</span>, <span class="st">""</span>, <span class="va">words</span><span class="op">)</span></span>
 <span><span class="va">words</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span>
 <span><span class="co">#&gt; [1] "hey i like kittens i think all kinds of cats really are just the best pet ever"</span></span></code></pre></div>
 <p>The strsplit function splits one string into many based on a regular
 expression string.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># this applies to each element of the vector, and returns a list of vectors</span></span>
-<span><span class="va">words</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/strsplit.html" class="external-link">strsplit</a></span><span class="op">(</span><span class="va">words</span>, <span class="st">' +'</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">words</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/strsplit.html" class="external-link">strsplit</a></span><span class="op">(</span><span class="va">words</span>, <span class="st">" +"</span><span class="op">)</span></span></code></pre></div>
 <p>Now we have a list of tokens (the <code>words</code> object) which
 corresponds to our original text:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -167,11 +167,12 @@ text, and a column for each unique word:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># since our words are in a list, we need to unlist them, then get only the unique ones</span></span>
 <span><span class="co"># you don't need to sort the words, but it can make it easier to look through</span></span>
-<span><span class="va">unique_words</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">words</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">unique_words</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">words</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># then we can make a matrix of 0s, and put the unique words in as column names</span></span>
-<span><span class="va">dtm</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span></span>
-<span>  <span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">text</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">unique_words</span><span class="op">)</span>, dimnames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="cn">NULL</span>, <span class="va">unique_words</span><span class="op">)</span></span>
+<span><span class="va">dtm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span></span>
+<span>  <span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">text</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">unique_words</span><span class="op">)</span>,</span>
+<span>  dimnames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="cn">NULL</span>, <span class="va">unique_words</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">dtm</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span></span>
 <span><span class="co">#&gt;      about all and anything are be best can care cars</span></span>
@@ -186,16 +187,15 @@ through texts:</p>
 <code class="sourceCode R"><span><span class="co"># this will perform what's inside the curly brackets as many times as there are texts</span></span>
 <span><span class="co"># i will be set to each number in the sequence, so i will equal 1 on the first run</span></span>
 <span><span class="co"># the words and dtm objects all line up, so words[[i]] corresponds to dtm[i,]</span></span>
-<span><span class="kw">for</span><span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">words</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span>
-<span>  </span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">words</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span></span>
 <span>  <span class="co"># we can use the table function to count the words in a text</span></span>
-<span>  <span class="va">counts</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">words</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
-<span>  </span>
+<span>  <span class="va">counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">words</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span></span>
 <span>  <span class="co"># now the counts object has words associated with their count for the ith text</span></span>
 <span>  <span class="co"># to get this into the dtm, we can use i to select the row,</span></span>
 <span>  <span class="co"># and counts' names to select the columns</span></span>
-<span>  <span class="va">dtm</span><span class="op">[</span><span class="va">i</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span><span class="op">]</span> <span class="op">=</span> <span class="va">counts</span></span>
-<span>  </span>
+<span>  <span class="va">dtm</span><span class="op">[</span><span class="va">i</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">counts</span></span>
 <span><span class="op">}</span></span>
 <span></span>
 <span><span class="co"># now dtm is filled in with counts for each text</span></span>
@@ -215,7 +215,7 @@ of processing we just walked through.</p>
 <code class="sourceCode R"><span><span class="co"># load in the lingmatch package</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/miserman/lingmatch" class="external-link">lingmatch</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">dtm</span> <span class="op">=</span> <span class="fu"><a href="../reference/lma_dtm.html">lma_dtm</a></span><span class="op">(</span><span class="va">text</span>, sparse <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">dtm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lma_dtm.html">lma_dtm</a></span><span class="op">(</span><span class="va">text</span>, sparse <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">dtm</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span></span>
 <span><span class="co">#&gt;      about all and anything are be best can care cars</span></span>
 <span><span class="co">#&gt; [1,]     0   1   0        0   1  0    1   0    0    0</span></span>
@@ -244,7 +244,7 @@ information:</p>
 <span><span class="co">#&gt; are      -0.5773503  0.5773503 -0.3333333 -0.3333333  1.0000000</span></span>
 <span></span>
 <span><span class="co"># correlation between texts (document similarity)</span></span>
-<span><span class="fu"><a href="../reference/lma_simets.html">lma_simets</a></span><span class="op">(</span><span class="va">dtm</span>, <span class="st">'pearson'</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/lma_simets.html">lma_simets</a></span><span class="op">(</span><span class="va">dtm</span>, <span class="st">"pearson"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; 4 x 4 sparse Matrix of class "dtCMatrix" (unitriangular)</span></span>
 <span><span class="co">#&gt;                                      </span></span>
 <span><span class="co">#&gt; [1,]  I          .         .        .</span></span>
@@ -288,14 +288,14 @@ frequencies:</p>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://miserman.github.io/splot/" class="external-link">splot</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># available term weight types</span></span>
-<span><span class="va">term_weights</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'binary'</span>, <span class="st">'log'</span>, <span class="st">'sqrt'</span>, <span class="st">'count'</span>, <span class="st">'amplify'</span><span class="op">)</span></span>
+<span><span class="va">term_weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"binary"</span>, <span class="st">"log"</span>, <span class="st">"sqrt"</span>, <span class="st">"count"</span>, <span class="st">"amplify"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># apply each type of weighting to a 1:20 sequence</span></span>
-<span><span class="va">Weighted</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">term_weights</span>, <span class="kw">function</span><span class="op">(</span><span class="va">w</span><span class="op">)</span> <span class="fu"><a href="../reference/lma_weight.html">lma_weight</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">20</span>, <span class="va">w</span>, <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">Weighted</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">term_weights</span>, <span class="kw">function</span><span class="op">(</span><span class="va">w</span><span class="op">)</span> <span class="fu"><a href="../reference/lma_weight.html">lma_weight</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">20</span>, <span class="va">w</span>, <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># plot weighted ~ raw term frequencies</span></span>
 <span><span class="co">## note that dark = TRUE makes the text white, so you might need to remove it</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/splot/man/splot.html" class="external-link">splot</a></span><span class="op">(</span><span class="va">Weighted</span> <span class="op">~</span> <span class="fl">1</span><span class="op">:</span><span class="fl">20</span>, labx <span class="op">=</span> <span class="st">'Raw Count'</span>, lines <span class="op">=</span> <span class="st">'connected'</span>, dark <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/pkg/splot/man/splot.html" class="external-link">splot</a></span><span class="op">(</span><span class="va">Weighted</span> <span class="op">~</span> <span class="fl">1</span><span class="op">:</span><span class="fl">20</span>, labx <span class="op">=</span> <span class="st">"Raw Count"</span>, lines <span class="op">=</span> <span class="st">"connected"</span>, dark <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="introduction_files/figure-html/unnamed-chunk-11-1.svg" width="960"></p>
 <p>And plot weighted by a range of variants of raw document frequencies.
 The y-axis shows relative values (z-scores), with positive being higher
@@ -303,33 +303,39 @@ than the weight’s mean. From this, you can see what types of terms the
 scheme gives more weight:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># available document weight types</span></span>
-<span><span class="va">doc_weights</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'df'</span>, <span class="st">'dflog'</span>, <span class="st">'dfmax'</span>, <span class="st">'dfmlog'</span>, <span class="st">'normal'</span>,</span>
-<span>  <span class="st">'idf'</span>, <span class="st">'ridf'</span>, <span class="st">'dpois'</span>, <span class="st">'ppois'</span>, <span class="st">'entropy'</span><span class="op">)</span></span>
+<span><span class="va">doc_weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  <span class="st">"df"</span>, <span class="st">"dflog"</span>, <span class="st">"dfmax"</span>, <span class="st">"dfmlog"</span>, <span class="st">"normal"</span>,</span>
+<span>  <span class="st">"idf"</span>, <span class="st">"ridf"</span>, <span class="st">"dpois"</span>, <span class="st">"ppois"</span>, <span class="st">"entropy"</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># function to demonstrates weights over a range document frequencies</span></span>
-<span><span class="va">weight_range</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">w</span>, <span class="va">value</span> <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">{</span></span>
-<span>  <span class="va">m</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="fl">20</span><span class="op">)</span></span>
-<span>  <span class="va">m</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/lower.tri.html" class="external-link">upper.tri</a></span><span class="op">(</span><span class="va">m</span>, <span class="cn">TRUE</span><span class="op">)</span><span class="op">]</span> <span class="op">=</span> <span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">is.numeric</a></span><span class="op">(</span><span class="va">value</span><span class="op">)</span><span class="op">)</span> <span class="va">value</span> <span class="kw">else</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span></span>
-<span>    <span class="fl">1</span><span class="op">:</span><span class="fl">20</span>, <span class="kw">function</span><span class="op">(</span><span class="va">v</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="kw">if</span><span class="op">(</span><span class="va">value</span> <span class="op">==</span> <span class="st">'inverted'</span><span class="op">)</span> <span class="fl">21</span> <span class="op">-</span> <span class="va">v</span> <span class="kw">else</span> <span class="va">v</span>, <span class="va">v</span><span class="op">)</span></span>
-<span>  <span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">weight_range</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">w</span>, <span class="va">value</span> <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="fl">20</span><span class="op">)</span></span>
+<span>  <span class="va">m</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/lower.tri.html" class="external-link">upper.tri</a></span><span class="op">(</span><span class="va">m</span>, <span class="cn">TRUE</span><span class="op">)</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">is.numeric</a></span><span class="op">(</span><span class="va">value</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">value</span></span>
+<span>  <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span></span>
+<span>      <span class="fl">1</span><span class="op">:</span><span class="fl">20</span>, <span class="kw">function</span><span class="op">(</span><span class="va">v</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="kw">if</span> <span class="op">(</span><span class="va">value</span> <span class="op">==</span> <span class="st">"inverted"</span><span class="op">)</span> <span class="fl">21</span> <span class="op">-</span> <span class="va">v</span> <span class="kw">else</span> <span class="va">v</span>, <span class="va">v</span><span class="op">)</span></span>
+<span>    <span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
 <span>  <span class="fu"><a href="../reference/lma_weight.html">lma_weight</a></span><span class="op">(</span><span class="va">m</span>, <span class="va">w</span>, <span class="cn">FALSE</span>, doc.only <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
 <span><span class="co"># categories of weightings for coloring</span></span>
-<span><span class="va">category</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'df'</span>, <span class="st">'normal'</span>, <span class="st">'idf'</span>, <span class="st">'poisson'</span>, <span class="st">'entropy'</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">category</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"df"</span>, <span class="st">"normal"</span>, <span class="st">"idf"</span>, <span class="st">"poisson"</span>, <span class="st">"entropy"</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># set up options for reuse</span></span>
-<span><span class="va">op</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>  laby <span class="op">=</span> <span class="st">'Relative (Scaled) Weight'</span>, labx <span class="op">=</span> <span class="st">'Document Frequency'</span>,</span>
-<span>  leg <span class="op">=</span> <span class="st">'outside'</span>, colorby <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/substitute.html" class="external-link">quote</a></span><span class="op">(</span><span class="va">category</span><span class="op">)</span>, grade <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
-<span>  lines <span class="op">=</span> <span class="st">'connected'</span>, mv.scale <span class="op">=</span> <span class="cn">TRUE</span>, note <span class="op">=</span> <span class="cn">FALSE</span>, dark <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="va">op</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>  laby <span class="op">=</span> <span class="st">"Relative (Scaled) Weight"</span>, labx <span class="op">=</span> <span class="st">"Document Frequency"</span>,</span>
+<span>  leg <span class="op">=</span> <span class="st">"outside"</span>, colorby <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/substitute.html" class="external-link">quote</a></span><span class="op">(</span><span class="va">category</span><span class="op">)</span>, grade <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>  lines <span class="op">=</span> <span class="st">"connected"</span>, mv.scale <span class="op">=</span> <span class="cn">TRUE</span>, note <span class="op">=</span> <span class="cn">FALSE</span>, dark <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># then plot a few different examples</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/splot/man/splot.html" class="external-link">splot</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">doc_weights</span>, <span class="va">weight_range</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span><span class="op">:</span><span class="fl">20</span>,</span>
-<span>  options <span class="op">=</span> <span class="va">op</span>, title <span class="op">=</span> <span class="st">'Same Term, Varying Document Frequencies'</span>,</span>
-<span>  sud <span class="op">=</span> <span class="st">'All term frequencies are 1.'</span></span>
+<span>  options <span class="op">=</span> <span class="va">op</span>, title <span class="op">=</span> <span class="st">"Same Term, Varying Document Frequencies"</span>,</span>
+<span>  sud <span class="op">=</span> <span class="st">"All term frequencies are 1."</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="introduction_files/figure-html/unnamed-chunk-12-1.svg" width="960"></p>
 <p>Some document weight types are sensitive to term frequency, so it can
@@ -338,25 +344,25 @@ be interesting to see two extremes:</p>
 <code class="sourceCode R"><span><span class="co"># here, counts increase from 1 to 20, and appear in 1 to 20 documents,</span></span>
 <span><span class="co"># so less common terms also have lower term frequencies</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/splot/man/splot.html" class="external-link">splot</a></span><span class="op">(</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">doc_weights</span>, <span class="va">weight_range</span>, value <span class="op">=</span> <span class="st">'sequence'</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span><span class="op">:</span><span class="fl">20</span>,</span>
-<span>  options <span class="op">=</span> <span class="va">op</span>, title <span class="op">=</span> <span class="st">'Term as Document Frequencies'</span>,</span>
-<span>  sud <span class="op">=</span> <span class="st">'Non-zero terms are the number of non-zero terms.'</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">doc_weights</span>, <span class="va">weight_range</span>, value <span class="op">=</span> <span class="st">"sequence"</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span><span class="op">:</span><span class="fl">20</span>,</span>
+<span>  options <span class="op">=</span> <span class="va">op</span>, title <span class="op">=</span> <span class="st">"Term as Document Frequencies"</span>,</span>
+<span>  sud <span class="op">=</span> <span class="st">"Non-zero terms are the number of non-zero terms."</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="introduction_files/figure-html/unnamed-chunk-13-1.svg" width="960"></p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># here, counts decrease from 20 to 1, while appearing in 1 to 20 documents,</span></span>
 <span><span class="co"># so less common terms have higher term frequencies</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/splot/man/splot.html" class="external-link">splot</a></span><span class="op">(</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">doc_weights</span>, <span class="va">weight_range</span>, value <span class="op">=</span> <span class="st">'inverted'</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span><span class="op">:</span><span class="fl">20</span>,</span>
-<span>  options <span class="op">=</span> <span class="va">op</span>, title <span class="op">=</span> <span class="st">'Term Opposite of Document Frequencies'</span>,</span>
-<span>  sud <span class="op">=</span> <span class="st">'Non-zero terms are the number of zero terms + 1.'</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">doc_weights</span>, <span class="va">weight_range</span>, value <span class="op">=</span> <span class="st">"inverted"</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span><span class="op">:</span><span class="fl">20</span>,</span>
+<span>  options <span class="op">=</span> <span class="va">op</span>, title <span class="op">=</span> <span class="st">"Term Opposite of Document Frequencies"</span>,</span>
+<span>  sud <span class="op">=</span> <span class="st">"Non-zero terms are the number of zero terms + 1."</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="introduction_files/figure-html/unnamed-chunk-13-2.svg" width="960"></p>
 <p>We can weight our example dtm and see how it affects the correlation
 between documents:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># idf dampens common words</span></span>
-<span><span class="fu"><a href="../reference/lma_simets.html">lma_simets</a></span><span class="op">(</span><span class="fu"><a href="../reference/lma_weight.html">lma_weight</a></span><span class="op">(</span><span class="va">dtm</span>, <span class="st">'idf'</span><span class="op">)</span>, <span class="st">'pearson'</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/lma_simets.html">lma_simets</a></span><span class="op">(</span><span class="fu"><a href="../reference/lma_weight.html">lma_weight</a></span><span class="op">(</span><span class="va">dtm</span>, <span class="st">"idf"</span><span class="op">)</span>, <span class="st">"pearson"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; 4 x 4 sparse Matrix of class "dtCMatrix" (unitriangular)</span></span>
 <span><span class="co">#&gt;                                         </span></span>
 <span><span class="co">#&gt; [1,]  I           .          .         .</span></span>
@@ -365,7 +371,7 @@ between documents:</p>
 <span><span class="co">#&gt; [4,] -0.42504381 -0.4232513 -0.1271555 I</span></span>
 <span></span>
 <span><span class="co"># whereas Poisson amplifies common words</span></span>
-<span><span class="fu"><a href="../reference/lma_simets.html">lma_simets</a></span><span class="op">(</span><span class="fu"><a href="../reference/lma_weight.html">lma_weight</a></span><span class="op">(</span><span class="va">dtm</span>, <span class="st">'ppois'</span><span class="op">)</span>, <span class="st">'pearson'</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/lma_simets.html">lma_simets</a></span><span class="op">(</span><span class="fu"><a href="../reference/lma_weight.html">lma_weight</a></span><span class="op">(</span><span class="va">dtm</span>, <span class="st">"ppois"</span><span class="op">)</span>, <span class="st">"pearson"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; 4 x 4 sparse Matrix of class "dtCMatrix" (unitriangular)</span></span>
 <span><span class="co">#&gt;                                         </span></span>
 <span><span class="co">#&gt; [1,]  I           .          .         .</span></span>
@@ -375,7 +381,7 @@ between documents:</p>
 <p>For now, we’ll just apply standard word count (frequency) weighting,
 sometimes called normalization:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">wdtm</span> <span class="op">=</span> <span class="fu"><a href="../reference/lma_weight.html">lma_weight</a></span><span class="op">(</span><span class="va">dtm</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">wdtm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lma_weight.html">lma_weight</a></span><span class="op">(</span><span class="va">dtm</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="dimension-reduction">Dimension Reduction<a class="anchor" aria-label="anchor" href="#dimension-reduction"></a>
@@ -387,7 +393,7 @@ categories.</p>
 <p>The default, internal dictionary (<code><a href="../reference/lma_dict.html">?lma_dict</a></code>) contains
 function word categories:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">rwdtm</span> <span class="op">=</span> <span class="fu"><a href="../reference/lma_termcat.html">lma_termcat</a></span><span class="op">(</span><span class="va">wdtm</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">rwdtm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lma_termcat.html">lma_termcat</a></span><span class="op">(</span><span class="va">wdtm</span><span class="op">)</span></span>
 <span><span class="va">rwdtm</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">]</span></span>
 <span><span class="co">#&gt;          ppron      ipron    article     adverb       conj       prep</span></span>
 <span><span class="co">#&gt; [1,] 0.1176471 0.00000000 0.05882353 0.17647059 0.00000000 0.05882353</span></span>
@@ -401,7 +407,7 @@ function word categories:</p>
 <p>The way we’ve set things up allows us to look at the standard
 Language Style Matching calculation:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/lma_simets.html">lma_simets</a></span><span class="op">(</span><span class="va">rwdtm</span>, <span class="st">'canberra'</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/lma_simets.html">lma_simets</a></span><span class="op">(</span><span class="va">rwdtm</span>, <span class="st">"canberra"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; 4 x 4 sparse Matrix of class "dtCMatrix" (unitriangular)</span></span>
 <span><span class="co">#&gt;                                     </span></span>
 <span><span class="co">#&gt; [1,] I         .         .         .</span></span>
@@ -410,7 +416,7 @@ Language Style Matching calculation:</p>
 <span><span class="co">#&gt; [4,] 0.3273152 0.3350735 0.5571444 I</span></span>
 <span></span>
 <span><span class="co"># you could get the same thing from the lsm default</span></span>
-<span><span class="fu"><a href="../reference/lingmatch.html">lingmatch</a></span><span class="op">(</span><span class="va">text</span>, type <span class="op">=</span> <span class="st">'lsm'</span><span class="op">)</span><span class="op">$</span><span class="va">sim</span></span>
+<span><span class="fu"><a href="../reference/lingmatch.html">lingmatch</a></span><span class="op">(</span><span class="va">text</span>, type <span class="op">=</span> <span class="st">"lsm"</span><span class="op">)</span><span class="op">$</span><span class="va">sim</span></span>
 <span><span class="co">#&gt; 4 x 4 sparse Matrix of class "dtCMatrix" (unitriangular)</span></span>
 <span><span class="co">#&gt;                                     </span></span>
 <span><span class="co">#&gt; [1,] I         .         .         .</span></span>
@@ -428,10 +434,10 @@ frequency - inverse document frequency, use a latent semantic space to
 reduce dimensions, and cosine similarity to measure matching, it would
 be “latent semantic similarity”:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">dtm</span> <span class="op">=</span> <span class="fu"><a href="../reference/lma_dtm.html">lma_dtm</a></span><span class="op">(</span><span class="va">text</span>, <span class="st">'function'</span><span class="op">)</span></span>
-<span><span class="va">wdtm</span> <span class="op">=</span> <span class="fu"><a href="../reference/lma_weight.html">lma_weight</a></span><span class="op">(</span><span class="va">dtm</span>, <span class="st">'tf-idf'</span><span class="op">)</span></span>
-<span><span class="va">rwdtm</span> <span class="op">=</span> <span class="fu"><a href="../reference/lma_lspace.html">lma_lspace</a></span><span class="op">(</span><span class="va">wdtm</span>, space <span class="op">=</span> <span class="st">'100k'</span>, dir <span class="op">=</span> <span class="st">'~/Latent Semantic Spaces'</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/lma_simets.html">lma_simets</a></span><span class="op">(</span><span class="va">rwdtm</span>, <span class="st">'cosine'</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">dtm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lma_dtm.html">lma_dtm</a></span><span class="op">(</span><span class="va">text</span>, <span class="st">"function"</span><span class="op">)</span></span>
+<span><span class="va">wdtm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lma_weight.html">lma_weight</a></span><span class="op">(</span><span class="va">dtm</span>, <span class="st">"tf-idf"</span><span class="op">)</span></span>
+<span><span class="va">rwdtm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lma_lspace.html">lma_lspace</a></span><span class="op">(</span><span class="va">wdtm</span>, space <span class="op">=</span> <span class="st">"100k"</span>, dir <span class="op">=</span> <span class="st">"~/Latent Semantic Spaces"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/lma_simets.html">lma_simets</a></span><span class="op">(</span><span class="va">rwdtm</span>, <span class="st">"cosine"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; 4 x 4 sparse Matrix of class "dtCMatrix" (unitriangular)</span></span>
 <span><span class="co">#&gt;                                     </span></span>
 <span><span class="co">#&gt; [1,] I         .         .         .</span></span>

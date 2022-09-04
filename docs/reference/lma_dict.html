@@ -56,7 +56,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>English Function Word Category and Special Character Lists</h1>
-      <small class="dont-index">Source: <a href="https://github.com/miserman/lingmatch/blob/HEAD/R/utils.R" class="external-link"><code>R/utils.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/miserman/lingmatch/blob/HEAD/R/lma_dict.R" class="external-link"><code>R/lma_dict.R</code></a></small>
       <div class="d-none name"><code>lma_dict.Rd</code></div>
     </div>
 
@@ -514,7 +514,7 @@ with the dictionary (so, for example, ": (" would be replaced with "repfrown" in
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># return just a few categories without regular expression</span></span></span>
-<span class="r-in"><span><span class="fu">lma_dict</span><span class="op">(</span><span class="va">neg</span>, <span class="va">ppron</span>, <span class="va">aux</span>, as.regex<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">lma_dict</span><span class="op">(</span><span class="va">neg</span>, <span class="va">ppron</span>, <span class="va">aux</span>, as.regex <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $ppron</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "dae"        "dem"        "eir"        "eirself"    "em"        </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [6] "he"         "he'*"       "her"        "hers"       "herself"   </span>
@@ -666,26 +666,26 @@ with the dictionary (so, for example, ": (" would be replaced with "repfrown" in
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># returning a function</span></span></span>
-<span class="r-in"><span><span class="va">is.ppron</span> <span class="op">=</span> <span class="fu">lma_dict</span><span class="op">(</span><span class="va">ppron</span>, as.function <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">is.ppron</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'i'</span>, <span class="st">'am'</span>, <span class="st">'you'</span>, <span class="st">'were'</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">is.ppron</span> <span class="op">&lt;-</span> <span class="fu">lma_dict</span><span class="op">(</span><span class="va">ppron</span>, as.function <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">is.ppron</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"i"</span>, <span class="st">"am"</span>, <span class="st">"you"</span>, <span class="st">"were"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1]  TRUE FALSE  TRUE FALSE</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">in.lsmcat</span> <span class="op">=</span> <span class="fu">lma_dict</span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">7</span>, as.function <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">in.lsmcat</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'a'</span>, <span class="st">'frog'</span>, <span class="st">'for'</span>, <span class="st">'me'</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">in.lsmcat</span> <span class="op">&lt;-</span> <span class="fu">lma_dict</span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">7</span>, as.function <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">in.lsmcat</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"a"</span>, <span class="st">"frog"</span>, <span class="st">"for"</span>, <span class="st">"me"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1]  TRUE FALSE  TRUE  TRUE</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## use as a stopword filter</span></span></span>
-<span class="r-in"><span><span class="va">is.stopword</span> <span class="op">=</span> <span class="fu">lma_dict</span><span class="op">(</span>as.function <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">dtm</span> <span class="op">=</span> <span class="fu"><a href="lma_dtm.html">lma_dtm</a></span><span class="op">(</span><span class="st">'Most of these words might not be all that relevant.'</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">is.stopword</span> <span class="op">&lt;-</span> <span class="fu">lma_dict</span><span class="op">(</span>as.function <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">dtm</span> <span class="op">&lt;-</span> <span class="fu"><a href="lma_dtm.html">lma_dtm</a></span><span class="op">(</span><span class="st">"Most of these words might not be all that relevant."</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">dtm</span><span class="op">[</span>, <span class="op">!</span><span class="fu">is.stopword</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">dtm</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> relevant    words </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        1        1 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## use to replace special characters</span></span></span>
-<span class="r-in"><span><span class="va">clean</span> <span class="op">=</span> <span class="fu">lma_dict</span><span class="op">(</span><span class="va">special</span>, as.function <span class="op">=</span> <span class="va">gsub</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">clean</span> <span class="op">&lt;-</span> <span class="fu">lma_dict</span><span class="op">(</span><span class="va">special</span>, as.function <span class="op">=</span> <span class="va">gsub</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">clean</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="st">"\u201Ccurly quotes\u201D"</span>, <span class="st">'na\u00EFve'</span>, <span class="st">'typographer\u2019s apostrophe'</span>,</span></span>
-<span class="r-in"><span>  <span class="st">'en\u2013dash'</span>, <span class="st">'em\u2014dash'</span></span></span>
+<span class="r-in"><span>  <span class="st">"\u201Ccurly quotes\u201D"</span>, <span class="st">"na\u00EFve"</span>, <span class="st">"typographer\u2019s apostrophe"</span>,</span></span>
+<span class="r-in"><span>  <span class="st">"en\u2013dash"</span>, <span class="st">"em\u2014dash"</span></span></span>
 <span class="r-in"><span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "\"curly quotes\""         "naive"                   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [3] "typographer's apostrophe" "en-dash"                 </span>

@@ -135,13 +135,13 @@ specific knowledge, so it can't always (readily) be done automatically. Variable
 
 \examples{
 # compare single strings
-lingmatch('Compare this sentence.', 'With this other sentence.')
+lingmatch("Compare this sentence.", "With this other sentence.")
 
 # compare each entry in a character vector with...
-texts = c(
-  'One bit of text as an entry...',
-  'Maybe multiple sentences in an entry. Maybe essays or posts or a book.',
-  'Could be lines or a column from a read-in file...'
+texts <- c(
+  "One bit of text as an entry...",
+  "Maybe multiple sentences in an entry. Maybe essays or posts or a book.",
+  "Could be lines or a column from a read-in file..."
 )
 
 ## one another
@@ -151,19 +151,19 @@ lingmatch(texts)
 lingmatch(texts, 1)
 
 ## the next
-lingmatch(texts, 'seq')
+lingmatch(texts, "seq")
 
 ## the set average
 lingmatch(texts, mean)
 
 ## other entries in a group
-lingmatch(texts, group = c('a', 'a', 'b'))
+lingmatch(texts, group = c("a", "a", "b"))
 
 ## one another, without stop words
-lingmatch(texts, exclude = 'function')
+lingmatch(texts, exclude = "function")
 
 ## a standard average (based on function words)
-lingmatch(texts, 'auto', dict = lma_dict(1:9))
+lingmatch(texts, "auto", dict = lma_dict(1:9))
 
 }
 \references{

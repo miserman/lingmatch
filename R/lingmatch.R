@@ -1,6 +1,6 @@
-.onLoad = function(lib, pkg){
-  if(is.null(getOption('lingmatch.lspace.dir'))) options(lingmatch.lspace.dir = '')
-  if(is.null(getOption('lingmatch.dict.dir'))) options(lingmatch.dict.dir = '')
+.onLoad <- function(lib, pkg) {
+  if (is.null(getOption("lingmatch.lspace.dir"))) options(lingmatch.lspace.dir = "")
+  if (is.null(getOption("lingmatch.dict.dir"))) options(lingmatch.dict.dir = "")
 }
 
 #' Linguistic Matching and Accommodation
@@ -129,13 +129,13 @@
 #' }
 #' @examples
 #' # compare single strings
-#' lingmatch('Compare this sentence.', 'With this other sentence.')
+#' lingmatch("Compare this sentence.", "With this other sentence.")
 #'
 #' # compare each entry in a character vector with...
-#' texts = c(
-#'   'One bit of text as an entry...',
-#'   'Maybe multiple sentences in an entry. Maybe essays or posts or a book.',
-#'   'Could be lines or a column from a read-in file...'
+#' texts <- c(
+#'   "One bit of text as an entry...",
+#'   "Maybe multiple sentences in an entry. Maybe essays or posts or a book.",
+#'   "Could be lines or a column from a read-in file..."
 #' )
 #'
 #' ## one another
@@ -145,19 +145,19 @@
 #' lingmatch(texts, 1)
 #'
 #' ## the next
-#' lingmatch(texts, 'seq')
+#' lingmatch(texts, "seq")
 #'
 #' ## the set average
 #' lingmatch(texts, mean)
 #'
 #' ## other entries in a group
-#' lingmatch(texts, group = c('a', 'a', 'b'))
+#' lingmatch(texts, group = c("a", "a", "b"))
 #'
 #' ## one another, without stop words
-#' lingmatch(texts, exclude = 'function')
+#' lingmatch(texts, exclude = "function")
 #'
 #' ## a standard average (based on function words)
-#' lingmatch(texts, 'auto', dict = lma_dict(1:9))
+#' lingmatch(texts, "auto", dict = lma_dict(1:9))
 #'
 #' @export
 #' @import methods Matrix
@@ -166,517 +166,613 @@
 #' @importFrom RcppParallel RcppParallelLibs
 #' @useDynLib lingmatch, .registration = TRUE
 
-lingmatch = function(input = NULL, comp = mean, data = NULL, group = NULL, ..., comp.data = NULL, comp.group = NULL, order = NULL,
-  drop = FALSE, all.levels = FALSE, type = 'lsm'){
-  inp = as.list(substitute(...()))
-  #setting up a default type if specified
-  if(!missing(type) && !is.null(type)){
-    type = if(grepl('lsm|lang|ling|style|match', type, TRUE)) 'lsm' else 'lsa'
-    ni = names(inp)
-    if(type == 'lsm' && !'dict' %in% ni) inp$dict = lma_dict(1:9)
-    if(type != 'lsm' && !'space' %in% ni) inp$space = '100k_lsa'
-    if(!'metric' %in% ni) inp$metric = if(type == 'lsm') 'canberra' else 'cosine'
-    if(is.null(attr(input, 'type')) || length(attr(input, 'type')) == 1){
-      if(type == 'lsm' && !'percent' %in% ni) inp$percent = TRUE
-      if(type != 'lsm' && !'weight' %in% ni) inp$weight = 'tfidf'
+lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ..., comp.data = NULL, comp.group = NULL, order = NULL,
+                      drop = FALSE, all.levels = FALSE, type = "lsm") {
+  inp <- as.list(substitute(...()))
+  # setting up a default type if specified
+  if (!missing(type) && !is.null(type)) {
+    type <- if (grepl("lsm|lang|ling|style|match", type, TRUE)) "lsm" else "lsa"
+    ni <- names(inp)
+    if (type == "lsm" && !"dict" %in% ni) inp$dict <- lma_dict(1:9)
+    if (type != "lsm" && !"space" %in% ni) inp$space <- "100k_lsa"
+    if (!"metric" %in% ni) inp$metric <- if (type == "lsm") "canberra" else "cosine"
+    if (is.null(attr(input, "type")) || length(attr(input, "type")) == 1) {
+      if (type == "lsm" && !"percent" %in% ni) inp$percent <- TRUE
+      if (type != "lsm" && !"weight" %in% ni) inp$weight <- "tfidf"
     }
   }
-  mets = c('jaccard', 'euclidean', 'canberra', 'cosine', 'pearson')
-  inp$metric = if(!is.null(inp$metric)) match_metric(inp$metric)$selected else 'cosine'
-  if(!length(inp$metric) || is.null(inp$metric) || inp$metric == '') inp$metric = 'cosine'
-  vs = c('input', 'comp', 'group', 'order', 'data', 'comp.data', 'comp.group')
-  opt = as.list(match.call(expand.dots = FALSE))[vs]
-  names(opt) = vs
+  mets <- c("jaccard", "euclidean", "canberra", "cosine", "pearson")
+  inp$metric <- if (!is.null(inp$metric)) match_metric(inp$metric)$selected else "cosine"
+  if (!length(inp$metric) || is.null(inp$metric) || inp$metric == "") inp$metric <- "cosine"
+  vs <- c("input", "comp", "group", "order", "data", "comp.data", "comp.group")
+  opt <- as.list(match.call(expand.dots = FALSE))[vs]
+  names(opt) <- vs
   # organizing options for preprocessing
-  dsp = lapply(c('lma_dtm', 'lma_weight', 'lma_lspace', 'lma_termcat', 'lma_simets'), function(f){
-    a = names(as.list(args(f)))
-    a = a[-c(1, length(a))]
+  dsp <- lapply(c("lma_dtm", "lma_weight", "lma_lspace", "lma_termcat", "lma_simets"), function(f) {
+    a <- names(as.list(args(f)))
+    a <- a[-c(1, length(a))]
     inp[a[a %in% names(inp)]]
   })
-  names(dsp) = c('p', 'w', 'm', 'c', 's')
+  names(dsp) <- c("p", "w", "m", "c", "s")
   # fetches input from data or environment
-  gv = function(a, data = NULL){
-    ta = a
-    if(is.character(a)){
-      if(!is.null(data) && a %in% colnames(data)) return(unlist(data[, a])) else
-        if(length(ta) == 1 || !any(grepl(' ', a, fixed = TRUE))) ta = parse(text = a)
+  gv <- function(a, data = NULL) {
+    ta <- a
+    if (is.character(a)) {
+      if (!is.null(data) && a %in% colnames(data)) {
+        return(unlist(data[, a]))
+      } else
+      if (length(ta) == 1 || !any(grepl(" ", a, fixed = TRUE))) ta <- parse(text = a)
     }
-    ta = tryCatch(eval(ta, parent.frame(3)), error = function(e) NULL)
-    if(length(ta) == 0 || (!is.null(dim(ta)) && dim(ta)[1] == 0))
-      ta = tryCatch(eval(a, data, parent.frame(2)), error = function(e) NULL)
-    if(length(ta) == 0 || (!is.null(dim(ta)) && dim(ta)[1] == 0))
-      ta = tryCatch(eval(a, globalenv()), error = function(e) NULL)
-    if(is.null(ta)) ta = tryCatch(eval(a, data), error = function(e) NULL)
-    if(is.null(ta)){
-      p = 2
-      while(is.null(ta) && p < 99){
-        p = p + 1
-        ta = tryCatch(eval(a, parent.frame(p)), error = function(e) NULL)
+    ta <- tryCatch(eval(ta, parent.frame(3)), error = function(e) NULL)
+    if (length(ta) == 0 || (!is.null(dim(ta)) && dim(ta)[1] == 0)) {
+      ta <- tryCatch(eval(a, data, parent.frame(2)), error = function(e) NULL)
+    }
+    if (length(ta) == 0 || (!is.null(dim(ta)) && dim(ta)[1] == 0)) {
+      ta <- tryCatch(eval(a, globalenv()), error = function(e) NULL)
+    }
+    if (is.null(ta)) ta <- tryCatch(eval(a, data), error = function(e) NULL)
+    if (is.null(ta)) {
+      p <- 2
+      while (is.null(ta) && p < 99) {
+        p <- p + 1
+        ta <- tryCatch(eval(a, parent.frame(p)), error = function(e) NULL)
       }
     }
-    if(is.null(ta)) stop('could not find ', deparse(a), call. = FALSE)
+    if (is.null(ta)) stop("could not find ", deparse(a), call. = FALSE)
     ta
   }
-  gd = function(a, data = NULL){
-    r = if(is.character(a) && length(a) == 1 && grepl('\\.(?:csv|txt|tsv|tab)$', a, TRUE)){
-      if(file.exists(a)){
-        r = if(grepl('txt$', a)) readLines(a, warn = FALSE) else{
-          r = read.table(a, TRUE, if(grepl('csv$', a)) ',' else '\t', '"', comment.char = '')
+  gd <- function(a, data = NULL) {
+    r <- if (is.character(a) && length(a) == 1 && grepl("\\.(?:csv|txt|tsv|tab)$", a, TRUE)) {
+      if (file.exists(a)) {
+        r <- if (grepl("txt$", a)) {
+          readLines(a, warn = FALSE)
+        } else {
+          r <- read.table(a, TRUE, if (grepl("csv$", a)) "," else "\t", '"', comment.char = "")
           r[, which(!vapply(r, is.numeric, TRUE))[1]]
         }
-        r[r != '']
-      }else stop(a, ' does not exist', call. = FALSE)
-    }else if(is.character(a)) a else gv(a, data)
-    if(is.factor(r)) r = as.character(r)
-    if(is.character(r) && length(r) == 1 && grepl('\\.(?:csv|txt|tsv|tab)$', r, TRUE)) r = gd(r)
+        r[r != ""]
+      } else {
+        stop(a, " does not exist", call. = FALSE)
+      }
+    } else if (is.character(a)) a else gv(a, data)
+    if (is.factor(r)) r <- as.character(r)
+    if (is.character(r) && length(r) == 1 && grepl("\\.(?:csv|txt|tsv|tab)$", r, TRUE)) r <- gd(r)
     r
   }
   # weight, categorize, and/or map
-  wmc = function(a){
-    if(!is.null(colnames(a)) || (length(dsp$c) == 0 && length(dsp$m) == 0)){
-      if(length(dsp$w) != 0) a = do.call(lma_weight, c(list(a), lapply(dsp$w, eval, parent.frame(2))))
-      if(length(dsp$c) != 0) a = do.call(lma_termcat, c(list(a), lapply(dsp$c, eval, parent.frame(2))))
-      if(length(dsp$m) != 0) a = do.call(lma_lspace, c(list(a), lapply(dsp$m, eval, parent.frame(2))))
+  wmc <- function(a) {
+    if (!is.null(colnames(a)) || (length(dsp$c) == 0 && length(dsp$m) == 0)) {
+      if (length(dsp$w) != 0) a <- do.call(lma_weight, c(list(a), lapply(dsp$w, eval, parent.frame(2))))
+      if (length(dsp$c) != 0) a <- do.call(lma_termcat, c(list(a), lapply(dsp$c, eval, parent.frame(2))))
+      if (length(dsp$m) != 0) a <- do.call(lma_lspace, c(list(a), lapply(dsp$m, eval, parent.frame(2))))
     }
     a
   }
   # initial data parsing
   # input
-  if(missing(input)){
-    if(!is.null(data)){
-      opt$input = opt$data
-      input = data
-    }else{
-      input = file.choose()
-      opt$input = input
+  if (missing(input)) {
+    if (!is.null(data)) {
+      opt$input <- opt$data
+      input <- data
+    } else {
+      input <- file.choose()
+      opt$input <- input
     }
   }
-  if(is.function(input)) stop('enter a character vector or matrix-like object as input')
-  if(missing(data)) data = input
-  input = if(is.character(input) && all(input %in% colnames(data))) data[, input] else gd(opt$input, data)
-  if(!missing(group) && is.data.frame(input)) input = as.matrix(input[, vapply(input, is.numeric, TRUE)])
-  rx = NROW(input)
-  cx = NCOL(input)
+  if (is.function(input)) stop("enter a character vector or matrix-like object as input")
+  if (missing(data)) data <- input
+  input <- if (is.character(input) && all(input %in% colnames(data))) data[, input] else gd(opt$input, data)
+  if (!missing(group) && is.data.frame(input)) input <- as.matrix(input[, vapply(input, is.numeric, TRUE)])
+  rx <- NROW(input)
+  cx <- NCOL(input)
   # comp
-  if(!missing(comp)){
-    comp = gd(opt$comp, if(missing(comp.data)) if(is.call(opt$comp)) NULL else data else comp.data)
-    if(is.logical(comp)) comp = which(comp)
-    if(missing(comp.data) && !is.null(colnames(comp))) comp.data = comp
-  }else if(missing(comp) && missing(group) && missing(comp.data) && missing(comp.group)){
-    opt$comp = comp = 'pairwise'
-  }else opt$comp = 'mean'
-  if(length(opt$comp) > 1) opt$comp = deparse(opt$comp)
-  if(is.factor(input)) input = as.character(input)
-  if(is.factor(comp)) comp = as.character(comp) else if(is.data.frame(comp))
-    comp = comp[, vapply(comp, is.numeric, TRUE)]
-  do.wmc = TRUE
-  if('dict' %in% names(inp) && any(class(input) %in% c('matrix', 'data.frame')) &&
-      is.null(attr(input, 'Type'))){
-    cn = colnames(input)
-    dn = gv(inp$dict)
-    if(is.list(dn)) dn = names(dn)
-    if(any(!(ck <- dn %in% cn))){
-      if('prep' %in% dn && !'prep' %in% cn) colnames(input)[cn == 'preps'] = 'prep'
-      if('article' %in% dn && !'article' %in% cn) colnames(input)[cn == 'articles'] = 'article'
-      ck = dn %in% colnames(input)
+  if (!missing(comp)) {
+    comp <- gd(opt$comp, if (missing(comp.data)) if (is.call(opt$comp)) NULL else data else comp.data)
+    if (is.logical(comp)) comp <- which(comp)
+    if (missing(comp.data) && !is.null(colnames(comp))) comp.data <- comp
+  } else if (missing(comp) && missing(group) && missing(comp.data) && missing(comp.group)) {
+    opt$comp <- comp <- "pairwise"
+  } else {
+    opt$comp <- "mean"
+  }
+  if (length(opt$comp) > 1) opt$comp <- deparse(opt$comp)
+  if (is.factor(input)) input <- as.character(input)
+  if (is.factor(comp)) {
+    comp <- as.character(comp)
+  } else if (is.data.frame(comp)) {
+    comp <- comp[, vapply(comp, is.numeric, TRUE)]
+  }
+  do.wmc <- TRUE
+  if ("dict" %in% names(inp) && any(class(input) %in% c("matrix", "data.frame")) &&
+    is.null(attr(input, "Type"))) {
+    cn <- colnames(input)
+    dn <- gv(inp$dict)
+    if (is.list(dn)) dn <- names(dn)
+    if (any(!(ck <- dn %in% cn))) {
+      if ("prep" %in% dn && !"prep" %in% cn) colnames(input)[cn == "preps"] <- "prep"
+      if ("article" %in% dn && !"article" %in% cn) colnames(input)[cn == "articles"] <- "article"
+      ck <- dn %in% colnames(input)
     }
-    if(sum(ck) / length(ck) > .75){
-      inp$dict = NULL
-      if(any(!ck)) dn = dn[ck]
-      cx = length(dn)
-      input = input[, dn]
-      do.wmc = FALSE
-      if(!missing(comp)){
-        if(any(class(comp) %in% c('matrix', 'data.frame'))){
-          if(all(dn %in% colnames(comp))) comp = comp[, dn]
-        }else{
-          if(is.character(comp) && (length(comp)>1 || grepl(' ', comp, fixed = TRUE)))
-            comp = wmc(do.call(lma_dtm, c(list(comp), dsp$p)))
+    if (sum(ck) / length(ck) > .75) {
+      inp$dict <- NULL
+      if (any(!ck)) dn <- dn[ck]
+      cx <- length(dn)
+      input <- input[, dn]
+      do.wmc <- FALSE
+      if (!missing(comp)) {
+        if (any(class(comp) %in% c("matrix", "data.frame"))) {
+          if (all(dn %in% colnames(comp))) comp <- comp[, dn]
+        } else {
+          if (is.character(comp) && (length(comp) > 1 || grepl(" ", comp, fixed = TRUE))) {
+            comp <- wmc(do.call(lma_dtm, c(list(comp), dsp$p)))
+          }
         }
       }
     }
   }
-  if(!is.matrix(input) && is.character(input)){
-    if(!any(grepl('[^[:digit:][:space:].-]', input))){
-      input = as.numeric(input)
-    }else{
+  if (!is.matrix(input) && is.character(input)) {
+    if (!any(grepl("[^[:digit:][:space:].-]", input))) {
+      input <- as.numeric(input)
+    } else {
       # if input looks like text, seeing if other text can be added, then converting to a dtm
-      if(is.character(comp) && (length(comp)>1 ||  grepl(' ', comp, fixed = TRUE))){
-        input = c(comp, input)
-        comp = seq_along(comp)
-        opt$comp = 'text'
+      if (is.character(comp) && (length(comp) > 1 || grepl(" ", comp, fixed = TRUE))) {
+        input <- c(comp, input)
+        comp <- seq_along(comp)
+        opt$comp <- "text"
       }
-      input = do.call(lma_dtm, c(list(input), dsp$p))
+      input <- do.call(lma_dtm, c(list(input), dsp$p))
     }
   }
-  if(is.data.frame(comp)) comp = as.matrix(comp)
-  cc = if(is.numeric(comp) && (!is.null(comp.data) || is.null(dim(comp)))) 1 else if(is.character(comp)){
-    comp = tolower(comp)
+  if (is.data.frame(comp)) comp <- as.matrix(comp)
+  cc <- if (is.numeric(comp) && (!is.null(comp.data) || is.null(dim(comp)))) {
+    1
+  } else if (is.character(comp)) {
+    comp <- tolower(comp)
     2
-  }else 0
+  } else {
+    0
+  }
   # group and order
-  agc = c('c', 'list', 'cbind', 'data.frame')
-  if(!missing(group) && !(is.null(colnames(data)) && rx == length(opt$group) - 1))
-    group = if(length(opt$group) > 1 && as.character(opt$group[1]) %in% agc
-    && !grepl('[$[]', as.character(opt$group[1]))) lapply(opt$group[-1], gv, data) else{
-      if(!is.null(data) && is.character(opt$group) && length(opt$group) < nrow(data)){
-        if(!all(opt$group %in% colnames(data)))
-          stop('group appears to be column names, but were not found in data')
-        group = data[, opt$group]
-        if(!is.list(group)) group = if(is.matrix(group)) as.data.frame(group, stringsAsFactors = FALSE) else list(group)
-      }else{
-        group = gv(opt$group, data)
-        if(is.factor(group)) group = as.character(group) else if(is.matrix(group))
-          group = as.data.frame(group, row.names = FALSE, stringsAsFactors = FALSE)
-        if(is.null(dim(group))) list(group) else lapply(group, as.character)
+  agc <- c("c", "list", "cbind", "data.frame")
+  if (!missing(group) && !(is.null(colnames(data)) && rx == length(opt$group) - 1)) {
+    group <- if (length(opt$group) > 1 && as.character(opt$group[1]) %in% agc &&
+      !grepl("[$[]", as.character(opt$group[1]))) {
+      lapply(opt$group[-1], gv, data)
+    } else {
+      if (!is.null(data) && is.character(opt$group) && length(opt$group) < nrow(data)) {
+        if (!all(opt$group %in% colnames(data))) {
+          stop("group appears to be column names, but were not found in data")
+        }
+        group <- data[, opt$group]
+        if (!is.list(group)) group <- if (is.matrix(group)) as.data.frame(group, stringsAsFactors = FALSE) else list(group)
+      } else {
+        group <- gv(opt$group, data)
+        if (is.factor(group)) {
+          group <- as.character(group)
+        } else if (is.matrix(group)) {
+          group <- as.data.frame(group, row.names = FALSE, stringsAsFactors = FALSE)
+        }
+        if (is.null(dim(group))) list(group) else lapply(group, as.character)
       }
     }
-  if(!missing(comp.group) || (!is.null(comp.data) && !missing(group))){
-    cg = opt[[if(missing(comp.group)) 'group' else 'comp.group']]
-    if(!is.null(cg)){
-      cg = if(!is.null(comp.data) && length(cg)>1
-        && as.character(cg[1]) %in% agc && !grepl('[$[]', as.character(cg[1]))){
+  }
+  if (!missing(comp.group) || (!is.null(comp.data) && !missing(group))) {
+    cg <- opt[[if (missing(comp.group)) "group" else "comp.group"]]
+    if (!is.null(cg)) {
+      cg <- if (!is.null(comp.data) && length(cg) > 1 &&
+        as.character(cg[1]) %in% agc && !grepl("[$[]", as.character(cg[1]))) {
         lapply(as.character(cg[-1]), gv, comp.data)
-      }else if(is.character(cg)){
-        if(cg %in% colnames(comp.data)) list(comp.data[, cg]) else
-          stop('groups not found in comp.data')
-      }else{
+      } else if (is.character(cg)) {
+        if (cg %in% colnames(comp.data)) {
+          list(comp.data[, cg])
+        } else {
+          stop("groups not found in comp.data")
+        }
+      } else {
         list(gv(cg, comp.data))
       }
-      if(is.list(cg) && length(cg) == 1 && !is.null(dim(cg[[1]]))) cg = as.data.frame(cg[[1]], stringsAsFactors = FALSE)
-      if(cc != 1) if(NROW(comp) != length(cg[[1]]) || NROW(input) != length(group[[1]]))
-        stop('data and comp.data mismatch', call. = FALSE)
-      if(all.levels){
-        comp.group = cg
-      }else{
-        comp.group = do.call(paste, cg)
-        if(length(group)>1){
-          group = do.call(paste, group)
-          if(!is.null(comp.data) && any(ck<-!(ckg<-unique(group)) %in% unique(comp.group)))
-            if(all(ck)) stop('group and comp.group had no levels in common') else{
-              warning('levels not found in comp.group: ', paste(ckg[ck], collapse = ', '), call. = FALSE)
-              group = group[ck<-group %in% ckg[!ck]]
-              input = input[ck,, drop = FALSE]
+      if (is.list(cg) && length(cg) == 1 && !is.null(dim(cg[[1]]))) cg <- as.data.frame(cg[[1]], stringsAsFactors = FALSE)
+      if (cc != 1) {
+        if (NROW(comp) != length(cg[[1]]) || NROW(input) != length(group[[1]])) {
+          stop("data and comp.data mismatch", call. = FALSE)
+        }
+      }
+      if (all.levels) {
+        comp.group <- cg
+      } else {
+        comp.group <- do.call(paste, cg)
+        if (length(group) > 1) {
+          group <- do.call(paste, group)
+          if (!is.null(comp.data) && any(ck <- !(ckg <- unique(group)) %in% unique(comp.group))) {
+            if (all(ck)) {
+              stop("group and comp.group had no levels in common")
+            } else {
+              warning("levels not found in comp.group: ", paste(ckg[ck], collapse = ", "), call. = FALSE)
+              group <- group[ck <- group %in% ckg[!ck]]
+              input <- input[ck, , drop = FALSE]
             }
+          }
         }
       }
     }
   }
-  if(!missing(group)) if(length(if(is.list(group)) group[[1]] else group) != rx)
-    stop('length(group) != nrow(input)')
-  if(!missing(order)){
-    order = gv(opt$order, data)
-    if(!is.null(order)) if(length(order) == rx){
-      input = input[order, ]
-      group = lapply(group, '[', order)
-    }else warning('length(order) != nrow(input), so order was not applied', call. = FALSE) else
-      warning('failed to apply order', call. = FALSE)
-  }
-  if(is.character(input)) input = matrix(as.numeric(input), rx)
-  if(is.data.frame(input) && any(ckvc <- !vapply(seq_len(cx), function(col)
-    class(input[, col])[1], '') %in% c('numeric', 'integer'))){
-    if(all(ckvc)){
-      for(col in seq_along(ckvc)) input[, col] = as.numeric(input[, col])
-    }else{
-      input = input[, !ckvc]
-      warning('some input variables were not of numeric or integer class, so they were removed')
+  if (!missing(group)) {
+    if (length(if (is.list(group)) group[[1]] else group) != rx) {
+      stop("length(group) != nrow(input)")
     }
   }
-  dtm = Matrix(if(is.data.frame(input)) as.matrix(input) else input, sparse = TRUE)
-  if(do.wmc) input = wmc(input)
-  if(is.null(dim(input))) input = t(as.matrix(input))
-  if(cc == 2 && (length(comp)>1 || any(grepl(' ', comp, fixed = TRUE)))){
-    comp = do.call(lma_dtm, c(list(comp), dsp$p))
-    cc = 1
+  if (!missing(order)) {
+    order <- gv(opt$order, data)
+    if (!is.null(order)) {
+      if (length(order) == rx) {
+        input <- input[order, ]
+        group <- lapply(group, "[", order)
+      } else {
+        warning("length(order) != nrow(input), so order was not applied", call. = FALSE)
+      }
+    } else {
+      warning("failed to apply order", call. = FALSE)
+    }
+  }
+  if (is.character(input)) input <- matrix(as.numeric(input), rx)
+  if (is.data.frame(input) && any(ckvc <- !vapply(seq_len(cx), function(col) {
+    class(input[, col])[1]
+  }, "") %in% c("numeric", "integer"))) {
+    if (all(ckvc)) {
+      for (col in seq_along(ckvc)) input[, col] <- as.numeric(input[, col])
+    } else {
+      input <- input[, !ckvc]
+      warning("some input variables were not of numeric or integer class, so they were removed")
+    }
+  }
+  dtm <- Matrix(if (is.data.frame(input)) as.matrix(input) else input, sparse = TRUE)
+  if (do.wmc) input <- wmc(input)
+  if (is.null(dim(input))) input <- t(as.matrix(input))
+  if (cc == 2 && (length(comp) > 1 || any(grepl(" ", comp, fixed = TRUE)))) {
+    comp <- do.call(lma_dtm, c(list(comp), dsp$p))
+    cc <- 1
   }
   # if comp appears to be a dtm, unifying input and comp
-  if(cc == 1 && !is.null(names(comp))) comp = t(as.matrix(comp))
-  cr = nrow(comp)
-  cn = colnames(comp)
-  if(!is.null(cn)){
-    cc = 1
-    nn = cn[!cn %in% colnames(input)]
-    if(length(nn) != 0) input = cbind(input, matrix(0, nrow(input), length(nn), dimnames = list(NULL, nn)))
-    input = rbind(matrix(0, cr, ncol(input), dimnames = list(NULL, colnames(input))), input)
-    input[seq_len(cr), cn] = comp[seq_len(cr), ]
-    comp = seq_len(cr)
+  if (cc == 1 && !is.null(names(comp))) comp <- t(as.matrix(comp))
+  cr <- nrow(comp)
+  cn <- colnames(comp)
+  if (!is.null(cn)) {
+    cc <- 1
+    nn <- cn[!cn %in% colnames(input)]
+    if (length(nn) != 0) input <- cbind(input, matrix(0, nrow(input), length(nn), dimnames = list(NULL, nn)))
+    input <- rbind(matrix(0, cr, ncol(input), dimnames = list(NULL, colnames(input))), input)
+    input[seq_len(cr), cn] <- comp[seq_len(cr), ]
+    comp <- seq_len(cr)
   }
-  if(drop){
-    if(sum(su <- colSums(input, na.rm = TRUE) != 0) != 0) input = input[, su, drop = FALSE] else
-      stop('input is all 0s after processing')
+  if (drop) {
+    if (sum(su <- colSums(input, na.rm = TRUE) != 0) != 0) {
+      input <- input[, su, drop = FALSE]
+    } else {
+      stop("input is all 0s after processing")
+    }
   }
-  nc = ncol(input)
+  nc <- ncol(input)
   # finalizing comp
-  if(cc == 1 || opt$comp == 'text'){
-    comp.data = input[comp,, drop = FALSE]
-    if(!missing(comp.group) && !all.levels){
-      if(anyDuplicated(comp.group)){
-        comp.data = t(vapply(split(as.data.frame(comp.data, stringsAsFactors = FALSE), comp.group), colMeans,
-          numeric(ncol(comp.data))))
-        rownames(comp.data) = comp.group = unique(comp.group)
-        opt$comp = paste(opt$comp, opt$group, 'group means')
-      }else if(nrow(comp.data) == length(comp.group)) rownames(comp.data) = comp.group
-    }else if(nrow(comp.data) == 1) comp.data = structure(as.numeric(comp.data[1, ]),
-      names = colnames(comp.data))
-    input = input[-comp,, drop = FALSE]
-  }else if(cc == 2){
-    ckp = FALSE
-    if(grepl('^pa|^se', comp)){
-      opt$comp = if(grepl('^pa', comp)) 'pairwise' else 'sequential'
-    }else if(any(!is.na(p<-pmatch(comp, rownames(lsm_profiles))))){
-      opt$comp = rownames(lsm_profiles)[p]
-      ckp = TRUE
-      comp.data = lsm_profiles[p,, drop = FALSE]
-    }else if(grepl('^au', comp)){
-      p = colMeans(input, na.rm = TRUE)
-      p = which.max(lma_simets(lsm_profiles, p, 'pearson'))
-      opt$comp = paste('auto:', names(p))
-      ckp = TRUE
-      comp.data = lsm_profiles[p,, drop = FALSE]
-    }else opt$comp = substitute(comp)
-    if(ckp){
-      if(any(ckp<-!(cn<-colnames(input)) %in% (bn<-colnames(comp.data)))){
-        if(all(ckp)) stop('input and comp have no columns in common')
-        if('articles' %in% cn && !'articles' %in% bn) bn[bn == 'article'] = 'articles'
-        if('preps' %in% cn && !'preps' %in% bn) bn[bn == 'prep'] = 'preps'
-        colnames(comp.data) = bn
-        if(any(ckp<-!cn %in% bn)){
-          warning('input columns were not found in comp: ', paste(cn[ckp], collapse = ', '), call. = FALSE)
-          comp.data = comp.data[, cn[!ckp], drop = FALSE]
+  if (cc == 1 || opt$comp == "text") {
+    comp.data <- input[comp, , drop = FALSE]
+    if (!missing(comp.group) && !all.levels) {
+      if (anyDuplicated(comp.group)) {
+        comp.data <- t(vapply(
+          split(as.data.frame(comp.data, stringsAsFactors = FALSE), comp.group), colMeans,
+          numeric(ncol(comp.data))
+        ))
+        rownames(comp.data) <- comp.group <- unique(comp.group)
+        opt$comp <- paste(opt$comp, opt$group, "group means")
+      } else if (nrow(comp.data) == length(comp.group)) rownames(comp.data) <- comp.group
+    } else if (nrow(comp.data) == 1) {
+      comp.data <- structure(as.numeric(comp.data[1, ]),
+        names = colnames(comp.data)
+      )
+    }
+    input <- input[-comp, , drop = FALSE]
+  } else if (cc == 2) {
+    ckp <- FALSE
+    if (grepl("^pa|^se", comp)) {
+      opt$comp <- if (grepl("^pa", comp)) "pairwise" else "sequential"
+    } else if (any(!is.na(p <- pmatch(comp, rownames(lsm_profiles))))) {
+      opt$comp <- rownames(lsm_profiles)[p]
+      ckp <- TRUE
+      comp.data <- lsm_profiles[p, , drop = FALSE]
+    } else if (grepl("^au", comp)) {
+      p <- colMeans(input, na.rm = TRUE)
+      p <- which.max(lma_simets(lsm_profiles, p, "pearson"))
+      opt$comp <- paste("auto:", names(p))
+      ckp <- TRUE
+      comp.data <- lsm_profiles[p, , drop = FALSE]
+    } else {
+      opt$comp <- substitute(comp)
+    }
+    if (ckp) {
+      if (any(ckp <- !(cn <- colnames(input)) %in% (bn <- colnames(comp.data)))) {
+        if (all(ckp)) stop("input and comp have no columns in common")
+        if ("articles" %in% cn && !"articles" %in% bn) bn[bn == "article"] <- "articles"
+        if ("preps" %in% cn && !"preps" %in% bn) bn[bn == "prep"] <- "preps"
+        colnames(comp.data) <- bn
+        if (any(ckp <- !cn %in% bn)) {
+          warning("input columns were not found in comp: ", paste(cn[ckp], collapse = ", "), call. = FALSE)
+          comp.data <- comp.data[, cn[!ckp], drop = FALSE]
         }
-      }else comp.data = comp.data[, cn, drop = FALSE]
+      } else {
+        comp.data <- comp.data[, cn, drop = FALSE]
+      }
     }
-  }else if(!is.null(comp.data)){
-    cn = colnames(input)
-    cns = cn[ck<-cn %in% colnames(comp.data)]
-    if(!any(ck)) stop('input and comp have no columns in common') else if(any(!ck)){
-      warning('input columns were not found in comp: ', paste(cn[!ck], collapse = ', '), call. = FALSE)
-      input = input[, cns]
+  } else if (!is.null(comp.data)) {
+    cn <- colnames(input)
+    cns <- cn[ck <- cn %in% colnames(comp.data)]
+    if (!any(ck)) {
+      stop("input and comp have no columns in common")
+    } else if (any(!ck)) {
+      warning("input columns were not found in comp: ", paste(cn[!ck], collapse = ", "), call. = FALSE)
+      input <- input[, cns]
     }
-    comp.data = comp.data[, cns, drop = FALSE]
+    comp.data <- comp.data[, cns, drop = FALSE]
   }
-  compmeanck = opt$comp == 'mean'
-  sim = speaker = NULL
-  if(!is.null(group)){
-    if(!is.null(comp.data) && (NROW(comp.data) == 1 || (is.list(group) && length(group[[1]]) != nrow(input)))){
-      group = NULL
-      warning('group does not appear to be meaningful for this comparison, so it was ignored',
-        call. = FALSE)
-    }else if(!is.list(group)) group = list(group)
-    gl = length(group)
-    if(opt$comp == 'sequential'){
-      speaker = group[[gl]]
-      group = if(gl == 1) NULL else group[-gl]
-      gl = length(group)
+  compmeanck <- opt$comp == "mean"
+  sim <- speaker <- NULL
+  if (!is.null(group)) {
+    if (!is.null(comp.data) && (NROW(comp.data) == 1 || (is.list(group) && length(group[[1]]) != nrow(input)))) {
+      group <- NULL
+      warning("group does not appear to be meaningful for this comparison, so it was ignored",
+        call. = FALSE
+      )
+    } else if (!is.list(group)) group <- list(group)
+    gl <- length(group)
+    if (opt$comp == "sequential") {
+      speaker <- group[[gl]]
+      group <- if (gl == 1) NULL else group[-gl]
+      gl <- length(group)
     }
-    if(gl > 1 && !all.levels){
-      group = list(do.call(paste, group))
-      gl = 1
+    if (gl > 1 && !all.levels) {
+      group <- list(do.call(paste, group))
+      gl <- 1
     }
-    if(gl){
-      sim = as.data.frame(group, stringsAsFactors = FALSE)
-      colnames(sim) = paste0('g', seq_len(gl))
-      for(m in inp$metric) sim[, m] = NA
-      mets = seq_along(inp$metric) + gl
+    if (gl) {
+      sim <- as.data.frame(group, stringsAsFactors = FALSE)
+      colnames(sim) <- paste0("g", seq_len(gl))
+      for (m in inp$metric) sim[, m] <- NA
+      mets <- seq_along(inp$metric) + gl
     }
-    gs = as.character(unique(sim[, 1]))
-    if(gl == 1 && !is.null(comp.data) && !is.null(comp.group) && !any(gs %in% rownames(comp.data))){
-      warning('no group levels were found in comp.data', call. = FALSE)
+    gs <- as.character(unique(sim[, 1]))
+    if (gl == 1 && !is.null(comp.data) && !is.null(comp.group) && !any(gs %in% rownames(comp.data))) {
+      warning("no group levels were found in comp.data", call. = FALSE)
     }
-  }else if(opt$comp == 'sequential' && is.null(speaker)) speaker = seq_len(nrow(input))
-  #making comparisons
-  sal = dsp$s
-  ckf = is.function(comp)
-  apply_comp = function(m){
-    a = names(as.list(args(comp)))
-    if('na.rm' %in% a){
+  } else if (opt$comp == "sequential" && is.null(speaker)) speaker <- seq_len(nrow(input))
+  # making comparisons
+  sal <- dsp$s
+  ckf <- is.function(comp)
+  apply_comp <- function(m) {
+    a <- names(as.list(args(comp)))
+    if ("na.rm" %in% a) {
       apply(m, 2, comp, na.rm = TRUE)
-    }else if('na.action' %in% a){
+    } else if ("na.action" %in% a) {
       apply(m, 2, comp, na.action = na.omit)
-    }else apply(m, 2, comp)
+    } else {
+      apply(m, 2, comp)
+    }
   }
-  if(is.null(group)){
-    if(!is.null(speaker)) sal$group = speaker
-    if(!is.null(comp.data)){
-      if(ckf){
-        opt$comp = paste(if(length(opt$comp.data) > 1) deparse(opt$comp.data) else opt$comp.data, opt$comp)
-        sal$b = comp.data = if(is.null(dim(comp.data))) comp.data else
-          if(compmeanck) colMeans(comp.data, na.rm = TRUE) else apply_comp(comp.data)
-      }else sal$b = comp.data
-    }else if(ckf) sal$b = comp.data = if(compmeanck) colMeans(input, na.rm = TRUE) else
-      apply_comp(input)
-    if(!'b' %in% names(sal) && (is.numeric(comp) || !is.null(dim(comp)))) sal$b = comp
-    sim = do.call(lma_simets, c(list(input), sal))
-  }else{
-    cks = !is.null(speaker)
-    ckc = !is.null(comp.data)
-    ckp = cc == 2 && opt$comp == 'pairwise'
-    ckq = cc == 2 && opt$comp == 'sequential'
-    if(gl == 1){
-      if(opt$comp != 'pairwise'){
-        if(opt$comp == 'sequential'){
-          group = sim[, 1]
-          sim = do.call(rbind, lapply(gs, function(g){
-            su = which(group == g)
-            s = speaker[su]
-            r = if(length(su) < 2 || length(unique(s)) < 2){
+  if (is.null(group)) {
+    if (!is.null(speaker)) sal$group <- speaker
+    if (!is.null(comp.data)) {
+      if (ckf) {
+        opt$comp <- paste(if (length(opt$comp.data) > 1) deparse(opt$comp.data) else opt$comp.data, opt$comp)
+        sal$b <- comp.data <- if (is.null(dim(comp.data))) {
+          comp.data
+        } else
+        if (compmeanck) colMeans(comp.data, na.rm = TRUE) else apply_comp(comp.data)
+      } else {
+        sal$b <- comp.data
+      }
+    } else if (ckf) {
+      sal$b <- comp.data <- if (compmeanck) {
+        colMeans(input, na.rm = TRUE)
+      } else {
+        apply_comp(input)
+      }
+    }
+    if (!"b" %in% names(sal) && (is.numeric(comp) || !is.null(dim(comp)))) sal$b <- comp
+    sim <- do.call(lma_simets, c(list(input), sal))
+  } else {
+    cks <- !is.null(speaker)
+    ckc <- !is.null(comp.data)
+    ckp <- cc == 2 && opt$comp == "pairwise"
+    ckq <- cc == 2 && opt$comp == "sequential"
+    if (gl == 1) {
+      if (opt$comp != "pairwise") {
+        if (opt$comp == "sequential") {
+          group <- sim[, 1]
+          sim <- do.call(rbind, lapply(gs, function(g) {
+            su <- which(group == g)
+            s <- speaker[su]
+            r <- if (length(su) < 2 || length(unique(s)) < 2) {
               data.frame(group = g, structure(as.list(numeric(length(mets)) + 1),
-                names = inp$metric), row.names = paste(su, collapse = ', '), stringsAsFactors = FALSE)
-            }else{
-              sal$group = s
-              r = do.call(lma_simets, c(list(input[su,, drop = FALSE]), sal))
-              rs = as.integer(unlist(strsplit(rownames(r), '[^0-9]+')))
-              rownames(r) = strsplit(do.call(sprintf, c(
-                paste(gsub('[0-9]+', '%i', rownames(r)), collapse = '|'), as.list(rs - 1 + su[1])
-              )), '|', fixed = TRUE)[[1]]
+                names = inp$metric
+              ), row.names = paste(su, collapse = ", "), stringsAsFactors = FALSE)
+            } else {
+              sal$group <- s
+              r <- do.call(lma_simets, c(list(input[su, , drop = FALSE]), sal))
+              rs <- as.integer(unlist(strsplit(rownames(r), "[^0-9]+")))
+              rownames(r) <- strsplit(do.call(sprintf, c(
+                paste(gsub("[0-9]+", "%i", rownames(r)), collapse = "|"), as.list(rs - 1 + su[1])
+              )), "|", fixed = TRUE)[[1]]
               data.frame(group = g, r, stringsAsFactors = FALSE)
             }
           }))
-        }else{
-          ckmc = FALSE
-          if(!ckc){
-            if(!ckf){
-              ckf = TRUE
-              opt$comp = 'mean'
-              comp = mean
+        } else {
+          ckmc <- FALSE
+          if (!ckc) {
+            if (!ckf) {
+              ckf <- TRUE
+              opt$comp <- "mean"
+              comp <- mean
             }
-            ckmc = TRUE
-            opt$comp = paste0(if(length(opt$group) == 1) paste(opt$group, ''), 'group ', opt$comp)
-            comp.data = as.data.frame(
+            ckmc <- TRUE
+            opt$comp <- paste0(if (length(opt$group) == 1) paste(opt$group, ""), "group ", opt$comp)
+            comp.data <- as.data.frame(
               matrix(NA, length(gs), nc, dimnames = list(gs, colnames(input))),
               stringsAsFactors = FALSE
             )
           }
-          for(g in gs){
-            su = sim[, 1] == g
-            sal$b = NULL
-            if(ckc){
-              if(nrow(cc <- comp.data[if(!is.null(comp.group)) comp.group == g else g,, drop = FALSE]) == 1)
-                sal$b = cc else warning('comp.data has too few/many rows in group ', g, call. = FALSE)
-            }else if(sum(su) == 1) sal$b = input[su, ] else if(sum(su) > 1)
-              sal$b = if(compmeanck) colMeans(input[su, ], na.rm = TRUE) else apply_comp(input[su, ])
-            if(!is.null(sal$b) && ckmc) comp.data[g, ] = sal$b
-            if(sum(su) == 1 && is.null(sal$b)){
-              sim[su, mets] = 1
+          for (g in gs) {
+            su <- sim[, 1] == g
+            sal$b <- NULL
+            if (ckc) {
+              if (nrow(cc <- comp.data[if (!is.null(comp.group)) comp.group == g else g, , drop = FALSE]) == 1) {
+                sal$b <- cc
+              } else {
+                warning("comp.data has too few/many rows in group ", g, call. = FALSE)
+              }
+            } else if (sum(su) == 1) {
+              sal$b <- input[su, ]
+            } else if (sum(su) > 1) {
+              sal$b <- if (compmeanck) colMeans(input[su, ], na.rm = TRUE) else apply_comp(input[su, ])
+            }
+            if (!is.null(sal$b) && ckmc) comp.data[g, ] <- sal$b
+            if (sum(su) == 1 && is.null(sal$b)) {
+              sim[su, mets] <- 1
               next
             }
-            tm = do.call(lma_simets, c(list(input[su,, drop = FALSE]), sal))
-            sim[su, mets] = tm
+            tm <- do.call(lma_simets, c(list(input[su, , drop = FALSE]), sal))
+            sim[su, mets] <- tm
           }
         }
-      }else{
-        tomean = if('mean' %in% names(dsp$s)) dsp$s$mean else TRUE
-        ug = unique(group[[1]])
-        if(tomean){
-          sal$symmetrical = TRUE
-          sim = data.frame(group[[1]], NA, stringsAsFactors = FALSE)
-          colnames(sim) = c(opt$group, sal$metric)
-          for(g in ug){
-            su = group[[1]] == g
-            ssu = sum(su)
-            if(ssu != 1){
-              gsim = do.call(lma_simets, c(list(input[su, ]), sal))
-              sim[su, -1] = if(length(sal$metric) == 1){
+      } else {
+        tomean <- if ("mean" %in% names(dsp$s)) dsp$s$mean else TRUE
+        ug <- unique(group[[1]])
+        if (tomean) {
+          sal$symmetrical <- TRUE
+          sim <- data.frame(group[[1]], NA, stringsAsFactors = FALSE)
+          colnames(sim) <- c(opt$group, sal$metric)
+          for (g in ug) {
+            su <- group[[1]] == g
+            ssu <- sum(su)
+            if (ssu != 1) {
+              gsim <- do.call(lma_simets, c(list(input[su, ]), sal))
+              sim[su, -1] <- if (length(sal$metric) == 1) {
                 (colSums(gsim) - 1) / (ssu - 1)
-              }else{
+              } else {
                 vapply(sal$metric, function(i) (colSums(gsim[[sal$metric[i]]]) - 1) / (ssu - 1), 0)
               }
             }
           }
-        }else{
-          sal$symmetrical = if('symmetrical' %in% names(dsp$s)) dsp$s$symmetrical else FALSE
-          sim = lapply(ug, function(g){
-            su = group[[1]] == g
-            if(sum(su) != 1) do.call(lma_simets, c(list(input[su, ]), sal)) else
+        } else {
+          sal$symmetrical <- if ("symmetrical" %in% names(dsp$s)) dsp$s$symmetrical else FALSE
+          sim <- lapply(ug, function(g) {
+            su <- group[[1]] == g
+            if (sum(su) != 1) {
+              do.call(lma_simets, c(list(input[su, ]), sal))
+            } else {
               rep(NA, length(sal$metric))
+            }
           })
-          names(sim) = ug
+          names(sim) <- ug
         }
       }
-    }else if(gl>1){
-      for(i in seq_len(gl-1)) sim = cbind(sim, sim[, mets])
-      sug = seq_len(gl)
-      cn = paste0('g', sug)
-      mn = length(inp$metric)
-      mw = seq_len(mn)
-      colnames(sim)[-sug] = paste0(rep(vapply(seq_along(cn), function(e)
-        paste0(cn[seq_len(e)], collapse = '_'), ''), each = mn), '_', inp$metric)
-      group = vapply(sug, function(g) do.call(paste, group[seq_len(g)]), character(nrow(sim)))
-      if(!missing(comp.group)){
-        comp.group = vapply(sug, function(g)
-          do.call(paste, comp.group[seq_len(g)]), character(length(comp.group[[1]])))
+    } else if (gl > 1) {
+      for (i in seq_len(gl - 1)) sim <- cbind(sim, sim[, mets])
+      sug <- seq_len(gl)
+      cn <- paste0("g", sug)
+      mn <- length(inp$metric)
+      mw <- seq_len(mn)
+      colnames(sim)[-sug] <- paste0(rep(vapply(seq_along(cn), function(e) {
+        paste0(cn[seq_len(e)], collapse = "_")
+      }, ""), each = mn), "_", inp$metric)
+      group <- vapply(sug, function(g) do.call(paste, group[seq_len(g)]), character(nrow(sim)))
+      if (!missing(comp.group)) {
+        comp.group <- vapply(sug, function(g) {
+          do.call(paste, comp.group[seq_len(g)])
+        }, character(length(comp.group[[1]])))
       }
-      if(!is.null(dsp$s$mean) && !dsp$s$mean){
-        sal$symmetrical = TRUE
-        sim = lapply(ug<-unique(sim[, 1]), function(g){
-          su = sim[, 1] == g
-          gsm = do.call(lma_simets, c(list(input[su, ]), sal))
-          gn = group[su, ncol(group)]
-          for(m in names(gsm)) dimnames(gsm[[m]]) = list(gn, gn)
+      if (!is.null(dsp$s$mean) && !dsp$s$mean) {
+        sal$symmetrical <- TRUE
+        sim <- lapply(ug <- unique(sim[, 1]), function(g) {
+          su <- sim[, 1] == g
+          gsm <- do.call(lma_simets, c(list(input[su, ]), sal))
+          gn <- group[su, ncol(group)]
+          for (m in names(gsm)) dimnames(gsm[[m]]) <- list(gn, gn)
           gsm
         })
-        if(!is.null(dsp$s$symmetrical) && !dsp$s$symmetrical){
-          sim = do.call(rbind, lapply(sim, function(ll){
-            m = ll[[1]]
-            su = lower.tri(m)
+        if (!is.null(dsp$s$symmetrical) && !dsp$s$symmetrical) {
+          sim <- do.call(rbind, lapply(sim, function(ll) {
+            m <- ll[[1]]
+            su <- lower.tri(m)
             as.data.frame(
-              comp = outer(n <- colnames(m), n, function(a, b) paste0(a, ' <-> ', b))[su],
-              lapply(ll, '[', su), stringsAsFactors = FALSE
+              comp = outer(n <- colnames(m), n, function(a, b) paste0(a, " <-> ", b))[su],
+              lapply(ll, "[", su), stringsAsFactors = FALSE
             )
           }))
-        }else names(sim) = ug
-      }else{
-        sal$symmetrical = FALSE
-        ssl = if(is.null(speaker)) TRUE else !is.na(speaker)
-        for(g in unique(sim[, 1])){
-          su = which(sim[, 1] == g & ssl)
-          sg = group[su,, drop = FALSE]
-          sx = input[su,, drop = FALSE]
-          gck = ckc && !missing(comp.group)
-          if(gck){
-            gcsub = comp.group[, 1] == g
-            if(!any(gcsub)){
-              warning('the first comparison group has no levels in common with the first data group',
-                call. = FALSE)
-              gck = FALSE
+        } else {
+          names(sim) <- ug
+        }
+      } else {
+        sal$symmetrical <- FALSE
+        ssl <- if (is.null(speaker)) TRUE else !is.na(speaker)
+        for (g in unique(sim[, 1])) {
+          su <- which(sim[, 1] == g & ssl)
+          sg <- group[su, , drop = FALSE]
+          sx <- input[su, , drop = FALSE]
+          gck <- ckc && !missing(comp.group)
+          if (gck) {
+            gcsub <- comp.group[, 1] == g
+            if (!any(gcsub)) {
+              warning("the first comparison group has no levels in common with the first data group",
+                call. = FALSE
+              )
+              gck <- FALSE
             }
           }
-          for(s in sug){
-            usg = unique(sg[, s])
-            if(length(usg) == 1){
-              ssg = list(sx)
-              names(ssg) = usg
-            }else{
-              ssg = lapply(usg, function(ss) sx[sg[, s] == ss,, drop = FALSE])
-              names(ssg) = usg
+          for (s in sug) {
+            usg <- unique(sg[, s])
+            if (length(usg) == 1) {
+              ssg <- list(sx)
+              names(ssg) <- usg
+            } else {
+              ssg <- lapply(usg, function(ss) sx[sg[, s] == ss, , drop = FALSE])
+              names(ssg) <- usg
             }
-            if(length(ssg) != 0) for(ssn in names(ssg)){
-              ssu = su[sg[, s] == ssn]
-              lss = length(ssu)
-              if(cks) sal$group = speaker[ssu] else if(ckf)
-                sal$b = if(compmeanck) colMeans(ssg[[ssn]], na.rm = TRUE) else
-                  apply_comp(ssg[[ssn]])
-              if(!is.null(sal$b) && identical(sal$b, ssg[[ssn]])){
-                sim[ssu, gl + mw + (mn * (s - 1))] = 1
-                next
-              }
-              if(gck){
-                gcsu = comp.group[, s] == ssn & gcsub
-                if(!any(gcsu)) warning('no ', paste(usg, collapse = ', '),
-                  ' level found in the comparison group(s)') else{
-                  sal$b = comp.data[gcsu,, drop = FALSE]
-                  if(nrow(sal$b) != 1) sal$b = colMeans(sal$b)
+            if (length(ssg) != 0) {
+              for (ssn in names(ssg)) {
+                ssu <- su[sg[, s] == ssn]
+                lss <- length(ssu)
+                if (cks) {
+                  sal$group <- speaker[ssu]
+                } else if (ckf) {
+                  sal$b <- if (compmeanck) {
+                    colMeans(ssg[[ssn]], na.rm = TRUE)
+                  } else {
+                    apply_comp(ssg[[ssn]])
+                  }
                 }
+                if (!is.null(sal$b) && identical(sal$b, ssg[[ssn]])) {
+                  sim[ssu, gl + mw + (mn * (s - 1))] <- 1
+                  next
+                }
+                if (gck) {
+                  gcsu <- comp.group[, s] == ssn & gcsub
+                  if (!any(gcsu)) {
+                    warning(
+                      "no ", paste(usg, collapse = ", "),
+                      " level found in the comparison group(s)"
+                    )
+                  } else {
+                    sal$b <- comp.data[gcsu, , drop = FALSE]
+                    if (nrow(sal$b) != 1) sal$b <- colMeans(sal$b)
+                  }
+                }
+                ssim <- do.call(lma_simets, c(list(ssg[[ssn]]), sal))
+                if (ckp || ckq) {
+                  if (ckp) {
+                    if (length(ssim[[1]]) != 1) ssim <- vapply(ssim, mean, 0, na.rm = TRUE)
+                  } else if (nrow(ssim) > 1) ssim <- colMeans(ssim, na.rm = TRUE)
+                  if (lss != 1) ssim <- vapply(ssim, rep, numeric(lss), lss)
+                }
+                csu <- gl + mw + (mn * (s - 1))
+                if (all(dim(ssim) == c(lss, length(csu)))) sim[ssu, csu] <- ssim else warning(g, s)
               }
-              ssim = do.call(lma_simets, c(list(ssg[[ssn]]), sal))
-              if(ckp || ckq){
-                if(ckp){
-                  if(length(ssim[[1]]) != 1) ssim = vapply(ssim, mean, 0, na.rm = TRUE)
-                }else if(nrow(ssim)>1) ssim = colMeans(ssim, na.rm = TRUE)
-                if(lss != 1) ssim = vapply(ssim, rep, numeric(lss), lss)
-              }
-              csu = gl + mw + (mn * (s - 1))
-              if(all(dim(ssim) == c(lss, length(csu)))) sim[ssu, csu] = ssim else warning(g, s)
             }
           }
         }
@@ -686,1342 +782,21 @@ lingmatch = function(input = NULL, comp = mean, data = NULL, group = NULL, ..., 
   list(
     dtm = dtm,
     processed = input,
-    comp.type = if(!is.null(opt$comp)) if(is.character(opt$comp)) opt$comp else
-      gsub('"', "'", as.character(deparse(opt$comp))),
+    comp.type = if (!is.null(opt$comp)) {
+      if (is.character(opt$comp)) {
+        opt$comp
+      } else {
+        gsub('"', "'", as.character(deparse(opt$comp)))
+      }
+    },
     comp = comp.data,
-    group = if(!is.null(opt$group)) if(is.character(opt$group)) opt$group else
-      gsub('"', "'", as.character(deparse(opt$group))),
+    group = if (!is.null(opt$group)) {
+      if (is.character(opt$group)) {
+        opt$group
+      } else {
+        gsub('"', "'", as.character(deparse(opt$group)))
+      }
+    },
     sim = sim
   )
-}
-
-#' Document-Term Matrix Creation
-#'
-#' Creates a document-term matrix (dtm) from a set of texts.
-#' @param text Texts to be processed. This can be a vector (such as a column in a data frame)
-#'   or list.
-#' @param exclude A character vector of words to be excluded. If \code{exclude} is a single string
-#'   matching \code{'function'}, \code{lma_dict(1:9)} will be used.
-#' @param context A character vector used to reformat text based on look- ahead/behind. For example,
-#'   you might attempt to disambiguate \emph{like} by reformatting certain \emph{like}s
-#'   (e.g., \code{context = c('(i) like*', '(you) like*', '(do) like')}, where words in parentheses are
-#'   the context for the target word, and asterisks denote partial matching). This would be converted
-#'   to regular expression (i.e., \code{'(? <= i) like\\\\b'}) which, if matched, would be
-#'   replaced with a coded version of the word (e.g., \code{"Hey, i like that!"} would become
-#'   \code{"Hey, i i-like that!"}). This would probably only be useful for categorization, where a
-#'   dictionary would only include one or another version of a word (e.g., the LIWC 2015 dictionary
-#'   does something like this with \emph{like}, and LIWC 2007 did something like this with
-#'   \emph{kind (of)}, both to try and clean up the posemo category).
-#' @param replace.special Logical: if \code{TRUE} (default), special characters are replaced with regular
-#'   equivalents using the \code{\link{lma_dict}} special function.
-#' @param numbers Logical: if \code{TRUE}, numbers are preserved.
-#' @param punct Logical: if \code{TRUE}, punctuation is preserved.
-#' @param urls Logical: if \code{FALSE}, attempts to replace all urls with "repurl".
-#' @param emojis Logical: if \code{TRUE}, attempts to replace emojis (e.g., ":(" would be replaced
-#'   with "repfrown").
-#' @param to.lower Logical: if \code{FALSE}, words with different capitalization are treated as
-#'   different terms.
-#' @param word.break A regular expression string determining the way words are split. Default is
-#'   \code{' +'} which breaks words at one or more blank spaces. You may also like to break by
-#'   dashes or slashes (\code{'[ /-]+'}), depending on the text.
-#' @param dc.min Numeric: excludes terms appearing in the set number or fewer documents.
-#'   Default is 0 (no limit).
-#' @param dc.max Numeric: excludes terms appearing in the set number or more. Default
-#'   is Inf (no limit).
-#' @param sparse Logical: if \code{FALSE}, a regular dense matrix is returned.
-#' @param tokens.only Logical: if \code{TRUE}, returns a list rather than a matrix, with these entries:
-#'   \tabular{ll}{
-#'     \code{tokens} \tab A vector of indices with terms as names. \cr
-#'     \code{frequencies} \tab A vector of counts with terms as names. \cr
-#'     \code{WC} \tab A vector of term counts for each document. \cr
-#'     \code{indices} \tab A list with a vector of token indices for each document. \cr
-#'   }
-#' @note
-#' This is a relatively simple way to make a dtm. To calculate the (more or less) standard forms of
-#' LSM and LSS, a somewhat raw dtm should be fine, because both processes essentially use
-#' dictionaries (obviating stemming) and weighting or categorization (largely obviating 'stop word'
-#' removal). The exact effect of additional processing will depend on the dictionary/semantic space
-#' and weighting scheme used (particularly for LSA). This function also does some processing which
-#' may matter if you plan on categorizing with categories that have terms with look- ahead/behind assertions
-#' (like LIWC dictionaries). Otherwise, other methods may be faster, more memory efficient, and/or more featureful.
-#' @return A sparse matrix (or regular matrix if \code{sparse = FALSE}), with a row per \code{text},
-#' and column per term, or a list if \code{tokens.only = TRUE}. Includes an attribute with options (\code{opts}),
-#' and attributes with word count (\code{WC}) and column sums (\code{colsums}) if \code{tokens.only = FALSE}.
-#' @examples
-#' text = c(
-#'   "Why, hello there! How are you this evening?",
-#'   "I am well, thank you for your inquiry!",
-#'   "You are a most good at social interactions person!",
-#'   "Why, thank you! You're not all bad yourself!"
-#' )
-#'
-#' lma_dtm(text)
-#' @export
-
-lma_dtm = function(text, exclude = NULL, context = NULL, replace.special = TRUE, numbers = FALSE,
-  punct = FALSE, urls = TRUE, emojis = FALSE, to.lower = TRUE, word.break = ' +', dc.min = 0,
-  dc.max = Inf, sparse = TRUE, tokens.only = FALSE){
-  if(!is.null(dim(text))){
-    if(is.character(text[, 1]) || is.factor(text[, 1])){
-      text = text[, 1]
-    }else stop('enter a vector of texts as the first argument')
-  }
-  if(is.list(text) && all(c('tokens', 'indices') %in% names(text))){
-    m = do.call(rbind, lapply(seq_along(text$indices), function(i){
-      if(length(text$indices[[i]])){
-        inds = as.factor(text$indices[[i]])
-        cbind(i, as.integer(levels(inds)), tabulate(inds))
-      }
-    }))
-    dtm = sparseMatrix(m[, 1], m[, 2], x = m[, 3], dims = c(length(text$indices), length(text$tokens)),
-      dimnames = list(NULL, if(is.character(text$tokens)) text$tokens else names(text$tokens)))
-    if(!sparse) dtm = as.matrix(dtm)
-    attr(dtm, 'colsums') = text$frequencies
-    attr(dtm, 'type') = 'count'
-    attr(dtm, 'WC') = text$WC
-    attr(dtm, 'opts') = attr(text, 'opts')
-    attr(dtm, 'time') = attr(text, 'time')
-    return(dtm)
-  }
-  if(is.null(text)) stop(substitute(text), ' not found')
-  if(is.character(text) && all(nchar(text) < 500) && all(file.exists(text))){
-    text = if(length(text) != 1 || dir.exists(text)) read.segments(text) else readLines(text)
-  }
-  text = paste(' ', text, ' ')
-  st = proc.time()[[3]]
-  if(replace.special){
-    text = lma_dict('special', as.function = gsub)(text)
-    text = gsub("(?<=[^a-z0-9])'|'(?=[^a-z0-9])", '"', text, TRUE, TRUE)
-  }
-  if(!urls){
-    text = gsub(paste0('\\s[a-z]+://[^\\s]*|www\\.[^\\s]*|\\s[a-z_~-]+\\.[a-z_~-]{2,}[^\\s]*|\\s[a-z_~-]+\\.',
-      '(?:io|com|net|org|gov|edu)\\s'), ' repurl ', text, TRUE, TRUE)
-    text = gsub('(?<=[A-Z])\\.\\s', ' ', text, perl = TRUE)
-  }
-  text = gsub('\\s+', ' ', text, perl = TRUE)
-  text = gsub('\\s(etc|st|rd|ft|feat|dr|drs|mr|ms|mrs|messrs|jr|prof)\\.', ' \\1tempperiod', text)
-  text = gsub('\\s\\.|\\.\\s', ' . ', text)
-  if(any(punct, emojis, !is.null(context))){
-    special = lma_dict(special)[[1]]
-    if(!missing(context) && length(context) == 1 && grepl('like', context, TRUE))
-      context = special[['LIKE']]
-    if(punct) text = gsub(special[['ELLIPSIS']], ' repellipsis ', text)
-    if(emojis) for(type in c('SMILE', 'FROWN')) text = gsub(
-      special[[type]], paste0(' rep', tolower(type), ' '), text, perl = TRUE
-    )
-    if(!missing(context)){
-      if(!any(grepl('[?=]', context))){
-        context = gsub('^\\(', '(?<=', context)
-        context = gsub('\\((?!\\?)', '(?=', context, perl = TRUE)
-        context = gsub('(?<![)*])$', '\\\\b', context, perl = TRUE)
-        context = gsub('\\*', '\\\\w*', context, perl = TRUE)
-      }
-      context = structure(
-        as.list(context),
-        names = paste('', gsub('--+', '-', gsub('[\\s^[]|\\\\s]', '-',
-          gsub("[^a-z0-9\\s\\\\']|\\\\[wbs]", '', context, TRUE, TRUE), perl = TRUE)), '')
-      )
-      for(rn in names(context)) text = gsub(context[[rn]], rn, text, perl = TRUE)
-    }
-  }
-  if(to.lower) text = tolower(text)
-  if(!is.null(exclude)){
-    if(length(exclude) == 1 && grepl(exclude, 'function', TRUE)){
-      exclude = unlist(lma_dict(), use.names = FALSE)
-    }else if(is.list(exclude)) exclude = unlist(exclude, use.names = FALSE)
-  }
-  if(!numbers) text = gsub('[[:punct:]]*[0-9][0-9,.el-]*', ' ', text, TRUE, TRUE)
-  text = gsub(paste0("([^a-z0-9.,':/?=#\\s-]|[:/?=#](?=\\s)|(?:(?<=\\s)[:/=-]|,)(?=[a-z])|(?<=[^a-z0-9])",
-    "(,(?=[a-z0-9])|[.-](?=[a-z]))|[.,'-](?=[^0-9a-z]|[.,'-]))"), ' \\1 ', text, TRUE, TRUE)
-  text = gsub("(\\s[a-z]+)/([a-z]+\\s)", ' \\1 / \\2 ', text, TRUE, TRUE)
-  text = gsub("([a-z0-9.,'-].*[^a-z0-9])", ' \\1 ', text, TRUE, TRUE)
-  text = gsub("(?<=[a-z])\\s['\u00E7\u00ED]\\s(?=[a-z])", "'", text, TRUE, TRUE)
-  if(!punct){
-    text = gsub("[^A-Za-z0-9'._-]+", ' ', text)
-    text = gsub("(?=[a-z])\\.+|(?<=[^a-z0-9])['._-]+|'+\\s", ' ', text, TRUE, TRUE)
-  }
-  text = gsub('tempperiod', '.', text, fixed = TRUE)
-  text = gsub('^\\s+|\\s(?=\\s)|\\s+$', '', text, perl = TRUE)
-  text = strsplit(text, word.break)
-  words = sort(unique(unlist(text)))
-  words = words[!words == '']
-  if(!is.null(exclude)){
-    if(is.list(exclude)) exclude = unlist(exclude, use.names = FALSE)
-    if(!any(grepl('^', exclude, fixed = TRUE))) exclude = gsub('\\^\\*|\\*\\$', '', paste0('^', exclude, '$'))
-    if(any(ck <- grepl('[[({]', exclude) + grepl('[})]|\\]', exclude) == 1))
-      exclude[ck] = gsub('([([{}\\])])', '\\\\\\1', exclude[ck], perl = TRUE)
-    words = grep(paste(exclude, collapse = '|'), words, value = TRUE, invert = TRUE)
-  }
-  if(tokens.only){
-    m = match_terms(
-      text, words, !grepl('^[[:punct:]]$|^repellipsis$', words),
-      c(length(text), length(words)), is.null(exclude), TRUE
-    )
-    names(m) = c('tokens', 'frequencies', 'WC', 'indices')
-    m$tokens = m$tokens + 1L
-    m$tokens = sort(m$tokens)
-    inds = vector('list', length(text))
-    l = 0
-    for(i in seq_along(inds)){
-      if(m$WC[i]){
-        inds[[i]] = m$indices[seq_len(m$WC[i]) + l] + 1L
-        l = l + m$WC[i]
-      }else inds[[i]] = integer()
-    }
-    m$indices = inds
-    if(dc.min > 0 || dc.max < Inf){
-      su = m$frequencies > dc.min & m$frequencies < dc.max
-      if(any(!su)){
-        if(!any(su)){
-          warning(
-            'document count bounds [', dc.min, ', ', dc.max, '] exlcuded all terms, so they were ignored',
-            call. = FALSE
-          )
-        }else{
-          m$frequencies = m$frequencies[su]
-          ex = m$tokens[!su]
-          m$tokens = m$tokens[su]
-          new_inds = structure(seq_along(m$tokens), names = m$tokens)
-          m$tokens[] = new_inds
-          for(i in seq_along(m$indices)){
-            inds = m$indices[[i]]
-            m$indices[[i]] = unname(new_inds[as.character(inds[!inds %in% ex])])
-            m$WC[i] = length(m$indices[[i]])
-          }
-        }
-      }
-    }
-    names(m$frequencies) = names(m$tokens)
-  }else{
-    msu = match_terms(
-      text, words, !grepl('^[[:punct:]]$|^repellipsis$', words),
-      c(length(text), length(words)), is.null(exclude), FALSE
-    )
-    m = if(sparse) as(msu[[1]], 'dgCMatrix') else as.matrix(msu[[1]])
-    su = msu[[3]] > dc.min & msu[[3]] < dc.max
-    names(msu[[3]]) = words
-    if(any(!su)){
-      if(!any(su)){
-        warning(
-          'document count bounds [', dc.min, ', ', dc.max, '] exlcuded all terms, so they were ignored',
-          call. = FALSE
-        )
-      }else m = m[, su, drop = FALSE]
-    }
-    attr(m, 'WC') = unlist(msu[[2]], use.names = FALSE)
-    attr(m, 'colsums') = msu[[3]]
-    attr(m, 'type') = 'count'
-    if(!missing(dc.min) || !missing(dc.max)) attr(m, 'info') = paste('a lim of', dc.min, 'and', dc.max, 'left', sum(su), 'of', length(words), 'unique terms')
-  }
-  attr(m, 'opts') = c(numbers = numbers, punct = punct, urls = urls, to.lower = to.lower)
-  attr(m, 'time') = c(dtm = proc.time()[[3]] - st)
-  m
-}
-
-#' Document-Term Matrix Weighting
-#'
-#' Weight a document-term matrix.
-#' @param dtm A matrix with words as column names.
-#' @param weight A string referring at least partially to one (or a combination; see note) of the
-#'   available weighting methods:
-#'
-#'   \strong{Term weights} (applied uniquely to each cell)
-#'   \itemize{
-#'     \item \strong{\code{binary}} \cr
-#'     \code{(dtm > 0) * 1} \cr
-#'     Convert frequencies to 1s and 0s; remove differences in frequencies.
-#'
-#'     \item \strong{\code{log}} \cr
-#'     \code{log(dtm + 1, log.base)} \cr
-#'     Log of frequencies.
-#'
-#'     \item \strong{\code{sqrt}} \cr
-#'     \code{sqrt(dtm)} \cr
-#'     Square root of frequencies.
-#'
-#'     \item \strong{\code{count}} \cr
-#'     \code{dtm} \cr
-#'     Unaltered; sometimes called term frequencies (tf).
-#'
-#'     \item \strong{\code{amplify}} \cr
-#'     \code{dtm ^ alpha} \cr
-#'     Amplify difference in frequencies.
-#'   }
-#'
-#'   \strong{Document weights} (applied by column)
-#'   \itemize{
-#'     \item \strong{\code{dflog}} \cr
-#'     \code{log(colSums(dtm > 0), log.base)} \cr
-#'     Log of binary term sum.
-#'
-#'     \item \strong{\code{entropy}} \cr
-#'     \code{1 - rowSums(x *} \code{log(x + 1, log.base) /} \code{log(ncol(x), log.base),} \code{na.rm = TRUE)} \cr
-#'     Where \code{x = t(dtm) / colSums(dtm > 0)}; entropy of term-conditional term distribution.
-#'
-#'     \item \strong{\code{ppois}} \cr
-#'     \code{1 - ppois(pois.x,} \code{colSums(dtm) / nrow(dtm))} \cr
-#'     Poisson-predicted term distribution.
-#'
-#'     \item \strong{\code{dpois}} \cr
-#'     \code{1 - dpois(pois.x, colSums(dtm) / nrow(dtm))} \cr
-#'     Poisson-predicted term density.
-#'
-#'     \item \strong{\code{dfmlog}} \cr
-#'     \code{log(diag(dtm[max.col(t(dtm)), ]), log.base)} \cr
-#'     Log of maximum term frequency.
-#'
-#'     \item \strong{\code{dfmax}} \cr
-#'     \code{diag(dtm[max.col(t(dtm)), ])} \cr
-#'     Maximum term frequency.
-#'
-#'     \item \strong{\code{df}} \cr
-#'     \code{colSums(dtm > 0)} \cr
-#'     Sum of binary term occurrence across documents.
-#'
-#'     \item \strong{\code{idf}} \cr
-#'     \code{log(nrow(dtm) / colSums(dtm > 0), log.base)} \cr
-#'     Inverse document frequency.
-#'
-#'     \item \strong{\code{ridf}} \cr
-#'     \code{idf - log(dpois, log.base)} \cr
-#'     Residual inverse document frequency.
-#'
-#'     \item \strong{\code{normal}} \cr
-#'     \code{sqrt(1 / colSums(dtm ^ 2))} \cr
-#'     Normalized document frequency.
-#'   }
-#'
-#' Alternatively, \code{'pmi'} or \code{'ppmi'} will apply a pointwise mutual information weighting
-#' scheme (with \code{'ppmi'} setting negative values to 0).
-#' @param normalize Logical: if \code{FALSE}, the dtm is not divided by document word-count before
-#'   being weighted.
-#' @param wc.complete If the dtm was made with \code{\link{lma_dtm}} (has a \code{'WC'}
-#'   attribute), word counts for
-#'   frequencies can be based on the raw count (default; \code{wc.complete = TRUE}). If
-#'   \code{wc.complete = FALSE}, or the dtm does not have a \code{'WC'} attribute,
-#'   \code{rowSums(dtm)} is used as word count.
-#' @param log.base The base of logs, applied to any weight using \code{\link[base]{log}}.
-#'   Default is 10.
-#' @param alpha A scaling factor applied to document frequency as part of pointwise mutual
-#'   information weighting, or amplify's power (\code{dtm ^ alpha}, which defaults to 1.1).
-#' @param pois.x integer; quantile or probability of the poisson distribution (\code{dpois(pois.x,
-#'   colSums(x,} \code{na.rm = TRUE) / nrow(x))}).
-#' @param doc.only Logical: if \code{TRUE}, only document weights are returned (a single value for
-#'   each term).
-#' @param percent Logical; if \code{TRUE}, frequencies are multiplied by 100.
-#' @note
-#' Term weights works to adjust differences in counts within documents, with differences meaning
-#' increasingly more from \code{binary} to \code{log} to \code{sqrt} to \code{count} to \code{amplify}.
-#'
-#' Document weights work to treat words differently based on their between-document or overall frequency.
-#' When term frequencies are constant, \code{dpois}, \code{idf}, \code{ridf}, and \code{normal} give
-#' less common words increasingly more weight, and \code{dfmax}, \code{dfmlog}, \code{ppois}, \code{df},
-#' \code{dflog}, and \code{entropy} give less common words increasingly less weight.
-#'
-#' \code{weight} can either be a vector with two characters, corresponding to term weight and
-#' document weight (e.g., \code{c('count', 'idf')}), or it can be a string with term and
-#' document weights separated by any of \code{:\\*_/; ,-} (e.g., \code{'count-idf'}).
-#' \code{'tf'} is also acceptable for \code{'count'}, and \code{'tfidf'} will be parsed as
-#' \code{c('count', 'idf')}, though this is a special case.
-#'
-#' For \code{weight}, term or document weights can be entered individually; term weights alone will
-#' not apply any document weight, and document weights alone will apply a \code{'count'} term weight
-#' (unless \code{doc.only = TRUE}, in which case a term-named vector of document weights is returned
-#' instead of a weighted dtm).
-#' @return A weighted version of \code{dtm}, with a \code{type} attribute added (\code{attr(dtm, 'type')}).
-#' @examples
-#' # visualize term and document weights
-#'
-#' ## term weights
-#' term_weights = c('binary', 'log', 'sqrt', 'count', 'amplify')
-#' Weighted = sapply(term_weights, function(w) lma_weight(1:20, w, FALSE))
-#' if(require(splot)) splot(Weighted ~ 1:20, labx = 'Raw Count', lines = 'co')
-#'
-#' ## document weights
-#' doc_weights = c('df', 'dflog', 'dfmax', 'dfmlog', 'idf', 'ridf',
-#'   'normal', 'dpois', 'ppois', 'entropy')
-#' weight_range = function(w, value = 1){
-#'   m = diag(20)
-#'   m[upper.tri(m, TRUE)] = if(is.numeric(value)) value else unlist(lapply(
-#'     1:20, function(v) rep(if(value == 'inverted') 21 - v else v, v)
-#'   ))
-#'   lma_weight(m, w, FALSE, doc.only = TRUE)
-#' }
-#'
-#' if(require(splot)){
-#'   category = rep(c('df', 'idf', 'normal', 'poisson', 'entropy'), c(4, 2, 1, 2, 1))
-#'   op = list(
-#'     laby = 'Relative (Scaled) Weight', labx = 'Document Frequency',
-#'     leg = 'outside', colorby = list(quote(category), grade = TRUE),
-#'     lines = 'connected', mv.scale = TRUE, note = FALSE
-#'   )
-#'   splot(
-#'     sapply(doc_weights, weight_range) ~ 1:20,
-#'     options = op, title = 'Same Term, Varying Document Frequencies',
-#'     sud = 'All term frequencies are 1.'
-#'   )
-#'   splot(
-#'     sapply(doc_weights, weight_range, value = 'sequence') ~ 1:20,
-#'     options = op, title = 'Term as Document Frequencies',
-#'     sud = 'Non-zero terms are the number of non-zero terms.'
-#'   )
-#'   splot(
-#'     sapply(doc_weights, weight_range, value = 'inverted') ~ 1:20,
-#'     options = op, title = 'Term Opposite of Document Frequencies',
-#'     sud = 'Non-zero terms are the number of zero terms + 1.'
-#'   )
-#' }
-#'
-#' @export
-
-lma_weight = function(dtm, weight = 'count', normalize = TRUE, wc.complete = TRUE,
-  log.base = 10, alpha = 1, pois.x = 1L, doc.only = FALSE, percent = FALSE){
-  if(is.null(dim(dtm))) dtm = if(is.character(dtm) || is.factor(dtm)) lma_dtm(dtm) else matrix(dtm, 1)
-  ck = attr(dtm, 'type')
-  if(!is.null(ck) && length(ck) == 3 && (ck[1] == 'TRUE' || ck[2] != 'count' || ck[3] != 'NA')){
-    message('the entered dtm appears to already be weighted (', paste(ck[2:3], collapse = '*'),
-      '), so it will not be altered')
-    return(dtm)
-  }
-  weight = tolower(weight)
-  if(missing(normalize) && any(grepl('pmi', weight))) normalize = FALSE
-  if(normalize){
-    wc = attr(dtm, 'WC')
-    if(is.null(wc) || !wc.complete || nrow(dtm) != length(wc)) wc = rowSums(dtm, na.rm = TRUE)
-    adj = if(percent) 100 else 1
-    if(.hasSlot(dtm, 'x') && .hasSlot(dtm, 'i')){
-      wc = wc[dtm@i + 1]
-      su = wc != 0
-      dtm@x[su] = dtm@x[su] / wc[su] * adj
-    }else{
-      su = wc != 0
-      dtm[su, ] = dtm[su, ] / wc[su] * adj
-    }
-  }
-  nr = nrow(dtm)
-  if(any(grepl('pmi', weight))){
-    tw = dw = 'pmi'
-    if(missing(log.base)) log.base = 2
-    twc = sum(dtm, na.rm = TRUE)
-    pc = matrix(colSums(dtm ^ alpha, na.rm = TRUE) / twc ^ alpha, 1)
-    dtm = dtm / twc
-    dtm = dtm / rowSums(dtm, na.rm = TRUE) %*% pc
-    if(.hasSlot(dtm, 'x')){
-      dtm@x = log(dtm@x, base = log.base)
-      dtm@x[!is.finite(dtm@x)] = 0
-    }else{
-      dtm = log(dtm, base = log.base)
-      dtm[!is.finite(dtm)] = 0
-    }
-    if(any(grepl('pp', weight))){
-      tw = dw = 'ppmi'
-      dtm[dtm < 0] = 0
-    }
-  }else{
-    term = function(x, type) switch(type,
-      binary = (x > 0) * 1,
-      log = log(x + 1, base = log.base),
-      sqrt = sqrt(x),
-      count = x,
-      amplify = x ^ alpha
-    )
-    doc = function(x, type){
-      d = switch(type,
-        df = colSums(x > 0, na.rm = TRUE),
-        dflog = log(colSums(x > 0, na.rm = TRUE), base = log.base),
-        dfmax = diag(x[max.col(t(x)), ]),
-        dfmlog = log(diag(x[max.col(t(x)), ]), base = log.base),
-        idf = log(nrow(x) / colSums(x > 0, na.rm = TRUE), base = log.base),
-        normal = sqrt(1 / colSums(x ^ 2, na.rm = TRUE)),
-        dpois = 1 - dpois(pois.x, colSums(x, na.rm = TRUE) / nrow(x)),
-        ppois = 1 - ppois(pois.x, colSums(x, na.rm = TRUE) / nrow(x)),
-        ridf = doc(x, 'idf') - log(doc(x, 'dpois'), base = log.base),
-        entropy = {
-          x = t(x) / colSums(x > 0, na.rm = TRUE)
-          1 - rowSums(x * log(x + 1, base = log.base) /
-              log(ncol(x), base = log.base), na.rm = TRUE)
-        }
-      )
-      d[!is.finite(d)] = 0
-      d
-    }
-    if(length(weight) == 1){
-      weight = strsplit(weight, ' *[:\\*_/; ,-] *')[[1]]
-      if(length(weight) == 1 && weight == 'tfidf') weight = c('count', 'idf')
-    }
-    if(grepl('^(?:t|na|non|f)', weight[1])) weight[1] = 'count'
-    tws = c('binary', 'log', 'sqrt', 'count', 'amplify')
-    tw = if(weight[1] == '') 'count' else grep(substr(weight[1], 0, 4), tws, value = TRUE)[1]
-    pdw = TRUE
-    dws = c('df', 'dflog', 'dfmax', 'dfmlog', 'idf', 'normal', 'dpois', 'ppois', 'ridf', 'entropy')
-    if(is.na(tw)){
-      tw = grep(substr(weight[1], 0, 4), dws, value = TRUE)[1]
-      if(!is.na(tw)){
-        pdw = FALSE
-        if(!doc.only){
-          dw = tw
-          tw = 'count'
-        }else return(doc(dtm, tw))
-      }else stop(paste(weight, collapse = ' * '), ' is not a recognized weight', call. = FALSE)
-    }
-    if(pdw) dw = if(length(weight) > 1) grep(substr(weight[2], 0, 4), dws, value = TRUE)[1] else 'none'
-    if(is.na(dw)) dw = 'none'
-    if(missing(alpha) && tw == 'amplify') alpha = 1.1
-    dtm = if(dw == 'none') term(dtm, tw) else term(dtm, tw) * rep(doc(dtm, dw), each = nr)
-  }
-  attr(dtm, 'type') = c(normalized = normalize, term = tw, document = dw)
-  dtm
-}
-
-#' Latent Semantic Space (Embeddings) Operations
-#'
-#' Map a document-term matrix onto a latent semantic space, extract terms from a
-#' latent semantic space (if \code{dtm} is a character vector, or \code{map.space =} \code{FALSE}),
-#' or perform a singular value decomposition of a document-term matrix (if \code{dtm} is a matrix
-#' and \code{space} is missing).
-#' @param dtm A matrix with terms as column names, or a character vector of terms to be extracted
-#'   from a specified space. If this is of length 1 and \code{space} is missing, it will be treated
-#'   as \code{space}.
-#' @param space A matrix with terms as rownames. If missing, this will be the right singular vectors
-#'   of a singular value decomposition of \code{dtm}. If a character, a file matching the character
-#'   will be searched for in \code{dir} (e.g., \code{space = 'google'}). If a file is not found and
-#'   the character matches one of the \href{https://osf.io/489he/wiki/home}{available spaces}, you
-#'   will be given the option to download it, as handled by \code{\link{download.lspace}}.
-#'   If \code{dtm} is missing, the entire space will be loaded and returned.
-#' @param map.space Logical: if \code{FALSE}, the original vectors of \code{space} for terms
-#'   found in \code{dtm} are returned. Otherwise \code{dtm} \code{\%*\%} \code{space} is returned,
-#'   excluding uncommon columns of \code{dtm} and rows of \code{space}.
-#' @param fill.missing Logical: if \code{TRUE} and terms are being extracted from a space, includes
-#'   terms not found in the space as rows of 0s, such that the returned matrix will have a row
-#'   for every requested term.
-#' @param term.map A matrix with \code{space} as a column name, terms as row names, and indices of
-#'   the terms in the given space as values, or a numeric vector of indices with terms as names, or
-#'   a character vector or terms corresponding to rows of the space. This is used instead of reading
-#'   in an "_terms.txt" file corresponding to a \code{space} entered as a character (the name of a
-#'   space file).
-#' @param dim.cutoff If a \code{space} is calculated, this will be used to decide on the number of
-#'   dimensions to be retained: \code{cumsum(d) / sum(d) < dim.cutoff}, where \code{d} is a vector
-#'   of singular values of \code{dtm} (i.e., \code{svd(dtm)$d}). The default is \code{.5}; lower
-#'   cutoffs result in fewer dimensions.
-#' @param keep.dim Logical: if \code{TRUE}, and a space is being calculated from the input, a matrix
-#'   in the same dimensions as \code{dtm} is returned. Otherwise, a matrix with terms as rows and
-#'   dimensions as columns is returned.
-#' @param use.scan Logical: if \code{TRUE}, reads in the rows of \code{space} with \code{\link{scan}}.
-#' @param dir Path to a folder containing spaces. \cr
-#'   Set a session default with \code{options(lingmatch.lspace.dir = 'desired/path')}.
-#' @note
-#' A traditional latent semantic space is a selection of right singular vectors from the singular
-#' value decomposition of a dtm (\code{svd(dtm)$v[, 1:k]}, where \code{k} is the selected number of
-#' dimensions, decided here by \code{dim.cutoff}).
-#'
-#' Mapping a new dtm into a latent semantic space consists of multiplying common terms:
-#' \code{dtm[, ct]} \code{\%*\% space[ct, ]}, where \code{ct} \code{=} \code{colnames(dtm)[colnames(dtm)}
-#' \code{\%in\%} \code{rownames(space)]} -- the terms common between the dtm and the space. This
-#' results in a matrix with documents as rows, and dimensions as columns, replacing terms.
-#' @family Latent Semantic Space functions
-#' @return A matrix or sparse matrix with either (a) a row per term and column per latent dimension (a latent
-#' space, either calculated from the input, or retrieved when \code{map.space = FALSE}), (b) a row per document
-#' and column per latent dimension (when a dtm is mapped to a space), or (c) a row per document and
-#' column per term (when a space is calculated and \code{keep.dim = TRUE}).
-#' @examples
-#' text = c(
-#'   paste(
-#'     "Hey, I like kittens. I think all kinds of cats really are just the",
-#'     "best pet ever."
-#'   ),
-#'   paste(
-#'     "Oh year? Well I really like cars. All the wheels and the turbos...",
-#'     "I think that's the best ever."
-#'   ),
-#'   paste(
-#'     "You know what? Poo on you. Cats, dogs, rabbits -- you know, living",
-#'     "creatures... to think you'd care about anything else!"
-#'   ),
-#'   paste(
-#'     "You can stick to your opinion. You can be wrong if you want. You know",
-#'     "what life's about? Supercharging, diesel guzzling, exhaust spewing,",
-#'     "piston moving ignitions."
-#'   )
-#' )
-#'
-#' dtm = lma_dtm(text)
-#'
-#' # calculate a latent semantic space from the example text
-#' lss = lma_lspace(dtm)
-#'
-#' # show that document similarities between the truncated and full space are the same
-#' spaces = list(
-#'   full = lma_lspace(dtm, keep.dim = TRUE),
-#'   truncated = lma_lspace(dtm, lss)
-#' )
-#' sapply(spaces, lma_simets, metric = 'cosine')
-#'
-#' \dontrun{
-#'
-#' # specify a directory containing spaces,
-#' # or where you would like to download spaces
-#' space_dir = '~/Latent Semantic Spaces'
-#'
-#' # map to a pretrained space
-#' ddm = lma_lspace(dtm, '100k', dir = space_dir)
-#'
-#' # load the matching subset of the space
-#' # without mapping
-#' lss_100k_part = lma_lspace(colnames(dtm), '100k', dir = space_dir)
-#'
-#' ## or
-#' lss_100k_part = lma_lspace(dtm, '100k', map.space = FALSE, dir = space_dir)
-#'
-#' # load the full space
-#' lss_100k = lma_lspace('100k', dir = space_dir)
-#'
-#' ## or
-#' lss_100k = lma_lspace(space = '100k', dir = space_dir)
-#'
-#' }
-#' @export
-
-lma_lspace = function(dtm = '', space, map.space = TRUE, fill.missing = FALSE, term.map = NULL,
-  dim.cutoff = .5, keep.dim = FALSE, use.scan = FALSE, dir = getOption('lingmatch.lspace.dir')){
-  if(ckd <- dir == '') dir = '~/Latent Semantic Spaces'
-  if(is.character(dtm) || is.factor(dtm)){
-    if(length(dtm) > 1 && missing(space) && any(grepl(' ', dtm, fixed = TRUE))){
-      dtm = lma_dtm(dtm)
-    }else if(length(dtm) == 1 && dtm != ''){
-      if(missing(use.scan)) use.scan = TRUE
-      space = dtm
-      dtm = ''
-    }
-  }
-  if(is.data.frame(dtm)) dtm = as.matrix(dtm)
-  if(missing(space)){
-    nr = nrow(dtm)
-    if(is.null(nr)) stop('enter a matrix for dtm, or specify a space')
-    nc = ncol(dtm)
-    md = min(nr, nc)
-    s = svd(dtm)
-    s$v = t(s$v)
-    k = cumsum(s$d) / sum(s$d)
-    if(dim.cutoff > 1) dim.cutoff = 1
-    k = if(length(k) == 1) 1 else seq_len(if(any(k < dim.cutoff)) which(k >= dim.cutoff)[1] else 1)
-    if(keep.dim){
-      dtm[] = s$u[, k] %*% (if(length(k) == 1) matrix(s$d[k]) else diag(s$d[k])) %*% s$v[k, ]
-    }else{
-      cn = colnames(dtm)
-      dtm = t(s$v[k,, drop = FALSE])
-      rownames(dtm) = cn
-    }
-  }else{
-    terms = if(is.null(colnames(dtm))){
-      map.space = FALSE
-      dtm
-    }else colnames(dtm)
-    if(is.character(space)){
-      if(space == 'default') space = '100k_lsa'
-      name = gsub('^.*[/\\]|\\.[^/\\]*$', '', space)[1]
-      spaces = list.files(dir)
-      ts = grep(space, spaces, fixed = TRUE, value = TRUE)
-      if(!length(ts)){
-        ts = rownames(select.lspace(name)$selected)[1]
-        if(!ckd && !is.na(ts) && grepl('^$|^[yt1]|^ent', readline(paste0(
-          'would you like to download the ', ts, ' space? (press Enter for yes): ')))){
-          download.lspace(ts, dir = dir)
-          ts = paste0(ts, '.dat')
-        }else stop('space (', space, ') not found in dir (', dir, ')',
-          if(ckd) '\nspecify a directory (e.g., dir = "~") to locate or download; see ?download.lspace', call. = FALSE)
-      }
-      space_path = normalizePath(paste0(dir, '/', if(length(su <- grep('\\.dat$', ts))) ts[su[[1]]] else{
-        use.scan = TRUE
-        ts[grep('[bgx]z[ip2]*$', ts)[[1]]]
-      }), '/', FALSE)
-      name = sub('\\.[^.]*$', '', basename(space_path))
-      if(name %in% colnames(term.map)) term.map = term.map[term.map[, name] != 0, name]
-      rex = function(inds, f){
-        nc = length(strsplit(readLines(f, 1), '\\s+')[[1]])
-        l = length(inds)
-        all = all(seq_len(l) == inds)
-        r = matrix(0, l, nc)
-        i = 1
-        con = file(f, 'r')
-        on.exit(close(con))
-        while(i <= l){
-          if(all){
-            n = l
-          }else{
-            n = 1
-            while(i + n < l && inds[i + n - 1] == inds[i + n] - 1) n = n + 1
-          }
-          r[seq_len(n) + i - 1, ] = matrix(scan(
-            con, n = n * nc, quiet = TRUE, skip = (if(i == 1) inds[i] else
-              inds[i] - inds[i - 1]) - 1, quote = '', comment.char = '', na.strings = ''
-          ), n, nc, byrow = TRUE)
-          i = i + n
-        }
-        r
-      }
-      if(!is.null(term.map)){
-        if(is.character(term.map)) term.map = structure(seq_along(term.map), names = term.map)
-        su = which(names(term.map) %in% terms)
-        inds = as.numeric(sort(if(length(terms) == 1 && terms == '') term.map else term.map[su]))
-        if(length(inds)){
-          space = if(use.scan) rex(inds, space_path) else t(extract_indices(inds, space_path))
-          rownames(space) = ts = names(term.map)[inds]
-        }else stop('no matching terms in space ', space)
-      }else{
-        if(!file.exists(normalizePath(paste0(dir, '/', name, '_terms.txt'), '/', FALSE))){
-          if(file.exists(normalizePath(paste0(dir, '/lma_term_map.rda')))){
-            lma_term_map = NULL
-            load(normalizePath(paste0(dir, '/lma_term_map.rda'), '/', FALSE))
-            if(!is.null(lma_term_map) && !is.null(colnames(lma_term_map)) && name %in% colnames(lma_term_map)){
-              space_terms = names(lma_term_map[lma_term_map[, name] != 0, name])
-            }else stop(
-              'could not find terms file (', space, '_terms.txt) in dir (', dir, '),',
-              ' nor retrieve terms from them term map (lma_term_map.rda).'
-            )
-          }else stop('terms file (', space, '_terms.txt) not found in dir (', dir, ').')
-        }else space_terms = readLines(normalizePath(paste0(dir, '/', name, '_terms.txt'), '/', FALSE))
-        su = if(length(terms) == 1 && terms == ''){
-          terms = space_terms
-          !logical(length(space_terms))
-        }else space_terms %in% terms
-        if(sum(su) < length(terms)){
-          lsterms = tolower(space_terms)
-          su2 = !duplicated(lsterms) & lsterms %in% terms[!terms %in% space_terms[su]]
-          if(any(su2)){
-            space_terms[su2] = lsterms[su2]
-            su = su | su2
-          }
-        }
-        if(sum(su)){
-          space = if(use.scan) rex(which(su), space_path) else t(extract_indices(which(su), space_path))
-          rownames(space) = space_terms[su]
-          ts = terms[terms %in% rownames(space)]
-          space = space[ts,, drop = FALSE]
-        }else stop('no matching terms in space ', space)
-      }
-    }else{
-      if(is.data.frame(space)) space = as.matrix(space)
-      name = deparse(substitute(space))
-      su = terms %in% rownames(space)
-      if(sum(su)){
-        ts = terms[su]
-        space = space[ts,, drop = FALSE]
-      }else if(sum(su <- terms %in% colnames(space))){
-        ts = terms[su]
-        space = t(space[, ts, drop = FALSE])
-      }else stop('no matching terms in provided space')
-    }
-    if(fill.missing){
-      su = which(!terms %in% rownames(space))
-      if(length(su)){
-        space = rbind(space, matrix(0, length(su), ncol(space), dimnames = list(terms[su])))
-        space = space[terms, ]
-      }
-      ts = rownames(space)
-    }
-    attr(space, 'space') = name
-    if(map.space){
-      rep = length(ts) / ncol(dtm)
-      if(rep < .2) warning(paste0(
-        'only ', round(rep * 100, 2), '% of dtm terms appear in the provided space; ',
-        'you might consider using a different source or cleaning/partial matching terms'
-      ), call. = FALSE)
-      dtm = dtm[, ts, drop = FALSE] %*% space
-      attr(dtm, 'space') = name
-    }else return(space)
-  }
-  dtm
-}
-
-#' Document-Term Matrix Categorization
-#'
-#' Reduces the dimensions of a document-term matrix by dictionary-based categorization.
-#' @param dtm A matrix with terms as column names.
-#' @param dict The name of a provided dictionary
-#'   (\href{https://osf.io/y6g5b/wiki/home}{osf.io/y6g5b/wiki}) or of a file found in
-#'   \code{dir}, or a \code{list} object with named character vectors as word lists,
-#'   or the path to a file to be read in by \code{\link{read.dic}}.
-#' @param term.weights A \code{list} object with named numeric vectors lining up with the character
-#'   vectors in \code{dict}, used to weight the terms in each \code{dict} vector. If a category in
-#'   \code{dict} is not specified in \code{term.weights}, or the \code{dict} and \code{term.weights}
-#'   vectors aren't the same length, the weights for that category will be 1.
-#' @param bias A list or named vector specifying a constant to add to the named category. If a term
-#'   matching \code{bias.name} is included in a category, it's associated \code{weight} will be used
-#'   as the \code{bias} for that category.
-#' @param bias.name A character specifying a term to be used as a category bias; default is
-#'   \code{'_intercept'}.
-#' @param escape Logical indicating whether the terms in \code{dict} should not be treated as plain
-#'   text (including asterisk wild cards). If \code{TRUE}, regular expression related characters are
-#'   escaped. Set to \code{TRUE} if you get PCRE compilation errors.
-#' @param partial Logical; if \code{TRUE} terms are partially matched (not padded by ^ and $).
-#' @param glob Logical; if \code{TRUE} (default), will convert initial and terminal asterisks to
-#'   partial matches.
-#' @param to.lower Logical; if \code{TRUE} will lowercase dictionary terms. Otherwise, dictionary
-#'   terms will be converted to match the terms if they are single-cased. Set to \code{FALSE} to
-#'   always keep dictionary terms as entered.
-#' @param term.filter A regular expression string used to format the text of each term (passed to
-#'   \code{gsub}). For example, if terms are part-of-speech tagged (e.g.,
-#'   \code{'a_DT'}), \code{'_.*'} would remove the tag.
-#' @param term.break If a category has more than \code{term.break} characters, it will be processed
-#'   in chunks. Reduce from 20000 if you get a PCRE compilation error.
-#' @param dir Path to a folder in which to look for \code{dict}; \cr
-#'   will look in \code{'~/Dictionaries'} by default. \cr
-#'   Set a session default with \code{options(lingmatch.dict.dir = 'desired/path')}.
-#' @seealso For applying pattern-based dictionaries (to raw text) see \code{\link{lma_patcat}}.
-#' @family Dictionary functions
-#' @return A matrix with a row per \code{dtm} row and columns per dictionary category, and a \code{WC} attribute
-#' with original word counts.
-#' @examples
-#' \dontrun{
-#'
-#' # Score texts with the NRC Affect Intensity Lexicon
-#'
-#' dict = readLines('https://saifmohammad.com/WebDocs/NRC-AffectIntensity-Lexicon.txt')
-#' dict = read.table(
-#'   text = dict[-seq_len(grep('term\tscore', dict, fixed = TRUE)[[1]])],
-#'   col.names = c('term', 'weight', 'category')
-#' )
-#'
-#' text = c(
-#'   angry = paste(
-#'     'We are outraged by their hateful brutality,',
-#'     'and by the way they terrorize us with their hatred.'
-#'   ),
-#'   fearful = paste(
-#'     'The horrific torture of that terrorist was tantamount',
-#'     'to the terrorism of terrorists.'
-#'   ),
-#'   joyous = 'I am jubilant to be celebrating the bliss of this happiest happiness.',
-#'   sad = paste(
-#'     'They are nearly suicidal in their mourning after',
-#'     'the tragic and heartbreaking holocaust.'
-#'   )
-#' )
-#'
-#' emotion_scores = lma_termcat(text, dict)
-#' if(require('splot')) splot(emotion_scores ~ names(text), leg = 'out')
-#'
-#' ## or use the standardized version (which includes more categories)
-#'
-#' emotion_scores = lma_termcat(text, 'nrc_eil', dir = '~/Dictionaries')
-#' emotion_scores = emotion_scores[, c('anger', 'fear', 'joy', 'sadness')]
-#' if(require('splot')) splot(emotion_scores ~ names(text), leg = 'out')
-#' }
-#' @export
-
-lma_termcat = function(dtm, dict, term.weights = NULL, bias = NULL, bias.name = '_intercept',
-  escape = TRUE, partial = FALSE, glob = TRUE, term.filter = NULL, term.break = 2e4,
-  to.lower = FALSE, dir = getOption('lingmatch.dict.dir')){
-  st = proc.time()[[3]]
-  if(ckd <- dir == '') dir = '~/Dictionaries'
-  if(missing(dict)) dict = lma_dict(1:9)
-  if(is.factor(dict)) dict = as.character(dict)
-  if(is.character(dict) && length(dict) == 1 && missing(term.weights) && (file.exists(dict) || !grepl('\\s', dict))){
-    if(!file.exists(dict) && any(file.exists(normalizePath(paste0(dir, '/', dict), '/', FALSE))))
-      dict = normalizePath(paste0(dir, '/', dict))
-    td = tryCatch(read.dic(dict, dir = if(ckd) '' else dir), error = function(e) NULL)
-    dict = if(is.null(td)) list(cat1 = dict) else td
-  }
-  if(!is.null(dim(dict))){
-    if(!is.null(term.weights)){
-      if(is.character(term.weights) && any(su <- term.weights %in% colnames(dict))){
-        term.weights = dict[, term.weights[su], drop = FALSE]
-      }
-      if(!is.null(dim(term.weights))) term.weights = term.weights[, vapply(seq_len(ncol(term.weights)),
-        function(col) is.numeric(term.weights[, col]), TRUE)]
-    }else if(any(su <- vapply(seq_len(ncol(dict)), function(col) is.numeric(dict[, col]), TRUE))){
-      term.weights = dict[, su, drop = FALSE]
-      dict = if(all(su)) if(!is.null(rownames(dict))) data.frame(term = rownames(dict), stringsAsFactors = FALSE) else{
-        term.weights = if(ncol(term.weights) == 1) NULL else term.weights[, -1, drop = FALSE]
-        dict[, 1, drop = FALSE]
-      }else dict[, !su, drop = FALSE]
-    }
-    if(!is.null(rownames(dict)) && ncol(dict) == 1 && any(grepl('^[a-z]', rownames(dict), TRUE))){
-      dict = rownames(dict)
-    }else{
-      su = vapply(seq_len(ncol(dict)), function(col) !is.numeric(dict[, col]), TRUE)
-      if(!any(su)) stop('no terms found in dictionary')
-      dict = if(sum(su) > 1){
-        su = which(su)
-        if(!is.null(term.weights) && (!is.list(term.weights) || ncol(term.weights) == 1)){
-          if(is.list(term.weights)) term.weights = term.weights[, 1]
-          ssu = vapply(su, function(col) length(unique(dict[, col])), 0) + seq(length(su), 1)
-          term.weights = split(term.weights, dict[, which.min(ssu)])
-          dict = split(dict[, which.max(ssu)], dict[, which.min(ssu)])
-        }else{
-          ssu = vapply(su, function(col) anyDuplicated(dict[, col]) == 0, TRUE)
-          if(any(ssu)) dict[, su[ssu][1]] else dict[, su[1]]
-        }
-      }else dict[, su]
-    }
-  }
-  if(is.numeric(dict) && is.null(term.weights)){
-    term.weights = dict
-    dict = names(dict)
-  }
-  if(is.factor(dict)) dict = as.character(dict)
-  if(!is.null(dim(term.weights))){
-    if(is.null(colnames(term.weights))) colnames(term.weights) = if(length(dict) == length(term.weights)) names(dict) else  paste0('cat', seq_len(ncol(term.weights)))
-    if(!is.data.frame(term.weights)) term.weights = as.data.frame(term.weights, stringsAsFactors = FALSE)
-    su = vapply(term.weights, is.numeric, TRUE)
-    if(any(!su)){
-      if(any(ssu <- !su & vapply(term.weights, anyDuplicated, 0) == 0))
-        rownames(term.weights) = term.weights[, which(ssu)[1]]
-      term.weights = term.weights[, su]
-    }
-    if(!length(term.weights)) stop('no numeric columns in term.weights')
-  }
-  if(!is.list(dict)) dict = if(is.matrix(dict)) as.data.frame(dict, stringsAsFactors = FALSE) else
-    if(is.character(dict) && length(dict) == 1 && (file.exists(dict) || dict %in% rownames(select.dict()$info)))
-      read.dic(dict, dir = if(ckd) '' else dir) else list(dict)
-  if(is.list(dict)){
-    if(is.null(names(dict))){
-      tn = if(!is.null(colnames(term.weights))) colnames(term.weights) else names(term.weights)
-      names(dict) = if(!is.null(tn) && length(tn) == length(dict)) tn else paste0('cat', seq_along(dict))
-    }else if(any(su <- names(dict) == '')){
-      names(dict)[su] = if(sum(su) == 1) 'cat_unnamed' else paste0('cat_unnamed', seq_len(sum(su)))
-      if(!is.null(term.weights) && any(su <- names(term.weights) == ''))
-        names(term.weights)[su] = if(sum(su) == 1) 'cat_unnamed' else paste0('cat_unnamed', seq_len(sum(su)))
-    }
-  }else dict = list(dict)
-  if(!is.null(term.weights)){
-    if(is.null(dim(term.weights))){
-      if(is.list(term.weights)){
-        if(length(dict) != length(term.weights) && !is.null(names(term.weights[[1]]))) dict = term.weights
-        if(length(dict) == length(term.weights) && !all(names(dict) %in% names(term.weights))){
-          if(is.null(names(term.weights)) || !any(names(term.weights) %in% names(dict))){
-            names(term.weights) = names(dict)
-          }else for(cat in names(dict)[!names(dict) %in% names(term.weights)]){
-            term.weights[cat] = structure(rep(1, length(dict[[cat]])), names = dict[[cat]])
-          }
-        }
-        for(cat in names(dict)) if(is.null(names(term.weights[[cat]])))
-          if(length(term.weights[[cat]]) == length(dict[[cat]])) names(term.weights[[cat]]) = dict[[cat]] else
-            term.weights[[cat]] = structure(rep(1, length(dict[[cat]])), names = dict[[cat]])
-      }else{
-        if(is.null(names(term.weights))){
-          if(length(dict[[1]]) == length(term.weights)){
-            term.weights = list(term.weights)
-            names(term.weights) = names(dict)
-            names(term.weights[[1]]) = dict[[1]]
-          }else{
-            term.weights = NULL
-            warning('term.weights were dropped as they could not be aligned with dict')
-          }
-        }
-      }
-    }else{
-      if(length(dict) == 1 && length(dict[[1]]) == nrow(term.weights) &&
-          !any(grepl('[a-z]', rownames(term.weights), TRUE))){
-        if(is.factor(dict[[1]])) dict[[1]] = as.character(dict[[1]])
-        if(anyDuplicated(dict[[1]])){
-          dt = unique(dict[[1]][duplicated(dict[[1]])])
-          su = dict[[1]] %in% dt
-          td = term.weights[su, ]
-          tw = matrix(0, length(dt), ncol(term.weights), dimnames = list(dt, colnames(term.weights)))
-          for(term in dt) tw[term, ] = colMeans(term.weights[dict[[1]] == term,, drop = FALSE], na.rm = TRUE)
-          term.weights = rbind(term.weights[!su, ], tw)
-          rownames(term.weights) = c(dict[[1]][!su], dt)
-          dict[[1]] = rownames(term.weights)
-        }else rownames(term.weights) = dict[[1]]
-      }
-    }
-    if(!is.null(term.weights)){
-      if(!is.list(term.weights)) term.weights = list(term.weights)
-      dlen = length(dict)
-      if(is.null(names(term.weights)))
-        names(term.weights) = if(length(term.weights) == dlen) names(dict) else seq_along(term.weights)
-      if(length(term.weights) > dlen && dlen == 1 && all(vapply(term.weights, length, 0) == length(dict[[1]])))
-        dict = lapply(term.weights, function(ws) dict[[1]])
-    }
-  }
-  dict = lapply(dict, function(cat) if(!is.character(cat))
-    if(is.null(names(cat))) as.character(cat) else names(cat) else cat)
-  if(!is.null(bias) && is.null(names(bias)))
-    names(bias) = if(length(bias) == length(dict)) names(dict) else seq_along(bias)
-  if(!is.null(names(term.weights)) && length(names(term.weights)) == length(dict)) names(dict) = names(term.weights)
-  for(n in names(dict)) if(!n %in% names(bias) && any(ii <- !is.na(dict[[n]]) & dict[[n]] == bias.name)){
-    bias[n] = term.weights[[n]][ii]
-    term.weights[[n]][ii] = 0
-  }
-  dict_chars = list(
-    all = paste(unique(strsplit(paste0(unique(unlist(dict, use.names = FALSE)), collapse = ''), '')[[1]]),
-      collapse = '')
-  )
-  dict_chars$alpha = gsub('[^A-Za-z]', '', dict_chars$all)
-  dict_chars$case = if(grepl('[A-Z]', dict_chars$alpha))
-    if(grepl('[a-z]', dict_chars$alpha)) 'mixed' else 'upper' else 'lower'
-  edtm = substitute(dtm)
-  if(is.factor(dtm)) dtm = as.character(dtm)
-  if(is.character(dtm) || !any(grepl('\\s', colnames(dtm)))){
-    if(any(grepl('\\s', unlist(dict, use.names = FALSE)))){
-      if(is.character(dtm)){
-        warning(
-          'dict has terms with spaces, so using lma_patcat instead;',
-          '\n  enter a dtm (e.g., lma_dtm(', edtm, ')) to force lma_termcat use'
-        )
-        args = list(text = dtm, dict = dict)
-        if(!is.null(term.weights)) args$pattern.weights = term.weights
-        if(!is.null(bias)) args$bias = bias
-        if(!missing(glob)) args$globtoregex = glob
-        if(!missing(partial) && !partial) args$boundary = '\\b'
-        if(!missing(dir)) args$dir = if(ckd) '' else dir
-        return(do.call(lma_patcat, args))
-      }
-    }
-    if(is.character(dtm)){
-      if(dict_chars$case == 'upper') dtm = toupper(dtm)
-      dtm = lma_dtm(dtm, numbers = grepl('[0-9]', dict_chars$all), punct = grepl('[_/\\?!."-]', dict_chars$all),
-        to.lower = dict_chars$case == 'lower')
-    }
-  }
-  if(is.null(dim(dtm))) dtm = t(dtm)
-  ats = attributes(dtm)[c('opts', 'WC', 'type')]
-  ats = ats[!vapply(ats, is.null, TRUE)]
-  atsn = names(ats)
-  ws = if(is.null(term.filter)) colnames(dtm) else gsub(term.filter, '', colnames(dtm), perl = TRUE)
-  if((missing(to.lower) || !is.logical(to.lower)) && dict_chars$case != 'mixed'){
-    text_case = if(any(grepl('[A-Z]', ws))) if(any(grepl('[a-z]', ws))) 'mixed' else 'upper' else 'lower'
-    if(text_case == 'upper'){
-      dict = lapply(dict, toupper)
-      dict_chars$case = 'upper'
-    }
-    to.lower = text_case == 'lower'
-  }
-  if(to.lower && dict_chars$case != 'lower'){
-    dict = lapply(dict, tolower)
-    dict_chars$case = 'lower'
-  }
-  if(dict_chars$case != 'mixed') ws = (if(dict_chars$case == 'lower') tolower else toupper)(ws)
-  odict = dict
-  boundaries = FALSE
-  formatdict = function(dict, collapse = '|'){
-    lab = if(!escape){
-      lab = lapply(dict, function(l){
-        if(!any(grepl('[][)(}{]', l))) return(FALSE)
-        sl = strsplit(l, '')
-        !any(grepl('\\[.+\\]|\\(.+\\)|\\{.+\\}', l)) || any(vapply(sl, function(cs)
-          sum(sl == '[') != sum(sl == ']') &
-          sum(sl == '{') != sum(sl == '}') &
-          sum(sl == '(') != sum(sl == ')')
-        , TRUE))
-      })
-      Filter(isTRUE, lab)
-    }else logical()
-    if(!partial){
-      s = '^'
-      e = '$'
-    }else s = e = ''
-    rec = '([][)(}{*.^$+?\\|\\\\])'
-    if(length(lab)){
-      for(l in names(lab)) dict[[l]][lab[[l]]] = gsub('([][)(}{])', '\\\\\\1', dict[[l]][lab[[l]]])
-      rec = '([*.^$+?\\|])'
-    }
-    res = if(escape) lapply(dict, function(l)
-      paste0(s, gsub(rec, '\\\\\\1', l, perl = TRUE), e, collapse = collapse)
-    ) else lapply(dict, function(l) paste(paste0(s, gsub('([+*])[+*]+', '\\\\\\1+', l), e), collapse = collapse))
-    if(glob) lapply(res, function(l) gsub(paste0(
-      if(s == '^') '\\' else '', s, if(escape) '\\\\' else '', '\\*|', if(escape) '\\\\' else '', '\\*', if(e == '$')
-        '\\' else '', e
-    ), '', l)) else res
-  }
-  for(l in dict){
-    if(!boundaries) boundaries = !any(grepl('^\\*|\\*$', l)) && any(grepl('^\\^|\\$$', l))
-    if(missing(partial) && boundaries) partial = TRUE
-    if(missing(glob) && (any(grepl('([][}{.^$+?\\|\\\\])', l)) || any(grepl('\\w\\*\\w', l)))) glob = FALSE
-    if(missing(escape) && (boundaries || any(grepl('[.])][+*]|[.+*]\\?|\\[\\^', l))) &&
-      !any(grepl('[({[][^])}]*$|^[^({[]*[])}]', l))) escape = FALSE
-  }
-  cls = 0
-  if(is.null(term.weights)){
-    cls = structure(numeric(length(dict)), names = names(dict))
-    for(cat in seq_along(dict)){
-      ccls = tryCatch(nchar(dict[[cat]]), error = function(e) NULL)
-      if(is.null(ccls)){
-        warning('dict appears to be misencoded, so results may not be as expected;\n',
-          'might try reading the dictionary in with encoding = "latin1"')
-        dict[[cat]] = iconv(dict[[cat]], sub = '#')
-        ccls = nchar(dict[[cat]])
-      }
-      cls[cat] = sum(ccls)
-    }
-  }
-  if(any(cls > term.break)){
-    br = function(l, e = term.break){
-      f = ceiling(cls[[l]] / e)
-      l = length(dict[[l]])
-      e = ceiling(l / f)
-      o = lapply(seq_len(f), function(i) seq_len(e) + e * (i - 1))
-      o[[f]] = o[[f]][o[[f]] <= l]
-      o
-    }
-    op = matrix(0, nrow(dtm), length(dict), dimnames = list(rownames(dtm), names(dict)))
-    for(cat in names(dict)){
-      matches = if(cls[[cat]] > term.break){
-        unique(unlist(lapply(br(cat), function(s)
-          grep(formatdict(list(dict[[cat]][s]))[[1]], ws, perl = TRUE))))
-      }else grep(formatdict(list(dict[[cat]])), ws, perl = TRUE)
-      if(length(matches)){
-        op[, cat] = rowSums(dtm[, matches, drop = FALSE], na.rm = TRUE)
-      }
-    }
-  }else{
-    if(!is.null(term.weights)){
-      dict = formatdict(dict, NULL)
-      terms = unique(unlist(dict))
-      termmap = lapply(terms, grep, ws, perl = TRUE, value = TRUE)
-      names(termmap) = unique(unlist(odict))
-      termmap = Filter(length, termmap)
-      if(is.null(dim(term.weights))){
-        op = matrix(0, nrow(dtm), length(dict), dimnames = list(rownames(dtm), names(dict)))
-        if(length(termmap)){
-          weights = lapply(names(term.weights), function(n){
-            l = term.weights[[n]]
-            if(is.null(names(l)) && n %in% names(dict) && length(dict[[n]]) == length(l)){
-              names(term.weights[[n]]) = dict[[n]]
-              l = term.weights[[n]]
-            }
-            if(any(su <- !names(termmap) %in% names(l))) l[names(termmap)[su]] = 0
-            do.call(c, lapply(names(termmap), function(p)
-              structure(rep(l[[p]], length(termmap[[p]])), names = termmap[[p]])))
-          })
-          names(weights) = names(term.weights)
-          for(cat in names(dict)) if(length(weights[[cat]]))
-            op[, cat] = as.numeric(dtm[, names(weights[[cat]]), drop = FALSE] %*% weights[[cat]])
-        }
-      }else{
-        if(length(termmap)){
-          weights = do.call(rbind, lapply(names(termmap), function(p) matrix(
-            rep(as.numeric(term.weights[p, ]), length(termmap[[p]])),
-            ncol = ncol(term.weights), dimnames = list(termmap[[p]], colnames(term.weights))
-          )))
-          op = matrix(0, nrow(dtm), ncol(weights), dimnames = list(rownames(dtm), colnames(weights)))
-          for(cat in colnames(op))
-            op[, cat] = as.numeric(dtm[, rownames(weights), drop = FALSE] %*% weights[, cat])
-        }else{
-          op = matrix(0, nrow(dtm), length(dict), dimnames = list(rownames(dtm), colnames(weights)))
-        }
-      }
-    }else{
-      dict = formatdict(dict)
-      op = vapply(names(dict), function(cat) rowSums(dtm[, grep(dict[[cat]], ws, perl = TRUE),
-        drop = FALSE], na.rm = TRUE), numeric(nrow(dtm)))
-      if(nrow(dtm) == 1){
-        op = t(op)
-        rownames(op) = 1
-      }
-    }
-  }
-  if(!is.null(bias)) for(n in names(bias)) if(n %in% colnames(op)) op[, n] = op[, n] + bias[[n]]
-  attr(op, 'WC') = if('WC' %in% atsn) ats$WC else if(all(vapply(seq_len(ncol(dtm)), function(i)
-    is.numeric(dtm[, i]) || is.integer(dtm[, i]), TRUE))) rowSums(dtm, na.rm = TRUE) else NULL
-  attr(op, 'time') = c(attr(dtm, 'time'), termcat = proc.time()[[3]] - st)
-  if('type' %in% atsn) attr(op, 'type') = ats$type
-  op
-}
-
-match_metric = function(x){
-  mets = c('jaccard', 'euclidean', 'canberra', 'cosine', 'pearson')
-  sel = if(is.null(x) || (length(x) == 1 && grepl(tolower(substr(x, 1, 1)), 'a', fixed = TRUE)))
-    mets else if(is.function(x)){
-      stop('only internal metrics are available: ', paste(mets, collapse = ', '), call. = FALSE)
-    }else{
-      if(is.numeric(x)) mets[x] else{
-        if(is.call(x)) x = eval(x)
-        su = grepl('^(?:cor|r)', x, TRUE)
-        if(any(su)) x[su] = 'pearson'
-        unique(unlist(lapply(substr(x, 1, 3), grep, mets, fixed = TRUE, value = TRUE)))
-      }
-    }
-  list(all = mets, selected = sel, dummy = as.integer(mets %in% sel))
-}
-
-#' Similarity Calculations
-#'
-#' Enter a numerical matrix, set of vectors, or set of matrices to calculate similarity per vector.
-#'
-#' @param a A vector or matrix. If a vector, \code{b} must also be provided. If a matrix and \code{b}
-#'   is missing, each row will be compared. If a matrix and \code{b} is not missing, each row will
-#'   be compared with \code{b} or each row of \code{b}.
-#' @param b A vector or matrix to be compared with \code{a} or rows of \code{a}.
-#' @param metric A character or vector of characters at least partially matching one of the
-#'   available metric names (or 'all' to explicitly include all metrics),
-#'   or a number or vector of numbers indicating the metric by index:
-#'   \itemize{
-#'     \item \strong{\code{jaccard}}: \code{sum(a & b) / sum(a | b)}
-#'     \item \strong{\code{euclidean}}: \code{1 / (1 + sqrt(sum((a - b) ^ 2)))}
-#'     \item \strong{\code{canberra}}: \code{mean(1 - abs(a - b) / (a + b))}
-#'     \item \strong{\code{cosine}}: \code{sum(a * b) / sqrt(sum(a ^ 2 * sum(b ^ 2)))}
-#'     \item \strong{\code{pearson}}: \code{(mean(a * b) - (mean(a) * mean(b))) /} \cr
-#'       \code{sqrt(mean(a ^ 2) - mean(a) ^ 2) / sqrt(mean(b ^ 2) - mean(b) ^ 2)}
-#'   }
-#' @param group If \code{b} is missing and \code{a} has multiple rows, this will be used to make
-#'   comparisons between rows of \code{a}, as modified by \code{agg} and \code{agg.mean}.
-#' @param lag Amount to adjust the \code{b} index; either rows if \code{b} has multiple rows (e.g.,
-#'   for \code{lag = 1}, \code{a[1, ]} is compared with \code{b[2, ]}), or values otherwise (e.g.,
-#'   for \code{lag = 1}, \code{a[1]} is compared with \code{b[2]}). If \code{b} is not supplied,
-#'   \code{b} is a copy of \code{a}, resulting in lagged self-comparisons or autocorrelations.
-#' @param agg Logical: if \code{FALSE}, only the boundary rows between groups will be compared, see
-#'   example.
-#' @param agg.mean Logical: if \code{FALSE} aggregated rows are summed instead of averaged.
-#' @param pairwise Logical: if \code{FALSE} and \code{a} and \code{b} are matrices with the same number of
-#'   rows, only paired rows are compared. Otherwise (and if only \code{a} is supplied), all pairwise
-#'   comparisons are made.
-#' @param symmetrical Logical: if \code{TRUE} and pairwise comparisons between \code{a} rows were made,
-#'   the results in the lower triangle are copied to the upper triangle.
-#' @param mean Logical: if \code{TRUE}, a single mean for each metric is returned per row of \code{a}.
-#' @param return.list Logical: if \code{TRUE}, a list-like object will always be returned, with an entry
-#'   for each metric, even when only one metric is requested.
-#' @details
-#' Use \code{\link[RcppParallel]{setThreadOptions}} to change parallelization options; e.g., run
-#' RcppParallel::setThreadOptions(4) before a call to lma_simets to set the number of CPU
-#' threads to 4.
-#' @return Output varies based on the dimensions of \code{a} and \code{b}:
-#'   \itemize{
-#'     \item \strong{Out:} A vector with a value per metric. \cr
-#'       \strong{In:} Only when \code{a} and \code{b} are both vectors.
-#'     \item \strong{Out:} A vector with a value per row. \cr
-#'       \strong{In:} Any time a single value is expected per row: \code{a} or \code{b} is a vector,
-#'       \code{a} and \code{b} are matrices with the same number of rows and \code{pairwise = FALSE}, a group is
-#'       specified, or \code{mean = TRUE}, and only one metric is requested.
-#'     \item \strong{Out:} A data.frame with a column per metric. \cr
-#'       \strong{In:} When multiple metrics are requested in the previous case.
-#'     \item \strong{Out:} A sparse matrix with a \code{metric} attribute with the metric name. \cr
-#'       \strong{In:} Pairwise comparisons within an \code{a} matrix or between
-#'       an \code{a} and \code{b} matrix, when only 1 metric is requested.
-#'     \item \strong{Out:} A list with a sparse matrix per metric. \cr
-#'       \strong{In:} When multiple metrics are requested in the previous case.
-#'   }
-#' @examples
-#' text = c(
-#'   'words of speaker A', 'more words from speaker A',
-#'   'words from speaker B', 'more words from speaker B'
-#' )
-#' (dtm = lma_dtm(text))
-#'
-#' # compare each entry
-#' lma_simets(dtm)
-#'
-#' # compare each entry with the mean of all entries
-#' lma_simets(dtm, colMeans(dtm))
-#'
-#' # compare by group (corresponding to speakers and turns in this case)
-#' speaker = c('A', 'A', 'B', 'B')
-#'
-#' ## by default, consecutive rows from the same group are averaged:
-#' lma_simets(dtm, group = speaker)
-#'
-#' ## with agg = FALSE, only the rows at the boundary between
-#' ## groups (rows 2 and 3 in this case) are used:
-#' lma_simets(dtm, group = speaker, agg = FALSE)
-#' @export
-
-lma_simets = function(a, b = NULL, metric = NULL, group = NULL, lag = 0, agg = TRUE, agg.mean = TRUE,
-  pairwise = TRUE, symmetrical = FALSE, mean = FALSE, return.list = FALSE){
-  cf = NULL
-  mets = c('jaccard', 'euclidean', 'canberra', 'cosine', 'pearson')
-  if(missing(metric) && length(b) == 1 && !grepl(' ', b) &&
-    any(grepl(tolower(substr(b, 1, 3)), mets, fixed = TRUE))){
-    metric = b
-    b = NULL
-  }
-  met = match_metric(metric)
-  if(!length(met$selected)) stop('no recognized metric; should match one of ',
-    paste0(mets, collapse = ', '), ', or all')
-  st = proc.time()[[3]]
-  slots = c('i', 'p', 'x', 'Dim')
-  if((is.character(a) || is.factor(a)) && any(grepl('[a-zA-Z]', a))) a = lma_dtm(a) else
-    if(is.data.frame(a)) a = Matrix(as.matrix(a), sparse = TRUE)
-  if(is.null(b) && !missing(lag) && is.null(dim(a))) b = a
-  if(is.null(b)){
-    n = dim(a)[1]
-    if(is.null(n) || n < 2) stop('a must have more than 1 row when b is not provided', call. = FALSE)
-    if(is.null(group)){
-      if(!all(slots %in% slotNames(a))) a = as(a, 'dgCMatrix')
-      res = calculate_similarities(a, NULL, 2, met$dummy)
-      for(i in seq_along(res)) attr(res[[i]], 'metric') = met$selected[i]
-    }else{
-      if(length(group) != n) stop('group is not the same length as a or columns in a')
-      ager = if(agg.mean) colMeans else colSums
-      l = length(group)
-      chunks = NULL
-      i = 1
-      while(i < l){
-        st = i
-        g = group[i]
-        while(i < l && g == group[i + 1]) i = i + 1
-        chunks = c(chunks, list(seq(st, i)))
-        i = i + 1
-      }
-      if(!any(chunks[[length(chunks)]] == l)) chunks = c(chunks, list(l))
-      rows = character(length(chunks) - 1)
-      res = as.data.frame(matrix(0, length(chunks) - 1, sum(met$dummy), dimnames = list(NULL, met$selected)))
-      for(i in seq_len(length(chunks) - 1)){
-        s = chunks[[i]]
-        sa = if(agg) s else s[length(s)]
-        ta = ager(a[sa,, drop = FALSE])
-        s = chunks[[i + 1]]
-        sb = if(agg) s else s[1]
-        tb = ager(a[sb,, drop = FALSE])
-        res[i, ] = vector_similarity(ta, tb, met$dummy)
-        rows[i] = paste(paste(sa, collapse = ', '), '<->', paste(sb, collapse = ', '))
-      }
-      rownames(res) = rows
-    }
-  }else{
-    if((is.character(b) || is.factor(b)) && any(grepl('[a-zA-Z]', b))) b = lma_dtm(b) else
-      if(is.data.frame(b)) b = Matrix(as.matrix(b), sparse = TRUE)
-    bn = if(is.null(dim(b))) length(b) else dim(b)[1]
-    if(lag && abs(lag) >= bn) lag = if(lag < 0) -bn + 1 else bn - 1
-    res = if(is.null(dim(b)) && length(a) == bn && (is.null(dim(a)) || any(dim(a) == 1))){
-      b = as.numeric(b)
-      if(lag) b = if(lag < 0) c(b[-seq_len(-lag)], numeric(-lag)) else c(numeric(lag), b)[seq_len(bn)]
-      vector_similarity(as.numeric(a), b, met$dummy)
-    }else{
-      if(is.null(dim(a))) a = Matrix(a, 1, dimnames = list(NULL, names(a)), sparse = TRUE)
-      if(!all(slots %in% slotNames(a))) a = as(a, 'dgCMatrix')
-      if(is.null(dim(b))) b = Matrix(b, 1, dimnames = list(NULL, names(b)), sparse = TRUE)
-      if(!all(slots %in% slotNames(b))) b = as(b, 'dgCMatrix')
-      d = c(dim(a), dim(b))
-      if(d[2] != d[4]){
-        ns = colnames(a)
-        if(!is.null(ns)){
-          ns = ns[ns %in% colnames(b)]
-          if(length(ns)){
-            a = a[, ns, drop = FALSE]
-            b = b[, ns, drop = FALSE]
-          }
-        }
-        d = c(dim(a), dim(b))
-        if(d[2] != d[4])
-          stop('a and b have a different number of columns, which could not be aligned by name')
-      }
-      if(lag){
-        b = if(lag > 0) rbind(Matrix(0, lag, d[4], sparse = TRUE), b[-(seq_len(lag) + d[3] - lag), ]) else
-          rbind(b[-seq_len(-lag), ], Matrix(0, -lag, d[4], sparse = TRUE))
-      }
-      calculate_similarities(a, b, if(((missing(pairwise) || !pairwise) && d[1] == d[3]) ||
-          d[3] == 1) 1 else 3, met$dummy)
-    }
-  }
-  if('list' %in% class(res) && length(res)){
-    pairwise = 'dtCMatrix' %in% class(res[[1]])
-    if((pairwise && symmetrical) || mean) for(i in seq_along(res)){
-      if(pairwise && (symmetrical || mean)) res[[i]] = forceSymmetric(res[[i]], 'L')
-      if(mean) res[[i]] = if(is.null(dim(res[[i]]))) mean(res[[i]], na.rm = TRUE) else rowMeans(res[[i]], TRUE)
-    }
-    if(is.null(dim(res[[1]]))){
-      rn = if(!is.na(nd <- which(c(dim(a), dim(b)) == length(res[[1]]))[1]) && !is.null(rownames(if(nd == 1) a else b)))
-        rownames(if(nd == 1) a else b) else NULL
-      if(length(met$selected) == 1){
-        if(length(rn) == length(res[[1]])) names(res[[1]]) = rn
-      }else{
-        attr(res, 'row.names') = if(length(rn) == length(res[[1]])) rn else seq_along(res[[1]])
-        attr(res, 'class') = 'data.frame'
-      }
-    }
-    if(!return.list && length(met$selected) == 1) res = res[[1]]
-  }
-  attr(res, 'time') = c(simets = proc.time()[[3]] - st)
-  res
 }
