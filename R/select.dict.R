@@ -105,7 +105,7 @@ select.dict <- function(query = NULL, dir = getOption("lingmatch.dict.dir"),
     dir, "/", rownames(r$info), ifelse(r$info$weighted, ".csv", ".dic")
   ), "/", FALSE)
   r$info[!file.exists(r$info[, "downloaded"]), "downloaded"] <- ""
-  if (!missing(query) && length(query) < nrow(dict_info) * 2) {
+  if (!missing(query)) {
     query <- paste0(query, collapse = "|")
     if (!length(sel <- grep(query, rownames(dict_info), TRUE))) {
       collapsed <- vapply(

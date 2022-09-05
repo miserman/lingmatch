@@ -354,7 +354,7 @@ test_that("read.segments sentence parsing works", {
 test_that("select dict and lspace work", {
   expect_equal(nrow(select.dict(c("inq", "sent"))$selected), 5)
   expect_equal(select.dict("sentiment analysis")$selected, select.dict("afinn")$selected)
-  expect_equal(nrow(select.lspace(c("goo"))$selected), 1)
+  expect_equal(nrow(select.lspace("goo")$selected), 1)
   expect_equal(nrow(select.lspace(c("goo", "glove"), dir = "", get.map = FALSE)$selected), 4)
   expect_equal(
     select.lspace("goo glove", dir = "", get.map = FALSE)$selected,
@@ -369,7 +369,7 @@ test_that("select dict and lspace work", {
     select.lspace(c("100k$", "turian_hlbl"), dir = "", get.map = FALSE)$selected,
   )
   skip_if_not(file.exists("~/Latent Semantic Spaces/lma_term_map.rda"), "term map not present")
-  expect_equal(select.lspace(c("cenepa", "didn't", "pansear", "xenops"))$selected$coverage, c(1, 1, .75, .5, .5))
+  expect_equal(select.lspace(terms = c("cenepa", "didn't", "pansear", "xenops"))$selected$coverage, c(1, 1, .75, .5, .5))
 })
 
 test_that("standardize.lspace works", {
