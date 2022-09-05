@@ -27,7 +27,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">lingmatch</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.5</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -90,7 +90,7 @@
     
 <p>Introduces the concept of word vectors and their use in measures of
 text similarity.</p>
-<p><em>Built with R 4.2.1 on September 03 2022</em></p>
+<p><em>Built with R 4.2.1 on September 05 2022</em></p>
 <hr>
 <p>A vector in this context is any set of values that represent one
 thing, so word vectors are fundamental to a bag-of-words framework.
@@ -288,7 +288,7 @@ first argument:</p>
 <span></span>
 <span><span class="co"># select.lspace returns more information about each space,</span></span>
 <span><span class="co"># as well as the full common term map</span></span>
-<span><span class="va">spaces</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/select.lspace.html">select.lspace</a></span><span class="op">(</span><span class="va">terms</span><span class="op">)</span></span>
+<span><span class="va">spaces</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/select.lspace.html">select.lspace</a></span><span class="op">(</span>terms <span class="op">=</span> <span class="va">terms</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># the "selected" entry contains the top 5 spaces in terms of coverage</span></span>
 <span><span class="va">spaces</span><span class="op">$</span><span class="va">selected</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"terms"</span>, <span class="st">"coverage"</span><span class="op">)</span><span class="op">]</span></span>

@@ -118,7 +118,7 @@ terms <- c("part-time", "i/o", "'cause", "brexit", "debuffs")
 
 # select.lspace returns more information about each space,
 # as well as the full common term map
-spaces <- select.lspace(terms)
+spaces <- select.lspace(terms = terms)
 
 # the "selected" entry contains the top 5 spaces in terms of coverage
 spaces$selected[, c("terms", "coverage")]
