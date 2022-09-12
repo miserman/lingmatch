@@ -108,7 +108,8 @@ lma_patcat <- function(text, dict = NULL, pattern.weights = "weight", pattern.ca
   if (is.null(names(name.map)) && length(name.map) < 3) names(name.map) <- c("intname", "term")[seq_along(name.map)]
   wide <- FALSE
   if (missing(dict) && missing(pattern.weights) && missing(pattern.categories)) dict <- lma_dict()
-  if (is.character(dict) && length(dict) == 1 && missing(pattern.weights) && missing(pattern.categories)) {
+  if (is.character(dict) && length(dict) == 1 && (file.exists(dict) || grepl("^[A-Za-z_]{3}", dict)) &&
+    missing(pattern.weights) && missing(pattern.categories)) {
     if (dir == "") dir <- "~/Dictionaries"
     if (!any(file.exists(dict)) && any(file.exists(normalizePath(paste0(dir, "/", dict), "/", FALSE)))) {
       dict <- normalizePath(paste0(dir, "/", dict), "/", FALSE)
@@ -189,7 +190,7 @@ lma_patcat <- function(text, dict = NULL, pattern.weights = "weight", pattern.ca
     lex <- list(term = dict[, name.map[["term"]]], weights = dict[, categories, drop = FALSE], category = categories)
     # independently entered weights and categories
   } else if (is.null(dim(dict))) {
-    if ((is.numeric(dict) && is.null(names(dict))) || (is.list(dict) && is.numeric(dict[[1]]) &&
+    if (is.null(dict) || (is.numeric(dict) && is.null(names(dict))) || (is.list(dict) && is.numeric(dict[[1]]) &&
       is.null(names(dict[[1]])))) {
       stop("could not recognize terms in dict")
     }
@@ -269,8 +270,8 @@ lma_patcat <- function(text, dict = NULL, pattern.weights = "weight", pattern.ca
   }
   if (any(lex$category == "")) lex[lex$category == "", "category"] <- "cat_unnamed"
   if (is.factor(lex$term)) lex$term <- as.character(lex$term)
-  if (globtoregex) {
-    lex$term <- to_regex(list(lex$term), TRUE)[[1]]
+  if (globtoregex || !fixed) {
+    lex$term <- to_regex(list(lex$term), TRUE, globtoregex)[[1]]
     if (missing(fixed)) fixed <- FALSE
   }
   if (wide && return.dtm) {
@@ -327,6 +328,13 @@ lma_patcat <- function(text, dict = NULL, pattern.weights = "weight", pattern.ca
   if (to.lower) text <- tolower(text)
   st <- proc.time()[[3]]
   terms <- unique(lex$term)
+  if (!fixed) {
+    ck <- tryCatch(
+      suppressWarnings(grepl(paste0("(?:", paste(terms, collapse = "|"), ")"), "", perl = TRUE)),
+      error = function(e) NULL
+    )
+    if (is.null(ck)) stop("terms contain invalid regular expressions", call. = FALSE)
+  }
   op <- pattern_search(
     text, if (is.character(boundary)) paste0(boundary, terms, boundary) else terms,
     seq_along(terms) - 1L, fixed, exclusive

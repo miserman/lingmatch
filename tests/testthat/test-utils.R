@@ -232,9 +232,17 @@ test_that("lma_patcat variants works", {
 test_that("lma_patcat globtoregex works", {
   text <- "fishes befish the unbefished"
   dict <- list(prefish = "*fish", postfish = "fish*", barefish = "fish")
-  expect_equal(as.numeric(lma_patcat(text, dict)), c(0, 0, 3))
+  expect_equal(as.numeric(lma_patcat(text, dict, globtoregex = FALSE)), c(0, 0, 3))
   expect_equal(as.numeric(lma_patcat(text, dict, globtoregex = TRUE)), c(3, 0, 0))
   expect_equal(as.numeric(lma_patcat(text, dict, globtoregex = TRUE, exclusive = FALSE)), c(3, 3, 3))
+})
+
+test_that("invalid regex are escaped", {
+  text <- ":\\ :>\\ :] :-] :->( :("
+  dict <- list(d = ":*\\", i = ":*]", f = ":*(")
+  expect_true(all(lma_patcat(text, dict) == 0))
+  expect_true(all(lma_patcat(text, dict, globtoregex = TRUE) == 2))
+  expect_error(lma_patcat(text, "?", fixed = FALSE), "terms contain invalid", fixed = TRUE)
 })
 
 test_that("lma_patcat parts work", {

@@ -1,14 +1,14 @@
-to_regex <- function(dict, intext = FALSE) {
+to_regex <- function(dict, intext = FALSE, isGlob = TRUE) {
   lapply(dict, function(l) {
-    l <- gsub("([+*])[+*]+", "\\\\\\1+", l)
+    l <- gsub("([+*])[+*]+", "\\\\\\1+", sub("(?<=[^\\\\])\\\\$", "\\\\\\\\", l, perl = TRUE))
     if (any(ck <- grepl("[[({]", l) + grepl("[})]|\\]", l) == 1)) {
       l[ck] <- gsub("([([{}\\])])", "\\\\\\1", l[ck], perl = TRUE)
     }
-    if (intext) {
-      sub("^\\*", "\\\\\\b\\\\\\w*", sub("\\*$", "\\\\\\w*\\\\\\b", l, TRUE), TRUE)
-    } else {
-      gsub("\\^\\*|\\*\\$", "", paste0("^", l, "$"))
+    if (isGlob) {
+      if (!intext) l <- gsub("\\^\\*|\\*\\$", "", paste0("^", l, "$"))
+      l <- gsub("\\*", "[^\\\\s]*", l)
     }
+    l
   })
 }
 

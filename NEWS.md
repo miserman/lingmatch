@@ -1,3 +1,8 @@
+# version 1.0.5
+
+### Bug Fixes
+* Catches more invalid regular expressions to avoid crashes from pattern_search.
+
 # version 1.0.4
 
 ### Improvements
