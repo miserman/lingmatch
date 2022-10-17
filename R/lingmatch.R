@@ -1,8 +1,3 @@
-.onLoad <- function(lib, pkg) {
-  if (is.null(getOption("lingmatch.lspace.dir"))) options(lingmatch.lspace.dir = "")
-  if (is.null(getOption("lingmatch.dict.dir"))) options(lingmatch.dict.dir = "")
-}
-
 #' Linguistic Matching and Accommodation
 #'
 #' Offers a variety of methods to assess linguistic matching or accommodation, where \emph{matching}

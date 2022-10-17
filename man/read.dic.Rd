@@ -9,7 +9,7 @@ read.dic(path, cats, type = "asis", as.weighted = FALSE,
   dir = getOption("lingmatch.dict.dir"), ..., term.name = "term",
   category.name = "category", raw = FALSE)
 
-write.dic(dict, filename, type = "asis", as.weighted = FALSE,
+write.dic(dict, filename = NULL, type = "asis", as.weighted = FALSE,
   save = TRUE)
 }
 \arguments{

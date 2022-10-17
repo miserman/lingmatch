@@ -480,22 +480,3 @@ lma_termcat <- function(dtm, dict, term.weights = NULL, bias = NULL, bias.name =
   if ("type" %in% atsn) attr(op, "type") <- ats$type
   op
 }
-
-match_metric <- function(x) {
-  mets <- c("jaccard", "euclidean", "canberra", "cosine", "pearson")
-  sel <- if (is.null(x) || (length(x) == 1 && grepl(tolower(substr(x, 1, 1)), "a", fixed = TRUE))) {
-    mets
-  } else if (is.function(x)) {
-    stop("only internal metrics are available: ", paste(mets, collapse = ", "), call. = FALSE)
-  } else {
-    if (is.numeric(x)) {
-      mets[x]
-    } else {
-      if (is.call(x)) x <- eval(x)
-      su <- grepl("^(?:cor|r)", x, TRUE)
-      if (any(su)) x[su] <- "pearson"
-      unique(unlist(lapply(substr(x, 1, 3), grep, mets, fixed = TRUE, value = TRUE)))
-    }
-  }
-  list(all = mets, selected = sel, dummy = as.integer(mets %in% sel))
-}

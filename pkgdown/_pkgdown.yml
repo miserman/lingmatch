@@ -71,6 +71,10 @@ reference:
     - select.lspace
     - download.lspace
     - standardize.lspace
+    - report_term_matches
+
+news:
+  cran_dates: false
 
 footer:
   structure:

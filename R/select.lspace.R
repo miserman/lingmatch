@@ -101,7 +101,7 @@ select.lspace <- function(query = NULL, dir = getOption("lingmatch.lspace.dir"),
   r <- list(info = lss_info, selected = lss_info[NULL, ])
   r$info[, "wiki"] <- paste0("https://osf.io/489he/wiki/", rownames(lss_info))
   r$info[, "downloaded"] <- normalizePath(paste0(dir, "/", rownames(r$info), ".dat"), "/", FALSE)
-  r$info[!r$info[, "downloaded"] %in% list.files(dir, "\\.dat"), "downloaded"] <- ""
+  r$info[!file.exists(r$info[, "downloaded"]), "downloaded"] <- ""
   if (get.map) {
     if (!is.null(lma_term_map)) {
       r$term_map <- lma_term_map

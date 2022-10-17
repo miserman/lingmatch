@@ -60,37 +60,42 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.0.5" id="version-105">version 1.0.5<a class="anchor" aria-label="anchor" href="#version-105"></a></h2>
 <div class="section level4">
+<h4 id="features-1-0-5">Features<a class="anchor" aria-label="anchor" href="#features-1-0-5"></a></h4>
+<ul><li>Adds <code>report_term_match</code> to assess fuzzy terms in dictionaries.</li>
+</ul></div>
+<div class="section level4">
 <h4 id="bug-fixes-1-0-5">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-0-5"></a></h4>
-<ul><li>Catches more invalid regular expressions to avoid crashes from pattern_search.</li>
+<ul><li>Fixes <code>select.lspace</code> downloaded indicator.</li>
+<li>Catches more invalid regular expressions to avoid crashes from <code>pattern_search</code>.</li>
 </ul></div>
 </div>
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="1.0.4" id="version-104">version 1.0.4<a class="anchor" aria-label="anchor" href="#version-104"></a></h2><p class="text-muted">CRAN release: 2022-09-05</p>
+<h2 class="pkg-version" data-toc-text="1.0.4" id="version-104">version 1.0.4<a class="anchor" aria-label="anchor" href="#version-104"></a></h2>
 <div class="section level4">
 <h4 id="improvements-1-0-4">Improvements<a class="anchor" aria-label="anchor" href="#improvements-1-0-4"></a></h4>
 <ul><li>Avoids checking if long texts are files.</li>
 <li>Improves feedback when a directory has not been specified.</li>
-<li>Changes results of singular pairwise comparisons from 1 to NA.</li>
+<li>Changes results of singular pairwise comparisons from <code>1</code> to <code>NA</code>.</li>
 </ul></div>
 </div>
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="1.0.3" id="version-103">version 1.0.3<a class="anchor" aria-label="anchor" href="#version-103"></a></h2><p class="text-muted">CRAN release: 2022-01-25</p>
+<h2 class="pkg-version" data-toc-text="1.0.3" id="version-103">version 1.0.3<a class="anchor" aria-label="anchor" href="#version-103"></a></h2>
 <div class="section level4">
 <h4 id="bug-fixes-1-0-3">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-0-3"></a></h4>
-<ul><li>Fixes lma_simets vector to matrix comparisons in some cases.</li>
-<li>Fixes lma_dtm tokens.only when one text ends up empty.</li>
+<ul><li>Fixes <code>lma_simets</code> vector to matrix comparisons in some cases.</li>
+<li>Fixes <code>lma_dtm</code> <code>tokens.only</code> when one text ends up empty.</li>
 </ul></div>
 </div>
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="1.0.2" id="version-102">version 1.0.2<a class="anchor" aria-label="anchor" href="#version-102"></a></h2><p class="text-muted">CRAN release: 2021-04-22</p>
+<h2 class="pkg-version" data-toc-text="1.0.2" id="version-102">version 1.0.2<a class="anchor" aria-label="anchor" href="#version-102"></a></h2>
 <div class="section level3">
 <h3 id="features-1-0-2">Features<a class="anchor" aria-label="anchor" href="#features-1-0-2"></a></h3>
-<ul><li>Adds options to specify term and category names in read.dic.</li>
-<li>Adds an option to remove unmatched categories or terms in lma_patcat.</li>
+<ul><li>Adds options to specify term and category names in <code>read.dic</code>.</li>
+<li>Adds an option to remove unmatched categories or terms in <code>lma_patcat</code>.</li>
 </ul><div class="section level4">
 <h4 id="improvements-1-0-2">Improvements<a class="anchor" aria-label="anchor" href="#improvements-1-0-2"></a></h4>
 <ul><li>Improves input-handling of dictionaries.</li>
-<li>Enables term exclusions for token-only lma_dtm.</li>
+<li>Enables term exclusions for token-only <code>lma_dtm</code>.</li>
 <li>Makes output formats more consistent.</li>
 <li>Handles special-character conversion on misencoded text.</li>
 <li>Better handles unrecognized weight and metric names.</li>
@@ -98,21 +103,21 @@
 </ul></div>
 <div class="section level4">
 <h4 id="bug-fixes-1-0-2">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-0-2"></a></h4>
-<ul><li>Fixes lma_dtm token to dtm conversion when final token indices entries are empty.</li>
-<li>Appropriately allows read.dic to read urls.</li>
+<ul><li>Fixes <code>lma_dtm</code> token to dtm conversion when final token indices entries are empty.</li>
+<li>Appropriately allows <code>read.dic</code> to read urls.</li>
 <li>Term weights correctly default to count given an empty weight.</li>
-<li>Adds the pois.x argument to lma_weight to allow for separately specified augment alphas and d/ppois quantiles or probabilities.</li>
+<li>Adds the <code>pois.x</code> argument to <code>lma_weight</code> to allow for separately specified augment alphas and d/ppois quantiles or probabilities.</li>
 <li>Corrects handling of empty texts in some cases.</li>
-<li>Corrects lma_process routing and argument passing in some cases.</li>
+<li>Corrects <code>lma_process</code> routing and argument passing in some cases.</li>
 </ul></div>
 </div>
 </div>
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="1.0.1" id="version-101">version 1.0.1<a class="anchor" aria-label="anchor" href="#version-101"></a></h2><p class="text-muted">CRAN release: 2021-02-25</p>
+<h2 class="pkg-version" data-toc-text="1.0.1" id="version-101">version 1.0.1<a class="anchor" aria-label="anchor" href="#version-101"></a></h2>
 <div class="section level4">
 <h4 id="bug-fixes-1-0-1">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-0-1"></a></h4>
 <ul><li>Avoids a compilation issue on older macOS platforms.</li>
-<li>Avoids factor-related issues when the stringsAsFactors option is TRUE.</li>
+<li>Avoids factor-related issues when the <code>stringsAsFactors</code> option is <code>TRUE</code>.</li>
 </ul></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
