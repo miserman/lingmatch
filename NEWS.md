@@ -4,6 +4,7 @@
 * Adds `report_term_match` to assess fuzzy terms in dictionaries.
 
 ### Bug Fixes
+* Avoids integer overflow when setting up large comparisons.
 * Fixes `select.lspace` downloaded indicator.
 * Catches more invalid regular expressions to avoid crashes from `pattern_search`.
 

@@ -148,8 +148,9 @@ List calculate_similarities(const S4 &m, const RObject &comp, int &type, const I
   const bool procb = type != 2 && comp.isS4();
   Sparse_Arrays a(m), b = procb ? Sparse_Arrays(as<S4>(comp)) : a;
   const IntegerVector dim{a.dims[0], b.dims[0]};
-  int nrow = b.dims[0], n = type == 1 ? a.dims[0] : type == 2 ? a.dims[0] * (a.dims[0] - 1) / 2 :
-      a.dims[0] * nrow, index = metrics.length(), ai = 1, bi = 0;
+  size_t nrow = b.dims[0], ai = 1, bi = 0, index = metrics.length();
+  const size_t arow = a.dims[0], n = type == 1
+    ? a.dims[0] : type == 2 ? arow * (arow - 1) / 2 : arow * nrow;
   // setting up output vectors
   const CharacterVector metric_names{"jaccard", "euclidean", "canberra", "cosine", "pearson"};
   unordered_map<String, NumericVector> res;

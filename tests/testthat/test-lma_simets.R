@@ -82,9 +82,9 @@ test_that("entry order is arbitrary for vector-matrix comparisons", {
 
 test_that("pearson aligns with cor", {
   a <- matrix(rnorm(500), 20)
-  expect_equal(as.numeric(lma_simets(a, metric = 5, symmetric = TRUE)), as.numeric(cor(t(a))))
+  expect_equal(as.numeric(lma_simets(a, metric = 5, symmetrical = TRUE)), as.numeric(cor(t(a))))
   a <- matrix(rpois(500, 1), 20)
-  expect_equal(as.numeric(lma_simets(a, metric = "correlation", symmetric = TRUE)), as.numeric(cor(t(a))))
+  expect_equal(as.numeric(lma_simets(a, metric = "correlation", symmetrical = TRUE)), as.numeric(cor(t(a))))
 })
 
 test_that("groups work as expected", {
