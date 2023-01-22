@@ -98,8 +98,7 @@ lma_simets <- function(a, b = NULL, metric = NULL, group = NULL, lag = 0, agg = 
   slots <- c("i", "p", "x", "Dim")
   if ((is.character(a) || is.factor(a)) && any(grepl("[a-zA-Z]", a))) {
     a <- lma_dtm(a)
-  } else
-  if (is.data.frame(a)) a <- Matrix(as.matrix(a), sparse = TRUE)
+  } else if (is.data.frame(a)) a <- Matrix(as.matrix(a), sparse = TRUE)
   if (is.null(b) && !missing(lag) && is.null(dim(a))) b <- a
   if (is.null(b)) {
     n <- dim(a)[1]
@@ -139,8 +138,7 @@ lma_simets <- function(a, b = NULL, metric = NULL, group = NULL, lag = 0, agg = 
   } else {
     if ((is.character(b) || is.factor(b)) && any(grepl("[a-zA-Z]", b))) {
       b <- lma_dtm(b)
-    } else
-    if (is.data.frame(b)) b <- Matrix(as.matrix(b), sparse = TRUE)
+    } else if (is.data.frame(b)) b <- Matrix(as.matrix(b), sparse = TRUE)
     bn <- if (is.null(dim(b))) length(b) else dim(b)[1]
     if (lag && abs(lag) >= bn) lag <- if (lag < 0) -bn + 1 else bn - 1
     res <- if (is.null(dim(b)) && length(a) == bn && (is.null(dim(a)) || any(dim(a) == 1))) {

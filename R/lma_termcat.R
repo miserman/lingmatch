@@ -153,8 +153,7 @@ lma_termcat <- function(dtm, dict, term.weights = NULL, bias = NULL, bias.name =
   if (!is.list(dict)) {
     dict <- if (is.matrix(dict)) {
       as.data.frame(dict, stringsAsFactors = FALSE)
-    } else
-    if (is.character(dict) && length(dict) == 1 && (file.exists(dict) || dict %in% rownames(select.dict()$info))) {
+    } else if (is.character(dict) && length(dict) == 1 && (file.exists(dict) || dict %in% rownames(select.dict()$info))) {
       read.dic(dict, dir = if (ckd) "" else dir)
     } else {
       list(dict)

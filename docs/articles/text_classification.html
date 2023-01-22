@@ -8,10 +8,10 @@
 <meta name="description" content="lingmatch">
 <title>Introduction to Text Classification • lingmatch</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.1.3/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.1.3/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
+<link href="../deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
+<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
 <meta property="og:title" content="Introduction to Text Classification">
 <meta property="og:description" content="lingmatch">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
@@ -89,7 +89,7 @@
     
     
 <p>Works through a text classification example.</p>
-<p><em>Built with R 4.2.1 on September 05 2022</em></p>
+<p><em>Built with R 4.2.2 on January 22 2023</em></p>
 <hr>
 <div class="section level2">
 <h2 id="data">Data<a class="anchor" aria-label="anchor" href="#data"></a>
@@ -245,8 +245,8 @@ will often smooth the probabilities.</p>
 <span>  package <span class="op">=</span> <span class="va">weights_nb</span><span class="op">$</span><span class="va">prob1</span><span class="op">[</span><span class="st">"dress"</span>, <span class="op">]</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt;         Feminine  Masculine</span></span>
-<span><span class="co">#&gt; manual       0.2 0.05263158</span></span>
-<span><span class="co">#&gt; package      0.2 0.05263158</span></span></code></pre></div>
+<span><span class="co">#&gt; manual      0.16 0.03947368</span></span>
+<span><span class="co">#&gt; package     0.16 0.03947368</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="decision-tree-classifier">Decision Tree classifier<a class="anchor" aria-label="anchor" href="#decision-tree-classifier"></a>
@@ -300,7 +300,7 @@ required on your system, though it should be handled automatically (see
 <h4 id="basic-model">Basic model<a class="anchor" aria-label="anchor" href="#basic-model"></a>
 </h4>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://keras.rstudio.com" class="external-link">keras</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tensorflow.rstudio.com/" class="external-link">keras</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># process texts in the same way, but add tokens.only = TRUE to preserve sequence</span></span>
 <span><span class="co"># information</span></span>
@@ -322,7 +322,6 @@ required on your system, though it should be handled automatically (see
 <span>  <span class="co"># to a binary classification</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/pkg/keras/man/layer_dense.html" class="external-link">layer_dense</a></span><span class="op">(</span>units <span class="op">=</span> <span class="fl">1</span>, activation <span class="op">=</span> <span class="st">"sigmoid"</span><span class="op">)</span></span>
 <span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Loaded Tensorflow version 2.9.1</span></span>
 <span></span>
 <span><span class="co"># then compile the model (this changes the weights_neural object)</span></span>
 <span><span class="fu"><a href="https://generics.r-lib.org/reference/compile.html" class="external-link">compile</a></span><span class="op">(</span></span>
@@ -402,7 +401,7 @@ classifiers (or calculate predictions manually), then measure accuracy
 <span>  neural <span class="op">=</span> <span class="va">classes</span><span class="op">[</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">weights_neural</span>, <span class="va">test_sequences</span><span class="op">)</span> <span class="op">&lt;</span> <span class="fl">.5</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1</span><span class="op">]</span>,</span>
 <span>  neural_glove <span class="op">=</span> <span class="va">classes</span><span class="op">[</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">weights_neural_glove</span>, <span class="va">test_sequences</span><span class="op">)</span> <span class="op">&lt;</span> <span class="fl">.5</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1</span><span class="op">]</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; as(&lt;matrix&gt;, "dgRMatrix") is deprecated since Matrix 1.4-2; do as(as(as(., "dMatrix"), "generalMatrix"), "RsparseMatrix") instead</span></span>
+<span><span class="co">#&gt; as(&lt;matrix&gt;, "dgRMatrix") is deprecated since Matrix 1.5-0; do as(as(as(., "dMatrix"), "generalMatrix"), "RsparseMatrix") instead</span></span>
 <span></span>
 <span><span class="co"># when you have multiple classifiers, you can also add an ensemble classifier based</span></span>
 <span><span class="co"># on them by, for example, taking the most-predicted class</span></span>
@@ -411,13 +410,13 @@ classifiers (or calculate predictions manually), then measure accuracy
 <span><span class="co"># overall accuracies</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>accuracy <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">predictions</span> <span class="op">==</span> <span class="va">data</span><span class="op">[</span><span class="op">-</span><span class="va">train_ids</span>, <span class="st">"Recall"</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;               accuracy</span></span>
-<span><span class="co">#&gt; terms        0.7230769</span></span>
-<span><span class="co">#&gt; bayes        0.7846154</span></span>
-<span><span class="co">#&gt; dtree        0.6307692</span></span>
-<span><span class="co">#&gt; svm          0.6923077</span></span>
-<span><span class="co">#&gt; neural       0.7846154</span></span>
+<span><span class="co">#&gt; terms        0.6769231</span></span>
+<span><span class="co">#&gt; bayes        0.7538462</span></span>
+<span><span class="co">#&gt; dtree        0.7230769</span></span>
+<span><span class="co">#&gt; svm          0.7384615</span></span>
+<span><span class="co">#&gt; neural       0.7076923</span></span>
 <span><span class="co">#&gt; neural_glove 0.7538462</span></span>
-<span><span class="co">#&gt; ensemble     0.7538462</span></span></code></pre></div>
+<span><span class="co">#&gt; ensemble     0.7384615</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="testing-decisions">Testing decisions<a class="anchor" aria-label="anchor" href="#testing-decisions"></a>
@@ -551,10 +550,10 @@ parallelize it:</p>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>Average <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">Model_Accuracies</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;         Average</span></span>
-<span><span class="co">#&gt; terms 0.6898462</span></span>
-<span><span class="co">#&gt; bayes 0.7224615</span></span>
-<span><span class="co">#&gt; dtree 0.7287692</span></span>
-<span><span class="co">#&gt; svm   0.7200000</span></span>
+<span><span class="co">#&gt; terms 0.6824615</span></span>
+<span><span class="co">#&gt; bayes 0.7272308</span></span>
+<span><span class="co">#&gt; dtree 0.7341538</span></span>
+<span><span class="co">#&gt; svm   0.7106154</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/splot/man/splot.html" class="external-link">splot</a></span><span class="op">(</span><span class="va">Model_Accuracies</span>, title <span class="op">=</span> <span class="cn">FALSE</span>, leg.title <span class="op">=</span> <span class="st">"Model"</span>, dark <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="text_classification_files/figure-html/unnamed-chunk-14-1.svg" width="864"></p>
 </div>

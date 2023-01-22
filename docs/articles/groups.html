@@ -8,10 +8,10 @@
 <meta name="description" content="lingmatch">
 <title>Specifying comparisons and groups in lingmatch • lingmatch</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.1.3/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.1.3/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
+<link href="../deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
+<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
 <meta property="og:title" content="Specifying comparisons and groups in lingmatch">
 <meta property="og:description" content="lingmatch">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
@@ -90,7 +90,7 @@
     
 <p>This example demonstrates a few ways to specify comparisons and
 groups in lingmatch.</p>
-<p><em>Built with R 4.2.1 on September 05 2022</em></p>
+<p><em>Built with R 4.2.2 on January 22 2023</em></p>
 <hr>
 <div class="section level2">
 <h2 id="setup">Setup<a class="anchor" aria-label="anchor" href="#setup"></a>
@@ -111,12 +111,12 @@ a series of interactions after reading one of a set of prompts:</p>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">3</span> <span class="op">*</span> <span class="fl">2</span> <span class="op">*</span> <span class="fl">7</span>, <span class="fl">10</span>, <span class="fl">4</span><span class="op">)</span>, <span class="fl">3</span> <span class="op">*</span> <span class="fl">2</span>, dimnames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="cn">NULL</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="fu"><a href="../reference/lma_dict.html">lma_dict</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">7</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">prompts</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">8</span><span class="op">]</span></span>
-<span><span class="co">#&gt;     study   prompt     ppron     ipron   article    adverb      conj      prep</span></span>
-<span><span class="co">#&gt; 1 study 1 prompt 1  4.987201 13.301017 12.623672  6.538885  8.170807 14.014245</span></span>
-<span><span class="co">#&gt; 2 study 1 prompt 2 14.887584  8.029638 10.809341 15.352991  9.252747 13.201336</span></span>
-<span><span class="co">#&gt; 3 study 1 prompt 3 13.488052 10.991558 10.346742  5.285387 10.375448 12.254210</span></span>
-<span><span class="co">#&gt; 4 study 2 prompt 1  7.082027  7.370907  6.796533  6.652680  8.255588  5.016548</span></span>
-<span><span class="co">#&gt; 5 study 2 prompt 2 16.652842 11.872102  5.610486  7.772013  9.688338  8.725364</span></span>
+<span><span class="co">#&gt;     study   prompt     ppron     ipron  article    adverb      conj      prep</span></span>
+<span><span class="co">#&gt; 1 study 1 prompt 1  8.999514  7.113745 12.26744 13.727940  6.721313 12.865915</span></span>
+<span><span class="co">#&gt; 2 study 1 prompt 2  6.006486  6.412716 10.02495 11.678558  6.292891 12.961488</span></span>
+<span><span class="co">#&gt; 3 study 1 prompt 3 11.138157  9.381400 12.10719  7.593633 11.549834  5.178716</span></span>
+<span><span class="co">#&gt; 4 study 2 prompt 1  8.972194 11.204113 12.59285  5.425096  8.781494  1.352326</span></span>
+<span><span class="co">#&gt; 5 study 2 prompt 2 13.941198 11.492144 13.71004  7.088820  6.426368  8.208190</span></span>
 <span></span>
 <span><span class="co"># then, the same representation of the language the participants produced:</span></span>
 <span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
@@ -127,12 +127,12 @@ a series of interactions after reading one of a set of prompts:</p>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span> <span class="op">*</span> <span class="fl">7</span>, <span class="fl">10</span>, <span class="fl">4</span><span class="op">)</span>, <span class="fl">100</span>, dimnames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="cn">NULL</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">prompts</span><span class="op">)</span><span class="op">[</span><span class="op">-</span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">data</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">8</span><span class="op">]</span></span>
-<span><span class="co">#&gt;     study    pair   prompt speaker     ppron     ipron   article    adverb</span></span>
-<span><span class="co">#&gt; 1 study 1 pair 01 prompt 1       b  9.418413 12.936704 10.031236 15.040646</span></span>
-<span><span class="co">#&gt; 2 study 1 pair 02 prompt 3       b  0.831309  9.603137  7.858277 11.996755</span></span>
-<span><span class="co">#&gt; 3 study 1 pair 03 prompt 2       b 10.170156 10.388915 16.335834  5.103473</span></span>
-<span><span class="co">#&gt; 4 study 1 pair 04 prompt 3       b  9.976303  9.273981  5.139516 12.915494</span></span>
-<span><span class="co">#&gt; 5 study 1 pair 04 prompt 2       a 12.505904 11.503771  9.671936  9.902179</span></span></code></pre></div>
+<span><span class="co">#&gt;     study    pair   prompt speaker     ppron     ipron  article    adverb</span></span>
+<span><span class="co">#&gt; 1 study 1 pair 01 prompt 3       b  7.082930  9.017080 11.87576 13.327590</span></span>
+<span><span class="co">#&gt; 2 study 1 pair 01 prompt 1       a  9.035124 10.122622 19.31413  5.505680</span></span>
+<span><span class="co">#&gt; 3 study 1 pair 01 prompt 1       a  6.251151 13.809125 13.23191 11.517068</span></span>
+<span><span class="co">#&gt; 4 study 1 pair 01 prompt 1       a 13.023068 12.506742 11.90706  7.151218</span></span>
+<span><span class="co">#&gt; 5 study 1 pair 01 prompt 3       b 17.163844  8.420684 10.43337 18.307482</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="matching-with-a-standard">Matching with a standard<a class="anchor" aria-label="anchor" href="#matching-with-a-standard"></a>
@@ -154,11 +154,11 @@ the sample’s mean:</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $comp</span></span>
 <span><span class="co">#&gt;     ppron     ipron   article    adverb      conj      prep   auxverb </span></span>
-<span><span class="co">#&gt;  9.652762  9.522942 10.026650 10.080850  9.895080  9.254559 10.533518</span></span>
+<span><span class="co">#&gt; 10.255786 10.308621  9.769793 10.571518 10.299215 10.242701  9.747523</span></span>
 <span></span>
 <span><span class="co"># and maybe the average similarity score</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">lsm_mean</span><span class="op">$</span><span class="va">sim</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 0.8358412</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 0.8324537</span></span></code></pre></div>
 <p>This could be considered a baseline for the sample.</p>
 </div>
 <div class="section level3">
@@ -178,19 +178,19 @@ manual</a>.</p>
 <span><span class="co">#&gt;         ppron ipron article adverb conj  prep auxverb</span></span>
 <span><span class="co">#&gt; twitter  9.02   4.6    5.58   5.13 4.19 11.88    8.27</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">lsm_twitter</span><span class="op">$</span><span class="va">sim</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 0.7300534</span></span>
+<span><span class="co">#&gt; [1] 0.7260059</span></span>
 <span></span>
 <span><span class="co"># or the means of the set that is most similar to the current set</span></span>
 <span><span class="va">lsm_auto</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lingmatch.html">lingmatch</a></span><span class="op">(</span><span class="va">data</span>, <span class="st">"auto"</span>, type <span class="op">=</span> <span class="st">"lsm"</span><span class="op">)</span></span>
 <span><span class="va">lsm_auto</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"comp.type"</span>, <span class="st">"comp"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt; $comp.type</span></span>
-<span><span class="co">#&gt; [1] "auto: natural"</span></span>
+<span><span class="co">#&gt; [1] "auto: expressive"</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $comp</span></span>
-<span><span class="co">#&gt;         ppron ipron article adverb conj  prep auxverb</span></span>
-<span><span class="co">#&gt; natural 13.37  7.53    4.34   7.67 6.21 10.29   12.03</span></span>
+<span><span class="co">#&gt;            ppron ipron article adverb conj  prep auxverb</span></span>
+<span><span class="co">#&gt; expressive 12.74  5.28     5.7   6.02 7.46 14.27    9.25</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">lsm_auto</span><span class="op">$</span><span class="va">sim</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 0.7728412</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 0.764846</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="external-means">External means<a class="anchor" aria-label="anchor" href="#external-means"></a>
@@ -205,9 +205,9 @@ comparison:</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $comp</span></span>
 <span><span class="co">#&gt;     ppron     ipron   article    adverb      conj      prep   auxverb </span></span>
-<span><span class="co">#&gt;  9.947789  9.177562  9.014542  9.538932  9.530457 10.490109  8.966236</span></span>
+<span><span class="co">#&gt; 10.329427  9.445518 11.090509  9.946371  7.518051  8.451717  8.437454</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">lsm_prmed</span><span class="op">$</span><span class="va">sim</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 0.8316992</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 0.820794</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="group-means">Group means<a class="anchor" aria-label="anchor" href="#group-means"></a>
@@ -221,12 +221,12 @@ considered groups:</p>
 <span><span class="co">#&gt; [1] "study group mean"</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $comp</span></span>
-<span><span class="co">#&gt;            ppron    ipron   article    adverb      conj     prep  auxverb</span></span>
-<span><span class="co">#&gt; study 1 9.586353 9.717637 10.195310 10.196349 10.528556 9.121903 10.41695</span></span>
-<span><span class="co">#&gt; study 2 9.733928 9.284982  9.820509  9.939683  9.120831 9.416694 10.67599</span></span>
+<span><span class="co">#&gt;             ppron    ipron  article   adverb      conj      prep   auxverb</span></span>
+<span><span class="co">#&gt; study 1  9.700849 10.23006 9.904329 10.56492 10.955778 10.694350 10.101656</span></span>
+<span><span class="co">#&gt; study 2 10.641420 10.36321 9.676301 10.57610  9.842959  9.928843  9.501431</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="va">lsm_topics</span><span class="op">$</span><span class="va">sim</span><span class="op">[</span>, <span class="fl">2</span><span class="op">]</span>, <span class="va">lsm_topics</span><span class="op">$</span><span class="va">sim</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>, <span class="va">mean</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   study 1   study 2 </span></span>
-<span><span class="co">#&gt; 0.8401380 0.8310303</span></span></code></pre></div>
+<span><span class="co">#&gt; 0.8398397 0.8288364</span></span></code></pre></div>
 <p>This type of group variable is just splitting the data, and
 performing the same comparisons within splits.</p>
 </div>
@@ -250,24 +250,24 @@ prompts:</p>
 <span><span class="co">#&gt; [1] "prompts"</span></span>
 <span><span class="va">lsm</span><span class="op">$</span><span class="va">comp</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">]</span></span>
 <span><span class="co">#&gt;                      ppron     ipron   article    adverb      conj      prep</span></span>
-<span><span class="co">#&gt; study 1 prompt 1  4.987201 13.301017 12.623672  6.538885  8.170807 14.014245</span></span>
-<span><span class="co">#&gt; study 1 prompt 2 14.887584  8.029638 10.809341 15.352991  9.252747 13.201336</span></span>
-<span><span class="co">#&gt; study 1 prompt 3 13.488052 10.991558 10.346742  5.285387 10.375448 12.254210</span></span>
-<span><span class="co">#&gt; study 2 prompt 1  7.082027  7.370907  6.796533  6.652680  8.255588  5.016548</span></span>
-<span><span class="co">#&gt; study 2 prompt 2 16.652842 11.872102  5.610486  7.772013  9.688338  8.725364</span></span>
-<span><span class="co">#&gt; study 2 prompt 3  2.589027  3.500148  7.900478 15.631636 11.439816  9.728948</span></span>
+<span><span class="co">#&gt; study 1 prompt 1  8.999514  7.113745 12.267444 13.727940  6.721313 12.865915</span></span>
+<span><span class="co">#&gt; study 1 prompt 2  6.006486  6.412716 10.024947 11.678558  6.292891 12.961488</span></span>
+<span><span class="co">#&gt; study 1 prompt 3 11.138157  9.381400 12.107193  7.593633 11.549834  5.178716</span></span>
+<span><span class="co">#&gt; study 2 prompt 1  8.972194 11.204113 12.592849  5.425096  8.781494  1.352326</span></span>
+<span><span class="co">#&gt; study 2 prompt 2 13.941198 11.492144 13.710036  7.088820  6.426368  8.208190</span></span>
+<span><span class="co">#&gt; study 2 prompt 3 12.919016 11.068989  5.840584 14.164180  5.336406 10.143665</span></span>
 <span><span class="va">lsm</span><span class="op">$</span><span class="va">sim</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, <span class="op">]</span></span>
 <span><span class="co">#&gt;                  g1  canberra</span></span>
-<span><span class="co">#&gt; 1  study 1 prompt 1 0.8279033</span></span>
-<span><span class="co">#&gt; 2  study 1 prompt 3 0.7409349</span></span>
-<span><span class="co">#&gt; 3  study 1 prompt 2 0.8025704</span></span>
-<span><span class="co">#&gt; 4  study 1 prompt 3 0.8032386</span></span>
-<span><span class="co">#&gt; 5  study 1 prompt 2 0.8282935</span></span>
-<span><span class="co">#&gt; 6  study 1 prompt 1 0.8563901</span></span>
-<span><span class="co">#&gt; 7  study 1 prompt 1 0.6844770</span></span>
-<span><span class="co">#&gt; 8  study 1 prompt 1 0.8080112</span></span>
-<span><span class="co">#&gt; 9  study 1 prompt 2 0.8320456</span></span>
-<span><span class="co">#&gt; 10 study 1 prompt 1 0.7829796</span></span></code></pre></div>
+<span><span class="co">#&gt; 1  study 1 prompt 3 0.8125416</span></span>
+<span><span class="co">#&gt; 2  study 1 prompt 1 0.8137639</span></span>
+<span><span class="co">#&gt; 3  study 1 prompt 1 0.8139366</span></span>
+<span><span class="co">#&gt; 4  study 1 prompt 1 0.8062561</span></span>
+<span><span class="co">#&gt; 5  study 1 prompt 3 0.7747141</span></span>
+<span><span class="co">#&gt; 6  study 1 prompt 2 0.7478765</span></span>
+<span><span class="co">#&gt; 7  study 1 prompt 3 0.8239541</span></span>
+<span><span class="co">#&gt; 8  study 1 prompt 2 0.7740213</span></span>
+<span><span class="co">#&gt; 9  study 1 prompt 1 0.8098167</span></span>
+<span><span class="co">#&gt; 10 study 1 prompt 2 0.7254091</span></span></code></pre></div>
 <p>Here, the <code>group</code> argument is just pasting together the
 included variables, and using the resulting string to identify a single
 comparison for each text (acting as a condition ID).</p>
@@ -282,28 +282,28 @@ unique IDs).</p>
 <code class="sourceCode R"><span><span class="va">interlsm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lingmatch.html">lingmatch</a></span><span class="op">(</span><span class="va">data</span>, group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pair"</span>, <span class="st">"speaker"</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"lsm"</span><span class="op">)</span></span>
 <span><span class="va">interlsm</span><span class="op">$</span><span class="va">comp</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, <span class="op">]</span></span>
 <span><span class="co">#&gt;               ppron     ipron   article    adverb      conj      prep   auxverb</span></span>
-<span><span class="co">#&gt; pair 01 b  9.418413 12.936704 10.031236 15.040646  6.431521 10.852016  8.834441</span></span>
-<span><span class="co">#&gt; pair 02 b  0.831309  9.603137  7.858277 11.996755  8.564600  7.741957 11.138628</span></span>
-<span><span class="co">#&gt; pair 03 b 10.170156 10.388915 16.335834  5.103473  7.159062 12.565010 12.433113</span></span>
-<span><span class="co">#&gt; pair 04 b 12.068365  8.194582  9.118260 10.815866 11.619430  9.519027 12.225844</span></span>
-<span><span class="co">#&gt; pair 04 a 11.369066 10.645593  9.890928 12.257883 10.970550 10.342637 11.168773</span></span>
-<span><span class="co">#&gt; pair 05 b  9.393570 12.262515  8.862981  6.685336 13.254845 11.001119  9.410473</span></span>
-<span><span class="co">#&gt; pair 05 a  6.602626  8.212602  8.465088  8.105234  6.449587  9.985923  8.298047</span></span>
-<span><span class="co">#&gt; pair 06 b  7.586492 12.630662 14.165139 13.406996 11.875605  9.135385 11.876902</span></span>
-<span><span class="co">#&gt; pair 06 a 10.402218  8.231461  9.886171  6.686365  7.978440  5.179883 13.469274</span></span>
-<span><span class="co">#&gt; pair 07 b  8.360588  7.509923 10.273891 11.660883 12.399689  7.100344 10.951838</span></span>
+<span><span class="co">#&gt; pair 01 b 11.263068 12.411894  9.267130 13.900095 11.069133  8.254953  8.085763</span></span>
+<span><span class="co">#&gt; pair 01 a  8.661024 11.458638 14.271066  9.980748 12.896681 11.217167  9.037394</span></span>
+<span><span class="co">#&gt; pair 02 b  5.742498  7.574519  8.579088 10.530001  8.013711  8.561762 10.015464</span></span>
+<span><span class="co">#&gt; pair 02 a 13.728115 10.637801  5.645587 11.868234  9.968967 10.923804 13.403071</span></span>
+<span><span class="co">#&gt; pair 03 a 10.163899  8.137864 10.213392 11.609652 10.229410 12.556742  9.251094</span></span>
+<span><span class="co">#&gt; pair 03 b  8.545921  8.474187 11.736990 15.953142 13.984315  6.360841 13.999293</span></span>
+<span><span class="co">#&gt; pair 04 b 12.675084  8.494400  7.342891  9.853640 11.411758 10.182290 12.105269</span></span>
+<span><span class="co">#&gt; pair 04 a  5.692284 11.255832  5.507104  9.077797 10.242481  7.964764 12.825737</span></span>
+<span><span class="co">#&gt; pair 05 a  9.374152  9.392858  7.623296  6.357555 12.791639 11.294442  6.386612</span></span>
+<span><span class="co">#&gt; pair 05 b 15.103901 11.653109  7.914079  3.926320 17.381616  9.225844  8.558503</span></span>
 <span><span class="va">interlsm</span><span class="op">$</span><span class="va">sim</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, <span class="op">]</span></span>
 <span><span class="co">#&gt;           g1  canberra</span></span>
-<span><span class="co">#&gt; 1  pair 01 b 1.0000000</span></span>
-<span><span class="co">#&gt; 2  pair 02 b 1.0000000</span></span>
-<span><span class="co">#&gt; 3  pair 03 b 1.0000000</span></span>
-<span><span class="co">#&gt; 4  pair 04 b 0.9010198</span></span>
-<span><span class="co">#&gt; 5  pair 04 a 0.9007322</span></span>
-<span><span class="co">#&gt; 6  pair 04 a 0.8507701</span></span>
-<span><span class="co">#&gt; 7  pair 04 b 0.8638351</span></span>
-<span><span class="co">#&gt; 8  pair 04 a 0.9208263</span></span>
-<span><span class="co">#&gt; 9  pair 04 a 0.8181075</span></span>
-<span><span class="co">#&gt; 10 pair 04 a 0.8281971</span></span></code></pre></div>
+<span><span class="co">#&gt; 1  pair 01 b 0.8028372</span></span>
+<span><span class="co">#&gt; 2  pair 01 a 0.8697591</span></span>
+<span><span class="co">#&gt; 3  pair 01 a 0.8950049</span></span>
+<span><span class="co">#&gt; 4  pair 01 a 0.8738900</span></span>
+<span><span class="co">#&gt; 5  pair 01 b 0.8434469</span></span>
+<span><span class="co">#&gt; 6  pair 01 b 0.8537347</span></span>
+<span><span class="co">#&gt; 7  pair 01 a 0.8172437</span></span>
+<span><span class="co">#&gt; 8  pair 01 b 0.7604004</span></span>
+<span><span class="co">#&gt; 9  pair 02 b 0.8568486</span></span>
+<span><span class="co">#&gt; 10 pair 02 a 0.9097700</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -315,17 +315,17 @@ argument specifies the speaker:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">seqlsm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lingmatch.html">lingmatch</a></span><span class="op">(</span><span class="va">data</span>, <span class="st">"seq"</span>, group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pair"</span>, <span class="st">"speaker"</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"lsm"</span><span class="op">)</span></span>
 <span><span class="va">seqlsm</span><span class="op">$</span><span class="va">sim</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, <span class="op">]</span></span>
-<span><span class="co">#&gt;                   group  canberra</span></span>
-<span><span class="co">#&gt; 1               pair 01 1.0000000</span></span>
-<span><span class="co">#&gt; 2               pair 02 1.0000000</span></span>
-<span><span class="co">#&gt; 3               pair 03 1.0000000</span></span>
-<span><span class="co">#&gt; 4 &lt;-&gt; 5, 6      pair 04 0.8595994</span></span>
-<span><span class="co">#&gt; 5, 6 &lt;-&gt; 7      pair 04 0.8278706</span></span>
-<span><span class="co">#&gt; 7 &lt;-&gt; 8, 9, 10  pair 04 0.8070561</span></span>
-<span><span class="co">#&gt; 8, 9, 10 &lt;-&gt; 11 pair 04 0.8706087</span></span>
-<span><span class="co">#&gt; 11 &lt;-&gt; 12, 13   pair 04 0.8797340</span></span>
-<span><span class="co">#&gt; 14, 15 &lt;-&gt; 16   pair 05 0.8686913</span></span>
-<span><span class="co">#&gt; 16 &lt;-&gt; 17       pair 05 0.8927151</span></span></code></pre></div>
+<span><span class="co">#&gt;                     group  canberra</span></span>
+<span><span class="co">#&gt; 1 &lt;-&gt; 2, 3, 4     pair 01 0.7428710</span></span>
+<span><span class="co">#&gt; 2, 3, 4 &lt;-&gt; 5, 6  pair 01 0.8473695</span></span>
+<span><span class="co">#&gt; 5, 6 &lt;-&gt; 7        pair 01 0.7896586</span></span>
+<span><span class="co">#&gt; 7 &lt;-&gt; 8           pair 01 0.7510678</span></span>
+<span><span class="co">#&gt; 9 &lt;-&gt; 10, 11, 12  pair 02 0.7889958</span></span>
+<span><span class="co">#&gt; 10, 11, 12 &lt;-&gt; 13 pair 02 0.8292398</span></span>
+<span><span class="co">#&gt; 14 &lt;-&gt; 15         pair 03 0.7857001</span></span>
+<span><span class="co">#&gt; 15 &lt;-&gt; 16, 17     pair 03 0.8651510</span></span>
+<span><span class="co">#&gt; 18, 19 &lt;-&gt; 20, 21 pair 04 0.8271480</span></span>
+<span><span class="co">#&gt; 20, 21 &lt;-&gt; 22, 23 pair 04 0.8760137</span></span></code></pre></div>
 <p>The rownames of <code>sim</code> show the row numbers that are being
 compared, with some being aggregated if the same speaker takes multiple
 turns in a row. You could also just compare edges by adding
@@ -336,16 +336,16 @@ turns in a row. You could also just compare edges by adding
 <span>  group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pair"</span>, <span class="st">"speaker"</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"lsm"</span>, agg <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span><span class="op">$</span><span class="va">sim</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, <span class="op">]</span></span>
 <span><span class="co">#&gt;             group  canberra</span></span>
-<span><span class="co">#&gt; 1         pair 01 1.0000000</span></span>
-<span><span class="co">#&gt; 2         pair 02 1.0000000</span></span>
-<span><span class="co">#&gt; 3         pair 03 1.0000000</span></span>
-<span><span class="co">#&gt; 4 &lt;-&gt; 5   pair 04 0.8271564</span></span>
-<span><span class="co">#&gt; 6 &lt;-&gt; 7   pair 04 0.7477043</span></span>
-<span><span class="co">#&gt; 7 &lt;-&gt; 8   pair 04 0.8003724</span></span>
-<span><span class="co">#&gt; 10 &lt;-&gt; 11 pair 04 0.7963424</span></span>
-<span><span class="co">#&gt; 11 &lt;-&gt; 12 pair 04 0.7682358</span></span>
-<span><span class="co">#&gt; 15 &lt;-&gt; 16 pair 05 0.9064733</span></span>
-<span><span class="co">#&gt; 16 &lt;-&gt; 17 pair 05 0.8927151</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 &lt;-&gt; 2   pair 01 0.7242187</span></span>
+<span><span class="co">#&gt; 4 &lt;-&gt; 5   pair 01 0.8413983</span></span>
+<span><span class="co">#&gt; 6 &lt;-&gt; 7   pair 01 0.7427976</span></span>
+<span><span class="co">#&gt; 7 &lt;-&gt; 8   pair 01 0.7510678</span></span>
+<span><span class="co">#&gt; 9 &lt;-&gt; 10  pair 02 0.7357867</span></span>
+<span><span class="co">#&gt; 12 &lt;-&gt; 13 pair 02 0.8519086</span></span>
+<span><span class="co">#&gt; 14 &lt;-&gt; 15 pair 03 0.7857001</span></span>
+<span><span class="co">#&gt; 15 &lt;-&gt; 16 pair 03 0.8046643</span></span>
+<span><span class="co">#&gt; 19 &lt;-&gt; 20 pair 04 0.6936045</span></span>
+<span><span class="co">#&gt; 21 &lt;-&gt; 22 pair 04 0.7934629</span></span></code></pre></div>
 <hr>
 <div style="text-align:center">
 <div class="figure">

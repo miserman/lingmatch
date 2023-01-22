@@ -260,12 +260,10 @@ lma_patcat <- function(text, dict = NULL, pattern.weights = "weight", pattern.ca
       term = dict[[term]],
       category = if (length(pattern.categories) == nrow(dict)) {
         pattern.categories
-      } else
-      if (pattern.categories %in% en) dict[[pattern.categories]] else "cat1",
+      } else if (pattern.categories %in% en) dict[[pattern.categories]] else "cat1",
       weights = if (length(pattern.weights) == nrow(dict)) {
         pattern.weights
-      } else
-      if (all(pattern.weights %in% en)) dict[[pattern.weights]] else 1, stringsAsFactors = FALSE
+      } else if (all(pattern.weights %in% en)) dict[[pattern.weights]] else 1, stringsAsFactors = FALSE
     )
   }
   if (any(lex$category == "")) lex[lex$category == "", "category"] <- "cat_unnamed"

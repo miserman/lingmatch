@@ -102,8 +102,7 @@ read.dic <- function(path, cats, type = "asis", as.weighted = FALSE, dir = getOp
           ssu <- vapply(su, function(col) {
             if (!anyDuplicated(path[, col])) {
               1
-            } else
-            if (all(path[, col] == path[1, col])) 0 else 2
+            } else if (all(path[, col] == path[1, col])) 0 else 2
           }, 0)
           if (length(su) == ncol(path) && !any(ssu == 0)) {
             path <- data.frame(

@@ -191,7 +191,7 @@ List calculate_similarities(const S4 &m, const RObject &comp, int &type, const I
   if(a.dims[0] == 1) type = 1;
   List op;
   NumericVector sim;
-  for(const String &met : metric_names){
+  for(const String met : metric_names){
     sim = res.at(met);
     if(sim.length()){
       if(type == 1){

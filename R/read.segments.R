@@ -100,11 +100,12 @@ read.segments <- function(path = ".", segment = NULL, ext = ".txt", subdir = FAL
               gsub(if (preclean) {
                 '["\']+'
               } else {
-                paste0("(?:", paste(c(
-                  '["\']',
-                  unlist(lma_dict("special")$special$CHARACTERS[c('"', "'")])
-                ),
-                collapse = "|"
+                paste0("(?:", paste(
+                  c(
+                    '["\']',
+                    unlist(lma_dict("special")$special$CHARACTERS[c('"', "'")])
+                  ),
+                  collapse = "|"
                 ), ")+$")
               }, "", words)
             } else {

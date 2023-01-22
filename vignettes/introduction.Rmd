@@ -106,7 +106,6 @@ Now we can fill the matrix with counts for each word for each text. We can count
 # i will be set to each number in the sequence, so i will equal 1 on the first run
 # the words and dtm objects all line up, so words[[i]] corresponds to dtm[i,]
 for (i in seq_along(words)) {
-
   # we can use the table function to count the words in a text
   counts <- table(words[[i]])
 

@@ -178,7 +178,7 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
   }
   mets <- c("jaccard", "euclidean", "canberra", "cosine", "pearson")
   inp$metric <- if (!is.null(inp$metric)) match_metric(inp$metric)$selected else "cosine"
-  if (!length(inp$metric) || is.null(inp$metric) || inp$metric == "") inp$metric <- "cosine"
+  if (!length(inp$metric) || all(inp$metric == "")) inp$metric <- "cosine"
   vs <- c("input", "comp", "group", "order", "data", "comp.data", "comp.group")
   opt <- as.list(match.call(expand.dots = FALSE))[vs]
   names(opt) <- vs
@@ -195,8 +195,7 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
     if (is.character(a)) {
       if (!is.null(data) && a %in% colnames(data)) {
         return(unlist(data[, a]))
-      } else
-      if (length(ta) == 1 || !any(grepl(" ", a, fixed = TRUE))) ta <- parse(text = a)
+      } else if (length(ta) == 1 || !any(grepl(" ", a, fixed = TRUE))) ta <- parse(text = a)
     }
     ta <- tryCatch(eval(ta, parent.frame(3)), error = function(e) NULL)
     if (length(ta) == 0 || (!is.null(dim(ta)) && dim(ta)[1] == 0)) {
@@ -562,8 +561,7 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
         opt$comp <- paste(if (length(opt$comp.data) > 1) deparse(opt$comp.data) else opt$comp.data, opt$comp)
         sal$b <- comp.data <- if (is.null(dim(comp.data))) {
           comp.data
-        } else
-        if (compmeanck) colMeans(comp.data, na.rm = TRUE) else apply_comp(comp.data)
+        } else if (compmeanck) colMeans(comp.data, na.rm = TRUE) else apply_comp(comp.data)
       } else {
         sal$b <- comp.data
       }
