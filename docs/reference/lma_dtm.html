@@ -74,7 +74,8 @@
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>text</dt>
 <dd><p>Texts to be processed. This can be a vector (such as a column in a data frame)
-or list.</p></dd>
+or list. When a list, these can be in the form returned with <code>tokens.only = TRUE</code>,
+or a list with named vectors, where names are tokens and values are frequencies or the like.</p></dd>
 
 
 <dt>exclude</dt>
@@ -182,6 +183,76 @@ may matter if you plan on categorizing with categories that have terms with look
 <span class="r-out co"><span class="r-pr">#&gt;</span> [2,] . . 1 . . . . 1 . . . 1 1 . . . . . 1 . . 1 . 1 . 1 .</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 1 . . 1 1 . . . 1 . . . . 1 1 . 1 1 . . . . . 1 . . .</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [4,] . 1 . . . 1 . . . . . . . . . 1 . . 1 . . . 1 1 1 . 1</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># return tokens only</span></span></span>
+<span class="r-in"><span><span class="op">(</span><span class="va">tokens</span> <span class="op">&lt;-</span> <span class="fu">lma_dtm</span><span class="op">(</span><span class="va">text</span>, tokens.only <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $tokens</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            a          all           am          are           at          bad </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            1            2            3            4            5            6 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      evening          for         good        hello          how            i </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            7            8            9           10           11           12 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      inquiry interactions         most          not       person       social </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           13           14           15           16           17           18 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        thank        there         this         well          why          you </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           19           20           21           22           23           24 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       you're         your     yourself </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           25           26           27 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $frequencies</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            a          all           am          are           at          bad </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            1            1            1            2            1            1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      evening          for         good        hello          how            i </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            1            1            1            1            1            1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      inquiry interactions         most          not       person       social </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            1            1            1            1            1            1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        thank        there         this         well          why          you </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            2            1            1            1            2            4 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       you're         your     yourself </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            1            1            1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $WC</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 8 8 9 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $indices</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $indices[[1]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 23 10 20 11  4 24 21  7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $indices[[2]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 12  3 22 19 24  8 26 13</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $indices[[3]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 24  4  1 15  9  5 18 14 17</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $indices[[4]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 23 19 24 25 16  2  6 27</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"opts")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  numbers    punct     urls to.lower </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    FALSE    FALSE     TRUE     TRUE </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"time")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> dtm </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   0 </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## convert those to a regular DTM</span></span></span>
+<span class="r-in"><span><span class="fu">lma_dtm</span><span class="op">(</span><span class="va">tokens</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 x 27 sparse Matrix of class "dgCMatrix"</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   [[ suppressing 27 column names 'a', 'all', 'am' ... ]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] . . . 1 . . 1 . . 1 1 . . . . . . . . 1 1 . 1 1 . . .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] . . 1 . . . . 1 . . . 1 1 . . . . . 1 . . 1 . 1 . 1 .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 1 . . 1 1 . . . 1 . . . . 1 1 . 1 1 . . . . . 1 . . .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] . 1 . . . 1 . . . . . . . . . 1 . . 1 . . . 1 1 1 . 1</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># convert a list-representation to a sparse matrix</span></span></span>
+<span class="r-in"><span><span class="fu">lma_dtm</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  doc1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>why <span class="op">=</span> <span class="fl">1</span>, hello <span class="op">=</span> <span class="fl">1</span>, there <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  doc2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>i <span class="op">=</span> <span class="fl">1</span>, am <span class="op">=</span> <span class="fl">1</span>, well <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 x 6 sparse Matrix of class "dgCMatrix"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      why hello there i am well</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> doc1   1     1     1 .  .    .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> doc2   .     .     . 1  1    1</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

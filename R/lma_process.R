@@ -70,7 +70,7 @@ lma_process <- function(input = NULL, ..., meta = TRUE) {
     op <- input
   }
   # process
-  ck_text <- "text" %in% colnames(op)
+  ck_text <- "text" %in% colnames(op) && is.character(op[, "text"])
   ck_changed <- FALSE
   if (ck_text) {
     if (arg_checks[["lma_patcat"]]) {

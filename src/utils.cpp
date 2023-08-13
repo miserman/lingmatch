@@ -1,11 +1,9 @@
 // [[Rcpp::depends(RcppParallel)]]
+// [[Rcpp::depends(BH)]]
 #include <Rcpp.h>
 #include <RcppParallel.h>
-#include <unordered_map>
 #include <fstream>
-#include <limits>
-#include <regex>
-#include <cmath>
+#include <boost/regex.hpp>
 using namespace std;
 using namespace Rcpp;
 using namespace RcppParallel;
@@ -75,15 +73,15 @@ void reformat_embedding(const std::string &infile, const std::string &outfile,
   int n, i, ln, cl = 0, ck = 1e3;
   const string num = "-.0123456789";
   bool start = true, filter = term_check != "";
-  regex ckterm(term_check, regex_constants::optimize), rm(remove, regex_constants::optimize);
+  boost::regex ckterm(term_check, boost::regex_constants::optimize), rm(remove, boost::regex_constants::optimize);
   std::string line, term, value;
   for(; getline(d, line);){
     for(cl++, term = "", n = line.length(), i = 0; i < n; i++){
       if(line[i] == sep) break;
       term.push_back(line[i]);
     }
-    if(remove != "") term = regex_replace(term, rm, "");
-    if(term != "" && n > 100 && i++ < n && (!filter || regex_match(term, ckterm)) &&
+    if(remove != "") term = boost::regex_replace(term, rm, "");
+    if(term != "" && n > 100 && i++ < n && (!filter || boost::regex_match(term, ckterm)) &&
       num.find(line[i]) != string::npos) try{
       ln = line.length();
       if(ln){
@@ -180,17 +178,18 @@ List pattern_search(const CharacterVector &texts, const CharacterVector &pattern
       }
     }
   }else{
-    vector<regex> pats;
-    if(!fixed) for(; i < n; i++) pats.push_back(regex(patterns[i], regex_constants::optimize));
-    for(r = 0; r < tn; r++){
+    vector<boost::regex> pats;
+    if(!fixed) for(; i < n; i++) pats.push_back(boost::regex(patterns[i], boost::regex_constants::optimize));
+    const unsigned int zero = 0;
+    for(r = zero; r < tn; r++){
       checkUserInterrupt();
       txt = texts[r];
-      smatch re;
-      for(i = 0, n = pats.size(); i < n; i++){
+      boost::smatch re;
+      for(i = zero, n = pats.size(); i < n; i++){
         std::string::const_iterator start = txt.cbegin();
-        cx = 0;
-        if(patterns[i].size()) for(tp = 0; regex_search(start, txt.cend(), re, pats[i]);){
-          p = re.position(0);
+        cx = zero;
+        if(patterns[i].size()) for(tp = zero; boost::regex_search(start, txt.cend(), re, pats[i]);){
+          p = re.position(zero);
           if(exclusive){
             txt.replace(tp + p, re.length(), " ");
             start += p + 1;
@@ -217,15 +216,15 @@ List pattern_search(const CharacterVector &texts, const CharacterVector &pattern
 
 // [[Rcpp::export]]
 List extract_matches(const CharacterVector &terms, const std::vector<std::string> &text, const bool &raw){
-  List res(terms.length());
-  string match;
   const int n = terms.length();
+  List res(n);
+  string match;
   for(int i = 0, ck = 1e3; i < n; i++) {
     unordered_map<std::string, int> matches;
-    const regex re(terms[i]);
+    const boost::regex re(terms[i]);
     for(const std::string &t : text) {
       if (raw) {
-        sregex_iterator search(t.cbegin(), t.cend(), re), search_end;
+        boost::sregex_iterator search(t.cbegin(), t.cend(), re), search_end;
         for (; search != search_end; search++) {
           match = (*search).str();
           if (matches.find(match) == matches.end()) {
@@ -233,7 +232,7 @@ List extract_matches(const CharacterVector &terms, const std::vector<std::string
           } else matches[match]++;
         }
       } else {
-        if (regex_match(t, re)) {
+        if (boost::regex_match(t, re)) {
           if (matches.find(t) == matches.end()) {
             matches.insert({t, 1});
           } else matches[t]++;

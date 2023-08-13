@@ -2,7 +2,8 @@
 #'
 #' Creates a document-term matrix (dtm) from a set of texts.
 #' @param text Texts to be processed. This can be a vector (such as a column in a data frame)
-#'   or list.
+#'   or list. When a list, these can be in the form returned with \code{tokens.only = TRUE},
+#'   or a list with named vectors, where names are tokens and values are frequencies or the like.
 #' @param exclude A character vector of words to be excluded. If \code{exclude} is a single string
 #'   matching \code{'function'}, \code{lma_dict(1:9)} will be used.
 #' @param context A character vector used to reformat text based on look- ahead/behind. For example,
@@ -59,6 +60,18 @@
 #' )
 #'
 #' lma_dtm(text)
+#'
+#' # return tokens only
+#' (tokens <- lma_dtm(text, tokens.only = TRUE))
+#'
+#' ## convert those to a regular DTM
+#' lma_dtm(tokens)
+#'
+#' # convert a list-representation to a sparse matrix
+#' lma_dtm(list(
+#'   doc1 = c(why = 1, hello = 1, there = 1),
+#'   doc2 = c(i = 1, am = 1, well = 1)
+#' ))
 #' @export
 
 lma_dtm <- function(text, exclude = NULL, context = NULL, replace.special = FALSE, numbers = FALSE,
@@ -71,26 +84,45 @@ lma_dtm <- function(text, exclude = NULL, context = NULL, replace.special = FALS
       stop("enter a vector of texts as the first argument")
     }
   }
-  if (is.list(text) && all(c("tokens", "indices") %in% names(text))) {
-    m <- do.call(rbind, lapply(seq_along(text$indices), function(i) {
-      if (length(text$indices[[i]])) {
-        inds <- as.factor(text$indices[[i]])
-        cbind(i, as.integer(levels(inds)), tabulate(inds))
+  if (is.list(text)) {
+    if (all(c("tokens", "indices") %in% names(text))) {
+      m <- do.call(rbind, lapply(seq_along(text$indices), function(i) {
+        if (length(text$indices[[i]])) {
+          inds <- as.factor(text$indices[[i]])
+          cbind(i, as.integer(levels(inds)), tabulate(inds))
+        }
+      }))
+      dtm <- sparseMatrix(m[, 1], m[, 2],
+        x = m[, 3], dims = c(length(text$indices), length(text$tokens)),
+        dimnames = list(NULL, if (is.character(text$tokens)) text$tokens else names(text$tokens))
+      )
+      if (!sparse) dtm <- as.matrix(dtm)
+      attr(dtm, "colsums") <- text$frequencies
+      attr(dtm, "type") <- "count"
+      attr(dtm, "WC") <- text$WC
+      attr(dtm, "opts") <- attr(text, "opts")
+      attr(dtm, "time") <- attr(text, "time")
+      return(dtm)
+    } else {
+      tokens <- unlist(unname(text), recursive = FALSE)
+      cinds <- unique(names(tokens))
+      if (is.null(cinds)) {
+        text <- unlist(text)
+      } else {
+        rinds <- rep(seq_along(text), vapply(text, length, 0))
+        cinds <- structure(seq_along(cinds), names = cinds)
+        dtm <- sparseMatrix(
+          rinds, cinds[names(tokens)],
+          x = tokens,
+          dims = c(length(text), length(cinds)), dimnames = list(names(text), names(cinds))
+        )
+        if (!sparse) dtm <- as.matrix(dtm)
+        return(dtm)
       }
-    }))
-    dtm <- sparseMatrix(m[, 1], m[, 2],
-      x = m[, 3], dims = c(length(text$indices), length(text$tokens)),
-      dimnames = list(NULL, if (is.character(text$tokens)) text$tokens else names(text$tokens))
-    )
-    if (!sparse) dtm <- as.matrix(dtm)
-    attr(dtm, "colsums") <- text$frequencies
-    attr(dtm, "type") <- "count"
-    attr(dtm, "WC") <- text$WC
-    attr(dtm, "opts") <- attr(text, "opts")
-    attr(dtm, "time") <- attr(text, "time")
-    return(dtm)
+    }
   }
   if (is.null(text)) stop(substitute(text), " not found")
+  docnames <- names(text)
   if (is.character(text) && all(nchar(text) < 500) && all(file.exists(text))) {
     text <- if (length(text) != 1 || dir.exists(text)) read.segments(text) else readLines(text)
   }
@@ -218,6 +250,7 @@ lma_dtm <- function(text, exclude = NULL, context = NULL, replace.special = FALS
       c(length(text), length(words)), is.null(exclude), FALSE
     )
     m <- if (sparse) as(msu[[1]], "CsparseMatrix") else as.matrix(msu[[1]])
+    if (length(docnames) == nrow(m)) rownames(m) <- docnames
     su <- msu[[3]] > dc.min & msu[[3]] < dc.max
     names(msu[[3]]) <- words
     if (any(!su)) {

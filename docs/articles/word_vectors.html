@@ -90,7 +90,7 @@
     
 <p>Introduces the concept of word vectors and their use in measures of
 text similarity.</p>
-<p><em>Built with R 4.2.2 on January 22 2023</em></p>
+<p><em>Built with R 4.3.1 on August 13 2023</em></p>
 <hr>
 <p>A vector in this context is any set of values that represent one
 thing, so word vectors are fundamental to a bag-of-words framework.
@@ -162,7 +162,7 @@ we can see which animals co-occur with different attributes:</p>
 <span><span class="co">#&gt; whales    0.25 0.75</span></span>
 <span></span>
 <span><span class="co"># note that dark = TRUE makes the text white, so you might need to remove it</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/splot/man/splot.html" class="external-link">splot</a></span><span class="op">(</span></span>
+<span><span class="fu"><a href="https://miserman.github.io/splot/reference/splot.html" class="external-link">splot</a></span><span class="op">(</span></span>
 <span>  <span class="va">attribute_loadings</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span> <span class="op">~</span> <span class="va">attribute_loadings</span><span class="op">[</span>, <span class="fl">2</span><span class="op">]</span>,</span>
 <span>  type <span class="op">=</span> <span class="st">"scatter"</span>,</span>
 <span>  lines <span class="op">=</span> <span class="cn">FALSE</span>, laby <span class="op">=</span> <span class="st">"smallness"</span>, labx <span class="op">=</span> <span class="st">"bigness"</span>, dark <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -229,10 +229,9 @@ if you specify a directory or set the directory options (you can run
 <h3 id="embeddings-mapped-similarity">Embeddings-mapped similarity<a class="anchor" aria-label="anchor" href="#embeddings-mapped-similarity"></a>
 </h3>
 <p>Similarity between documents that have been mapped to embeddings is
-sometimes called Latent Semantic Similarity <span class="citation">(<a href="#ref-landauer:1997" role="doc-biblioref">Landauer &amp; Dumais,
-1997</a>)</span> or Word Centroid (inverse) Distance <span class="citation">(<a href="#ref-kusner:2015" role="doc-biblioref">Kusner
-et al., 2015</a>)</span>. Both of these measures have common parameter
-decisions associated with them.</p>
+sometimes called Latent Semantic Similarity <span class="citation">(<a href="#ref-landauer:1997">Landauer &amp; Dumais, 1997</a>)</span> or
+Word Centroid (inverse) Distance <span class="citation">(<a href="#ref-kusner:2015">Kusner et al., 2015</a>)</span>. Both of these
+measures have common parameter decisions associated with them.</p>
 <p>For Latent Semantic Similarity, the Document-Term Matrix is usually
 initially weighted (as by Term-Frequency Inverse Document Frequency or
 Pointwise Mutual Information schemes), and has stop words removed
@@ -353,7 +352,7 @@ you’ve downloaded:</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># and look at where the animal words fall within that attribute space</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/splot/man/splot.html" class="external-link">splot</a></span><span class="op">(</span></span>
+<span><span class="fu"><a href="https://miserman.github.io/splot/reference/splot.html" class="external-link">splot</a></span><span class="op">(</span></span>
 <span>  <span class="va">smallness</span> <span class="op">~</span> <span class="va">bigness</span>, <span class="va">sims_best</span>,</span>
 <span>  type <span class="op">=</span> <span class="st">"scatter"</span>, dark <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  lines <span class="op">=</span> <span class="cn">FALSE</span>, add <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/graphics/text.html" class="external-link">text</a></span><span class="op">(</span><span class="va">y</span> <span class="op">+</span> <span class="fl">.0017</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/AsIs.html" class="external-link">I</a></span><span class="op">(</span><span class="va">x</span> <span class="op">+</span> <span class="fl">3e-4</span><span class="op">)</span>, labels <span class="op">=</span> <span class="va">terms</span><span class="op">[</span><span class="op">-</span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
@@ -389,7 +388,7 @@ synonym centroids or concept vectors:</p>
 <span><span class="op">)</span><span class="op">[</span><span class="op">-</span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"small"</span>, <span class="st">"big"</span><span class="op">)</span><span class="op">]</span></span>
 <span></span>
 <span><span class="co"># and see if animal relationships are improved</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/splot/man/splot.html" class="external-link">splot</a></span><span class="op">(</span></span>
+<span><span class="fu"><a href="https://miserman.github.io/splot/reference/splot.html" class="external-link">splot</a></span><span class="op">(</span></span>
 <span>  <span class="va">sims_best_fuz</span><span class="op">[</span>, <span class="st">"small"</span><span class="op">]</span> <span class="op">~</span> <span class="va">sims_best_fuz</span><span class="op">[</span>, <span class="st">"big"</span><span class="op">]</span>,</span>
 <span>  type <span class="op">=</span> <span class="st">"scatter"</span>,</span>
 <span>  lines <span class="op">=</span> <span class="cn">FALSE</span>, laby <span class="op">=</span> <span class="st">"smallness"</span>, labx <span class="op">=</span> <span class="st">"bigness"</span>, dark <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -399,7 +398,8 @@ synonym centroids or concept vectors:</p>
 The best way to learn animal attributes in general would probably come
 down to the training texts, which might start to look like research in
 personality psychology on clusters in words used to describe people
-<span class="citation">(e.g., <a href="#ref-thurstone:1934" role="doc-biblioref">Thurstone, 1934</a>)</span>.</p>
+<span class="citation">(e.g., <a href="#ref-thurstone:1934">Thurstone,
+1934</a>)</span>.</p>
 </div>
 </div>
 </div>
@@ -423,7 +423,7 @@ thing in pretrained embeddings:</p>
 <span><span class="co"># make a function to more easily retrieve terms</span></span>
 <span><span class="va">top_terms</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">dims</span>, <span class="va">space</span>, <span class="va">nterms</span> <span class="op">=</span> <span class="fl">30</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">terms</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="va">space</span><span class="op">[</span>, <span class="va">dims</span>, drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span><span class="op">)</span>, <span class="cn">TRUE</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">nterms</span><span class="op">)</span><span class="op">]</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/splot/man/splot.html" class="external-link">splot</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://miserman.github.io/splot/reference/splot.html" class="external-link">splot</a></span><span class="op">(</span></span>
 <span>    <span class="va">terms</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">terms</span><span class="op">)</span>,</span>
 <span>    colorby <span class="op">=</span> <span class="va">terms</span>, leg <span class="op">=</span> <span class="cn">FALSE</span>, sort <span class="op">=</span> <span class="cn">TRUE</span>, dark <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>    type <span class="op">=</span> <span class="st">"bar"</span>, laby <span class="op">=</span> <span class="cn">FALSE</span>, labx <span class="op">=</span> <span class="cn">FALSE</span>, title <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span></span>
@@ -486,8 +486,7 @@ drop-offs:</p>
 <span><span class="co">#&gt; grandpa    0.7      0    1</span></span>
 <span><span class="co">#&gt; uncle      0.6      0    1</span></span></code></pre></div>
 <p>In this simple space, you can solve analogies like you can in
-pretrained spaces <span class="citation">(as in <a href="#ref-mikolov:2013" role="doc-biblioref">Mikolov et al.,
-2013</a>)</span>:</p>
+pretrained spaces <span class="citation">(as in <a href="#ref-mikolov:2013">Mikolov et al., 2013</a>)</span>:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># function to abstract the process</span></span>
 <span><span class="va">guess_analog</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">asx</span>, <span class="va">space</span>, <span class="va">metric</span> <span class="op">=</span> <span class="st">"canberra"</span><span class="op">)</span> <span class="op">{</span></span>

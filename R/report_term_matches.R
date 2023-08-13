@@ -77,7 +77,6 @@ report_term_matches <- function(dict, text = NULL, space = NULL, glob = TRUE,
   if (!is.null(text) && !as_terms) {
     if (verbose) cat("preparing text (", round(proc.time()[[3]] - st, 4), ")\n", sep = "")
     if (bysentence) text <- read.segments(text, segment.size = 1, bysentence = TRUE)$text
-    text <- paste(c("", text, ""))
     if (tolower) text <- tolower(text)
     if (!punct) text <- gsub("[,_:;/\\\\.?!\"()\\{}[]|\\]", " ", text)
     if (!special) text <- lma_dict("special", as.function = gsub)(text)
@@ -104,6 +103,7 @@ report_term_matches <- function(dict, text = NULL, space = NULL, glob = TRUE,
   }
   rawtext <- is.null(space_name) && !as_terms
   terms$regex <- to_regex(list(terms$term), TRUE, glob)[[1]]
+  terms <- terms[!is.na(terms$regex) & terms$regex != "", ]
   terms$regex <- if (rawtext) paste0("\\b", terms$regex, "\\b") else paste0("^", terms$regex, "$")
   if (is.list(dict)) {
     if (is.null(names(dict))) names(dict) <- paste0("cat_", seq_along(dict))

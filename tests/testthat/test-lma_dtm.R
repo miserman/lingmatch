@@ -60,3 +60,16 @@ test_that("tokens.only lines up", {
   tokens <- lma_dtm(texts, ex, dc.min = 2, dc.max = 5, tokens.only = TRUE)
   expect_equal(as.numeric(lma_dtm(tokens)), as.numeric(dtm))
 })
+
+test_that("alternate token list input works", {
+  dtm <- matrix(
+    c(1, 0, 1, 1, 0, 0, 0, 0, 1), 3,
+    dimnames = list(c("a", "c", "f"), c("w1", "w2", "w3"))
+  )
+  expect_identical(lma_dtm(list(
+    a = c(w1 = 1, w2 = 1), c = numeric(), f = c(w1 = 1, w3 = 1)
+  ), sparse = FALSE), dtm)
+  expect_equal(as.matrix(lma_dtm(list(
+    a = "w1 w2", c = "", f = "w1 w3"
+  ), numbers = TRUE)), dtm)
+})

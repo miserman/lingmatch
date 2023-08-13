@@ -1,6 +1,6 @@
 .algolia-autocomplete .aa-dropdown-menu .aa-suggestion {
   color: #e4e4e4;
 }
-mark {
+mark, .navbar-dark .navbar-nav .active > .nav-link {
   color: #fff;
 }

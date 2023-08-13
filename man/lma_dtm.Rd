@@ -11,7 +11,8 @@ lma_dtm(text, exclude = NULL, context = NULL, replace.special = FALSE,
 }
 \arguments{
 \item{text}{Texts to be processed. This can be a vector (such as a column in a data frame)
-or list.}
+or list. When a list, these can be in the form returned with \code{tokens.only = TRUE},
+or a list with named vectors, where names are tokens and values are frequencies or the like.}
 
 \item{exclude}{A character vector of words to be excluded. If \code{exclude} is a single string
 matching \code{'function'}, \code{lma_dict(1:9)} will be used.}
@@ -88,4 +89,16 @@ text <- c(
 )
 
 lma_dtm(text)
+
+# return tokens only
+(tokens <- lma_dtm(text, tokens.only = TRUE))
+
+## convert those to a regular DTM
+lma_dtm(tokens)
+
+# convert a list-representation to a sparse matrix
+lma_dtm(list(
+  doc1 = c(why = 1, hello = 1, there = 1),
+  doc2 = c(i = 1, am = 1, well = 1)
+))
 }

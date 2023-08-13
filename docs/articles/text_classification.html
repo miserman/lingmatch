@@ -89,7 +89,7 @@
     
     
 <p>Works through a text classification example.</p>
-<p><em>Built with R 4.2.2 on January 22 2023</em></p>
+<p><em>Built with R 4.3.1 on August 13 2023</em></p>
 <hr>
 <div class="section level2">
 <h2 id="data">Data<a class="anchor" aria-label="anchor" href="#data"></a>
@@ -212,14 +212,14 @@ terms are most important.</p>
 <span>  scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  min.freq <span class="op">=</span> <span class="fl">0</span>, random.order <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  random.color <span class="op">=</span> <span class="cn">FALSE</span>, rot.per <span class="op">=</span> <span class="fl">0</span>, ordered.colors <span class="op">=</span> <span class="cn">TRUE</span>, fixed.asp <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  colors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/splot/man/splot.color.html" class="external-link">splot.color</a></span><span class="op">(</span></span>
+<span>  colors <span class="op">=</span> <span class="fu"><a href="https://miserman.github.io/splot/reference/splot.color.html" class="external-link">splot.color</a></span><span class="op">(</span></span>
 <span>    <span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">term_diffs</span><span class="op">[</span><span class="va">terms</span><span class="op">]</span><span class="op">)</span>,</span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">dict</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="va">dict</span>, <span class="va">length</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span></span>
 <span>  <span class="st">"topleft"</span>,</span>
-<span>  legend <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">dict</span><span class="op">)</span>, text.col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/splot/man/splot.color.html" class="external-link">splot.color</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  legend <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">dict</span><span class="op">)</span>, text.col <span class="op">=</span> <span class="fu"><a href="https://miserman.github.io/splot/reference/splot.color.html" class="external-link">splot.color</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  text.font <span class="op">=</span> <span class="fl">2</span>, bty <span class="op">=</span> <span class="st">"n"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="text_classification_files/figure-html/unnamed-chunk-6-1.svg" width="864"></p>
@@ -231,7 +231,7 @@ terms are most important.</p>
 will often smooth the probabilities.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/majkamichal/naivebayes" class="external-link">naivebayes</a></span><span class="op">)</span></span>
-<span><span class="va">weights_nb</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://majkamichal.github.io/naivebayes//reference/bernoulli_naive_bayes.html" class="external-link">bernoulli_naive_bayes</a></span><span class="op">(</span></span>
+<span><span class="va">weights_nb</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://majkamichal.github.io/naivebayes/reference/bernoulli_naive_bayes.html" class="external-link">bernoulli_naive_bayes</a></span><span class="op">(</span></span>
 <span>  <span class="op">(</span><span class="va">dtm</span> <span class="op">!=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">*</span> <span class="fl">1</span>, <span class="va">data</span><span class="op">[</span><span class="va">train_ids</span>, <span class="st">"Recall"</span><span class="op">]</span>,</span>
 <span>  laplace <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span>
@@ -244,9 +244,9 @@ will often smooth the probabilities.</p>
 <span>  <span class="op">}</span><span class="op">)</span>,</span>
 <span>  package <span class="op">=</span> <span class="va">weights_nb</span><span class="op">$</span><span class="va">prob1</span><span class="op">[</span><span class="st">"dress"</span>, <span class="op">]</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt;         Feminine  Masculine</span></span>
-<span><span class="co">#&gt; manual      0.24 0.03947368</span></span>
-<span><span class="co">#&gt; package     0.24 0.03947368</span></span></code></pre></div>
+<span><span class="co">#&gt;          Feminine  Masculine</span></span>
+<span><span class="co">#&gt; manual  0.2133333 0.02631579</span></span>
+<span><span class="co">#&gt; package 0.2133333 0.02631579</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="decision-tree-classifier">Decision Tree classifier<a class="anchor" aria-label="anchor" href="#decision-tree-classifier"></a>
@@ -397,11 +397,14 @@ classifiers (or calculate predictions manually), then measure accuracy
 <span>  terms <span class="op">=</span> <span class="va">classes</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/maxCol.html" class="external-link">max.col</a></span><span class="op">(</span><span class="fu"><a href="../reference/lma_termcat.html">lma_termcat</a></span><span class="op">(</span><span class="va">test_dtm</span>, <span class="va">dict</span><span class="op">)</span><span class="op">)</span><span class="op">]</span>,</span>
 <span>  bayes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">weights_nb</span>, <span class="op">(</span><span class="va">test_dtm</span> <span class="op">!=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">*</span> <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  dtree <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">weight_dtree</span>, <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">test_dtm</span><span class="op">)</span><span class="op">)</span>, <span class="st">"class"</span><span class="op">)</span>,</span>
-<span>  svm <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">weights_svm</span>, <span class="va">test_dtm</span><span class="op">)</span>,</span>
-<span>  neural <span class="op">=</span> <span class="va">classes</span><span class="op">[</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">weights_neural</span>, <span class="va">test_sequences</span><span class="op">)</span> <span class="op">&lt;</span> <span class="fl">.5</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1</span><span class="op">]</span>,</span>
-<span>  neural_glove <span class="op">=</span> <span class="va">classes</span><span class="op">[</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">weights_neural_glove</span>, <span class="va">test_sequences</span><span class="op">)</span> <span class="op">&lt;</span> <span class="fl">.5</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1</span><span class="op">]</span></span>
+<span>  svm <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">weights_svm</span>, <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">test_dtm</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  neural <span class="op">=</span> <span class="va">classes</span><span class="op">[</span></span>
+<span>    <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">weights_neural</span>, <span class="va">test_sequences</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">&lt;</span> <span class="fl">.5</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1</span></span>
+<span>  <span class="op">]</span>,</span>
+<span>  neural_glove <span class="op">=</span> <span class="va">classes</span><span class="op">[</span></span>
+<span>    <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">weights_neural_glove</span>, <span class="va">test_sequences</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">&lt;</span> <span class="fl">.5</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1</span></span>
+<span>  <span class="op">]</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; as(&lt;matrix&gt;, "dgRMatrix") is deprecated since Matrix 1.5-0; do as(as(as(., "dMatrix"), "generalMatrix"), "RsparseMatrix") instead</span></span>
 <span></span>
 <span><span class="co"># when you have multiple classifiers, you can also add an ensemble classifier based</span></span>
 <span><span class="co"># on them by, for example, taking the most-predicted class</span></span>
@@ -410,13 +413,13 @@ classifiers (or calculate predictions manually), then measure accuracy
 <span><span class="co"># overall accuracies</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>accuracy <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">predictions</span> <span class="op">==</span> <span class="va">data</span><span class="op">[</span><span class="op">-</span><span class="va">train_ids</span>, <span class="st">"Recall"</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;               accuracy</span></span>
-<span><span class="co">#&gt; terms        0.6769231</span></span>
-<span><span class="co">#&gt; bayes        0.6615385</span></span>
+<span><span class="co">#&gt; terms        0.6923077</span></span>
+<span><span class="co">#&gt; bayes        0.7384615</span></span>
 <span><span class="co">#&gt; dtree        0.6769231</span></span>
-<span><span class="co">#&gt; svm          0.6615385</span></span>
-<span><span class="co">#&gt; neural       0.6615385</span></span>
+<span><span class="co">#&gt; svm          0.7538462</span></span>
+<span><span class="co">#&gt; neural       0.6153846</span></span>
 <span><span class="co">#&gt; neural_glove 0.6769231</span></span>
-<span><span class="co">#&gt; ensemble     0.6923077</span></span></code></pre></div>
+<span><span class="co">#&gt; ensemble     0.7230769</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="testing-decisions">Testing decisions<a class="anchor" aria-label="anchor" href="#testing-decisions"></a>
@@ -481,7 +484,7 @@ with different weighting schemes in the term-based model:</p>
 <span><span class="op">}</span></span>
 <span></span>
 <span><span class="co"># note that dark = TRUE makes the text white, so you might need to remove it</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/splot/man/splot.html" class="external-link">splot</a></span><span class="op">(</span></span>
+<span><span class="fu"><a href="https://miserman.github.io/splot/reference/splot.html" class="external-link">splot</a></span><span class="op">(</span></span>
 <span>  <span class="va">weight_accuracies</span> <span class="op">~</span> <span class="va">weights</span>,</span>
 <span>  type <span class="op">=</span> <span class="st">"point"</span>, title <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  leg.title <span class="op">=</span> <span class="st">"Stop words"</span>, laby <span class="op">=</span> <span class="st">"Overall Accuracy"</span>, labx <span class="op">=</span> <span class="st">"Weight Scheme"</span>,</span>
@@ -529,7 +532,7 @@ parallelize it:</p>
 <span>  <span class="co"># train models</span></span>
 <span>  <span class="va">terms</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">train_dtm</span><span class="op">[</span><span class="va">feminine_texts</span>, <span class="op">]</span> <span class="op">!=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">-</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">train_dtm</span><span class="op">[</span><span class="op">!</span><span class="va">feminine_texts</span>, <span class="op">]</span> <span class="op">!=</span> <span class="fl">0</span><span class="op">)</span></span>
-<span>  <span class="va">bayes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://majkamichal.github.io/naivebayes//reference/bernoulli_naive_bayes.html" class="external-link">bernoulli_naive_bayes</a></span><span class="op">(</span></span>
+<span>  <span class="va">bayes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://majkamichal.github.io/naivebayes/reference/bernoulli_naive_bayes.html" class="external-link">bernoulli_naive_bayes</a></span><span class="op">(</span></span>
 <span>    <span class="op">(</span><span class="va">train_dtm</span> <span class="op">!=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">*</span> <span class="fl">1</span>, <span class="va">data</span><span class="op">[</span><span class="va">ids</span>, <span class="st">"Recall"</span><span class="op">]</span>,</span>
 <span>    laplace <span class="op">=</span> <span class="fl">1</span></span>
 <span>  <span class="op">)</span></span>
@@ -550,11 +553,11 @@ parallelize it:</p>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>Average <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">Model_Accuracies</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;         Average</span></span>
-<span><span class="co">#&gt; terms 0.6904615</span></span>
-<span><span class="co">#&gt; bayes 0.7275385</span></span>
-<span><span class="co">#&gt; dtree 0.7341538</span></span>
-<span><span class="co">#&gt; svm   0.7153846</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/splot/man/splot.html" class="external-link">splot</a></span><span class="op">(</span><span class="va">Model_Accuracies</span>, title <span class="op">=</span> <span class="cn">FALSE</span>, leg.title <span class="op">=</span> <span class="st">"Model"</span>, dark <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co">#&gt; terms 0.6869231</span></span>
+<span><span class="co">#&gt; bayes 0.7380000</span></span>
+<span><span class="co">#&gt; dtree 0.7340000</span></span>
+<span><span class="co">#&gt; svm   0.7316923</span></span>
+<span><span class="fu"><a href="https://miserman.github.io/splot/reference/splot.html" class="external-link">splot</a></span><span class="op">(</span><span class="va">Model_Accuracies</span>, title <span class="op">=</span> <span class="cn">FALSE</span>, leg.title <span class="op">=</span> <span class="st">"Model"</span>, dark <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="text_classification_files/figure-html/unnamed-chunk-14-1.svg" width="864"></p>
 </div>
 </div>

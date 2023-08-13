@@ -27,6 +27,7 @@ library(lingmatch)
 library(wordcloud)
 library(naivebayes)
 library(caret)
+tensorflow::tf_gpu_configured()
 ```
 
 # Data
@@ -315,9 +316,13 @@ predictions <- data.frame(
   terms = classes[max.col(lma_termcat(test_dtm, dict))],
   bayes = predict(weights_nb, (test_dtm != 0) * 1),
   dtree = predict(weight_dtree, as.data.frame(as.matrix(test_dtm)), "class"),
-  svm = predict(weights_svm, test_dtm),
-  neural = classes[(predict(weights_neural, test_sequences) < .5) + 1],
-  neural_glove = classes[(predict(weights_neural_glove, test_sequences) < .5) + 1]
+  svm = predict(weights_svm, as.matrix(test_dtm)),
+  neural = classes[
+    (predict(weights_neural, test_sequences, verbose = FALSE) < .5) + 1
+  ],
+  neural_glove = classes[
+    (predict(weights_neural_glove, test_sequences, verbose = FALSE) < .5) + 1
+  ]
 )
 
 # when you have multiple classifiers, you can also add an ensemble classifier based

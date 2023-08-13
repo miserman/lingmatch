@@ -1,7 +1,6 @@
 // [[Rcpp::depends(RcppParallel)]]
 #include <Rcpp.h>
 #include <RcppParallel.h>
-#include <unordered_map>
 using namespace std;
 using namespace Rcpp;
 using namespace RcppParallel;
@@ -77,7 +76,7 @@ struct Compare : public Worker{
      jaccard(out.at("jaccard")), euclidean(out.at("euclidean")), canberra(out.at("canberra")),
      cosine(out.at("cosine")), pearson(out.at("pearson")) {}
   void operator()(size_t p, size_t final){
-    int r, comp, i, c, bi, bc, l, col, ck = 1e3;
+    int r, comp, i, c, bi, bc, l, col;
     double x, bx, dif, sa, sb, sdif, sadif, sse, sne, cp, asq, bsq, sj, si, ma, mb;
     for(; p < final; p++){
       r = aind[p];
@@ -136,10 +135,6 @@ struct Compare : public Worker{
         }
       }
     }
-    if(!--ck){
-      checkUserInterrupt();
-      ck = 1e3;
-    }
   }
 };
 
@@ -187,6 +182,7 @@ List calculate_similarities(const S4 &m, const RObject &comp, int &type, const I
   }
   // making comparisons
   Compare sims(a, b, aind, bind, type, metrics, res);
+  checkUserInterrupt();
   parallelFor(0, n, sims);
   // formatting output
   if(a.dims[0] == 1) type = 1;

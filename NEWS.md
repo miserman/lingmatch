@@ -1,3 +1,11 @@
+# version 1.0.6
+
+### Features
+* Adds conversion of list-representation to sparse matrix to `lma_dtm`.
+
+### Improvements
+* `lma_dtm` applies row names where possible.
+
 # version 1.0.5
 
 ### Features

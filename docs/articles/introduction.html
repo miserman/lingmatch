@@ -90,7 +90,7 @@
     
 <p>This introduction uses lingmatch to illustrate a few of the many
 branching paths of text analysis.</p>
-<p><em>Built with R 4.2.2 on January 22 2023</em></p>
+<p><em>Built with R 4.3.1 on August 13 2023</em></p>
 <hr>
 <div class="section level2">
 <h2 id="setup">Setup<a class="anchor" aria-label="anchor" href="#setup"></a>
@@ -294,7 +294,7 @@ frequencies:</p>
 <span></span>
 <span><span class="co"># plot weighted ~ raw term frequencies</span></span>
 <span><span class="co">## note that dark = TRUE makes the text white, so you might need to remove it</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/splot/man/splot.html" class="external-link">splot</a></span><span class="op">(</span><span class="va">Weighted</span> <span class="op">~</span> <span class="fl">1</span><span class="op">:</span><span class="fl">20</span>, labx <span class="op">=</span> <span class="st">"Raw Count"</span>, lines <span class="op">=</span> <span class="st">"connected"</span>, dark <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://miserman.github.io/splot/reference/splot.html" class="external-link">splot</a></span><span class="op">(</span><span class="va">Weighted</span> <span class="op">~</span> <span class="fl">1</span><span class="op">:</span><span class="fl">20</span>, labx <span class="op">=</span> <span class="st">"Raw Count"</span>, lines <span class="op">=</span> <span class="st">"connected"</span>, dark <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="introduction_files/figure-html/unnamed-chunk-11-1.svg" width="960"></p>
 <p>And plot weighted by a range of variants of raw document frequencies.
 The y-axis shows relative values (z-scores), with positive being higher
@@ -331,7 +331,7 @@ scheme gives more weight:</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># then plot a few different examples</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/splot/man/splot.html" class="external-link">splot</a></span><span class="op">(</span></span>
+<span><span class="fu"><a href="https://miserman.github.io/splot/reference/splot.html" class="external-link">splot</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">doc_weights</span>, <span class="va">weight_range</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span><span class="op">:</span><span class="fl">20</span>,</span>
 <span>  options <span class="op">=</span> <span class="va">op</span>, title <span class="op">=</span> <span class="st">"Same Term, Varying Document Frequencies"</span>,</span>
 <span>  sud <span class="op">=</span> <span class="st">"All term frequencies are 1."</span></span>
@@ -342,7 +342,7 @@ be interesting to see two extremes:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># here, counts increase from 1 to 20, and appear in 1 to 20 documents,</span></span>
 <span><span class="co"># so less common terms also have lower term frequencies</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/splot/man/splot.html" class="external-link">splot</a></span><span class="op">(</span></span>
+<span><span class="fu"><a href="https://miserman.github.io/splot/reference/splot.html" class="external-link">splot</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">doc_weights</span>, <span class="va">weight_range</span>, value <span class="op">=</span> <span class="st">"sequence"</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span><span class="op">:</span><span class="fl">20</span>,</span>
 <span>  options <span class="op">=</span> <span class="va">op</span>, title <span class="op">=</span> <span class="st">"Term as Document Frequencies"</span>,</span>
 <span>  sud <span class="op">=</span> <span class="st">"Non-zero terms are the number of non-zero terms."</span></span>
@@ -351,7 +351,7 @@ be interesting to see two extremes:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># here, counts decrease from 20 to 1, while appearing in 1 to 20 documents,</span></span>
 <span><span class="co"># so less common terms have higher term frequencies</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/splot/man/splot.html" class="external-link">splot</a></span><span class="op">(</span></span>
+<span><span class="fu"><a href="https://miserman.github.io/splot/reference/splot.html" class="external-link">splot</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">doc_weights</span>, <span class="va">weight_range</span>, value <span class="op">=</span> <span class="st">"inverted"</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span><span class="op">:</span><span class="fl">20</span>,</span>
 <span>  options <span class="op">=</span> <span class="va">op</span>, title <span class="op">=</span> <span class="st">"Term Opposite of Document Frequencies"</span>,</span>
 <span>  sud <span class="op">=</span> <span class="st">"Non-zero terms are the number of zero terms + 1."</span></span>
@@ -445,10 +445,10 @@ be “latent semantic similarity”:</p>
 <span><span class="co">#&gt; [4,] 0.6336500 0.8192378 0.5609665 I</span></span></code></pre></div>
 <hr>
 <div style="text-align:center">
-<div class="figure">
-<img src="https://www.depts.ttu.edu/psy/lusi/files/lusi_transp.png" alt=""><p class="caption">Brought to you by the
+<div class="float">
+<img src="https://www.depts.ttu.edu/psy/lusi/files/lusi_transp.png" alt="Brought to you by the Language Use and Social Interaction lab at Texas Tech University"><div class="figcaption">Brought to you by the
 <a href="https://www.depts.ttu.edu/psy/lusi/resources.php" target="_blank" class="external-link">Language
-Use and Social Interaction</a> lab at Texas Tech University</p>
+Use and Social Interaction</a> lab at Texas Tech University</div>
 </div>
 </div>
 </div>
