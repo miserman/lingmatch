@@ -6,7 +6,7 @@
 \usage{
 download.lspace(space = "100k_lsa", include.terms = TRUE,
   decompress = TRUE, check.md5 = TRUE, mode = "wb",
-  dir = getOption("lingmatch.lspace.dir"))
+  dir = getOption("lingmatch.lspace.dir"), overwrite = FALSE)
 }
 \arguments{
 \item{space}{Name of one or more spaces you want to download, or \code{'all'} for all available.
@@ -30,6 +30,8 @@ and compares it with that calculated from the downloaded file to check its integ
 \item{dir}{Directory in which to save the space. Specify this here, or set the lspace directory option
 (e.g., \code{options(lingmatch.lspace.dir = '~/Latent Semantic Spaces')}), or use
 \code{\link{lma_initdirs}} to initialize a directory.}
+
+\item{overwrite}{Logical; if \code{TRUE}, will replace existing files.}
 }
 \value{
 A character vector with paths to the [1] data and [2] term files.

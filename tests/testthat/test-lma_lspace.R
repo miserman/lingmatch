@@ -1,5 +1,3 @@
-context("lma_lspace")
-
 test_that("svd works", {
   dtm <- matrix(rpois(100, 1), 10)
   colnames(dtm) <- letters[1:10]

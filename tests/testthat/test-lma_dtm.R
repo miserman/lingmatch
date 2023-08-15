@@ -1,5 +1,3 @@
-context("lma_dtm")
-
 test_that("exclude works", {
   text <- "That would be what of the and word of the place name."
   dtm <- lma_dtm(text, "function")

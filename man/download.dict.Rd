@@ -5,7 +5,7 @@
 \title{Download Dictionaries}
 \usage{
 download.dict(dict = "lusi", check.md5 = TRUE, mode = "wb",
-  dir = getOption("lingmatch.dict.dir"))
+  dir = getOption("lingmatch.dict.dir"), overwrite = FALSE)
 }
 \arguments{
 \item{dict}{One or more names of dictionaries to download, or \code{'all'} for all available. See
@@ -19,6 +19,8 @@ and compares it with that calculated from the downloaded file to check its integ
 
 \item{dir}{Directory in which to save the dictionary; \cr default is \code{getOption('lingmatch.dict.dir')}. \cr
 This must be specified, or the option must be set -- use \code{\link{lma_initdirs}} to initialize a directory.}
+
+\item{overwrite}{Logical; if \code{TRUE}, will replace existing files.}
 }
 \value{
 Path to the downloaded dictionary, or a list of such if multiple were downloaded.

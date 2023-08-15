@@ -65,7 +65,7 @@
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">download.dict</span><span class="op">(</span>dict <span class="op">=</span> <span class="st">"lusi"</span>, check.md5 <span class="op">=</span> <span class="cn">TRUE</span>, mode <span class="op">=</span> <span class="st">"wb"</span>,</span>
-<span>  dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"lingmatch.dict.dir"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span>  dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"lingmatch.dict.dir"</span><span class="op">)</span>, overwrite <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -88,6 +88,10 @@ and compares it with that calculated from the downloaded file to check its integ
 <dt>dir</dt>
 <dd><p>Directory in which to save the dictionary; <br> default is <code>getOption('lingmatch.dict.dir')</code>. <br>
 This must be specified, or the option must be set -- use <code><a href="lma_initdirs.html">lma_initdirs</a></code> to initialize a directory.</p></dd>
+
+
+<dt>overwrite</dt>
+<dd><p>Logical; if <code>TRUE</code>, will replace existing files.</p></dd>
 
 </dl></div>
     <div class="section level2">

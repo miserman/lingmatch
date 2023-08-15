@@ -1,7 +1,4 @@
-context("utils")
-
 options(encoding = "latin1", stringsAsFactors = FALSE)
-TEST_DOWNLOAD <- grepl("R_LIBS", getwd(), fixed = TRUE)
 texts <- c(
   "And there with it isn't I think anyone would.",
   "Command lands of a few I two of it is."
@@ -408,9 +405,8 @@ test_that("standardize.lspace works", {
   ))
 })
 
-dir <- "~/../Downloads/"
-if (!dir.exists(dir)) dir <- "~/Downloads/"
-skip_if(!TEST_DOWNLOAD || !dir.exists(dir), "not downloading dictionary or embeddings files")
+skip_if(!grepl("R_LIBS", getwd(), fixed = TRUE), "not downloading dictionary or embeddings files")
+dir <- tempdir()
 
 test_that("select.lspace can download term_map", {
   expect_true("term_map" %in% names(select.lspace(get.map = TRUE, dir = dir)))
@@ -418,10 +414,12 @@ test_that("select.lspace can download term_map", {
 
 test_that("download.dict works", {
   download.dict("lusi", dir = dir)
-  expect_true(file.exists(paste0(dir, "lusi.dic")))
+  expect_true(file.exists(paste0(dir, "/lusi.dic")))
 })
 
 test_that("download.lspace works", {
-  download.lspace("senna", dir = dir)
-  expect_true(all(file.exists(paste0(dir, "senna", c(".dat", "_terms.txt")))))
+  download.lspace(c("default", "blogging"), dir = dir)
+  expect_true(all(file.exists(
+    paste0(dir, "/", c("100k_lsa", "blogs"), rep(c(".dat", "_terms.txt"), 2))
+  )))
 })

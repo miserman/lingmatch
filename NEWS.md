@@ -4,7 +4,13 @@
 * Adds conversion of list-representation to sparse matrix to `lma_dtm`.
 
 ### Improvements
+* Adds overwrite options to download functions.
+* `lingmatch` more flexibly handles pairwise comparisons within groups.
 * `lma_dtm` applies row names where possible.
+
+### Bug Fixes
+* Corrects handling of multiple groups given `all.levels` in some cases.
+* Adjusts `lma_simets` pairwise mean for self match.
 
 # version 1.0.5
 

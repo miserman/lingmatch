@@ -1,5 +1,3 @@
-context("lma_simets")
-
 manual <- function(a, b) {
   as.numeric(c(
     jaccard = sum(a & b) / sum(a | b),

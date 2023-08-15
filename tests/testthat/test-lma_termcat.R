@@ -1,5 +1,3 @@
-context("lma_termcat")
-
 options(encoding = "latin1", stringsAsFactors = FALSE)
 words <- vapply(seq_len(5e3), function(w) paste0(sample(letters, 5), collapse = ""), "")
 

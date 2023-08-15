@@ -46,15 +46,9 @@ lma_initdirs <- function(base = "", dict = "Dictionaries", lspace = "Latent Sema
       )
     }
   }
-  if (base == "") {
-    dirs <- normalizePath(c(dict, lspace), "/", FALSE)
-    names(dirs) <- c("dict", "lspace")
-    if (!all(mck)) dirs <- dirs[which(!mck)]
-  } else {
-    dirs <- normalizePath(paste0(base, if (base != "") "/", c(dict, lspace)), "/", FALSE)
-    names(dirs) <- c("dict", "lspace")
-    if (!all(mck)) dirs <- dirs[!mck]
-  }
+  dirs <- normalizePath(paste0(base, if (base != "") "/", c(dict, lspace)), "/", FALSE)
+  names(dirs) <- c("dict", "lspace")
+  if (!all(mck)) dirs <- dirs[!mck]
   if ("dict" %in% names(dirs)) {
     if (!dir.exists(dirs[["dict"]])) dir.create(dirs[["dict"]], recursive = TRUE)
     if (getOption("lingmatch.dict.dir") == "") options(lingmatch.dict.dir = dirs[["dict"]])

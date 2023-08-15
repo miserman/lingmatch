@@ -1,5 +1,3 @@
-context("lingmatch")
-
 words <- c(
   sub("*", "", unlist(lma_dict(1:9, as.regex = FALSE), use.names = FALSE), fixed = TRUE),
   vapply(seq_len(200), function(w) paste0(sample(letters, sample(9, 1)), collapse = ""), "")
@@ -129,11 +127,11 @@ test_that("group comparisons work", {
   expect_true(class(lingmatch(dtm, type = "lsm", symmetrical = FALSE)$sim)[1] == "dtCMatrix")
   pw <- lingmatch(dtm, type = "lsm", symmetrical = TRUE)$sim
   expect_equal(
-    as.numeric(lingmatch(dtm, "pairwise", mean = FALSE, symmetrical = TRUE, group = groups, type = "lsm")$sim$a),
+    as.numeric(lingmatch(dtm, "pairwise", symmetrical = TRUE, group = groups, type = "lsm")$sim$a),
     as.numeric(pw[groups == "a", groups == "a"])
   )
   expect_equal(
-    lingmatch(dtm, "pairwise", group = groups, type = "lsm")$sim[, 2],
+    lingmatch(dtm, "pairwise", mean = TRUE, group = groups, type = "lsm")$sim[, 2],
     (c(
       rowSums(pw[groups == "a", groups == "a"]),
       rowSums(pw[groups == "b", groups == "b"])
@@ -187,6 +185,7 @@ test_that("comp.group and comp.data work", {
     id = as.factor(rep(seq_len(nrow(dtm) / 2), 2)),
     condition = rbinom(nrow(dtm), 1, .5),
     group = as.factor(rep(c("a", "b"), each = nrow(dtm) / 2)),
+    subgroup = as.factor(rep(c("a", "b"), nrow(dtm) / 2)),
     lma_termcat(lma_weight(dtm, percent = TRUE))
   )
   cats <- names(lma_dict(1:9))
@@ -194,18 +193,43 @@ test_that("comp.group and comp.data work", {
   data[1, cats] <- 0
   sdat <- split(data[, cats], paste0(data$group, data$condition))
   pairs <- list(a = lma_simets(sdat$a0, sdat$a1, metric = "can"), b = lma_simets(sdat$b0, sdat$b1, metric = "can"))
-  expect_equal(as.numeric(rowMeans(pairs$a)), as.numeric(lma_simets(sdat$a0, sdat$a1, metric = "can", mean = TRUE)))
+  expect_identical(
+    as.numeric((rowSums(pairs$a) - 1) / (ncol(pairs$a) - 1)),
+    as.numeric(lma_simets(sdat$a0, sdat$a1, metric = "can", mean = TRUE))
+  )
   c1mean <- list(
     a = lma_simets(sdat$a0, colMeans(sdat$a1), metric = "can"),
     b = lma_simets(sdat$b0, colMeans(sdat$b1), metric = "can")
   )
-  tt <- lingmatch(
-    data[data$condition == 0, ], data[data$condition == 1, ],
-    group = group, comp.group = group, type = "lsm"
-  )
   expect_equal(
-    tt$sim$canberra,
+    lingmatch(
+      data[data$condition == 0, ],
+      comp.data = data[data$condition == 1, ],
+      comp.group = group, type = "lsm"
+    )$sim$canberra,
     as.numeric(unlist(c1mean))
+  )
+  pairwise_a <- as.numeric(lma_simets(
+    data[data$condition == 0 & data$group == "a", cats],
+    data[data$condition == 1 & data$group == "a", cats],
+    metric = "canberra"
+  ))
+  expect_identical(
+    as.numeric(lingmatch(
+      data[data$condition == 0, ], data[data$condition == 1, ],
+      comp.group = group, type = "lsm"
+    )$sim$a$canberra),
+    pairwise_a
+  )
+  comp <- data[data$condition == 1, ]
+  colnames(comp)[3:4] <- c("c1", "c2")
+  expect_identical(
+    as.numeric(lingmatch(
+      data[data$condition == 0, ], comp,
+      all.levels = TRUE, pairwise = TRUE,
+      group = c("group", "subgroup"), comp.group = c("c1", "c2"), type = "lsm"
+    )$sim$a$a$g1_canberra),
+    pairwise_a
   )
   colnames(sdat$a0)[c(3, 6)] <- colnames(sdat$a1)[c(3, 6)] <- c("articles", "preps")
   expect_true(all(lingmatch(sdat$a0, colMeans(sdat$a1), metric = "can")$sim == c1mean$a))

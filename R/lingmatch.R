@@ -333,6 +333,10 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
   }
   # group and order
   agc <- c("c", "list", "cbind", "data.frame")
+  if (missing(group) && !missing(comp.group)) {
+    group <- NULL
+    opt$group <- opt$comp.group
+  }
   if (!missing(group) && !(is.null(colnames(data)) && rx == length(opt$group) - 1)) {
     group <- if (length(opt$group) > 1 && as.character(opt$group[1]) %in% agc &&
       !grepl("[$[]", as.character(opt$group[1]))) {
@@ -371,11 +375,6 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
         list(gv(cg, comp.data))
       }
       if (is.list(cg) && length(cg) == 1 && !is.null(dim(cg[[1]]))) cg <- as.data.frame(cg[[1]], stringsAsFactors = FALSE)
-      if (cc != 1) {
-        if (NROW(comp) != length(cg[[1]]) || NROW(input) != length(group[[1]])) {
-          stop("data and comp.data mismatch", call. = FALSE)
-        }
-      }
       if (all.levels) {
         comp.group <- cg
       } else {
@@ -455,14 +454,14 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
   if (cc == 1 || opt$comp == "text") {
     comp.data <- input[comp, , drop = FALSE]
     if (!missing(comp.group) && !all.levels) {
-      if (anyDuplicated(comp.group)) {
+      if (FALSE && anyDuplicated(comp.group)) {
         comp.data <- t(vapply(
           split(as.data.frame(comp.data, stringsAsFactors = FALSE), comp.group), colMeans,
           numeric(ncol(comp.data))
         ))
         rownames(comp.data) <- comp.group <- unique(comp.group)
-        opt$comp <- paste(opt$comp, opt$group, "group means")
-      } else if (nrow(comp.data) == length(comp.group)) rownames(comp.data) <- comp.group
+        opt$comp <- paste(opt$comp, deparse(opt$group), "group means")
+      } else if (!anyDuplicated(comp.group) && nrow(comp.data) == length(comp.group)) rownames(comp.data) <- comp.group
     } else if (nrow(comp.data) == 1) {
       comp.data <- structure(as.numeric(comp.data[1, ]),
         names = colnames(comp.data)
@@ -536,13 +535,10 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
       for (m in inp$metric) sim[, m] <- NA
       mets <- seq_along(inp$metric) + gl
     }
-    gs <- as.character(unique(sim[, 1]))
-    if (gl == 1 && !is.null(comp.data) && !is.null(comp.group) && !any(gs %in% rownames(comp.data))) {
-      warning("no group levels were found in comp.data", call. = FALSE)
-    }
   } else if (opt$comp == "sequential" && is.null(speaker)) speaker <- seq_len(nrow(input))
   # making comparisons
   sal <- dsp$s
+  if (is.null(sal$mean)) sal$mean <- FALSE
   ckf <- is.function(comp)
   apply_comp <- function(m) {
     a <- names(as.list(args(comp)))
@@ -575,10 +571,10 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
     if (!"b" %in% names(sal) && (is.numeric(comp) || !is.null(dim(comp)))) sal$b <- comp
     sim <- do.call(lma_simets, c(list(input), sal))
   } else {
+    gs <- as.character(unique(sim[, 1]))
     cks <- !is.null(speaker)
     ckc <- !is.null(comp.data)
     ckp <- cc == 2 && opt$comp == "pairwise"
-    ckq <- cc == 2 && opt$comp == "sequential"
     if (gl == 1) {
       if (opt$comp != "pairwise") {
         if (opt$comp == "sequential") {
@@ -601,13 +597,12 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
             }
           }))
         } else {
+          if (is.null(sal$pairwise)) sal$pairwise <- TRUE
+          flat <- ckf || !sal$pairwise || sal$mean
+          sal$return.list <- !flat
+          fsim <- list()
           ckmc <- FALSE
-          if (!ckc) {
-            if (!ckf) {
-              ckf <- TRUE
-              opt$comp <- "mean"
-              comp <- mean
-            }
+          if (!ckc && ckf) {
             ckmc <- TRUE
             opt$comp <- paste0(if (length(opt$group) == 1) paste(opt$group, ""), "group ", opt$comp)
             comp.data <- as.data.frame(
@@ -619,15 +614,12 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
             su <- sim[, 1] == g
             sal$b <- NULL
             if (ckc) {
-              if (nrow(cc <- comp.data[if (!is.null(comp.group)) comp.group == g else g, , drop = FALSE]) == 1) {
-                sal$b <- cc
-              } else {
-                warning("comp.data has too few/many rows in group ", g, call. = FALSE)
-              }
-            } else if (sum(su) == 1) {
+              sal$b <- comp.data[if (!is.null(comp.group)) comp.group == g else g, , drop = FALSE]
+            } else {
               sal$b <- input[su, ]
-            } else if (sum(su) > 1) {
-              sal$b <- if (compmeanck) colMeans(input[su, ], na.rm = TRUE) else apply_comp(input[su, ])
+            }
+            if (ckf && !is.null(dim(sal$b))) {
+              sal$b <- if (compmeanck) colMeans(sal$b, na.rm = TRUE) else apply_comp(sal$b)
             }
             if (!is.null(sal$b) && ckmc) comp.data[g, ] <- sal$b
             if (sum(su) == 1 && is.null(sal$b)) {
@@ -635,31 +627,25 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
               next
             }
             tm <- do.call(lma_simets, c(list(input[su, , drop = FALSE]), sal))
-            sim[su, mets] <- tm
+            if (flat) {
+              sim[su, mets] <- tm
+            } else {
+              fsim[[g]] <- tm
+            }
           }
+          if (!flat) sim <- fsim
         }
       } else {
-        tomean <- if ("mean" %in% names(dsp$s)) dsp$s$mean else TRUE
         ug <- unique(group[[1]])
-        if (tomean) {
-          sal$symmetrical <- TRUE
+        if (sal$mean) {
           sim <- data.frame(group[[1]], NA, stringsAsFactors = FALSE)
           colnames(sim) <- c(opt$group, sal$metric)
           for (g in ug) {
             su <- group[[1]] == g
-            ssu <- sum(su)
-            if (ssu != 1) {
-              gsim <- do.call(lma_simets, c(list(input[su, ]), sal))
-              sim[su, -1] <- if (length(sal$metric) == 1) {
-                (colSums(gsim) - 1) / (ssu - 1)
-              } else {
-                vapply(sal$metric, function(i) (colSums(gsim[[sal$metric[i]]]) - 1) / (ssu - 1), 0)
-              }
-            }
+            sim[su, -1] <- if (sum(su) == 1) 1 else do.call(lma_simets, c(list(input[su, ]), sal))
           }
         } else {
-          sal$symmetrical <- if ("symmetrical" %in% names(dsp$s)) dsp$s$symmetrical else FALSE
-          sim <- lapply(ug, function(g) {
+          sim <- lapply(structure(ug, names = ug), function(g) {
             su <- group[[1]] == g
             if (sum(su) != 1) {
               do.call(lma_simets, c(list(input[su, ]), sal))
@@ -667,7 +653,6 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
               rep(NA, length(sal$metric))
             }
           })
-          names(sim) <- ug
         }
       }
     } else if (gl > 1) {
@@ -685,96 +670,80 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
           do.call(paste, comp.group[seq_len(g)])
         }, character(length(comp.group[[1]])))
       }
-      if (!is.null(dsp$s$mean) && !dsp$s$mean) {
-        sal$symmetrical <- TRUE
-        sim <- lapply(ug <- unique(sim[, 1]), function(g) {
-          su <- sim[, 1] == g
-          gsm <- do.call(lma_simets, c(list(input[su, ]), sal))
-          gn <- group[su, ncol(group)]
-          for (m in names(gsm)) dimnames(gsm[[m]]) <- list(gn, gn)
-          gsm
-        })
-        if (!is.null(dsp$s$symmetrical) && !dsp$s$symmetrical) {
-          sim <- do.call(rbind, lapply(sim, function(ll) {
-            m <- ll[[1]]
-            su <- lower.tri(m)
-            as.data.frame(
-              comp = outer(n <- colnames(m), n, function(a, b) paste0(a, " <-> ", b))[su],
-              lapply(ll, "[", su), stringsAsFactors = FALSE
+      if (is.null(sal$pairwise)) sal$pairwise <- TRUE
+      flat <- ckf || sal$mean
+      if (!flat) fsim <- list()
+      ssl <- if (is.null(speaker)) TRUE else !is.na(speaker)
+      for (g in unique(sim[, 1])) {
+        su <- which(sim[, 1] == g & ssl)
+        sg <- group[su, , drop = FALSE]
+        sx <- input[su, , drop = FALSE]
+        gck <- ckc && !missing(comp.group)
+        if (gck) {
+          gcsub <- comp.group[, 1] == g
+          if (!any(gcsub)) {
+            warning("the first comparison group has no levels in common with the first data group",
+              call. = FALSE
             )
-          }))
-        } else {
-          names(sim) <- ug
-        }
-      } else {
-        sal$symmetrical <- FALSE
-        ssl <- if (is.null(speaker)) TRUE else !is.na(speaker)
-        for (g in unique(sim[, 1])) {
-          su <- which(sim[, 1] == g & ssl)
-          sg <- group[su, , drop = FALSE]
-          sx <- input[su, , drop = FALSE]
-          gck <- ckc && !missing(comp.group)
-          if (gck) {
-            gcsub <- comp.group[, 1] == g
-            if (!any(gcsub)) {
-              warning("the first comparison group has no levels in common with the first data group",
-                call. = FALSE
-              )
-              gck <- FALSE
-            }
+            gck <- FALSE
           }
-          for (s in sug) {
-            usg <- unique(sg[, s])
-            if (length(usg) == 1) {
-              ssg <- list(sx)
-              names(ssg) <- usg
-            } else {
-              ssg <- lapply(usg, function(ss) sx[sg[, s] == ss, , drop = FALSE])
-              names(ssg) <- usg
-            }
-            if (length(ssg) != 0) {
-              for (ssn in names(ssg)) {
-                ssu <- su[sg[, s] == ssn]
-                lss <- length(ssu)
-                if (cks) {
-                  sal$group <- speaker[ssu]
-                } else if (ckf) {
-                  sal$b <- if (compmeanck) {
-                    colMeans(ssg[[ssn]], na.rm = TRUE)
-                  } else {
-                    apply_comp(ssg[[ssn]])
-                  }
+        }
+        for (s in sug) {
+          usg <- unique(sg[, s])
+          if (length(usg) == 1) {
+            ssg <- list(sx)
+            names(ssg) <- usg
+          } else {
+            ssg <- lapply(usg, function(ss) sx[sg[, s] == ss, , drop = FALSE])
+            names(ssg) <- usg
+          }
+          if (length(ssg) != 0) {
+            for (ssn in names(ssg)) {
+              ssu <- su[sg[, s] == ssn]
+              if (cks) {
+                sal$group <- speaker[ssu]
+              } else if (ckf && !is.null(dim(ssg[[ssn]]))) {
+                sal$b <- if (compmeanck) {
+                  colMeans(ssg[[ssn]], na.rm = TRUE)
+                } else {
+                  apply_comp(ssg[[ssn]])
                 }
-                if (!is.null(sal$b) && identical(sal$b, ssg[[ssn]])) {
-                  sim[ssu, gl + mw + (mn * (s - 1))] <- 1
-                  next
+              }
+              csu <- gl + mw + (mn * (s - 1))
+              if (gck) {
+                gcsu <- comp.group[, s] == ssn & gcsub
+                if (!any(gcsu)) {
+                  warning(
+                    "no ", paste(usg, collapse = ", "),
+                    " level found in the comparison group(s)"
+                  )
+                } else {
+                  sal$b <- comp.data[gcsu, , drop = FALSE]
                 }
-                if (gck) {
-                  gcsu <- comp.group[, s] == ssn & gcsub
-                  if (!any(gcsu)) {
-                    warning(
-                      "no ", paste(usg, collapse = ", "),
-                      " level found in the comparison group(s)"
-                    )
-                  } else {
-                    sal$b <- comp.data[gcsu, , drop = FALSE]
-                    if (nrow(sal$b) != 1) sal$b <- colMeans(sal$b)
-                  }
+              }
+              if (!is.null(sal$b) && identical(sal$b, ssg[[ssn]])) {
+                if (flat) {
+                  sim[ssu, csu] <- 1
+                } else {
+                  dims <- c(length(ssu), nrow(sal$b))
+                  fsim[[g]][[ssn]][[colnames(sim)[csu]]] <- sparseMatrix(
+                    rep(seq_len(dims[1]), dims[2]), rep(seq_len(dims[2]), each = dims[1]),
+                    x = 1L, dims = dims, dimnames = list(rownames(ssg[[ssn]]), rownames(sal$b))
+                  )
                 }
-                ssim <- do.call(lma_simets, c(list(ssg[[ssn]]), sal))
-                if (ckp || ckq) {
-                  if (ckp) {
-                    if (length(ssim[[1]]) != 1) ssim <- vapply(ssim, mean, 0, na.rm = TRUE)
-                  } else if (nrow(ssim) > 1) ssim <- colMeans(ssim, na.rm = TRUE)
-                  if (lss != 1) ssim <- vapply(ssim, rep, numeric(lss), lss)
-                }
-                csu <- gl + mw + (mn * (s - 1))
-                if (all(dim(ssim) == c(lss, length(csu)))) sim[ssu, csu] <- ssim else warning(g, s)
+                next
+              }
+              ssim <- do.call(lma_simets, c(list(ssg[[ssn]]), sal))
+              if (flat) {
+                sim[ssu, csu] <- ssim
+              } else {
+                fsim[[g]][[ssn]][[colnames(sim)[csu]]] <- ssim
               }
             }
           }
         }
       }
+      if (!flat) sim <- fsim
     }
   }
   list(
