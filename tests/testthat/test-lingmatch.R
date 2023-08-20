@@ -7,16 +7,27 @@ texts <- vapply(seq_len(50), function(d) {
 }, "")
 textsfile <- tempfile(fileext = ".csv")
 write(do.call(paste, list(c("id", seq_along(texts)), c("text", texts), sep = ",")), textsfile, sep = ",")
+txtfile <- tempfile(fileext = ".txt")
+writeLines(texts, txtfile)
 dtm <- lma_dtm(texts)
 
 test_that("different input formats have the same results", {
   manual <- as.numeric(lma_simets(dtm, metric = "cosine"))
   expect_equal(as.numeric(lingmatch(textsfile)$sim), manual)
+  expect_equal(as.numeric(lingmatch(txtfile)$sim), manual)
   expect_equal(as.numeric(lingmatch(texts)$sim), manual)
-  expect_equal(as.numeric(lingmatch(as.factor(texts))$sim), manual)
   expect_equal(as.numeric(lingmatch(dtm)$sim), manual)
   expect_equal(as.numeric(lingmatch(as.data.frame(as.matrix(dtm)))$sim), manual)
   expect_equal(as.numeric(lingmatch(data = dtm)$sim), manual)
+  data <- data.frame(text = as.factor(texts))
+  expect_equal(
+    as.numeric(lingmatch("text", "text", pairwise = TRUE, data = data)$sim),
+    as.numeric(lingmatch(data$text, symmetrical = TRUE)$sim)
+  )
+  expect_equal(
+    as.numeric(lingmatch("text", "text", pairwise = TRUE, data = data)$sim),
+    as.numeric(lingmatch(texts, "text", pairwise = TRUE, comp.data = data)$sim)
+  )
 })
 
 test_that("different input formats have the same results (comp)", {
@@ -163,8 +174,9 @@ test_that("groups work through data", {
     lma_simets(data[data$group == "a", categories], group_means["a", ], "canberra"),
     lma_simets(data[data$group == "b", categories], group_means["b", ], "canberra")
   ))
+  expect_error(lingmatch(data, group = noexist, type = "lsm"), "could not find noexist")
   expect_equal(
-    lingmatch(data, group = group, type = "lsm")$sim[, 2],
+    lingmatch(data, group = "group", type = "lsm")$sim[, 2],
     as.numeric(c(
       lma_simets(data[data$group == "a", categories], group_means["a", ], "canberra"),
       lma_simets(data[data$group == "b", categories], group_means["b", ], "canberra")
@@ -279,6 +291,9 @@ test_that("sequential comparisons work", {
     }, 0)
     expect_equal(comp[, "cosine"], manual)
   }
-  o <- sample(seq_len(nrow(data)))
-  expect_equal(h[[1]][, 1], lingmatch(data[o, ], "seq", dict = cats, group = speaker, order = order(o))$sim[, 1])
+  reorder <- sample(seq_len(nrow(data)))
+  expect_equal(h[[1]][, 1], lingmatch(
+    data[reorder, ], "seq",
+    dict = cats, group = speaker, order = order(reorder)
+  )$sim[, 1])
 })

@@ -198,21 +198,23 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
       } else if (length(ta) == 1 || !any(grepl(" ", a, fixed = TRUE))) ta <- parse(text = a)
     }
     ta <- tryCatch(eval(ta, parent.frame(3)), error = function(e) NULL)
-    if (length(ta) == 0 || (!is.null(dim(ta)) && dim(ta)[1] == 0)) {
+    if (!length(ta) || (!is.null(dim(ta)) && !dim(ta)[1])) {
       ta <- tryCatch(eval(a, data, parent.frame(2)), error = function(e) NULL)
-    }
-    if (length(ta) == 0 || (!is.null(dim(ta)) && dim(ta)[1] == 0)) {
-      ta <- tryCatch(eval(a, globalenv()), error = function(e) NULL)
-    }
-    if (is.null(ta)) ta <- tryCatch(eval(a, data), error = function(e) NULL)
-    if (is.null(ta)) {
-      p <- 2
-      while (is.null(ta) && p < 99) {
-        p <- p + 1
-        ta <- tryCatch(eval(a, parent.frame(p)), error = function(e) NULL)
+      if (!length(ta) || (!is.null(dim(ta)) && !dim(ta)[1])) {
+        ta <- tryCatch(eval(a, globalenv()), error = function(e) NULL)
+        if (is.null(ta)) {
+          ta <- tryCatch(eval(a, data), error = function(e) NULL)
+          if (is.null(ta)) {
+            p <- 2
+            while (is.null(ta) && p < 99) {
+              p <- p + 1
+              ta <- tryCatch(eval(a, parent.frame(p)), error = function(e) NULL)
+            }
+          }
+          if (is.null(ta)) stop("could not find ", deparse(a), call. = FALSE)
+        }
       }
     }
-    if (is.null(ta)) stop("could not find ", deparse(a), call. = FALSE)
     ta
   }
   gd <- function(a, data = NULL) {
@@ -253,7 +255,12 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
       opt$input <- input
     }
   }
-  if (is.function(input)) stop("enter a character vector or matrix-like object as input")
+  if (is.function(input) || (is.list(input) && is.null(dim(input)))) {
+    stop(
+      "enter a character vector or matrix-like object as input",
+      call. = FALSE
+    )
+  }
   if (missing(data)) data <- input
   input <- if (is.character(input) && all(input %in% colnames(data))) data[, input] else gd(opt$input, data)
   if (!missing(group) && is.data.frame(input)) input <- as.matrix(input[, vapply(input, is.numeric, TRUE)])
@@ -262,6 +269,8 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
   # comp
   if (!missing(comp)) {
     comp <- gd(opt$comp, if (missing(comp.data)) if (is.call(opt$comp)) NULL else data else comp.data)
+    if (!missing(comp.data) && is.character(comp) && all(comp %in% colnames(comp.data))) comp <- comp.data[, comp]
+    if (!missing(data) && is.character(comp) && all(comp %in% colnames(data))) comp <- data[, comp]
     if (is.logical(comp)) comp <- which(comp)
     if (missing(comp.data) && !is.null(colnames(comp))) comp.data <- comp
   } else if (missing(comp) && missing(group) && missing(comp.data) && missing(comp.group)) {
@@ -340,11 +349,13 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
   if (!missing(group) && !(is.null(colnames(data)) && rx == length(opt$group) - 1)) {
     group <- if (length(opt$group) > 1 && as.character(opt$group[1]) %in% agc &&
       !grepl("[$[]", as.character(opt$group[1]))) {
-      lapply(opt$group[-1], gv, data)
+      group <- tryCatch(gv(opt$group, data), error = function(e) NULL)
+      if (is.character(group) && all(group %in% colnames(data))) group <- data[, group]
+      if (is.null(group)) lapply(opt$group[-1], gv, data) else group
     } else {
-      if (!is.null(data) && is.character(opt$group) && length(opt$group) < nrow(data)) {
+      if (!is.null(colnames(data)) && is.character(opt$group) && length(opt$group) < nrow(data)) {
         if (!all(opt$group %in% colnames(data))) {
-          stop("group appears to be column names, but were not found in data")
+          stop("group appears to be column names, but were not found in data", call. = FALSE)
         }
         group <- data[, opt$group]
         if (!is.list(group)) group <- if (is.matrix(group)) as.data.frame(group, stringsAsFactors = FALSE) else list(group)
@@ -364,30 +375,38 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
     if (!is.null(cg)) {
       cg <- if (!is.null(comp.data) && length(cg) > 1 &&
         as.character(cg[1]) %in% agc && !grepl("[$[]", as.character(cg[1]))) {
-        lapply(as.character(cg[-1]), gv, comp.data)
+        cg <- tryCatch(gv(cg, comp.data), error = function(e) NULL)
+        if (is.character(cg) && all(cg %in% colnames(comp.data))) cg <- comp.data[, cg]
+        if (is.null(cg)) lapply(as.character(cg[-1]), gv, comp.data) else cg
       } else if (is.character(cg)) {
         if (cg %in% colnames(comp.data)) {
           list(comp.data[, cg])
         } else {
-          stop("groups not found in comp.data")
+          stop("groups not found in comp.data", call. = FALSE)
         }
       } else {
         list(gv(cg, comp.data))
       }
-      if (is.list(cg) && length(cg) == 1 && !is.null(dim(cg[[1]]))) cg <- as.data.frame(cg[[1]], stringsAsFactors = FALSE)
-      if (all.levels) {
-        comp.group <- cg
-      } else {
-        comp.group <- do.call(paste, cg)
-        if (length(group) > 1) {
-          group <- do.call(paste, group)
-          if (!is.null(comp.data) && any(ck <- !(ckg <- unique(group)) %in% unique(comp.group))) {
-            if (all(ck)) {
-              stop("group and comp.group had no levels in common")
-            } else {
-              warning("levels not found in comp.group: ", paste(ckg[ck], collapse = ", "), call. = FALSE)
-              group <- group[ck <- group %in% ckg[!ck]]
-              input <- input[ck, , drop = FALSE]
+      if (is.list(cg) && length(cg) == 1 && !is.null(dim(cg[[1]]))) {
+        cg <- as.data.frame(cg[[1]], stringsAsFactors = FALSE)
+      } else if (is.character(cg) && !missing(comp.group) && all(cg %in% colnames(comp.data))) {
+        cg <- comp.data[, cg]
+      }
+      if (!missing(comp.group) || length(if (is.list(cg)) cg[[1]] else cg) == nrow(comp.data)) {
+        if (all.levels) {
+          comp.group <- cg
+        } else {
+          comp.group <- do.call(paste, cg)
+          if (length(group) > 1) {
+            group <- do.call(paste, group)
+            if (!is.null(comp.data) && any(ck <- !(ckg <- unique(group)) %in% unique(comp.group))) {
+              if (all(ck)) {
+                stop("group and comp.group had no levels in common", call. = FALSE)
+              } else {
+                warning("levels not found in comp.group: ", paste(ckg[ck], collapse = ", "), call. = FALSE)
+                group <- group[ck <- group %in% ckg[!ck]]
+                input <- input[ck, , drop = FALSE]
+              }
             }
           }
         }
@@ -395,8 +414,9 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
     }
   }
   if (!missing(group)) {
+    if (is.matrix(group)) group <- as.data.frame(group)
     if (length(if (is.list(group)) group[[1]] else group) != rx) {
-      stop("length(group) != nrow(input)")
+      stop("length(group) != nrow(input)", call. = FALSE)
     }
   }
   if (!missing(order)) {
@@ -437,31 +457,30 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
   if (!is.null(cn)) {
     cc <- 1
     nn <- cn[!cn %in% colnames(input)]
-    if (length(nn) != 0) input <- cbind(input, matrix(0, nrow(input), length(nn), dimnames = list(NULL, nn)))
+    if (length(nn) != 0) {
+      input <- cbind(
+        input, matrix(0, nrow(input), length(nn), dimnames = list(NULL, nn))
+      )
+    }
     input <- rbind(matrix(0, cr, ncol(input), dimnames = list(NULL, colnames(input))), input)
-    input[seq_len(cr), cn] <- comp[seq_len(cr), ]
+    input[seq_len(cr), cn] <- as.matrix(comp[seq_len(cr), ])
     comp <- seq_len(cr)
   }
   if (drop) {
     if (sum(su <- colSums(input, na.rm = TRUE) != 0) != 0) {
       input <- input[, su, drop = FALSE]
     } else {
-      stop("input is all 0s after processing")
+      stop("input is all 0s after processing", call. = FALSE)
     }
   }
   nc <- ncol(input)
   # finalizing comp
-  if (cc == 1 || opt$comp == "text") {
+  if (is.numeric(comp) && (cc == 1 || opt$comp == "text")) {
     comp.data <- input[comp, , drop = FALSE]
     if (!missing(comp.group) && !all.levels) {
-      if (FALSE && anyDuplicated(comp.group)) {
-        comp.data <- t(vapply(
-          split(as.data.frame(comp.data, stringsAsFactors = FALSE), comp.group), colMeans,
-          numeric(ncol(comp.data))
-        ))
-        rownames(comp.data) <- comp.group <- unique(comp.group)
-        opt$comp <- paste(opt$comp, deparse(opt$group), "group means")
-      } else if (!anyDuplicated(comp.group) && nrow(comp.data) == length(comp.group)) rownames(comp.data) <- comp.group
+      if (!anyDuplicated(comp.group) && nrow(comp.data) == length(comp.group)) {
+        rownames(comp.data) <- comp.group
+      }
     } else if (nrow(comp.data) == 1) {
       comp.data <- structure(as.numeric(comp.data[1, ]),
         names = colnames(comp.data)
@@ -487,7 +506,7 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
     }
     if (ckp) {
       if (any(ckp <- !(cn <- colnames(input)) %in% (bn <- colnames(comp.data)))) {
-        if (all(ckp)) stop("input and comp have no columns in common")
+        if (all(ckp)) stop("input and comp have no columns in common", call. = FALSE)
         if ("articles" %in% cn && !"articles" %in% bn) bn[bn == "article"] <- "articles"
         if ("preps" %in% cn && !"preps" %in% bn) bn[bn == "prep"] <- "preps"
         colnames(comp.data) <- bn
@@ -503,7 +522,7 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
     cn <- colnames(input)
     cns <- cn[ck <- cn %in% colnames(comp.data)]
     if (!any(ck)) {
-      stop("input and comp have no columns in common")
+      stop("input and comp have no columns in common", call. = FALSE)
     } else if (any(!ck)) {
       warning("input columns were not found in comp: ", paste(cn[!ck], collapse = ", "), call. = FALSE)
       input <- input[, cns]
@@ -714,24 +733,11 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
                 gcsu <- comp.group[, s] == ssn & gcsub
                 if (!any(gcsu)) {
                   warning(
-                    "no ", paste(usg, collapse = ", "),
-                    " level found in the comparison group(s)"
+                    "no ", paste(usg, collapse = ", "), " level found in the comparison group(s)"
                   )
                 } else {
                   sal$b <- comp.data[gcsu, , drop = FALSE]
                 }
-              }
-              if (!is.null(sal$b) && identical(sal$b, ssg[[ssn]])) {
-                if (flat) {
-                  sim[ssu, csu] <- 1
-                } else {
-                  dims <- c(length(ssu), nrow(sal$b))
-                  fsim[[g]][[ssn]][[colnames(sim)[csu]]] <- sparseMatrix(
-                    rep(seq_len(dims[1]), dims[2]), rep(seq_len(dims[2]), each = dims[1]),
-                    x = 1L, dims = dims, dimnames = list(rownames(ssg[[ssn]]), rownames(sal$b))
-                  )
-                }
-                next
               }
               ssim <- do.call(lma_simets, c(list(ssg[[ssn]]), sal))
               if (flat) {

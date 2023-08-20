@@ -172,12 +172,13 @@ lma_simets <- function(a, b = NULL, metric = NULL, group = NULL, lag = 0, agg = 
           rbind(b[-seq_len(-lag), ], Matrix(0, -lag, d[4], sparse = TRUE))
         }
       }
-      calculate_similarities(a, b, if (((missing(pairwise) || !pairwise) && d[1] == d[3]) ||
+      type <- if (((missing(pairwise) || !pairwise) && d[1] == d[3]) ||
         d[3] == 1) {
         1
       } else {
         3
-      }, met$dummy)
+      }
+      calculate_similarities(a, b, type, met$dummy)
     }
   }
   if ("list" %in% class(res) && length(res)) {
