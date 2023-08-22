@@ -2,8 +2,10 @@
 title: "Specifying comparisons and groups in lingmatch"
 output: rmarkdown::html_document
 vignette: >
-  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
 ---
 
 This example demonstrates a few ways to specify comparisons and groups in lingmatch.
@@ -31,7 +33,7 @@ We'll generate some word category output, in a sort of experimental design that 
 Imagine in two studies we paired up participants, then had them have a series of interactions after reading one of a set of prompts:
 ```{r}
 # load lingmatch
-library("lingmatch")
+library(lingmatch)
 
 # first, we have simple representations (function word category use frequencies)
 # of our prompts (3 prompts per study):

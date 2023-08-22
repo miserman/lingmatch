@@ -13,34 +13,48 @@ dtm <- lma_dtm(texts)
 
 test_that("different input formats have the same results", {
   manual <- as.numeric(lma_simets(dtm, metric = "cosine"))
-  expect_equal(as.numeric(lingmatch(textsfile)$sim), manual)
+  expect_equal(as.numeric(lingmatch(textsfile, metric = "x")$sim), manual)
   expect_equal(as.numeric(lingmatch(txtfile)$sim), manual)
   expect_equal(as.numeric(lingmatch(texts)$sim), manual)
   expect_equal(as.numeric(lingmatch(dtm)$sim), manual)
   expect_equal(as.numeric(lingmatch(as.data.frame(as.matrix(dtm)))$sim), manual)
+  expect_equal(as.numeric(lingmatch(matrix(as.character(dtm), nrow(dtm)))$sim), manual)
+  expect_warning(
+    dropped <- lingmatch(cbind(as.data.frame(as.matrix(dtm)), id = "a"))$sim,
+    "some input variables were not"
+  )
+  expect_equal(as.numeric(dropped), manual)
   expect_equal(as.numeric(lingmatch(data = dtm)$sim), manual)
   data <- data.frame(text = as.factor(texts))
+  base <- as.numeric(lingmatch(data$text, symmetrical = TRUE)$sim)
   expect_equal(
     as.numeric(lingmatch("text", "text", pairwise = TRUE, data = data)$sim),
-    as.numeric(lingmatch(data$text, symmetrical = TRUE)$sim)
+    base
   )
   expect_equal(
     as.numeric(lingmatch("text", "text", pairwise = TRUE, data = data)$sim),
-    as.numeric(lingmatch(texts, "text", pairwise = TRUE, comp.data = data)$sim)
+    base
+  )
+  expect_equal(
+    as.numeric(lingmatch(data$text, data$text, pairwise = TRUE)$sim),
+    base
   )
 })
 
 test_that("different input formats have the same results (comp)", {
   manual <- as.numeric(lma_simets(dtm[-(1:10), ], dtm[1:10, ], metric = "cosine"))
-  expect_equal(as.numeric(lingmatch(textsfile, 1:10, drop = FALSE)$sim), manual)
-  expect_equal(as.numeric(lingmatch(texts[-(1:10)], texts[1:10], drop = FALSE)$sim), manual)
-  expect_equal(as.numeric(lingmatch(texts[-(1:10)], as.factor(texts[1:10]), drop = FALSE)$sim), manual)
-  expect_equal(as.numeric(lingmatch(dtm[-(1:10), ], dtm[1:10, ], drop = FALSE)$sim), manual)
+  expect_equal(as.numeric(lingmatch(textsfile, 1:10)$sim), manual)
+  expect_equal(as.numeric(lingmatch(texts[-(1:10)], texts[1:10])$sim), manual)
+  expect_equal(as.numeric(lingmatch(texts[-(1:10)], as.factor(texts[1:10]))$sim), manual)
+  expect_equal(as.numeric(lingmatch(dtm[-(1:10), ], dtm[1:10, ])$sim), manual)
   expect_equal(as.numeric(lingmatch(
     as.data.frame(as.matrix(dtm[-(1:10), ])),
-    as.data.frame(as.matrix(dtm[1:10, ])),
-    drop = FALSE
+    as.data.frame(as.matrix(dtm[1:10, ]))
   )$sim), manual)
+  expect_equal(
+    as.numeric(lingmatch(dtm[-(1:10), -1], dtm[1:10, ])$sim),
+    as.numeric(lma_simets(cbind(0, dtm[-(1:10), -1]), dtm[1:10, ], metric = "cosine"))
+  )
 })
 
 test_that("different input formats have the same results (LSM)", {
@@ -90,6 +104,15 @@ test_that("comparison columns align (unnamed)", {
   expect_equal(as.numeric(lingmatch(dtm, cdtm[1:5, ], space = space, type = "lsa")$sim), manual)
   expect_equal(as.numeric(lingmatch(wdtm, cdtm[1:5, ], space = space, type = "lsa")$sim), manual)
   expect_equal(as.numeric(lingmatch(cdtm, cdtm[1:5, ], space = space, type = "lsa")$sim), manual)
+})
+
+test_that("drop works", {
+  ddtm <- dtm
+  ddtm[, 1] <- 0
+  expect_identical(
+    as.numeric(lingmatch(ddtm, drop = TRUE)$sim),
+    as.numeric(lingmatch(dtm[, -1])$sim)
+  )
 })
 
 test_that("function comparisons work", {
@@ -149,16 +172,25 @@ test_that("group comparisons work", {
     ) - 1) / (nrow(dtm) / 2 - 1)
   )
   subgroups <- sample(c("x", "y"), nrow(dtm), TRUE)
-  sg <- paste(groups, subgroups)
-  sgmeans <- t(vapply(split(as.data.frame(cdtm), sg), colMeans, numeric(9)))
+  all_groups <- paste(groups, subgroups)
+  sgmeans <- t(vapply(split(as.data.frame(cdtm), all_groups), colMeans, numeric(9)))
   g1_2 <- lingmatch(dtm, group = cbind(groups, subgroups), type = "lsm", all.levels = TRUE)$sim
   expect_equal(g1, g1_2$g1_canberra)
-  expect_equal(g1_2$g1_g2_canberra, vapply(seq_along(sg), function(i) {
-    lma_simets(cdtm[i, ], sgmeans[sg[i], ], "can")
+  expect_equal(g1_2$g1_g2_canberra, vapply(seq_along(all_groups), function(i) {
+    lma_simets(cdtm[i, ], sgmeans[all_groups[i], ], "can")
   }, 0))
+  group_data <- cbind(groups, subgroups)
+  expect_equal(as.numeric(lingmatch(
+    dtm,
+    group = group_data, type = "lsm", all.levels = TRUE
+  )$sim$g1_canberra), g1)
+  # debugonce(lingmatch)
   g1_2p <- lingmatch(dtm, "pair", group = cbind(groups, subgroups), type = "lsm", mean = FALSE)$sim
   for (s in names(g1_2p)) {
-    expect_identical(as.numeric(g1_2p[[s]]), as.numeric(lingmatch(dtm[sg == s, ], "pair", type = "lsm", mean = FALSE)$sim))
+    expect_identical(
+      as.numeric(g1_2p[[s]]),
+      as.numeric(lingmatch(dtm[all_groups == s, ], "pair", type = "lsm", mean = FALSE)$sim)
+    )
   }
 })
 

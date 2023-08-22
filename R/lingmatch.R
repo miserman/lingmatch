@@ -53,7 +53,7 @@
 #' @param order A numeric vector the same length as \code{nrow(input)} indicating the order of the
 #'   texts and grouping variables when the type of comparison is sequential. Only necessary if the
 #'   texts are not already ordered as desired.
-#' @param drop logical; if \code{FALSE}, columns with a sum of 0 are retained.
+#' @param drop logical; if \code{TRUE}, will drop columns with a sum of 0.
 #' @param all.levels logical; if \code{FALSE}, multiple groups are combined. See the Grouping and
 #'   Comparisons section.
 #' @param type A character at least partially matching 'lsm' or 'lsa'; applies default settings
@@ -197,7 +197,7 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
         return(unlist(data[, a]))
       } else if (length(ta) == 1 || !any(grepl(" ", a, fixed = TRUE))) ta <- parse(text = a)
     }
-    ta <- tryCatch(eval(ta, parent.frame(3)), error = function(e) NULL)
+    ta <- tryCatch(eval(ta, parent.frame(2)), error = function(e) NULL)
     if (!length(ta) || (!is.null(dim(ta)) && !dim(ta)[1])) {
       ta <- tryCatch(eval(a, data, parent.frame(2)), error = function(e) NULL)
       if (!length(ta) || (!is.null(dim(ta)) && !dim(ta)[1])) {
@@ -255,7 +255,7 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
       opt$input <- input
     }
   }
-  if (is.function(input) || (is.list(input) && is.null(dim(input)))) {
+  if (is.function(input) || ((is.list(input) || is.numeric(input)) && is.null(dim(input)))) {
     stop(
       "enter a character vector or matrix-like object as input",
       call. = FALSE
@@ -307,29 +307,19 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
       cx <- length(dn)
       input <- input[, dn]
       do.wmc <- FALSE
-      if (!missing(comp)) {
-        if (any(class(comp) %in% c("matrix", "data.frame"))) {
-          if (all(dn %in% colnames(comp))) comp <- comp[, dn]
-        } else {
-          if (is.character(comp) && (length(comp) > 1 || grepl(" ", comp, fixed = TRUE))) {
-            comp <- wmc(do.call(lma_dtm, c(list(comp), dsp$p)))
-          }
-        }
+      if (!missing(comp) && any(class(comp) %in% c("matrix", "data.frame")) && all(dn %in% colnames(comp))) {
+        comp <- comp[, dn]
       }
     }
   }
   if (!is.matrix(input) && is.character(input)) {
-    if (!any(grepl("[^[:digit:][:space:].-]", input))) {
-      input <- as.numeric(input)
-    } else {
-      # if input looks like text, seeing if other text can be added, then converting to a dtm
-      if (is.character(comp) && (length(comp) > 1 || grepl(" ", comp, fixed = TRUE))) {
-        input <- c(comp, input)
-        comp <- seq_along(comp)
-        opt$comp <- "text"
-      }
-      input <- do.call(lma_dtm, c(list(input), dsp$p))
+    # if input looks like text, seeing if other text can be added, then converting to a dtm
+    if (is.character(comp) && (length(comp) > 1 || grepl(" ", comp, fixed = TRUE))) {
+      input <- c(comp, input)
+      comp <- seq_along(comp)
+      opt$comp <- "text"
     }
+    input <- do.call(lma_dtm, c(list(input), dsp$p))
   }
   if (is.data.frame(comp)) comp <- as.matrix(comp)
   cc <- if (is.numeric(comp) && (!is.null(comp.data) || is.null(dim(comp)))) {
@@ -350,7 +340,9 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
     group <- if (length(opt$group) > 1 && as.character(opt$group[1]) %in% agc &&
       !grepl("[$[]", as.character(opt$group[1]))) {
       group <- tryCatch(gv(opt$group, data), error = function(e) NULL)
-      if (is.character(group) && all(group %in% colnames(data))) group <- data[, group]
+      if (is.character(group) && is.null(dim(group)) && all(group %in% colnames(data))) {
+        group <- data[, group]
+      }
       if (is.null(group)) lapply(opt$group[-1], gv, data) else group
     } else {
       if (!is.null(colnames(data)) && is.character(opt$group) && length(opt$group) < nrow(data)) {
@@ -433,14 +425,12 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
     }
   }
   if (is.character(input)) input <- matrix(as.numeric(input), rx)
-  if (is.data.frame(input) && any(ckvc <- !vapply(seq_len(cx), function(col) {
-    class(input[, col])[1]
-  }, "") %in% c("numeric", "integer"))) {
+  if (is.data.frame(input) && any(ckvc <- !vapply(input, is.numeric, TRUE))) {
     if (all(ckvc)) {
       for (col in seq_along(ckvc)) input[, col] <- as.numeric(input[, col])
     } else {
       input <- input[, !ckvc]
-      warning("some input variables were not of numeric or integer class, so they were removed")
+      warning("some input variables were not numeric, so they were removed")
     }
   }
   dtm <- Matrix(if (is.data.frame(input)) as.matrix(input) else input, sparse = TRUE)
@@ -557,7 +547,14 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
   } else if (opt$comp == "sequential" && is.null(speaker)) speaker <- seq_len(nrow(input))
   # making comparisons
   sal <- dsp$s
-  if (is.null(sal$mean)) sal$mean <- FALSE
+  ck_grouppair <- !(!is.null(group) && if (is.null(comp.group)) {
+    !is.null(rownames(comp.data))
+  } else {
+    !anyDuplicated(comp.group)
+  })
+  if (ck_grouppair && !is.logical(sal$mean)) {
+    sal$mean <- isTRUE(grepl("T", sal$mean, fixed = TRUE))
+  }
   ckf <- is.function(comp)
   apply_comp <- function(m) {
     a <- names(as.list(args(comp)))
@@ -616,10 +613,10 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
             }
           }))
         } else {
-          if (is.null(sal$pairwise)) sal$pairwise <- TRUE
-          flat <- ckf || !sal$pairwise || sal$mean
+          if (is.null(sal$pairwise)) sal$pairwise <- ck_grouppair
+          flat <- ckf || !isTRUE(sal$pairwise) || isTRUE(sal$mean)
           sal$return.list <- !flat
-          fsim <- list()
+          if (!flat) fsim <- list()
           ckmc <- FALSE
           if (!ckc && ckf) {
             ckmc <- TRUE
@@ -656,7 +653,7 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
         }
       } else {
         ug <- unique(group[[1]])
-        if (sal$mean) {
+        if (isTRUE(sal$mean)) {
           sim <- data.frame(group[[1]], NA, stringsAsFactors = FALSE)
           colnames(sim) <- c(opt$group, sal$metric)
           for (g in ug) {
@@ -689,8 +686,8 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
           do.call(paste, comp.group[seq_len(g)])
         }, character(length(comp.group[[1]])))
       }
-      if (is.null(sal$pairwise)) sal$pairwise <- TRUE
-      flat <- ckf || sal$mean
+      if (is.null(sal$pairwise)) sal$pairwise <- ck_grouppair
+      flat <- ckf || isTRUE(sal$mean)
       if (!flat) fsim <- list()
       ssl <- if (is.null(speaker)) TRUE else !is.na(speaker)
       for (g in unique(sim[, 1])) {

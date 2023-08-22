@@ -89,7 +89,7 @@
     
     
 <p>Works through a text classification example.</p>
-<p><em>Built with R 4.3.1 on August 13 2023</em></p>
+<p><em>Built with R 4.3.1 on August 22 2023</em></p>
 <hr>
 <div class="section level2">
 <h2 id="data">Data<a class="anchor" aria-label="anchor" href="#data"></a>
@@ -245,8 +245,8 @@ will often smooth the probabilities.</p>
 <span>  package <span class="op">=</span> <span class="va">weights_nb</span><span class="op">$</span><span class="va">prob1</span><span class="op">[</span><span class="st">"dress"</span>, <span class="op">]</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt;          Feminine  Masculine</span></span>
-<span><span class="co">#&gt; manual  0.2133333 0.02631579</span></span>
-<span><span class="co">#&gt; package 0.2133333 0.02631579</span></span></code></pre></div>
+<span><span class="co">#&gt; manual  0.1866667 0.05263158</span></span>
+<span><span class="co">#&gt; package 0.1866667 0.05263158</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="decision-tree-classifier">Decision Tree classifier<a class="anchor" aria-label="anchor" href="#decision-tree-classifier"></a>
@@ -414,12 +414,12 @@ classifiers (or calculate predictions manually), then measure accuracy
 <span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>accuracy <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">predictions</span> <span class="op">==</span> <span class="va">data</span><span class="op">[</span><span class="op">-</span><span class="va">train_ids</span>, <span class="st">"Recall"</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;               accuracy</span></span>
 <span><span class="co">#&gt; terms        0.6923077</span></span>
-<span><span class="co">#&gt; bayes        0.7384615</span></span>
-<span><span class="co">#&gt; dtree        0.6769231</span></span>
-<span><span class="co">#&gt; svm          0.7538462</span></span>
-<span><span class="co">#&gt; neural       0.6153846</span></span>
-<span><span class="co">#&gt; neural_glove 0.6769231</span></span>
-<span><span class="co">#&gt; ensemble     0.7230769</span></span></code></pre></div>
+<span><span class="co">#&gt; bayes        0.7538462</span></span>
+<span><span class="co">#&gt; dtree        0.7076923</span></span>
+<span><span class="co">#&gt; svm          0.7230769</span></span>
+<span><span class="co">#&gt; neural       0.7538462</span></span>
+<span><span class="co">#&gt; neural_glove 0.7384615</span></span>
+<span><span class="co">#&gt; ensemble     0.7384615</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="testing-decisions">Testing decisions<a class="anchor" aria-label="anchor" href="#testing-decisions"></a>
@@ -553,10 +553,10 @@ parallelize it:</p>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>Average <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">Model_Accuracies</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;         Average</span></span>
-<span><span class="co">#&gt; terms 0.6869231</span></span>
-<span><span class="co">#&gt; bayes 0.7380000</span></span>
-<span><span class="co">#&gt; dtree 0.7340000</span></span>
-<span><span class="co">#&gt; svm   0.7316923</span></span>
+<span><span class="co">#&gt; terms 0.6873846</span></span>
+<span><span class="co">#&gt; bayes 0.7207692</span></span>
+<span><span class="co">#&gt; dtree 0.7310769</span></span>
+<span><span class="co">#&gt; svm   0.7233846</span></span>
 <span><span class="fu"><a href="https://miserman.github.io/splot/reference/splot.html" class="external-link">splot</a></span><span class="op">(</span><span class="va">Model_Accuracies</span>, title <span class="op">=</span> <span class="cn">FALSE</span>, leg.title <span class="op">=</span> <span class="st">"Model"</span>, dark <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="text_classification_files/figure-html/unnamed-chunk-14-1.svg" width="864"></p>
 </div>

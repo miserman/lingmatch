@@ -58,7 +58,7 @@ and \code{\link{lma_simets}}.}
 texts and grouping variables when the type of comparison is sequential. Only necessary if the
 texts are not already ordered as desired.}
 
-\item{drop}{logical; if \code{FALSE}, columns with a sum of 0 are retained.}
+\item{drop}{logical; if \code{TRUE}, will drop columns with a sum of 0.}
 
 \item{all.levels}{logical; if \code{FALSE}, multiple groups are combined. See the Grouping and
 Comparisons section.}
