@@ -32,7 +32,6 @@ save(lsm_profiles, lss_info, dict_info, file = "r/sysdata.rda", compress = "bzip
 # runs checks
 devtools::check_win_devel()
 devtools::check_rhub(interactive = FALSE)
-rhub::check(platforms = "macos-highsierra-release-cran")
 
 # releases
 devtools::release()
