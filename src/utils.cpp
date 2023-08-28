@@ -3,6 +3,7 @@
 #include <Rcpp.h>
 #include <RcppParallel.h>
 #include <fstream>
+#define BOOST_REGEX_USE_C_LOCALE
 #include <boost/regex.hpp>
 using namespace std;
 using namespace Rcpp;

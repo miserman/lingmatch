@@ -691,6 +691,7 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
       if (!flat) fsim <- list()
       ssl <- if (is.null(speaker)) TRUE else !is.na(speaker)
       for (g in unique(sim[, 1])) {
+        if (!flat && is.null(fsim[[g]])) fsim[[g]] <- list()
         su <- which(sim[, 1] == g & ssl)
         sg <- group[su, , drop = FALSE]
         sx <- input[su, , drop = FALSE]
@@ -716,6 +717,7 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
           if (length(ssg) != 0) {
             for (ssn in names(ssg)) {
               ssu <- su[sg[, s] == ssn]
+              if (!flat && is.null(fsim[[g]][[ssn]])) fsim[[g]][[ssn]] <- list()
               if (cks) {
                 sal$group <- speaker[ssu]
               } else if (ckf && !is.null(dim(ssg[[ssn]]))) {
