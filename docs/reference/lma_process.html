@@ -70,7 +70,7 @@ and optionally including <code><a href="lma_meta.html">lma_meta</a></code> outpu
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">lma_process</span><span class="op">(</span>input <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span>, meta <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">lma_process</span><span class="op">(</span>input <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span>, meta <span class="op">=</span> <span class="cn">TRUE</span>, coverage <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -87,6 +87,11 @@ and optionally including <code><a href="lma_meta.html">lma_meta</a></code> outpu
 <dt>meta</dt>
 <dd><p>Logical; if <code>FALSE</code>, metastatistics are not included. Only applies when raw text is available.
 If included, meta categories are added as the last columns, with names starting with "meta_".</p></dd>
+
+
+<dt>coverage</dt>
+<dd><p>Logical; if <code>TRUE</code> and a dictionary is provided (<code>dict</code>),
+will calculate the coverage (number of unique term matches) of each dictionary category.</p></dd>
 
 </dl></div>
     <div class="section level2">

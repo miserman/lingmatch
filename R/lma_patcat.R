@@ -102,6 +102,7 @@
 lma_patcat <- function(text, dict = NULL, pattern.weights = "weight", pattern.categories = "category", bias = NULL,
                        to.lower = TRUE, return.dtm = FALSE, drop.zeros = FALSE, exclusive = TRUE, boundary = NULL, fixed = TRUE,
                        globtoregex = FALSE, name.map = c(intname = "_intercept", term = "term"), dir = getOption("lingmatch.dict.dir")) {
+  text_names <- names(text)
   if (is.factor(text)) text <- as.character(text)
   if (!is.character(text)) stop("enter a character vector as the first argument")
   text <- paste(" ", text, " ")
@@ -361,6 +362,7 @@ lma_patcat <- function(text, dict = NULL, pattern.weights = "weight", pattern.ca
       rownames(op[[1]]) <- 1
     }
   }
+  if (length(text_names) == nrow(op[[1]])) rownames(op[[1]]) <- text_names
   attr(op[[1]], "WC") <- op[[2]]
   attr(op[[1]], "time") <- c(patcat = proc.time()[[3]] - st)
   if (drop.zeros) op[[1]] <- op[[1]][, colSums(op[[1]]) != 0, drop = FALSE]

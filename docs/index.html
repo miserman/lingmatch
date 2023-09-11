@@ -119,11 +119,11 @@
 <p>Download R from <a href="https://www.r-project.org/" class="external-link">r-project.org</a>, then install the package from an R console:</p>
 <p>Release (<a href="https://CRAN.R-project.org/package=lingmatch" class="external-link">version 1.0.6</a>)</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">'lingmatch'</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"lingmatch"</span><span class="op">)</span></span></code></pre></div>
 <p>Development (version 1.0.7)</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># install.packages('remotes')</span></span>
-<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">'miserman/lingmatch'</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># install.packages("remotes")</span></span>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"miserman/lingmatch"</span><span class="op">)</span></span></code></pre></div>
 <p>And load the package:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/miserman/lingmatch" class="external-link">lingmatch</a></span><span class="op">)</span></span></code></pre></div>
@@ -133,7 +133,7 @@
 </h2>
 <p>Can make a quick comparison between two bits of text; by default this will give the cosine similarity between raw word-count vectors:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/lingmatch.html">lingmatch</a></span><span class="op">(</span><span class="st">'First text to look at.'</span>, <span class="st">'Text to compare that text with.'</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="reference/lingmatch.html">lingmatch</a></span><span class="op">(</span><span class="st">"First text to look at."</span>, <span class="st">"Text to compare that text with."</span><span class="op">)</span></span></code></pre></div>
 <p>Or, given a vector of texts:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">text</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
@@ -145,24 +145,24 @@
 <p>Process the texts in one step:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># with a dictionary</span></span>
-<span><span class="va">inquirer_cats</span> <span class="op">=</span> <span class="fu"><a href="reference/lma_process.html">lma_process</a></span><span class="op">(</span><span class="va">text</span>, dict <span class="op">=</span> <span class="st">'inquirer'</span>, dir <span class="op">=</span> <span class="st">'~/Dictionaries'</span><span class="op">)</span></span>
+<span><span class="va">inquirer_cats</span> <span class="op">=</span> <span class="fu"><a href="reference/lma_process.html">lma_process</a></span><span class="op">(</span><span class="va">text</span>, dict <span class="op">=</span> <span class="st">"inquirer"</span>, dir <span class="op">=</span> <span class="st">"~/Dictionaries"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># with a latent semantic space</span></span>
-<span><span class="va">glove_vectors</span> <span class="op">=</span> <span class="fu"><a href="reference/lma_process.html">lma_process</a></span><span class="op">(</span><span class="va">text</span>, space <span class="op">=</span> <span class="st">'glove'</span>, dir <span class="op">=</span> <span class="st">'~/Latent Semantic Spaces'</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">glove_vectors</span> <span class="op">=</span> <span class="fu"><a href="reference/lma_process.html">lma_process</a></span><span class="op">(</span><span class="va">text</span>, space <span class="op">=</span> <span class="st">"glove"</span>, dir <span class="op">=</span> <span class="st">"~/Latent Semantic Spaces"</span><span class="op">)</span></span></code></pre></div>
 <p>Or process the texts step by step, then measure similarity between each:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dtm</span> <span class="op">=</span> <span class="fu"><a href="reference/lma_dtm.html">lma_dtm</a></span><span class="op">(</span><span class="va">text</span><span class="op">)</span></span>
 <span><span class="va">dtm_weighted</span> <span class="op">=</span> <span class="fu"><a href="reference/lma_weight.html">lma_weight</a></span><span class="op">(</span><span class="va">dtm</span><span class="op">)</span></span>
 <span><span class="va">dtm_categorized</span> <span class="op">=</span> <span class="fu"><a href="reference/lma_termcat.html">lma_termcat</a></span><span class="op">(</span><span class="va">dtm_weighted</span>, <span class="fu"><a href="reference/lma_dict.html">lma_dict</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">9</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">similarity</span> <span class="op">=</span> <span class="fu"><a href="reference/lma_simets.html">lma_simets</a></span><span class="op">(</span><span class="va">dtm_categorized</span>, metric <span class="op">=</span> <span class="st">'canberra'</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">similarity</span> <span class="op">=</span> <span class="fu"><a href="reference/lma_simets.html">lma_simets</a></span><span class="op">(</span><span class="va">dtm_categorized</span>, metric <span class="op">=</span> <span class="st">"canberra"</span><span class="op">)</span></span></code></pre></div>
 <p>Or do that within a single function call:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">similarity</span> <span class="op">=</span> <span class="fu"><a href="reference/lingmatch.html">lingmatch</a></span><span class="op">(</span></span>
-<span>  <span class="va">text</span>, weight <span class="op">=</span> <span class="st">'frequency'</span>, dict <span class="op">=</span> <span class="fu"><a href="reference/lma_dict.html">lma_dict</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">9</span><span class="op">)</span>, metric <span class="op">=</span> <span class="st">'canberra'</span></span>
+<span>  <span class="va">text</span>, weight <span class="op">=</span> <span class="st">"frequency"</span>, dict <span class="op">=</span> <span class="fu"><a href="reference/lma_dict.html">lma_dict</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">9</span><span class="op">)</span>, metric <span class="op">=</span> <span class="st">"canberra"</span></span>
 <span><span class="op">)</span><span class="op">$</span><span class="va">sim</span></span></code></pre></div>
 <p>Or, if you want a standard form (as in this example), specify a default:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">similarity</span> <span class="op">=</span> <span class="fu"><a href="reference/lingmatch.html">lingmatch</a></span><span class="op">(</span><span class="va">text</span>, type <span class="op">=</span> <span class="st">'lsm'</span><span class="op">)</span><span class="op">$</span><span class="va">sim</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">similarity</span> <span class="op">=</span> <span class="fu"><a href="reference/lingmatch.html">lingmatch</a></span><span class="op">(</span><span class="va">text</span>, type <span class="op">=</span> <span class="st">"lsm"</span><span class="op">)</span><span class="op">$</span><span class="va">sim</span></span></code></pre></div>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">

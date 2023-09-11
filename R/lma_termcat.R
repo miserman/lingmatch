@@ -32,10 +32,13 @@
 #' @param dir Path to a folder in which to look for \code{dict}; \cr
 #'   will look in \code{'~/Dictionaries'} by default. \cr
 #'   Set a session default with \code{options(lingmatch.dict.dir = 'desired/path')}.
+#' @param coverage Logical; if \code{TRUE}, will calculate coverage
+#'   (number of unique term matches) for each category.
 #' @seealso For applying pattern-based dictionaries (to raw text) see \code{\link{lma_patcat}}.
 #' @family Dictionary functions
-#' @return A matrix with a row per \code{dtm} row and columns per dictionary category, and a \code{WC} attribute
-#' with original word counts.
+#' @return A matrix with a row per \code{dtm} row and columns per dictionary category
+#' (with added \code{coverage_} versions if \code{coverage} is \code{TRUE}),
+#' and a \code{WC} attribute with original word counts.
 #' @examples
 #' \dontrun{
 #'
@@ -76,7 +79,7 @@
 
 lma_termcat <- function(dtm, dict, term.weights = NULL, bias = NULL, bias.name = "_intercept",
                         escape = TRUE, partial = FALSE, glob = TRUE, term.filter = NULL, term.break = 2e4,
-                        to.lower = FALSE, dir = getOption("lingmatch.dict.dir")) {
+                        to.lower = FALSE, dir = getOption("lingmatch.dict.dir"), coverage = FALSE) {
   st <- proc.time()[[3]]
   if (ckd <- dir == "") dir <- "~/Dictionaries"
   if (missing(dict)) dict <- lma_dict(1:9)
@@ -270,7 +273,7 @@ lma_termcat <- function(dtm, dict, term.weights = NULL, bias = NULL, bias.name =
       if (is.character(dtm)) {
         warning(
           "dict has terms with spaces, so using lma_patcat instead;",
-          "\n  enter a dtm (e.g., lma_dtm(", edtm, ")) to force lma_termcat use"
+          "\n  enter a dtm (e.g., lma_dtm(", paste0(edtm, collapse = ""), ")) to force lma_termcat use"
         )
         args <- list(text = dtm, dict = dict)
         if (!is.null(term.weights)) args$pattern.weights <- term.weights
@@ -396,6 +399,7 @@ lma_termcat <- function(dtm, dict, term.weights = NULL, bias = NULL, bias.name =
       o
     }
     op <- matrix(0, nrow(dtm), length(dict), dimnames = list(rownames(dtm), names(dict)))
+    if (coverage) cop <- op
     for (cat in names(dict)) {
       matches <- if (cls[[cat]] > term.break) {
         unique(unlist(lapply(br(cat), function(s) {
@@ -405,8 +409,14 @@ lma_termcat <- function(dtm, dict, term.weights = NULL, bias = NULL, bias.name =
         grep(formatdict(list(dict[[cat]])), ws, perl = TRUE)
       }
       if (length(matches)) {
-        op[, cat] <- rowSums(dtm[, matches, drop = FALSE], na.rm = TRUE)
+        su <- dtm[, matches, drop = FALSE]
+        op[, cat] <- rowSums(su, na.rm = TRUE)
+        if (coverage) cop[, cat] <- rowSums(su != 0, na.rm = TRUE)
       }
+    }
+    if (coverage) {
+      colnames(cop) <- paste0("coverage_", colnames(op))
+      op <- cbind(op, cop)
     }
   } else {
     if (!is.null(term.weights)) {
@@ -454,11 +464,21 @@ lma_termcat <- function(dtm, dict, term.weights = NULL, bias = NULL, bias.name =
       }
     } else {
       dict <- formatdict(dict)
-      op <- vapply(names(dict), function(cat) {
-        rowSums(dtm[, grep(dict[[cat]], ws, perl = TRUE),
-          drop = FALSE
-        ], na.rm = TRUE)
-      }, numeric(nrow(dtm)))
+      if (coverage) {
+        op <- vapply(names(dict), function(cat) {
+          su <- dtm[, grep(dict[[cat]], ws, perl = TRUE), drop = FALSE]
+          c(rowSums(su != 0, na.rm = TRUE), rowSums(su, na.rm = TRUE))
+        }, numeric(nrow(dtm) * 2))
+        cop <- op[seq_len(nrow(dtm)), ]
+        colnames(cop) <- paste0("coverage_", names(dict))
+        op <- cbind(op[-seq_len(nrow(dtm)), ], cop)
+      } else {
+        op <- vapply(names(dict), function(cat) {
+          rowSums(dtm[, grep(dict[[cat]], ws, perl = TRUE),
+            drop = FALSE
+          ], na.rm = TRUE)
+        }, numeric(nrow(dtm)))
+      }
       if (nrow(dtm) == 1) {
         op <- t(op)
         rownames(op) <- 1

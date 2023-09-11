@@ -4,7 +4,7 @@
 \alias{lma_process}
 \title{Process Text}
 \usage{
-lma_process(input = NULL, ..., meta = TRUE)
+lma_process(input = NULL, ..., meta = TRUE, coverage = FALSE)
 }
 \arguments{
 \item{input}{A vector of text, or path to a text file or folder.}
@@ -14,6 +14,9 @@ lma_process(input = NULL, ..., meta = TRUE)
 
 \item{meta}{Logical; if \code{FALSE}, metastatistics are not included. Only applies when raw text is available.
 If included, meta categories are added as the last columns, with names starting with "meta_".}
+
+\item{coverage}{Logical; if \code{TRUE} and a dictionary is provided (\code{dict}),
+will calculate the coverage (number of unique term matches) of each dictionary category.}
 }
 \value{
 A matrix with texts represented by rows, and features in columns, unless there are multiple rows per output

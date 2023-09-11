@@ -9,6 +9,8 @@
 #'   \code{\link{lma_termcat}}, and/or \code{\link{lma_lspace}}. All arguments must be named.
 #' @param meta Logical; if \code{FALSE}, metastatistics are not included. Only applies when raw text is available.
 #'  If included, meta categories are added as the last columns, with names starting with "meta_".
+#' @param coverage Logical; if \code{TRUE} and a dictionary is provided (\code{dict}),
+#'  will calculate the coverage (number of unique term matches) of each dictionary category.
 #' @return A matrix with texts represented by rows, and features in columns, unless there are multiple rows per output
 #'  (e.g., when a latent semantic space is applied without terms being mapped) in which case only the special output
 #'  is returned (e.g., a matrix with terms as rows and latent dimensions in columns).
@@ -32,7 +34,7 @@
 #' lma_process(texts, space = lma_lspace(texts), weight = "tfidf")
 #' @export
 
-lma_process <- function(input = NULL, ..., meta = TRUE) {
+lma_process <- function(input = NULL, ..., meta = TRUE, coverage = FALSE) {
   inp <- as.list(substitute(...()))
   funs <- c("read.segments", "lma_dtm", "lma_weight", "lma_lspace", "lma_termcat", "lma_patcat")
   allargs <- NULL
@@ -74,7 +76,7 @@ lma_process <- function(input = NULL, ..., meta = TRUE) {
   ck_changed <- FALSE
   if (ck_text) {
     if (arg_checks[["lma_patcat"]]) {
-      if (!"return.dtm" %in% names(arg_matches$lma_patcat) && length(arg_matches$lma_weight)) {
+      if (!"return.dtm" %in% names(arg_matches$lma_patcat) && (coverage || length(arg_matches$lma_weight))) {
         arg_matches$lma_patcat$return.dtm <- TRUE
       }
       arg_matches$lma_patcat$text <- op[, "text"]
@@ -100,11 +102,25 @@ lma_process <- function(input = NULL, ..., meta = TRUE) {
       matrix(0, nrow(op), length(categories), dimnames = list(NULL, names(categories))),
       stringsAsFactors = FALSE
     )
-    for (cat in names(categories)) xc[, cat] <- rowSums(x[, categories[[cat]], drop = FALSE], na.rm = TRUE)
+    if (coverage) {
+      cxc <- xc
+      for (cat in names(categories)) {
+        su <- x[, categories[[cat]], drop = FALSE]
+        xc[, cat] <- rowSums(su, na.rm = TRUE)
+        cxc[, cat] <- rowSums(su != 0, na.rm = TRUE)
+      }
+      colnames(cxc) <- paste0("coverage_", colnames(xc))
+      xc <- cbind(xc, cxc)
+    } else {
+      for (cat in names(categories)) {
+        xc[, cat] <- rowSums(x[, categories[[cat]], drop = FALSE], na.rm = TRUE)
+      }
+    }
     x <- xc
     ck_changed <- TRUE
   } else if (arg_checks[["lma_termcat"]] || (length(arg_matches$lma_termcat) &&
     any(names(arg_matches$lma_termcat) != "dir"))) {
+    arg_matches$lma_termcat$coverage <- coverage
     arg_matches$lma_termcat$dtm <- x
     x <- do.call(lma_termcat, lapply(arg_matches$lma_termcat, eval.parent, 2))
     ck_changed <- TRUE

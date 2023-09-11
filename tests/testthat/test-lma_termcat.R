@@ -127,6 +127,23 @@ test_that("text input works", {
   expect_equal(lma_termcat(dtm, dict)[, 1], rowSums(dtm))
 })
 
+test_that("coverage works", {
+  dict <- list(
+    a = paste0("a", letters[1:4]),
+    b = paste0("b", letters[1:4]),
+    c = paste0("c", letters[1:4])
+  )
+  text <- c(
+    a = "aa ab ac ad ba ba ba ba ca",
+    b = "ba bb bc bd aa ca ca ca ca",
+    c = "ca cb cc cd aa aa aa aa ba"
+  )
+  res <- lma_termcat(text, dict, coverage = TRUE)
+  expect_identical(as.numeric(res[, "coverage_b"]), c(1, 4, 1))
+  res <- lma_process(text, dict = dict, coverage = TRUE, meta = FALSE, exclusive = TRUE)
+  expect_identical(as.numeric(res[, "coverage_b"]), c(1, 4, 1))
+})
+
 test_that("lma_termcat and lma_patcat are accurate", {
   terms <- sample(words, 50)
   dict <- do.call(rbind, lapply(c("a", "b", "c"), function(cat) {
