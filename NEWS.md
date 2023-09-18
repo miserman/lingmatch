@@ -1,7 +1,11 @@
 # version 1.0.7
 
 ### Features
+* Adds `dictionary_meta` to assess dictionary categories.
 * Adds dictionary category coverage reporting to `lma_termcat` and `lma_process`.
+
+### Improvements
+* Allows for direct weight discretization from a weighted list dictionary.
 
 # version 1.0.6
 

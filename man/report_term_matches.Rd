@@ -7,6 +7,7 @@
 report_term_matches(dict, text = NULL, space = NULL, glob = TRUE,
   parse_phrases = TRUE, tolower = TRUE, punct = TRUE, special = TRUE,
   as_terms = FALSE, bysentence = FALSE, as_string = TRUE,
+  suggestion_terms = 10, term_map_freq = 0.98, term_map_spaces = 10,
   outFile = NULL, space_dir = getOption("lingmatch.lspace.dir"),
   verbose = TRUE)
 }
@@ -40,6 +41,12 @@ terms will only count as matches when matching the complete text.}
 consider unique sentences.}
 
 \item{as_string}{Logical; if \code{FALSE}, returns matches as tables rather than a string.}
+
+\item{term_map_freq}{Proportion of terms to include when using the term map as a source
+of terms. Applies when \code{text} is not specified.}
+
+\item{term_map_spaces}{Number of spaces in which a term has to appear to be included.
+Applies when \code{text} is not specified.}
 
 \item{outFile}{File path to write results to, always ending in \code{.csv}.}
 

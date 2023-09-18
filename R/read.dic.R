@@ -322,7 +322,11 @@ read.dic <- function(path, cats, type = "asis", as.weighted = FALSE, dir = getOp
     for (cat in names(wl)) op[, cat] <- as.integer(op$term %in% wl[[cat]])
     op
   } else {
-    wl
+    if (is.data.frame(wl) && !as.weighted) {
+      read.dic(wl, as.weighted = FALSE)
+    } else {
+      wl
+    }
   }
 }
 

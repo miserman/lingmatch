@@ -21,6 +21,10 @@
 #' @param bysentence Logical; if \code{TRUE}, will split \code{text} into sentences, and only
 #' consider unique sentences.
 #' @param as_string Logical; if \code{FALSE}, returns matches as tables rather than a string.
+#' @param term_map_freq Proportion of terms to include when using the term map as a source
+#' of terms. Applies when \code{text} is not specified.
+#' @param term_map_spaces Number of spaces in which a term has to appear to be included.
+#' Applies when \code{text} is not specified.
 #' @param outFile File path to write results to, always ending in \code{.csv}.
 #' @param space_dir Directory from which \code{space} should be loaded.
 #' @param verbose Logical; if \code{FALSE}, will not display status messages.
@@ -65,14 +69,22 @@
 
 report_term_matches <- function(dict, text = NULL, space = NULL, glob = TRUE,
                                 parse_phrases = TRUE, tolower = TRUE, punct = TRUE, special = TRUE,
-                                as_terms = FALSE, bysentence = FALSE, as_string = TRUE, outFile = NULL,
+                                as_terms = FALSE, bysentence = FALSE, as_string = TRUE,
+                                suggestion_terms = 10, term_map_freq = .98, term_map_spaces = 10, outFile = NULL,
                                 space_dir = getOption("lingmatch.lspace.dir"), verbose = TRUE) {
-  if (missing(dict)) stop("dict must be specified", .call = FALSE)
+  if (missing(dict)) stop("dict must be specified", call. = FALSE)
   if (is.null(text)) {
-    text <- rownames(select.lspace(dir = space_dir, get.map = TRUE)$term_map)
+    term_map <- select.lspace(dir = space_dir, get.map = TRUE)$term_map
+    if (term_map_freq > 0 && term_map_freq < 1) {
+      term_map <- term_map[seq(1, ceiling(nrow(term_map) * term_map_freq)), ]
+    }
+    if (term_map_spaces > 0 && term_map_spaces < ncol(term_map)) {
+      term_map <- term_map[rowSums(term_map != 0) >= term_map_spaces, ]
+    }
+    text <- rownames(term_map)
     as_terms <- TRUE
   }
-  if (is.null(text) && is.null(space)) stop("either text or space must be specified", .call = FALSE)
+  if (is.null(text) && is.null(space)) stop("either text or space must be specified", call. = FALSE)
   st <- proc.time()[[3]]
   if (!is.null(text) && !as_terms) {
     if (verbose) cat("preparing text (", round(proc.time()[[3]] - st, 4), ")\n", sep = "")

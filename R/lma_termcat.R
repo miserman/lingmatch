@@ -469,9 +469,9 @@ lma_termcat <- function(dtm, dict, term.weights = NULL, bias = NULL, bias.name =
           su <- dtm[, grep(dict[[cat]], ws, perl = TRUE), drop = FALSE]
           c(rowSums(su != 0, na.rm = TRUE), rowSums(su, na.rm = TRUE))
         }, numeric(nrow(dtm) * 2))
-        cop <- op[seq_len(nrow(dtm)), ]
+        cop <- op[seq_len(nrow(dtm)), , drop = FALSE]
         colnames(cop) <- paste0("coverage_", names(dict))
-        op <- cbind(op[-seq_len(nrow(dtm)), ], cop)
+        op <- cbind(op[-seq_len(nrow(dtm)), , drop = FALSE], cop)
       } else {
         op <- vapply(names(dict), function(cat) {
           rowSums(dtm[, grep(dict[[cat]], ws, perl = TRUE),

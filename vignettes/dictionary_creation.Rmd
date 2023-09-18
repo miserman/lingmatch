@@ -1,0 +1,171 @@
+---
+title: "Introduction to Dictionary Creation"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+library(lingmatch)
+```
+
+Walks through the process of creating and assessing a dictionary.
+
+*Built with R 
+`r getRversion()`*
+
+***
+
+# Background
+
+**Dictionaries** in this context are sets of term lists that each represent a category.
+**Categories** could range from concepts or topics (e.g., "furniture" or "shopping") to more
+abstract aspects of the text (e.g., "emotionality"). **Terms** may be single literal words
+(e.g., "term", "terms"), glob-like or fuzzy words (e.g., "term*", where the asterisk matches
+any number of additional letters), or arbitrary patterns (literal or regular expressions,
+e.g., "a phrase" or "an? (?:person|object)").
+
+The most straightforward way to make a dictionary is to manually assign terms to categories,
+but dictionaries can also be created with data, either by extracting cluster-like structures
+and assigning them category names (using unsupervised learning methods; see the 
+<a href='https://miserman.github.io/lingmatch/articles/word_vectors.html' target='_blank' rel='noreferrer'>introduction to word vectors</a> article),
+or by training a classifier to distinguish between provided tags (using supervised learning methods; see the 
+<a href='https://miserman.github.io/lingmatch/articles/text_classification.html' target='_blank' rel='noreferrer'>introduction to text classification</a> article).
+
+# Implementation
+
+In `lingmatch`, dictionaries are ultimately implemented as either lists or data.frames.
+
+As lists, categories are named entries with terms as character vectors:
+```{r}
+(dict_unweighted <- list(
+  a = c("aa", "ab", "ac"),
+  b = c("ba", "bb", "bc")
+))
+```
+As data.frames, terms are stored in a single column, and categories are defined by columns containing weights:
+```{r}
+(dict_dataframe <- data.frame(
+  term = c("aa", "ab", "ac", "ba", "bb", "bc"),
+  a = c(1, .9, .8, 0, 0, 0),
+  b = c(0, 0, 0, .9, 1, .8)
+))
+```
+
+Lists can also store weights in named character vectors:
+```{r}
+(dict_list <- list(
+  a = c("aa" = 1, "ab" = .9, "ac" = .8),
+  b = c("ba" = .9, "bb" = 1, "bc" = .8)
+))
+```
+
+Weighted dictionaries can be discretized using the `read.dic` function:
+```{r}
+read.dic(dict_dataframe, as.weighted = FALSE)
+```
+
+And un-weighted dictionaries can be converted to a weighted format with binary weights:
+```{r}
+read.dic(dict_unweighted, as.weighted = TRUE)
+```
+
+Dictionaries can also be read in from LIWC's `.dic` format:
+```{r}
+# this can also be written to and read from a file
+raw_dic <- write.dic(dict_unweighted, save = FALSE)
+cat(raw_dic)
+read.dic(raw = raw_dic)
+```
+
+For use in web applications, JavaScript Object Notation (JSON) may be a useful format,
+which can be converted to from lists:
+```{r}
+cat(jsonlite::toJSON(dict_unweighted, pretty = TRUE))
+```
+
+`.dic` or `JSON` dictionaries can be used in the
+<a href='https://miserman.github.io/adicat/highlight' target='_blank' rel='noreferrer'>adicat highlighter</a>
+(from the menu: Dictionary > load/create/edit > load), which can be used to see word matches, or process files.
+
+# Assessment
+
+Dictionary categories can be thought of as measures of the construct identified by the category's name.
+Constructs can range from being well defined by the text itself, to being more subtly embedded in the text.
+
+Some question we might ask when assessing a dictionary category are:
+
+1. How well will each term capture the word or words we have in mind?
+   - That is, are there unaccounted for variants, or unintended wildcard matches?
+2. How well does this set of terms cover the possible instances of the construct?
+   - That is, might the construct appear in a way that isn't covered?
+3. How confident would we be that the resulting score reflects the construct?
+   - That is, how much room is there for false positives due to varying contexts or word senses?
+
+For instance, consider this small dictionary:
+```{r}
+dict <- list(
+  a_words = "a*",
+  self_reference = c("i", "i'*", "me", "my", "mine", "myself"),
+  furniture = c("table", "chair", "desk*", "couch*", "sofa*"),
+  well_adjusted = c("happy", "bright*", "friend*", "she", "he", "they")
+)
+```
+
+The `a_words` category is only defined by characters, so it is perfect in that
+its scores can be expected to perfectly align with any other reliable means of scoring
+(such as a human counter). The only threat to this category (assuming texts are lowercased)
+is special characters that should count as `a`s, but converting such characters could be
+a part of pre-processing:
+```{r}
+clean <- lma_dict("special", as.function = gsub)
+lma_process(clean("Àn apple and à potato ærosol."), dict = dict[1], meta = FALSE)
+```
+
+The `self_reference` category is made up of words, so in addition to possible
+character variants, there are spelling/formatting variants to try and account for.
+Here "i'*" is particularly vulnerable since the apostrophe may be curly or omitted.
+A new danger introduced in this category is of false positives due to alternative uses
+of "i" (e.g., as a list item label) and alternate senses of "mine".
+These issues make for possible differences between the automatic score, and that theoretically
+calculated by a human:
+```{r}
+lma_process(
+  c("I) A mine.", "Mmeee! idk how but imma try!"),
+  dict = dict[2], meta = FALSE
+)
+```
+
+The `furniture` and `well_adjusted` categories introduces two main additional considerations:
+First, they uses broader wildcards, which are probably intended to simply catch plural forms,
+but are in danger of over-extending. We can use the `report_term_matches` function to check this:
+```{r}
+report_term_matches(dict[3:4])
+```
+By default, this searches for matches in a large set of common words found across
+latent semantic spaces (embeddings), but it can also be run on sets of text.
+
+The second consideration is that these categories are trying to cover broad concepts, so there
+are likely to be obvious but overlooked terms to include. One thing we could do to improve
+this sort of coverage is search for similar words within a latent semantic space:
+```{r}
+meta <- dictionary_meta(dict[3:4], suggest = TRUE)
+meta$suggested
+```
+
+This can help improve the theoretical coverage of these categories in themselves,
+but another type of coverage is how much of the category is covered by the text
+it's scoring. Low coverage of this sort isn't inherently an issue, but it puts more
+pressure on the covered terms to be unambiguous. For instance, compare the score
+versus coverage in these texts:
+```{r}
+texts <- c(
+  furniture = "There is a chair positioned in the intersection of a desk and table.",
+  business = "The chair took over from the former chair to introduced the new chair.",
+  although = "The chair sat down at their desk to table the discussion."
+)
+lma_termcat(texts, dict[3], coverage = TRUE)
+```
