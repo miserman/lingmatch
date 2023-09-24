@@ -6,7 +6,8 @@
 \usage{
 dictionary_meta(dict, space = "auto", suggest = FALSE,
   suggestion_terms = 10, suggest_stopwords = FALSE,
-  expand_cutoff_freq = 0.98, expand_cutoff_spaces = 10, glob = TRUE,
+  expand_cutoff_freq = 0.98, expand_cutoff_spaces = 10,
+  dimension_prop = 1, glob = TRUE,
   space_dir = getOption("lingmatch.lspace.dir"), verbose = TRUE)
 }
 \arguments{
@@ -29,6 +30,10 @@ Applies when \code{space} is a character (referring to a space to be loaded).}
 
 \item{expand_cutoff_spaces}{Number of spaces in which a term has to appear to be considered
 for expansion. Applies when \code{space} is a character (referring to a space to be loaded).}
+
+\item{dimension_prop}{Proportion of dimensions to use when searching for suggested additions,
+where less than 1 will calculate similarities to the category core using fewer dimensions
+of the space.}
 
 \item{glob}{Logical; if \code{TRUE}, converts globs (asterisk wildcards) to regular expressions.}
 

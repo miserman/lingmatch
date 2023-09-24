@@ -14,6 +14,9 @@
 #' Applies when \code{space} is a character (referring to a space to be loaded).
 #' @param expand_cutoff_spaces Number of spaces in which a term has to appear to be considered
 #' for expansion. Applies when \code{space} is a character (referring to a space to be loaded).
+#' @param dimension_prop Proportion of dimensions to use when searching for suggested additions,
+#' where less than 1 will calculate similarities to the category core using fewer dimensions
+#' of the space.
 #' @param glob Logical; if \code{TRUE}, converts globs (asterisk wildcards) to regular expressions.
 #' @param space_dir Directory from which \code{space} should be loaded.
 #' @param verbose Logical; if \code{FALSE}, will not show status messages.
@@ -22,7 +25,7 @@
 
 dictionary_meta <- function(
     dict, space = "auto", suggest = FALSE, suggestion_terms = 10, suggest_stopwords = FALSE,
-    expand_cutoff_freq = .98, expand_cutoff_spaces = 10, glob = TRUE,
+    expand_cutoff_freq = .98, expand_cutoff_spaces = 10, dimension_prop = 1, glob = TRUE,
     space_dir = getOption("lingmatch.lspace.dir"), verbose = TRUE) {
   if (missing(dict)) stop("dict must be specified", call. = FALSE)
   if (!is.list(dict)) dict <- list(dict)
@@ -80,15 +83,21 @@ dictionary_meta <- function(
   if (verbose) cat("calculating term similarities (", round(proc.time()[[3]] - st, 4), ")\n", sep = "")
   sims <- lapply(cat_names, function(cat) {
     su <- space_terms %in% dict_exp[[cat]]
-    lma_simets(space[su, ], space, metric = "cosine", pairwise = TRUE, symmetrical = TRUE)
+    if (dimension_prop < 1) {
+      loadings <- colSums(space[su, ])
+      dsu <- which(loadings >= sort(colSums(space[su, ]))[ceiling(ncol(space) * dimension_prop)])
+      if (!length(dsu)) dsu <- which.max(loadings)
+      space <- space[, dsu, drop = FALSE]
+    }
+    lma_simets(space, space[su, ], metric = "cosine", pairwise = TRUE, symmetrical = TRUE)
   })
   suggested <- if (suggest) {
     if (verbose) cat("identifying potential additions (", round(proc.time()[[3]] - st, 4), ")\n", sep = "")
     lapply(sims, function(s) {
       if (length(s)) {
-        su <- colnames(s) %in% rownames(s)
-        core <- names(sort(colSums(s[, su]), TRUE)[seq(1, min(nrow(s), max(5, min(20, ceiling(nrow(s) * .9)))))])
-        loadings <- sort(colMeans(s * rownames(s) %in% core)[!su], TRUE)
+        su <- rownames(s) %in% colnames(s)
+        core <- names(sort(rowSums(s[su, ]), TRUE)[seq(1, min(ncol(s), max(5, min(20, ceiling(ncol(s) * .9)))))])
+        loadings <- sort(rowMeans(s * colnames(s) %in% core)[!su], TRUE)
         co <- min(length(loadings), max(which(loadings > 0)), suggestion_terms)
         loadings[loadings > loadings[co] + Reduce("-", range(loadings[seq(1, co)])) / 2]
       }
@@ -104,8 +113,8 @@ dictionary_meta <- function(
     sim.space = space_name
   ), sim = do.call(rbind, lapply(sims, function(s) {
     if (length(s)) {
-      s <- s[, rownames(s)]
-      m <- (rowSums(s) - 1) / (nrow(s) - 1)
+      s <- s[colnames(s), ]
+      m <- (colSums(s) - 1) / (ncol(s) - 1)
     } else {
       m <- 0
     }

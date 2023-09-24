@@ -7,7 +7,8 @@ editor_options:
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  fig.width = 9
 )
 library(lingmatch)
 ```
@@ -152,11 +153,59 @@ The second consideration is that these categories are trying to cover broad conc
 are likely to be obvious but overlooked terms to include. One thing we could do to improve
 this sort of coverage is search for similar words within a latent semantic space:
 ```{r}
-meta <- dictionary_meta(dict[3:4], suggest = TRUE)
+meta <- dictionary_meta(dict[3:4], suggest = TRUE, dimension_prop = .7)
 meta$suggested
 ```
 
-This can help improve the theoretical coverage of these categories in themselves,
+We can also use the space to assess category cohesiveness by looking at summaries of
+pairwise cosine similarities between terms:
+```{r}
+meta$summary[, -1]
+```
+
+And we can visualize this together with the most similar suggested terms as a network:
+```{r, fig.height=7.5}
+library(visNetwork)
+
+top_suggested <- meta$suggested$furniture[1:10]
+nodes <- data.frame(
+  id = c(colnames(meta$sims$furniture), names(top_suggested)),
+  label = c(colnames(meta$sims$furniture), names(top_suggested)),
+  group = rep(
+    c("original", "suggested"),
+    c(ncol(meta$sims$furniture), length(top_suggested))
+  ),
+  shape = "box"
+)
+suggested_sim <- lma_simets(lma_lspace(
+  nodes$id,
+  space = meta$summary$sim.space[[1]]
+), metric = "cosine")
+nodes$size <- rowMeans(suggested_sim)
+edges <- data.frame(
+  from = rep(colnames(suggested_sim), each = nrow(suggested_sim)),
+  to = rep(rownames(suggested_sim), nrow(suggested_sim)),
+  value = as.numeric(suggested_sim),
+  title = as.numeric(suggested_sim)
+)
+
+visNetwork(
+  nodes, within(edges[edges$value > .1 & edges$value < 1, ], value <- (value * 10)^4)
+) |>
+  visEdges("title", smooth = FALSE, color = list(opacity = .6)) |>
+  visLegend(width = .07) |>
+  visPhysics(
+    "forceAtlas2Based",
+    forceAtlas2Based = list(centralGravity = .03, avoidOverlap = .5), timestep = 1e-4
+  ) |>
+  visLayout(randomSeed = 2080) |>
+  visInteraction(
+    dragNodes = TRUE, dragView = TRUE, hover = TRUE, hoverConnectedEdges = TRUE,
+    selectable = TRUE, tooltipDelay = 100, tooltipStay = 100
+  )
+```
+
+Suggested terms can help improve the theoretical coverage of these categories in themselves,
 but another type of coverage is how much of the category is covered by the text
 it's scoring. Low coverage of this sort isn't inherently an issue, but it puts more
 pressure on the covered terms to be unambiguous. For instance, compare the score
@@ -164,8 +213,14 @@ versus coverage in these texts:
 ```{r}
 texts <- c(
   furniture = "There is a chair positioned in the intersection of a desk and table.",
+  still_furniture = "I'm selling this chair, since my new chair replaced that chair.",
   business = "The chair took over from the former chair to introduced the new chair.",
-  although = "The chair sat down at their desk to table the discussion."
+  business_mixed = "The chair sat down at their desk to table the discussion."
 )
 lma_termcat(texts, dict[3], coverage = TRUE)
 ```
+
+These examples illustrate how this sort of coverage could relate to score validity
+(i.e., how much the category is actually reflected in the text), but also how
+it is not a perfect indicator. Generally, a smaller variety of term hits within a
+category should make us less confident in the category score.
