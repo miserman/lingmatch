@@ -34,6 +34,8 @@ navbar:
         href: articles/word_vectors.html
       - text: Text Classification
         href: articles/text_classification.html
+      - text: Dictionary Creation
+        href: articles/dictionary_creation.html
 
 home:
   sidebar:

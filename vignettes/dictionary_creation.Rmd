@@ -116,6 +116,8 @@ dict <- list(
 )
 ```
 
+## Character Variants
+
 The `a_words` category is only defined by characters, so it is perfect in that
 its scores can be expected to perfectly align with any other reliable means of scoring
 (such as a human counter). The only threat to this category (assuming texts are lowercased)
@@ -125,6 +127,8 @@ a part of pre-processing:
 clean <- lma_dict("special", as.function = gsub)
 lma_process(clean("Àn apple and à potato ærosol."), dict = dict[1], meta = FALSE)
 ```
+
+## Use Variants
 
 The `self_reference` category is made up of words, so in addition to possible
 character variants, there are spelling/formatting variants to try and account for.
@@ -140,14 +144,24 @@ lma_process(
 )
 ```
 
+## Coverage
+
+### Term Variants
+
 The `furniture` and `well_adjusted` categories introduces two main additional considerations:
 First, they uses broader wildcards, which are probably intended to simply catch plural forms,
 but are in danger of over-extending. We can use the `report_term_matches` function to check this:
 ```{r}
-report_term_matches(dict[3:4])
+report <- report_term_matches(dict[3:4])
+
+knitr::kable(report[, -c(4, 5)])
 ```
 By default, this searches for matches in a large set of common words found across
 latent semantic spaces (embeddings), but it can also be run on sets of text.
+
+### Category Coverage
+
+#### Term Coverage
 
 The second consideration is that these categories are trying to cover broad concepts, so there
 are likely to be obvious but overlooked terms to include. One thing we could do to improve
@@ -160,50 +174,71 @@ meta$suggested
 We can also use the space to assess category cohesiveness by looking at summaries of
 pairwise cosine similarities between terms:
 ```{r}
-meta$summary[, -1]
+knitr::kable(meta$summary[, -1], digits = 3)
 ```
 
 And we can visualize this together with the most similar suggested terms as a network:
 ```{r, fig.height=7.5}
 library(visNetwork)
 
-top_suggested <- meta$suggested$furniture[1:10]
-nodes <- data.frame(
-  id = c(colnames(meta$sims$furniture), names(top_suggested)),
-  label = c(colnames(meta$sims$furniture), names(top_suggested)),
-  group = rep(
-    c("original", "suggested"),
-    c(ncol(meta$sims$furniture), length(top_suggested))
-  ),
-  shape = "box"
-)
-suggested_sim <- lma_simets(lma_lspace(
-  nodes$id,
-  space = meta$summary$sim.space[[1]]
-), metric = "cosine")
-nodes$size <- rowMeans(suggested_sim)
-edges <- data.frame(
-  from = rep(colnames(suggested_sim), each = nrow(suggested_sim)),
-  to = rep(rownames(suggested_sim), nrow(suggested_sim)),
-  value = as.numeric(suggested_sim),
-  title = as.numeric(suggested_sim)
+display_network <- function(meta, n = 10, min = .1, seed = 2080) {
+  top_suggested <- meta$suggested$furniture[seq_len(n)]
+  nodes <- data.frame(
+    id = c(colnames(meta$sims$furniture), names(top_suggested)),
+    label = c(colnames(meta$sims$furniture), names(top_suggested)),
+    group = rep(
+      c("original", "suggested"),
+      c(ncol(meta$sims$furniture), length(top_suggested))
+    ),
+    shape = "box"
+  )
+  suggested_sim <- lma_simets(lma_lspace(
+    nodes$id,
+    space = meta$summary$sim.space[[1]]
+  ), metric = "cosine")
+  nodes$size <- rowMeans(suggested_sim)
+  edges <- data.frame(
+    from = rep(colnames(suggested_sim), each = nrow(suggested_sim)),
+    to = rep(rownames(suggested_sim), nrow(suggested_sim)),
+    value = as.numeric(suggested_sim),
+    title = as.numeric(suggested_sim)
+  )
+
+  visNetwork(
+    nodes, within(
+      edges[edges$value > min & edges$value < 1, ], value <- (value * 10)^4
+    )
+  ) |>
+    visEdges("title", smooth = FALSE, color = list(opacity = .6)) |>
+    visLegend(width = .07) |>
+    visLayout(randomSeed = seed) |>
+    visInteraction(
+      dragNodes = TRUE, dragView = TRUE, hover = TRUE, hoverConnectedEdges = TRUE,
+      selectable = TRUE, tooltipDelay = 100, tooltipStay = 100
+    )
+}
+
+display_network(meta)
+```
+
+By default, the `dicitonary_meta` function will choose from the available latent
+semantic spaces based on how many of the category terms appear in the space,
+but we can also request specific spaces and compare results between them:
+```{r}
+meta_100k <- dictionary_meta(
+  dict[3:4], "100k_lsa",
+  suggest = TRUE, dimension_prop = .7
 )
 
-visNetwork(
-  nodes, within(edges[edges$value > .1 & edges$value < 1, ], value <- (value * 10)^4)
-) |>
-  visEdges("title", smooth = FALSE, color = list(opacity = .6)) |>
-  visLegend(width = .07) |>
-  visPhysics(
-    "forceAtlas2Based",
-    forceAtlas2Based = list(centralGravity = .03, avoidOverlap = .5), timestep = 1e-4
-  ) |>
-  visLayout(randomSeed = 2080) |>
-  visInteraction(
-    dragNodes = TRUE, dragView = TRUE, hover = TRUE, hoverConnectedEdges = TRUE,
-    selectable = TRUE, tooltipDelay = 100, tooltipStay = 100
-  )
+meta_100k$suggested
+knitr::kable(meta_100k$summary[, -1], digits = 3)
 ```
+
+```{r, fig.height=7.5}
+display_network(meta_100k, min = .3, seed = 2562)
+```
+
+#### Text Coverage
 
 Suggested terms can help improve the theoretical coverage of these categories in themselves,
 but another type of coverage is how much of the category is covered by the text
