@@ -75,6 +75,12 @@ report_term_matches <- function(dict, text = NULL, space = NULL, glob = TRUE,
   if (missing(dict)) stop("dict must be specified", call. = FALSE)
   if (is.null(text)) {
     term_map <- select.lspace(dir = space_dir, get.map = TRUE)$term_map
+    if (is.null(term_map)) {
+      stop(
+        "term map not found; specify `space_dir` or provide text",
+        call. = FALSE
+      )
+    }
     if (term_map_freq > 0 && term_map_freq < 1) {
       term_map <- term_map[seq(1, ceiling(nrow(term_map) * term_map_freq)), ]
     }

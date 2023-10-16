@@ -36,6 +36,12 @@ dictionary_meta <- function(
   terms$regex <- paste0("^", to_regex(list(terms$term), TRUE, glob)[[1]], "$")
   if (is.character(space)) {
     term_map <- select.lspace(dir = space_dir, get.map = TRUE)$term_map
+    if (is.null(term_map)) {
+      stop(
+        "term map not found; specify `space_dir` or provide text",
+        call. = FALSE
+      )
+    }
     if (expand_cutoff_freq > 0 && expand_cutoff_freq < 1) {
       term_map <- term_map[seq(1, ceiling(nrow(term_map) * expand_cutoff_freq)), ]
     }

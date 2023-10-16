@@ -152,7 +152,7 @@ The `furniture` and `well_adjusted` categories introduces two main additional co
 First, they uses broader wildcards, which are probably intended to simply catch plural forms,
 but are in danger of over-extending. We can use the `report_term_matches` function to check this:
 ```{r}
-report <- report_term_matches(dict[3:4])
+report <- report_term_matches(dict[3:4], space_dir = "~/Latent Semantic Spaces")
 
 knitr::kable(report[, -c(4, 5)])
 ```
@@ -167,7 +167,10 @@ The second consideration is that these categories are trying to cover broad conc
 are likely to be obvious but overlooked terms to include. One thing we could do to improve
 this sort of coverage is search for similar words within a latent semantic space:
 ```{r}
-meta <- dictionary_meta(dict[3:4], suggest = TRUE, dimension_prop = .7)
+meta <- dictionary_meta(
+  dict[3:4],
+  suggest = TRUE, dimension_prop = .7, space_dir = "~/Latent Semantic Spaces"
+)
 meta$suggested
 ```
 

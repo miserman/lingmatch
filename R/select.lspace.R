@@ -78,6 +78,7 @@ select.lspace <- function(query = NULL, dir = getOption("lingmatch.lspace.dir"),
       error = function(e) NULL
     )
     if (!file.exists(map_path) || (!is.null(fi) && md5sum(map_path) != fi[which(fi == "md5") + 1])) {
+      dir.create(dir, FALSE, TRUE)
       status <- tryCatch(download.file(
         "https://osf.io/download/xr7jv", map_path,
         mode = mode
