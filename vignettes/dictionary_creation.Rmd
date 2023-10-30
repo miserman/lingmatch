@@ -180,18 +180,25 @@ pairwise cosine similarities between terms:
 knitr::kable(meta$summary[, -1], digits = 3)
 ```
 
+Or look at those similarities within categories and expanded terms:
+```{r}
+knitr::kable(meta$terms[1:15, ], digits = 3, row.names = FALSE)
+```
+
 And we can visualize this together with the most similar suggested terms as a network:
 ```{r, fig.height=7.5}
 library(visNetwork)
 
-display_network <- function(meta, n = 10, min = .1, seed = 2080) {
-  top_suggested <- meta$suggested$furniture[seq_len(n)]
+display_network <- function(meta, cat = 1, n = 10, min = .1, seed = 2080) {
+  cat_name <- meta$summary$category[[cat]]
+  top_suggested <- meta$suggested[[cat_name]][seq_len(n)]
+  terms <- meta$expanded[[cat_name]]
   nodes <- data.frame(
-    id = c(colnames(meta$sims$furniture), names(top_suggested)),
-    label = c(colnames(meta$sims$furniture), names(top_suggested)),
+    id = c(terms, names(top_suggested)),
+    label = c(terms, names(top_suggested)),
     group = rep(
       c("original", "suggested"),
-      c(ncol(meta$sims$furniture), length(top_suggested))
+      c(length(terms), length(top_suggested))
     ),
     shape = "box"
   )
@@ -215,6 +222,7 @@ display_network <- function(meta, n = 10, min = .1, seed = 2080) {
     visEdges("title", smooth = FALSE, color = list(opacity = .6)) |>
     visLegend(width = .07) |>
     visLayout(randomSeed = seed) |>
+    visPhysics("barnesHut", timestep = .1) |>
     visInteraction(
       dragNodes = TRUE, dragView = TRUE, hover = TRUE, hoverConnectedEdges = TRUE,
       selectable = TRUE, tooltipDelay = 100, tooltipStay = 100
@@ -224,21 +232,41 @@ display_network <- function(meta, n = 10, min = .1, seed = 2080) {
 display_network(meta)
 ```
 
-By default, the `dicitonary_meta` function will choose from the available latent
-semantic spaces based on how many of the category terms appear in the space,
-but we can also request specific spaces and compare results between them:
+Instead of looking at pairwise comparisons, it might also make sense to
+compare with category centroids:
 ```{r}
-meta_100k <- dictionary_meta(
-  dict[3:4], "100k_lsa",
-  suggest = TRUE, dimension_prop = .7
+meta_centroid <- dictionary_meta(
+  dict[3:4],
+  pairwise = FALSE, suggest = TRUE, dimension_prop = .7,
+  space_dir = "~/Latent Semantic Spaces"
 )
 
-meta_100k$suggested
-knitr::kable(meta_100k$summary[, -1], digits = 3)
+meta_centroid$suggested
+knitr::kable(meta_centroid$summary[, -1], digits = 3)
+```
+
+```{r}
+knitr::kable(meta_centroid$terms[1:15, ], digits = 3, row.names = FALSE)
 ```
 
 ```{r, fig.height=7.5}
-display_network(meta_100k, min = .3, seed = 2562)
+display_network(meta_centroid, min = .1, seed = 2562)
+```
+
+The previous examples looked at terms within a single space, but we can also
+aggregate across multiple spaces, which might result in more reliable comparisons:
+```{r}
+meta_multi <- dictionary_meta(
+  dict[3:4], "multi",
+  suggest = TRUE, dimension_prop = .7, space_dir = "~/Latent Semantic Spaces"
+)
+
+meta_multi$suggested
+knitr::kable(meta_multi$summary[, -1], digits = 3)
+```
+
+```{r}
+knitr::kable(meta_multi$terms[1:15, ], digits = 3, row.names = FALSE)
 ```
 
 #### Text Coverage

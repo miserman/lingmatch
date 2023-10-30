@@ -4,10 +4,10 @@
 \alias{dictionary_meta}
 \title{Assess Dictionary Categories Within a Latent Semantic Space}
 \usage{
-dictionary_meta(dict, space = "auto", suggest = FALSE,
-  suggestion_terms = 10, suggest_stopwords = FALSE,
+dictionary_meta(dict, space = "auto", n_spaces = 5, suggest = FALSE,
+  suggestion_terms = 10, suggest_stopwords = TRUE,
   expand_cutoff_freq = 0.98, expand_cutoff_spaces = 10,
-  dimension_prop = 1, glob = TRUE,
+  dimension_prop = 1, pairwise = TRUE, glob = TRUE,
   space_dir = getOption("lingmatch.lspace.dir"), verbose = TRUE)
 }
 \arguments{
@@ -16,14 +16,17 @@ categorized by \code{\link{read.dic}}.}
 
 \item{space}{A vector space used to calculate similarities between terms.
 Name of a the space (see \code{\link{select.lspace}}), a matrix with terms as row names, or
-\code{"auto"} to auto-select a space based on matched terms.}
+\code{"auto"} to auto-select a space based on matched terms. This can also be \code{multi}
+to use multiple spaces, which are combined after similarities are calculated.}
+
+\item{n_spaces}{Number of spaces to draw from if \code{space} is \code{multi}.}
 
 \item{suggest}{Logical; if \code{TRUE}, will search for other terms for possible inclusion
 in \code{space}.}
 
 \item{suggestion_terms}{Number of terms to use when selecting suggested additions.}
 
-\item{suggest_stopwords}{Logical; if \code{TRUE}, will potentially suggest function words.}
+\item{suggest_stopwords}{Logical; if \code{FALSE}, will not suggest function words.}
 
 \item{expand_cutoff_freq}{Proportion of mapped terms to include when expanding dictionary terms.
 Applies when \code{space} is a character (referring to a space to be loaded).}
@@ -34,6 +37,9 @@ for expansion. Applies when \code{space} is a character (referring to a space to
 \item{dimension_prop}{Proportion of dimensions to use when searching for suggested additions,
 where less than 1 will calculate similarities to the category core using fewer dimensions
 of the space.}
+
+\item{pairwise}{Logical; if \code{FALSE}, will compare candidate suggestion terms with a single,
+averaged category vector rather than all category terms separately.}
 
 \item{glob}{Logical; if \code{TRUE}, converts globs (asterisk wildcards) to regular expressions.}
 

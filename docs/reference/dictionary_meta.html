@@ -65,10 +65,10 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">dictionary_meta</span><span class="op">(</span><span class="va">dict</span>, space <span class="op">=</span> <span class="st">"auto"</span>, suggest <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  suggestion_terms <span class="op">=</span> <span class="fl">10</span>, suggest_stopwords <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">dictionary_meta</span><span class="op">(</span><span class="va">dict</span>, space <span class="op">=</span> <span class="st">"auto"</span>, n_spaces <span class="op">=</span> <span class="fl">5</span>, suggest <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  suggestion_terms <span class="op">=</span> <span class="fl">10</span>, suggest_stopwords <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  expand_cutoff_freq <span class="op">=</span> <span class="fl">0.98</span>, expand_cutoff_spaces <span class="op">=</span> <span class="fl">10</span>,</span>
-<span>  dimension_prop <span class="op">=</span> <span class="fl">1</span>, glob <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  dimension_prop <span class="op">=</span> <span class="fl">1</span>, pairwise <span class="op">=</span> <span class="cn">TRUE</span>, glob <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  space_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"lingmatch.lspace.dir"</span><span class="op">)</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -82,7 +82,12 @@ categorized by <code><a href="read.dic.html">read.dic</a></code>.</p></dd>
 <dt>space</dt>
 <dd><p>A vector space used to calculate similarities between terms.
 Name of a the space (see <code><a href="select.lspace.html">select.lspace</a></code>), a matrix with terms as row names, or
-<code>"auto"</code> to auto-select a space based on matched terms.</p></dd>
+<code>"auto"</code> to auto-select a space based on matched terms. This can also be <code>multi</code>
+to use multiple spaces, which are combined after similarities are calculated.</p></dd>
+
+
+<dt>n_spaces</dt>
+<dd><p>Number of spaces to draw from if <code>space</code> is <code>multi</code>.</p></dd>
 
 
 <dt>suggest</dt>
@@ -95,7 +100,7 @@ in <code>space</code>.</p></dd>
 
 
 <dt>suggest_stopwords</dt>
-<dd><p>Logical; if <code>TRUE</code>, will potentially suggest function words.</p></dd>
+<dd><p>Logical; if <code>FALSE</code>, will not suggest function words.</p></dd>
 
 
 <dt>expand_cutoff_freq</dt>
@@ -112,6 +117,11 @@ for expansion. Applies when <code>space</code> is a character (referring to a sp
 <dd><p>Proportion of dimensions to use when searching for suggested additions,
 where less than 1 will calculate similarities to the category core using fewer dimensions
 of the space.</p></dd>
+
+
+<dt>pairwise</dt>
+<dd><p>Logical; if <code>FALSE</code>, will compare candidate suggestion terms with a single,
+averaged category vector rather than all category terms separately.</p></dd>
 
 
 <dt>glob</dt>
