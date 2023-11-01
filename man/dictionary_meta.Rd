@@ -5,7 +5,7 @@
 \title{Assess Dictionary Categories Within a Latent Semantic Space}
 \usage{
 dictionary_meta(dict, space = "auto", n_spaces = 5, suggest = FALSE,
-  suggestion_terms = 10, suggest_stopwords = TRUE,
+  suggestion_terms = 10, suggest_stopwords = TRUE, pretrim_space = FALSE,
   expand_cutoff_freq = 0.98, expand_cutoff_spaces = 10,
   dimension_prop = 1, pairwise = TRUE, glob = TRUE,
   space_dir = getOption("lingmatch.lspace.dir"), verbose = TRUE)
@@ -27,6 +27,10 @@ in \code{space}.}
 \item{suggestion_terms}{Number of terms to use when selecting suggested additions.}
 
 \item{suggest_stopwords}{Logical; if \code{FALSE}, will not suggest function words.}
+
+\item{pretrim_space}{Logical; if \code{TRUE} and \code{pairwise} is \code{TRUE},
+will remove terms with a similarity of 0 or less with all category centroids,
+prior to calculating similarities for suggestions.}
 
 \item{expand_cutoff_freq}{Proportion of mapped terms to include when expanding dictionary terms.
 Applies when \code{space} is a character (referring to a space to be loaded).}

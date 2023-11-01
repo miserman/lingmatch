@@ -11,6 +11,7 @@ knitr::opts_chunk$set(
   fig.width = 9
 )
 library(lingmatch)
+library(plotly)
 ```
 
 Walks through the process of creating and assessing a dictionary.
@@ -169,7 +170,7 @@ this sort of coverage is search for similar words within a latent semantic space
 ```{r}
 meta <- dictionary_meta(
   dict[3:4],
-  suggest = TRUE, dimension_prop = .7, space_dir = "~/Latent Semantic Spaces"
+  suggest = TRUE, space_dir = "~/Latent Semantic Spaces"
 )
 meta$suggested
 ```
@@ -232,25 +233,58 @@ display_network <- function(meta, cat = 1, n = 10, min = .1, seed = 2080) {
 display_network(meta)
 ```
 
+Or we could look at terms across categories within a dimensionally-reduced version of the space:
+```{r, fig.height=7, fig.width=8.5}
+library(uwot)
+library(plotly)
+
+display_reduced_space <- function(
+    meta, space_name = "glove_crawl",
+    color_seeds = c("#30d126", "#a4e3a0", "#42b3ff", "#b4dbf5")) {
+  suggestions <- unlist(unname(meta$suggested))
+  terms <- rbind(meta$terms[, c("category", "match", "sim.category")], data.frame(
+    category = rep(
+      paste0(names(meta$suggested), "_suggested"), vapply(meta$suggested, length, 0)
+    ),
+    match = names(suggestions),
+    sim.category = suggestions
+  ))
+  space <- lma_lspace(terms$match, space_name)
+  m <- as.data.frame(umap(space, n_components = 3))
+  d <- cbind(terms, m)
+  d$color <- color_seeds[as.numeric(as.factor(d$category))]
+  ds <- split(d, d$category)
+  p <- plot_ly(
+    do.call(rbind, ds),
+    x = ~V1, y = ~V2, z = ~V3, textfont = list(size = 9)
+  ) |>
+    layout(
+      showlegend = TRUE, paper_bgcolor = "#000000", font = list(color = "#ffffff"),
+      margin = list(r = 0, b = 0, l = 0)
+    )
+  for (cat in names(ds)) {
+    p <- p |> add_text(
+      data = ds[[cat]], text = ~match, name = cat, textfont = list(color = ~color)
+    )
+  }
+  p
+}
+
+display_reduced_space(meta)
+```
+Here it seems the suggested terms strengthen cores of related terms within categories,
+leaving unrelated terms to group together between categories.
+
 Instead of looking at pairwise comparisons, it might also make sense to
 compare with category centroids:
 ```{r}
 meta_centroid <- dictionary_meta(
   dict[3:4],
-  pairwise = FALSE, suggest = TRUE, dimension_prop = .7,
-  space_dir = "~/Latent Semantic Spaces"
+  pairwise = FALSE, suggest = TRUE, space_dir = "~/Latent Semantic Spaces"
 )
 
 meta_centroid$suggested
 knitr::kable(meta_centroid$summary[, -1], digits = 3)
-```
-
-```{r}
-knitr::kable(meta_centroid$terms[1:15, ], digits = 3, row.names = FALSE)
-```
-
-```{r, fig.height=7.5}
-display_network(meta_centroid, min = .1, seed = 2562)
 ```
 
 The previous examples looked at terms within a single space, but we can also
@@ -258,15 +292,11 @@ aggregate across multiple spaces, which might result in more reliable comparison
 ```{r}
 meta_multi <- dictionary_meta(
   dict[3:4], "multi",
-  suggest = TRUE, dimension_prop = .7, space_dir = "~/Latent Semantic Spaces"
+  suggest = TRUE, space_dir = "~/Latent Semantic Spaces"
 )
 
 meta_multi$suggested
 knitr::kable(meta_multi$summary[, -1], digits = 3)
-```
-
-```{r}
-knitr::kable(meta_multi$terms[1:15, ], digits = 3, row.names = FALSE)
 ```
 
 #### Text Coverage

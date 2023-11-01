@@ -12,6 +12,9 @@
 #' in \code{space}.
 #' @param suggestion_terms Number of terms to use when selecting suggested additions.
 #' @param suggest_stopwords Logical; if \code{FALSE}, will not suggest function words.
+#' @param pretrim_space Logical; if \code{TRUE} and \code{pairwise} is \code{TRUE},
+#' will remove terms with a similarity of 0 or less with all category centroids,
+#' prior to calculating similarities for suggestions.
 #' @param expand_cutoff_freq Proportion of mapped terms to include when expanding dictionary terms.
 #' Applies when \code{space} is a character (referring to a space to be loaded).
 #' @param expand_cutoff_spaces Number of spaces in which a term has to appear to be considered
@@ -29,8 +32,8 @@
 
 dictionary_meta <- function(
     dict, space = "auto", n_spaces = 5, suggest = FALSE, suggestion_terms = 10, suggest_stopwords = TRUE,
-    expand_cutoff_freq = .98, expand_cutoff_spaces = 10, dimension_prop = 1, pairwise = TRUE, glob = TRUE,
-    space_dir = getOption("lingmatch.lspace.dir"), verbose = TRUE) {
+    pretrim_space = FALSE, expand_cutoff_freq = .98, expand_cutoff_spaces = 10, dimension_prop = 1,
+    pairwise = TRUE, glob = TRUE, space_dir = getOption("lingmatch.lspace.dir"), verbose = TRUE) {
   if (missing(dict)) stop("dict must be specified", call. = FALSE)
   if (!is.list(dict)) dict <- list(dict)
   if (is.null(names(dict))) names(dict) <- paste0("cat", seq_along(dict))
@@ -125,13 +128,23 @@ dictionary_meta <- function(
   })
   if (multi) {
     space <- lapply(space, function(s) as(s, "CsparseMatrix"))
+    if (pretrim_space && pairwise) {
+      if (verbose) cat("trimming the spaces (", round(proc.time()[[3]] - st, 4), ")\n", sep = "")
+      space_terms <- names(which(Reduce("+", lapply(cat_names, function(cat) {
+        su <- space_terms %in% dict_exp[[cat]]
+        Reduce("+", lapply(space, function(s) {
+          lma_simets(s, colMeans(s[su, , drop = FALSE]), metric = "cosine") > 0
+        })) == length(space)
+      })) == length(cat_names)))
+      space <- lapply(space, function(s) s[space_terms, , drop = FALSE])
+    }
     if (verbose) cat("calculating term similarities (", round(proc.time()[[3]] - st, 4), ")\n", sep = "")
     sims <- lapply(cat_names, function(cat) {
       su <- space_terms %in% dict_exp[[cat]]
       if (dimension_prop < 1) {
         space <- lapply(space, function(s) {
-          loadings <- colSums(s[su, , drop = FALSE])
-          dsu <- order(loadings, decreasing = TRUE)[seq(1, max(1, ceiling(ncol(s) * dimension_prop)))]
+          loadings <- colMeans(s[su, , drop = FALSE])
+          dsu <- order(-loadings)[seq(1, max(1, ceiling(ncol(s) * dimension_prop)))]
           s[, dsu, drop = FALSE]
         })
       }
@@ -152,6 +165,16 @@ dictionary_meta <- function(
     })
   } else {
     space <- as(space, "CsparseMatrix")
+    if (pretrim_space && pairwise) {
+      if (verbose) cat("trimming the space (", round(proc.time()[[3]] - st, 4), ")\n", sep = "")
+      space_terms <- names(which(Reduce("+", lapply(cat_names, function(cat) {
+        lma_simets(
+          space, colMeans(space[space_terms %in% dict_exp[[cat]], , drop = FALSE]),
+          metric = "cosine"
+        ) > 0
+      })) == length(cat_names)))
+      space <- space[space_terms, , drop = FALSE]
+    }
     if (verbose) cat("calculating term similarities (", round(proc.time()[[3]] - st, 4), ")\n", sep = "")
     sims <- lapply(cat_names, function(cat) {
       su <- space_terms %in% dict_exp[[cat]]
@@ -207,11 +230,16 @@ dictionary_meta <- function(
           })) / length(space)
         } else {
           s <- lma_simets(space[su, , drop = FALSE], metric = "cosine", pairwise = TRUE, symmetrical = TRUE)
-          if (is.null(dim(s))) s <- t(t(s))
         }
+        if (is.null(dim(s))) s <- t(t(s))
       }
       term_sims <- unlist(lapply(split(cl$match, cl$term), function(l) {
-        if (length(l) == 1) 1 else (colSums(s[l, l]) - 1) / (length(l) - 1)
+        sl <- l[l %in% colnames(s)]
+        m <- if (length(l) == 1) 1 else (colSums(s[l, l]) - 1) / (length(l) - 1)
+        if (is.null(names(m))) names(m) <- sl
+        m <- m[l]
+        names(m) <- l
+        m
       }))
       names(term_sims) <- sub("^[^.]*\\.", "", names(term_sims))
       cat_sims <- (colSums(s[colnames(s), , drop = FALSE]) - 1) / (ncol(s) - 1)

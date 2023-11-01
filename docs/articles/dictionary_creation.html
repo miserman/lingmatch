@@ -78,7 +78,9 @@
 
 
 <script src="dictionary_creation_files/htmlwidgets-1.6.2/htmlwidgets.js"></script><link href="dictionary_creation_files/vis-9.1.0/vis-network.min.css" rel="stylesheet">
-<script src="dictionary_creation_files/vis-9.1.0/vis-network.min.js"></script><script src="dictionary_creation_files/visNetwork-binding-2.1.2/visNetwork.js"></script><div class="row">
+<script src="dictionary_creation_files/vis-9.1.0/vis-network.min.js"></script><script src="dictionary_creation_files/visNetwork-binding-2.1.2/visNetwork.js"></script><script src="dictionary_creation_files/plotly-binding-4.10.3/plotly.js"></script><script src="dictionary_creation_files/typedarray-0.1/typedarray.min.js"></script><link href="dictionary_creation_files/crosstalk-1.2.0/css/crosstalk.min.css" rel="stylesheet">
+<script src="dictionary_creation_files/crosstalk-1.2.0/js/crosstalk.min.js"></script><link href="dictionary_creation_files/plotly-htmlwidgets-css-2.11.1/plotly-htmlwidgets.css" rel="stylesheet">
+<script src="dictionary_creation_files/plotly-main-2.11.1/plotly-latest.min.js"></script><div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Introduction to Dictionary Creation</h1>
             
@@ -90,7 +92,7 @@
     
     
 <p>Walks through the process of creating and assessing a dictionary.</p>
-<p><em>Built with R 4.3.1</em></p>
+<p><em>Built with R 4.3.2</em></p>
 <hr>
 <div class="section level2">
 <h2 id="background">Background<a class="anchor" aria-label="anchor" href="#background"></a>
@@ -304,7 +306,7 @@ are in danger of over-extending. We can use the
 <code class="sourceCode R"><span><span class="va">report</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/report_term_matches.html">report_term_matches</a></span><span class="op">(</span><span class="va">dict</span><span class="op">[</span><span class="fl">3</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, space_dir <span class="op">=</span> <span class="st">"~/Latent Semantic Spaces"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; preparing dict (0)</span></span>
 <span><span class="co">#&gt; extracting matches (0)</span></span>
-<span><span class="co">#&gt; preparing results (0.34)</span></span>
+<span><span class="co">#&gt; preparing results (0.35)</span></span>
 <span><span class="co">#&gt; done (0.36)</span></span>
 <span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">report</span><span class="op">[</span>, <span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">5</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
@@ -429,65 +431,35 @@ search for similar words within a latent semantic space:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">meta</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dictionary_meta.html">dictionary_meta</a></span><span class="op">(</span></span>
 <span>  <span class="va">dict</span><span class="op">[</span><span class="fl">3</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
-<span>  suggest <span class="op">=</span> <span class="cn">TRUE</span>, dimension_prop <span class="op">=</span> <span class="fl">.7</span>, space_dir <span class="op">=</span> <span class="st">"~/Latent Semantic Spaces"</span></span>
+<span>  suggest <span class="op">=</span> <span class="cn">TRUE</span>, space_dir <span class="op">=</span> <span class="st">"~/Latent Semantic Spaces"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; preparing terms (0)</span></span>
-<span><span class="co">#&gt; expanding terms (0.48)</span></span>
-<span><span class="co">#&gt; loading space (0.86)</span></span>
-<span><span class="co">#&gt; calculating term similarities (18.87)</span></span>
-<span><span class="co">#&gt; identifying potential additions (27.55)</span></span>
-<span><span class="co">#&gt; preparing results (27.78)</span></span>
-<span><span class="co">#&gt; done (28.03)</span></span>
+<span><span class="co">#&gt; expanding terms (0.47)</span></span>
+<span><span class="co">#&gt; loading space (0.83)</span></span>
+<span><span class="co">#&gt; calculating term similarities (19.43)</span></span>
+<span><span class="co">#&gt; identifying potential additions (33.36)</span></span>
+<span><span class="co">#&gt; preparing results (33.6)</span></span>
+<span><span class="co">#&gt; done (33.85)</span></span>
 <span><span class="va">meta</span><span class="op">$</span><span class="va">suggested</span></span>
 <span><span class="co">#&gt; $furniture</span></span>
-<span><span class="co">#&gt;    armchairs       chairs     loveseat     recliner  upholstered        futon </span></span>
-<span><span class="co">#&gt;    0.1469160    0.1452382    0.1390162    0.1370299    0.1327688    0.1318108 </span></span>
-<span><span class="co">#&gt;       chaise       settee     armchair      sleeper     bookcase         bunk </span></span>
-<span><span class="co">#&gt;    0.1306083    0.1296976    0.1235839    0.1189187    0.1172699    0.1170630 </span></span>
-<span><span class="co">#&gt;    recliners       dining   livingroom       daybed  overstuffed       lounge </span></span>
-<span><span class="co">#&gt;    0.1165865    0.1163508    0.1160423    0.1153505    0.1151018    0.1144352 </span></span>
-<span><span class="co">#&gt;    banquette      lounger     reclined  living-room   nightstand     cushions </span></span>
-<span><span class="co">#&gt;    0.1137200    0.1135923    0.1132958    0.1126593    0.1125195    0.1120243 </span></span>
-<span><span class="co">#&gt;      dinette      sitting  kitchenette  bookshelves      dinning      bedside </span></span>
-<span><span class="co">#&gt;    0.1119046    0.1118553    0.1118537    0.1118372    0.1113336    0.1111117 </span></span>
-<span><span class="co">#&gt;          bed  workstation workstations    bookcases      armoire        comfy </span></span>
-<span><span class="co">#&gt;    0.1101804    0.1101197    0.1098100    0.1085886    0.1083504    0.1078997 </span></span>
-<span><span class="co">#&gt;    open-plan     lounging      armless    reclining    furniture  dining-room </span></span>
-<span><span class="co">#&gt;    0.1070581    0.1066047    0.1060986    0.1059851    0.1057490    0.1050253 </span></span>
+<span><span class="co">#&gt;    armchairs       chairs     loveseat        futon  upholstered     recliner </span></span>
+<span><span class="co">#&gt;    0.1621497    0.1553185    0.1471279    0.1453766    0.1423177    0.1379395 </span></span>
+<span><span class="co">#&gt;       settee     armchair       chaise  workstation workstations     lounging </span></span>
+<span><span class="co">#&gt;    0.1376108    0.1365826    0.1365393    0.1338022    0.1327783    0.1290310 </span></span>
+<span><span class="co">#&gt;  living-room  overstuffed      armless    banquette    bookcases    recliners </span></span>
+<span><span class="co">#&gt;    0.1276333    0.1271940    0.1271812    0.1259943    0.1251764    0.1244811 </span></span>
+<span><span class="co">#&gt;         bunk      dinning      settees     cushions    reclining </span></span>
+<span><span class="co">#&gt;    0.1239567    0.1219439    0.1212862    0.1201270    0.1200046 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $well_adjusted</span></span>
-<span><span class="co">#&gt;         cheery       cheerful          smile           rosy          shone </span></span>
-<span><span class="co">#&gt;     0.11834808     0.11722890     0.11054719     0.10829093     0.10370459 </span></span>
-<span><span class="co">#&gt;           love         smiles      firelight       freckled       outshone </span></span>
-<span><span class="co">#&gt;     0.10241030     0.10225994     0.09916339     0.09635264     0.09489207 </span></span>
-<span><span class="co">#&gt;        twinkle        beaming       rainbows         lovely          lovey </span></span>
-<span><span class="co">#&gt;     0.09440613     0.09371555     0.09366875     0.09363756     0.09323161 </span></span>
-<span><span class="co">#&gt;           hope      twinkling        shining       blossoms        rainbow </span></span>
-<span><span class="co">#&gt;     0.09318308     0.09291460     0.09245249     0.09204360     0.09204254 </span></span>
-<span><span class="co">#&gt;       sunbeams       sparkles        fuzzies       freckles           glow </span></span>
-<span><span class="co">#&gt;     0.09202136     0.09176946     0.09175755     0.09169386     0.09158589 </span></span>
-<span><span class="co">#&gt;         shined      workmates      buttercup        squinty       blooming </span></span>
-<span><span class="co">#&gt;     0.09119721     0.09043744     0.09038357     0.08948545     0.08902558 </span></span>
-<span><span class="co">#&gt;        dearest       sweetest          loved      prettiest    schoolmates </span></span>
-<span><span class="co">#&gt;     0.08892823     0.08881416     0.08856870     0.08854026     0.08847039 </span></span>
-<span><span class="co">#&gt;     blossoming          orkut      ponyville          pinks       sunshiny </span></span>
-<span><span class="co">#&gt;     0.08815908     0.08813632     0.08790867     0.08778040     0.08775407 </span></span>
-<span><span class="co">#&gt;          aglow        bloomed        flowers      charmaine         smiley </span></span>
-<span><span class="co">#&gt;     0.08773970     0.08767890     0.08757398     0.08756331     0.08746298 </span></span>
-<span><span class="co">#&gt;        besties        smiling      fairyland        sparkle           eyes </span></span>
-<span><span class="co">#&gt;     0.08742085     0.08734616     0.08732019     0.08701827     0.08700315 </span></span>
-<span><span class="co">#&gt;          gleam happy-go-lucky       funhouse      fireflies         elissa </span></span>
-<span><span class="co">#&gt;     0.08646219     0.08630848     0.08627703     0.08612718     0.08606662 </span></span>
-<span><span class="co">#&gt;      welcoming        petunia         kallie          hazel       shinning </span></span>
-<span><span class="co">#&gt;     0.08565162     0.08539864     0.08531070     0.08513674     0.08505107 </span></span>
-<span><span class="co">#&gt;      lamplight         afters      blossomed       twinkled       flitting </span></span>
-<span><span class="co">#&gt;     0.08497532     0.08492263     0.08477144     0.08476463     0.08467916 </span></span>
-<span><span class="co">#&gt;         beachy         peeked        ladybug        glowing          becca </span></span>
-<span><span class="co">#&gt;     0.08466354     0.08463574     0.08451870     0.08425544     0.08390382 </span></span>
-<span><span class="co">#&gt;          raina          posie      wayfarers       happiest           joys </span></span>
-<span><span class="co">#&gt;     0.08381224     0.08344758     0.08338632     0.08334098     0.08333077 </span></span>
-<span><span class="co">#&gt;        welcome       sunshine </span></span>
-<span><span class="co">#&gt;     0.08329890     0.08328411</span></span></code></pre></div>
+<span><span class="co">#&gt;  cheerful     smile  everyone      hope    smiles    always      even      well </span></span>
+<span><span class="co">#&gt; 0.1879477 0.1861197 0.1793199 0.1787829 0.1783780 0.1778765 0.1749329 0.1741687 </span></span>
+<span><span class="co">#&gt;        so        we      when       way   looking       but      look       our </span></span>
+<span><span class="co">#&gt; 0.1737231 0.1732106 0.1727486 0.1717874 0.1716254 0.1715725 0.1701476 0.1698726 </span></span>
+<span><span class="co">#&gt;        as      love      just      them        my       all       one    things </span></span>
+<span><span class="co">#&gt; 0.1689191 0.1688581 0.1682467 0.1679332 0.1677518 0.1675724 0.1675712 0.1663454 </span></span>
+<span><span class="co">#&gt;    cheery        it       fun </span></span>
+<span><span class="co">#&gt; 0.1663346 0.1663166 0.1659012</span></span></code></pre></div>
 <p>We can also use the space to assess category cohesiveness by looking
 at summaries of pairwise cosine similarities between terms:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
@@ -523,24 +495,24 @@ at summaries of pairwise cosine similarities between terms:</p>
 <td align="right">5</td>
 <td align="right">34</td>
 <td align="left">glove_crawl</td>
-<td align="right">-0.029</td>
-<td align="right">0.014</td>
-<td align="right">0.034</td>
-<td align="right">0.046</td>
-<td align="right">0.075</td>
-<td align="right">0.140</td>
+<td align="right">-0.034</td>
+<td align="right">0.015</td>
+<td align="right">0.035</td>
+<td align="right">0.052</td>
+<td align="right">0.085</td>
+<td align="right">0.152</td>
 </tr>
 <tr class="even">
 <td align="left">well_adjusted</td>
 <td align="right">6</td>
 <td align="right">47</td>
 <td align="left">glove_crawl</td>
-<td align="right">-0.018</td>
-<td align="right">0.024</td>
-<td align="right">0.045</td>
-<td align="right">0.047</td>
-<td align="right">0.067</td>
-<td align="right">0.129</td>
+<td align="right">-0.014</td>
+<td align="right">0.017</td>
+<td align="right">0.077</td>
+<td align="right">0.081</td>
+<td align="right">0.137</td>
+<td align="right">0.183</td>
 </tr>
 </tbody>
 </table>
@@ -548,272 +520,6 @@ at summaries of pairwise cosine similarities between terms:</p>
 terms:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">meta</span><span class="op">$</span><span class="va">terms</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">15</span>, <span class="op">]</span>, digits <span class="op">=</span> <span class="fl">3</span>, row.names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
-<table class="table">
-<thead><tr class="header">
-<th align="left">category</th>
-<th align="left">term</th>
-<th align="left">match</th>
-<th align="right">sim.term</th>
-<th align="right">sim.category</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td align="left">furniture</td>
-<td align="left">table</td>
-<td align="left">table</td>
-<td align="right">1.000</td>
-<td align="right">0.083</td>
-</tr>
-<tr class="even">
-<td align="left">furniture</td>
-<td align="left">chair</td>
-<td align="left">chair</td>
-<td align="right">1.000</td>
-<td align="right">0.103</td>
-</tr>
-<tr class="odd">
-<td align="left">furniture</td>
-<td align="left">desk*</td>
-<td align="left">desk-top</td>
-<td align="right">0.124</td>
-<td align="right">0.048</td>
-</tr>
-<tr class="even">
-<td align="left">furniture</td>
-<td align="left">desk*</td>
-<td align="left">desk</td>
-<td align="right">0.171</td>
-<td align="right">0.134</td>
-</tr>
-<tr class="odd">
-<td align="left">furniture</td>
-<td align="left">desk*</td>
-<td align="left">desking</td>
-<td align="right">0.087</td>
-<td align="right">0.044</td>
-</tr>
-<tr class="even">
-<td align="left">furniture</td>
-<td align="left">desk*</td>
-<td align="left">deskpro</td>
-<td align="right">0.090</td>
-<td align="right">0.014</td>
-</tr>
-<tr class="odd">
-<td align="left">furniture</td>
-<td align="left">desk*</td>
-<td align="left">deskilled</td>
-<td align="right">0.086</td>
-<td align="right">0.029</td>
-</tr>
-<tr class="even">
-<td align="left">furniture</td>
-<td align="left">desk*</td>
-<td align="left">desktop</td>
-<td align="right">0.184</td>
-<td align="right">0.063</td>
-</tr>
-<tr class="odd">
-<td align="left">furniture</td>
-<td align="left">desk*</td>
-<td align="left">desktops</td>
-<td align="right">0.155</td>
-<td align="right">0.052</td>
-</tr>
-<tr class="even">
-<td align="left">furniture</td>
-<td align="left">desk*</td>
-<td align="left">desks</td>
-<td align="right">0.152</td>
-<td align="right">0.122</td>
-</tr>
-<tr class="odd">
-<td align="left">furniture</td>
-<td align="left">desk*</td>
-<td align="left">deskjet</td>
-<td align="right">0.078</td>
-<td align="right">0.025</td>
-</tr>
-<tr class="even">
-<td align="left">furniture</td>
-<td align="left">desk*</td>
-<td align="left">deskbound</td>
-<td align="right">0.104</td>
-<td align="right">0.049</td>
-</tr>
-<tr class="odd">
-<td align="left">furniture</td>
-<td align="left">desk*</td>
-<td align="left">deskins</td>
-<td align="right">-0.008</td>
-<td align="right">0.009</td>
-</tr>
-<tr class="even">
-<td align="left">furniture</td>
-<td align="left">desk*</td>
-<td align="left">deskilling</td>
-<td align="right">0.014</td>
-<td align="right">0.020</td>
-</tr>
-<tr class="odd">
-<td align="left">furniture</td>
-<td align="left">desk*</td>
-<td align="left">desker</td>
-<td align="right">0.040</td>
-<td align="right">-0.006</td>
-</tr>
-</tbody>
-</table>
-<p>And we can visualize this together with the most similar suggested
-terms as a network:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://datastorm-open.github.io/visNetwork/" class="external-link">visNetwork</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">display_network</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">meta</span>, <span class="va">cat</span> <span class="op">=</span> <span class="fl">1</span>, <span class="va">n</span> <span class="op">=</span> <span class="fl">10</span>, <span class="va">min</span> <span class="op">=</span> <span class="fl">.1</span>, <span class="va">seed</span> <span class="op">=</span> <span class="fl">2080</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">cat_name</span> <span class="op">&lt;-</span> <span class="va">meta</span><span class="op">$</span><span class="va">summary</span><span class="op">$</span><span class="va">category</span><span class="op">[[</span><span class="va">cat</span><span class="op">]</span><span class="op">]</span></span>
-<span>  <span class="va">top_suggested</span> <span class="op">&lt;-</span> <span class="va">meta</span><span class="op">$</span><span class="va">suggested</span><span class="op">[[</span><span class="va">cat_name</span><span class="op">]</span><span class="op">]</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">]</span></span>
-<span>  <span class="va">terms</span> <span class="op">&lt;-</span> <span class="va">meta</span><span class="op">$</span><span class="va">expanded</span><span class="op">[[</span><span class="va">cat_name</span><span class="op">]</span><span class="op">]</span></span>
-<span>  <span class="va">nodes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>    id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">terms</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">top_suggested</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>    label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">terms</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">top_suggested</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>    group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span></span>
-<span>      <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"original"</span>, <span class="st">"suggested"</span><span class="op">)</span>,</span>
-<span>      <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">terms</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">top_suggested</span><span class="op">)</span><span class="op">)</span></span>
-<span>    <span class="op">)</span>,</span>
-<span>    shape <span class="op">=</span> <span class="st">"box"</span></span>
-<span>  <span class="op">)</span></span>
-<span>  <span class="va">suggested_sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lma_simets.html">lma_simets</a></span><span class="op">(</span><span class="fu"><a href="../reference/lma_lspace.html">lma_lspace</a></span><span class="op">(</span></span>
-<span>    <span class="va">nodes</span><span class="op">$</span><span class="va">id</span>,</span>
-<span>    space <span class="op">=</span> <span class="va">meta</span><span class="op">$</span><span class="va">summary</span><span class="op">$</span><span class="va">sim.space</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
-<span>  <span class="op">)</span>, metric <span class="op">=</span> <span class="st">"cosine"</span><span class="op">)</span></span>
-<span>  <span class="va">nodes</span><span class="op">$</span><span class="va">size</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="va">suggested_sim</span><span class="op">)</span></span>
-<span>  <span class="va">edges</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>    from <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">suggested_sim</span><span class="op">)</span>, each <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">suggested_sim</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>    to <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">suggested_sim</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">suggested_sim</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>    value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">suggested_sim</span><span class="op">)</span>,</span>
-<span>    title <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">suggested_sim</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span>
-<span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/visNetwork/man/visNetwork.html" class="external-link">visNetwork</a></span><span class="op">(</span></span>
-<span>    <span class="va">nodes</span>, <span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">within</a></span><span class="op">(</span></span>
-<span>      <span class="va">edges</span><span class="op">[</span><span class="va">edges</span><span class="op">$</span><span class="va">value</span> <span class="op">&gt;</span> <span class="va">min</span> <span class="op">&amp;</span> <span class="va">edges</span><span class="op">$</span><span class="va">value</span> <span class="op">&lt;</span> <span class="fl">1</span>, <span class="op">]</span>, <span class="va">value</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="va">value</span> <span class="op">*</span> <span class="fl">10</span><span class="op">)</span><span class="op">^</span><span class="fl">4</span></span>
-<span>    <span class="op">)</span></span>
-<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/pkg/visNetwork/man/visEdges.html" class="external-link">visEdges</a></span><span class="op">(</span><span class="st">"title"</span>, smooth <span class="op">=</span> <span class="cn">FALSE</span>, color <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>opacity <span class="op">=</span> <span class="fl">.6</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/pkg/visNetwork/man/visLegend.html" class="external-link">visLegend</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">.07</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/pkg/visNetwork/man/visLayout.html" class="external-link">visLayout</a></span><span class="op">(</span>randomSeed <span class="op">=</span> <span class="va">seed</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/pkg/visNetwork/man/visPhysics.html" class="external-link">visPhysics</a></span><span class="op">(</span><span class="st">"barnesHut"</span>, timestep <span class="op">=</span> <span class="fl">.1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/pkg/visNetwork/man/visInteraction.html" class="external-link">visInteraction</a></span><span class="op">(</span></span>
-<span>      dragNodes <span class="op">=</span> <span class="cn">TRUE</span>, dragView <span class="op">=</span> <span class="cn">TRUE</span>, hover <span class="op">=</span> <span class="cn">TRUE</span>, hoverConnectedEdges <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>      selectable <span class="op">=</span> <span class="cn">TRUE</span>, tooltipDelay <span class="op">=</span> <span class="fl">100</span>, tooltipStay <span class="op">=</span> <span class="fl">100</span></span>
-<span>    <span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span></span>
-<span><span class="fu">display_network</span><span class="op">(</span><span class="va">meta</span><span class="op">)</span></span></code></pre></div>
-<div class="visNetwork html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-3b9e445a27b1a885a4cc" style="width:864px;height:720px;"></div>
-<script type="application/json" data-for="htmlwidget-3b9e445a27b1a885a4cc">{"x":{"nodes":{"id":["table","chair","desk-top","desk","desking","deskpro","deskilled","desktop","desktops","desks","deskjet","deskbound","deskins","deskilling","desker","deskside","deskstar","couchdb","couchant","couchsurfing","couche","couchette","couchman","couching","couched","coucher","couches","couch","sofaer","sofabed","sofala","sofas","sofar","sofa","armchairs","chairs","loveseat","recliner","upholstered","futon","chaise","settee","armchair","sleeper"],"label":["table","chair","desk-top","desk","desking","deskpro","deskilled","desktop","desktops","desks","deskjet","deskbound","deskins","deskilling","desker","deskside","deskstar","couchdb","couchant","couchsurfing","couche","couchette","couchman","couching","couched","coucher","couches","couch","sofaer","sofabed","sofala","sofas","sofar","sofa","armchairs","chairs","loveseat","recliner","upholstered","futon","chaise","settee","armchair","sleeper"],"group":["original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","suggested","suggested","suggested","suggested","suggested","suggested","suggested","suggested","suggested","suggested"],"shape":["box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box"],"size":[0.02272727272727273,0.03625512460148921,0.02292694281215085,0.05433122039387259,0.03791846491098146,0.02973440183455517,0.01765379527158755,0.05704399379832003,0.06322709650815966,0.08899322349317398,0.04387429869947199,0.03411635984573163,0.0118826765138885,0.02009102488206741,0.02024652982022445,0.04856305243591499,0.03011152631082269,0.036443257610164,0.01847024218086746,0.03095813981688787,0.01242054684953402,0.03364713417179781,0.03257479474168355,0.02593108242782212,0.02580805984693065,0.05169396442587326,0.08395827213122106,0.09347643800705234,0.004975963125787417,0.07524191676157445,0.02054884576755979,0.1112487880434006,0.003500221156383709,0.1367530272589772,0.1480247300395429,0.1572327811018694,0.1604516499283857,0.1709235459690553,0.189054214126319,0.1933709937885845,0.2117878669748115,0.2189158199706385,0.223574213006661,0.2003309942474651]},"edges":{"from":["table","table","table","table","table","table","table","table","table","table","table","table","table","table","table","table","table","table","table","table","table","chair","chair","chair","chair","chair","chair","chair","chair","chair","chair","chair","chair","chair","chair","chair","chair","chair","chair","chair","desk-top","desk-top","desk-top","desk-top","desk-top","desk-top","desk-top","desk-top","desk-top","desk-top","desk","desk","desk","desk","desk","desk","desk","desk","desk","desk","desk","desk","desk","desk","desk","desk","desk","desk","desk","desk","desking","desking","desking","desking","desking","desking","desking","desking","desking","desking","desking","desking","desking","desking","desking","desking","desking","desking","deskpro","deskpro","deskpro","deskpro","deskilled","deskilled","deskilled","desktop","desktop","desktop","desktop","desktop","desktop","desktop","desktop","desktop","desktop","desktop","desktop","desktops","desktops","desktops","desktops","desktops","desktops","desktops","desktops","desktops","desktops","desks","desks","desks","desks","desks","desks","desks","desks","desks","desks","desks","desks","desks","desks","desks","deskjet","deskbound","deskbound","deskbound","deskbound","deskbound","deskbound","deskins","deskins","deskilling","deskilling","deskilling","desker","deskside","deskside","couchdb","couchdb","couchdb","couchdb","couchdb","couchant","couchant","couchant","couchant","couchant","couchant","couchsurfing","couchsurfing","couchsurfing","couche","couche","couche","couche","couche","couche","couche","couche","couchette","couchette","couchette","couchette","couchette","couchette","couchette","couchette","couchette","couchette","couchette","couchman","couchman","couchman","couchman","couching","couched","couched","coucher","coucher","coucher","coucher","coucher","coucher","coucher","coucher","coucher","couches","couches","couches","couches","couches","couches","couches","couches","couches","couches","couches","couches","couches","couches","couch","couch","couch","couch","couch","couch","couch","couch","couch","couch","couch","couch","couch","sofabed","sofabed","sofabed","sofabed","sofabed","sofabed","sofabed","sofabed","sofabed","sofabed","sofabed","sofabed","sofas","sofas","sofas","sofas","sofas","sofas","sofas","sofas","sofas","sofas","sofas","sofa","sofa","sofa","sofa","sofa","sofa","sofa","sofa","sofa","sofa","armchairs","armchairs","armchairs","armchairs","armchairs","armchairs","armchairs","armchairs","armchairs","chairs","chairs","chairs","chairs","chairs","chairs","chairs","chairs","loveseat","loveseat","loveseat","loveseat","loveseat","loveseat","loveseat","recliner","recliner","recliner","recliner","recliner","recliner","upholstered","upholstered","upholstered","upholstered","upholstered","futon","futon","futon","futon","chaise","chaise","chaise","settee","settee","armchair"],"to":["chair","desk","desktop","desktops","desks","couchdb","couches","couch","sofabed","sofas","sofa","armchairs","chairs","loveseat","recliner","upholstered","futon","chaise","settee","armchair","sleeper","desk","desking","desktop","desks","couches","couch","sofabed","sofas","sofa","armchairs","chairs","loveseat","recliner","upholstered","futon","chaise","settee","armchair","sleeper","desk","desking","deskpro","desktop","desktops","desks","deskjet","deskbound","deskside","armchair","desking","desktop","desktops","desks","deskside","couches","couch","sofabed","sofas","sofa","armchairs","chairs","loveseat","recliner","upholstered","futon","chaise","settee","armchair","sleeper","deskpro","desktop","desktops","desks","deskside","couches","sofabed","sofas","sofa","armchairs","chairs","loveseat","recliner","upholstered","futon","chaise","settee","armchair","desktop","desktops","desks","deskjet","deskbound","deskilling","desker","desktops","desks","deskjet","deskside","couchdb","couch","sofas","sofa","chairs","recliner","armchair","sleeper","desks","deskjet","deskside","deskstar","couchdb","couches","couch","sofas","sofa","chairs","couches","couch","sofabed","sofas","sofa","armchairs","chairs","loveseat","recliner","upholstered","futon","chaise","settee","armchair","sleeper","deskside","deskins","deskilling","desker","deskside","futon","armchair","couchman","couched","couchant","couching","sofaer","couchman","upholstered","armchair","couchant","couchsurfing","sofas","sofar","chaise","couchsurfing","couche","couching","couched","coucher","settee","couching","couches","couch","couchman","coucher","couches","sofabed","sofala","armchairs","upholstered","chaise","couches","couch","sofabed","sofas","sofa","armchairs","loveseat","futon","settee","armchair","sleeper","coucher","sofala","loveseat","chaise","couched","sofar","upholstered","couches","sofabed","sofa","armchairs","loveseat","recliner","futon","chaise","settee","couch","sofabed","sofas","sofa","armchairs","chairs","loveseat","recliner","upholstered","futon","chaise","settee","armchair","sleeper","sofabed","sofas","sofa","armchairs","chairs","loveseat","recliner","upholstered","futon","chaise","settee","armchair","sleeper","sofas","sofa","armchairs","chairs","loveseat","recliner","upholstered","futon","chaise","settee","armchair","sleeper","sofa","armchairs","chairs","loveseat","recliner","upholstered","futon","chaise","settee","armchair","sleeper","armchairs","chairs","loveseat","recliner","upholstered","futon","chaise","settee","armchair","sleeper","chairs","loveseat","recliner","upholstered","futon","chaise","settee","armchair","sleeper","loveseat","recliner","upholstered","futon","chaise","settee","armchair","sleeper","recliner","upholstered","futon","chaise","settee","armchair","sleeper","upholstered","futon","chaise","settee","armchair","sleeper","futon","chaise","settee","armchair","sleeper","chaise","settee","armchair","sleeper","settee","armchair","sleeper","armchair","sleeper","sleeper"],"value":[1255.237955521096,1070.249467323296,132.6494415430383,4.200503920071854,268.4782812136871,2.040868733150214,192.0938517502161,525.8504753831592,10.28189643393416,220.4485879808113,732.7830672789802,159.7039404760301,1372.001002992258,140.4559553649837,100.9046421022778,152.0905738407185,70.30400284979385,165.7254976406156,132.7372130209995,184.901740476454,62.57273574934242,1304.809388217511,6.492024483558278,31.4411781344787,422.4750313996708,372.9395928749094,1495.968753582377,27.2139844442906,411.8127024032863,1719.547727265513,278.9446689086949,4754.961931601691,600.1436548291789,1116.676954271675,935.2067182800224,327.1985329766509,655.5717795805745,290.2816087679904,944.185735382006,219.3077273287873,22.41559190967696,10.61152251528506,3.385112589658386,62.55905492758933,38.27833140434907,13.21932595369659,5.888297443991383,1.999371095533181,62.59473552690684,1.153373055620307,27.4299491072879,535.919189513717,50.09242086141378,2477.543144136771,1.075468015854346,143.9995748859804,648.3325890351518,78.26075183263144,140.7202967950858,869.4858526805017,156.8026900342471,1058.341050085628,75.5824137636335,269.1005337651566,143.5662461111408,116.18987193076,96.11211256386861,71.79647766994889,395.4208949774793,124.4758545638531,21.16136187782153,1.644415274780267,8.07142030343903,171.260557509245,2.425706724204045,1.796986252274937,1.575318374080377,30.33869105158545,21.19878446577228,49.22906800045188,43.23822948042345,17.87289328208483,12.94746236913873,38.72848122511366,20.4792319602433,4.569383603145213,13.38434310678312,9.633311716066229,5.954890694678959,7.230477396749055,2.671122542178636,10.62799420453385,83.68248177598181,124.510322537659,7.652628335136748,2233.051935562612,72.51252870286693,27.39785576663747,5.675576895368747,1.146802801274356,25.59327392447654,1.605352467559332,15.02849853562254,25.93217044795087,2.681698801122916,2.651153634981747,5.012667663160255,142.511087065286,31.24643585311958,1.767467533902148,2.003013096114782,3.182546530768458,8.524834151760373,1.487824120435762,19.75560155527614,2.095037965663348,23.12294790205388,635.7497315581497,131.8935696341971,26.47770919816442,836.1660624477261,567.682418526271,672.795177518653,1636.174018118363,84.55726492716062,164.1277507834089,354.0873613419509,153.8583732481314,79.05766185149055,94.98583636797292,182.7675834422561,67.3174498665434,1.24043831148256,1.148790611440694,2.545346400322668,3.294156096665833,5.372293784331529,1.050485651376759,9.330926107133385,15.67340953323289,2.319302374226633,2.011467780637288,28.13066809014613,4.888102475603747,8.478535021610716,1.150016994232935,1.079849075485225,2.187309131554748,21.24169745754815,2.403269577987911,1.450716968862698,1.079833636600851,9.743191985628568,1.605396650622472,3.641634217620657,6.109005988575701,38.67472528415622,2.367147362312949,1.446244963663292,1.332273944819957,1.809453881893741,3.60801520813713,44.77615477594294,13.94846596932936,2.07771061276056,4.419331697589981,2.499438207288526,1.044475665102747,3.884992004026661,37.89571642567274,5.878742623964198,5.653664000283396,5.641715112373308,3.686706528914522,7.998781899877258,1.209159658062708,9.181816565166914,33.68637599414684,2.409803086620737,150.4484813835598,1.345720240388394,2.548142635500357,1.221122613327837,2.032071744840779,446.9606816666973,4.36267786429007,1.00491051390386,1.793872794874731,1.075851762878742,3.466649446835204,5.334163804087379,5.777652459190079,8.177355716209105,7.685217945615991,33.09273058895189,3.128892098517702,1430.538122824629,158.1403729067503,3013.236161804042,1707.024553855374,2764.414023956759,1761.521611073992,534.9179669237724,638.2738621628391,643.6750939960945,456.4941835234297,725.3189056019298,642.1747177334969,267.7775733272491,278.1366908575902,104.6698907796435,678.6126011948909,3659.324902937184,326.9288054380103,776.8354773874609,684.2363974189474,854.9652448733297,223.3867229507769,691.6827916254987,438.8478322201917,540.0258772255405,978.2486316082459,752.1122575408306,212.2810341098322,590.9840883416006,245.067911327339,33.96959995175651,242.1181387695788,163.9563517169006,66.01421954199303,416.6838287063567,193.0227190520296,156.7705515391516,58.01449551157745,191.3529698367755,2961.546566972163,3604.958959313486,1861.349235841131,1472.057865689085,1030.90420368942,1675.718032424044,789.0207852821858,1072.824586705531,1086.599221801795,527.6211367906485,543.4410330006726,1546.081831757549,1652.533918901046,2939.176723049315,2138.395283539493,1414.715315886267,2231.499668814858,1746.103297837306,1685.42458210011,1334.260283737032,1641.855265328364,1650.770551275201,1054.154130144776,881.2762220516138,1610.669931652264,350.0726998265271,1136.073003954631,1804.24175414524,821.8663034587909,97.92882564391158,565.828854741177,1095.514609132403,1728.82402842387,335.8055440238668,872.8718276887297,405.5600196579383,761.0511411918576,162.2479387146174,2548.749033988851,1621.472131232288,1644.697086231601,2862.231479472781,1878.099805672423,859.9343729208231,603.1920692321881,1031.293224226275,829.7017591037227,2015.605647859857,813.8287852367079,893.9863983107615,425.4448168162515,797.1902068047974,1519.814827379866,1057.353145873322,827.4492404264258,241.4941963817711,767.6108667912273,490.6009878511276,395.7647448154958,766.736810129896,1475.146321714853,875.6093467188017,221.5350707323531,720.7306624573546,301.5854634990773,353.9231179452253],"title":[0.5952254824655255,0.571967372012252,0.3393722724346542,0.1431612061074204,0.4047876834796631,0.119523628240216,0.3722874243125917,0.4788677255684218,0.1790681332757079,0.3853246834977493,0.5202880562579144,0.3554912437993472,0.6086093319529751,0.3442587912415149,0.316940534928228,0.3511766039072849,0.2895642973187412,0.358795785393678,0.3394283974686851,0.3687527347296501,0.2812524315540104,0.6010170163886844,0.1596228413869532,0.2367961858482791,0.4533673721785146,0.4394501561191796,0.6219144256332256,0.228401016838297,0.4504793986472864,0.6439520922876963,0.4086763598921399,0.8303988920978761,0.4949528219361464,0.5780719391994547,0.5530022578738399,0.4253072999187442,0.5060052962748921,0.4127669157982533,0.5543248634934406,0.3848251821288886,0.2175893089294575,0.1804863760733587,0.1356417172838155,0.281237057126737,0.2487357729145679,0.1906787638669661,0.1557748834555789,0.1189113616768401,0.2812771494892088,0.1036316589291986,0.2288528105890292,0.4811437259188353,0.2660375901356611,0.7055134644579819,0.1018355409664552,0.3464099058471449,0.5046025757991576,0.2974308443170322,0.3444206528479052,0.54301975568232,0.3538656254290336,0.5703696529039848,0.2948527545101837,0.4050220241724761,0.3461490039119085,0.3283160153469417,0.313108264376052,0.2910889935915627,0.4459281652624938,0.3340190827913941,0.2144795567837696,0.1132407861132458,0.1685533896578456,0.3617548300130733,0.1247985596541877,0.1157807047186911,0.1120319988512855,0.2346924992751149,0.2145743174942946,0.26488380324392,0.2564289036371681,0.2056121221693146,0.18969075467797,0.2494638476688785,0.2127298413855478,0.1462057337671142,0.1912710602743294,0.1761748471480295,0.1562134588401854,0.1639803251419223,0.127841969637102,0.1805563751368925,0.3024535162702859,0.3340422032707263,0.1663231323259267,0.6874240243727265,0.2918120775764128,0.228785841125494,0.1543485319043394,0.103483756712795,0.2249217538146473,0.1125622070743655,0.1968923753092011,0.2256626671637018,0.1279683291346247,0.1276023650730138,0.1496295011439079,0.3455112264940686,0.2364286604384306,0.1153022710028728,0.1189654761598857,0.1335653143184164,0.1708722289604202,0.1104429246693225,0.2108252211711008,0.1203089604964808,0.2192859467384914,0.5021362170068313,0.3388877774707645,0.226840242041373,0.5377409798586411,0.4881197284758683,0.509296530309403,0.6360003768525146,0.3032408684411532,0.3579278605251466,0.4337880724556666,0.3521926465584094,0.2981851364204259,0.3121869269961995,0.3676840514090556,0.2864388450212678,0.1055343386222157,0.1035285709755995,0.1263097058147405,0.1347212313730091,0.1522439132744509,0.1012389264466853,0.1747757552703005,0.1989714983379986,0.1234068716512629,0.1190908157553574,0.2303005693575535,0.1486911346389876,0.1706397493852294,0.1035561902084588,0.1019390930121157,0.1216123110156155,0.2146828265954207,0.1245089647811294,0.109747761991014,0.1019387286477003,0.1766750874927776,0.1125629815603233,0.138141472272529,0.157214514078503,0.2493772373165341,0.1240384480402932,0.1096630864577651,0.1074356420626215,0.115981008195292,0.1378215373060256,0.2586793129399661,0.193255388365663,0.1200594265122704,0.1449903672191561,0.1257362782035661,0.1010938139676945,0.1403936717262554,0.2481118634203775,0.1557116517851427,0.1541993342443541,0.1541177954116462,0.1385669449608684,0.1681728808350083,0.1048626701953166,0.174073296188779,0.2409148512150167,0.124593500906003,0.3502248452724371,0.1077057021051282,0.1263443814716539,0.1051210810467578,0.1193946204560345,0.4597982671209426,0.1445234387756604,0.1001225374322106,0.1157305217053081,0.1018446239557401,0.1364512384784485,0.1519730526097366,0.1550378915725452,0.1691037437721849,0.1664999268536837,0.2398463705425498,0.1329987767654936,0.6149996363600008,0.3546179293937719,0.7408977786501301,0.6427764282178108,0.725104786347026,0.6478463166467069,0.4809188460112525,0.5026338871626467,0.5036938825140955,0.4622307270471838,0.5189580456352522,0.5034001039288021,0.404523308325382,0.4083800997012962,0.3198566929921007,0.5103939055296265,0.7777683079593072,0.4252196218276955,0.5279371976416778,0.5114480688342951,0.5407382798384154,0.3866022161899911,0.5128339200784463,0.4576974463451602,0.4820628264014582,0.5592581378101107,0.5236856416866768,0.3817049558663803,0.4930533875859663,0.3956595132176935,0.2414196456227233,0.3944635071418899,0.3578343776430195,0.2850423391325603,0.4518056540291006,0.3727366582717966,0.3538474918388483,0.2759841430837793,0.371927937472781,0.7376997587908815,0.7748632810998047,0.656836028232938,0.6194142902248988,0.5666365409501271,0.6398088392769141,0.5299954131476979,0.5723111136378701,0.5741393951173279,0.4792703324257123,0.4828231740865283,0.6270585865519477,0.6375842724149215,0.7363027540244976,0.6800204870921631,0.6132919494284265,0.6873045305415038,0.6464240162000621,0.6407333521742598,0.6043800770448569,0.6365517515803143,0.6374141177179601,0.5698047019579037,0.5448513271832254,0.633507320602647,0.4325532316094339,0.5805659486418033,0.651738958536125,0.5354270321683582,0.3145774854598223,0.4877207946038065,0.5753134712395709,0.6448188096032809,0.4280770700534611,0.5435476459154738,0.4487596326677404,0.5252347605221225,0.3568985610796311,0.7105289351117194,0.6345668376107622,0.6368270183998173,0.7314357587012038,0.6583088096062378,0.5415222769514666,0.4955801533167002,0.5666899896760239,0.5366986498064054,0.6700410208815432,0.5341131391419077,0.5468053156317845,0.4541620162360821,0.5313619948901984,0.6243781107482799,0.5702365039704235,0.5363340138268815,0.394209126460087,0.5263629091601564,0.4706327059727384,0.4460250761454312,0.5262130065178491,0.6197389259887837,0.5439733170144452,0.38579857754791,0.5181353816194857,0.416727922675682,0.4337377605619424]},"nodesToDataframe":true,"edgesToDataframe":true,"options":{"width":"100%","height":"100%","nodes":{"shape":"dot"},"manipulation":{"enabled":false},"edges":{"title":"title","color":{"opacity":0.6},"smooth":false},"layout":{"randomSeed":2080},"physics":{"solver":"barnesHut","timestep":0.1},"interaction":{"dragNodes":true,"dragView":true,"hover":true,"hoverConnectedEdges":true,"selectable":true,"tooltipDelay":100,"zoomSpeed":1}},"groups":["original","suggested"],"width":null,"height":null,"idselection":{"enabled":false},"byselection":{"enabled":false},"main":null,"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)","legend":{"width":0.07000000000000001,"useGroups":true,"position":"left","ncol":1,"stepX":100,"stepY":100,"zoom":true},"tooltipStay":100,"tooltipStyle":"position: fixed;visibility:hidden;padding: 5px;white-space: nowrap;font-family: verdana;font-size:14px;font-color:#000000;background-color: #f5f4ed;-moz-border-radius: 3px;-webkit-border-radius: 3px;border-radius: 3px;border: 1px solid #808074;box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2);"},"evals":[],"jsHooks":[]}</script><p>Instead of looking at pairwise comparisons, it might also make sense
-to compare with category centroids:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">meta_centroid</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dictionary_meta.html">dictionary_meta</a></span><span class="op">(</span></span>
-<span>  <span class="va">dict</span><span class="op">[</span><span class="fl">3</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
-<span>  pairwise <span class="op">=</span> <span class="cn">FALSE</span>, suggest <span class="op">=</span> <span class="cn">TRUE</span>, dimension_prop <span class="op">=</span> <span class="fl">.7</span>,</span>
-<span>  space_dir <span class="op">=</span> <span class="st">"~/Latent Semantic Spaces"</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; preparing terms (0)</span></span>
-<span><span class="co">#&gt; expanding terms (0.27)</span></span>
-<span><span class="co">#&gt; loading space (0.65)</span></span>
-<span><span class="co">#&gt; calculating term similarities (18.27)</span></span>
-<span><span class="co">#&gt; identifying potential additions (21.54)</span></span>
-<span><span class="co">#&gt; preparing results (21.63)</span></span>
-<span><span class="co">#&gt; done (22)</span></span>
-<span></span>
-<span><span class="va">meta_centroid</span><span class="op">$</span><span class="va">suggested</span></span>
-<span><span class="co">#&gt; $furniture</span></span>
-<span><span class="co">#&gt;    armchairs       chairs     loveseat     recliner       chaise  upholstered </span></span>
-<span><span class="co">#&gt;    0.5529963    0.5434817    0.5252644    0.5092236    0.4974767    0.4938080 </span></span>
-<span><span class="co">#&gt;        futon       settee     bookcase     armchair    recliners         bunk </span></span>
-<span><span class="co">#&gt;    0.4922854    0.4799182    0.4508335    0.4491583    0.4415674    0.4412543 </span></span>
-<span><span class="co">#&gt;      sleeper       daybed       lounge     cushions       dining   livingroom </span></span>
-<span><span class="co">#&gt;    0.4392628    0.4377850    0.4334839    0.4316007    0.4308022    0.4273143 </span></span>
-<span><span class="co">#&gt;    bookcases      lounger  workstation workstations  bookshelves      dinette </span></span>
-<span><span class="co">#&gt;    0.4271747    0.4265419    0.4264448    0.4263882    0.4248537    0.4220310 </span></span>
-<span><span class="co">#&gt;    banquette  overstuffed  kitchenette   nightstand  living-room      dinning </span></span>
-<span><span class="co">#&gt;    0.4219197    0.4198761    0.4195903    0.4173235    0.4161322    0.4099219 </span></span>
-<span><span class="co">#&gt;     reclined      armoire      bedside          bed      armless    furniture </span></span>
-<span><span class="co">#&gt;    0.4061959    0.4035826    0.4029241    0.4016325    0.4013178    0.4009581 </span></span>
-<span><span class="co">#&gt;     credenza    reclining </span></span>
-<span><span class="co">#&gt;    0.3988580    0.3974828 </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $well_adjusted</span></span>
-<span><span class="co">#&gt;     cheery   cheerful      smile       rosy      shone  firelight     smiles </span></span>
-<span><span class="co">#&gt;  0.4419037  0.4335846  0.4165741  0.4127805  0.3933930  0.3915648  0.3852913 </span></span>
-<span><span class="co">#&gt;       love   outshone   freckled    beaming       glow      orkut    twinkle </span></span>
-<span><span class="co">#&gt;  0.3720330  0.3662235  0.3661171  0.3600111  0.3545007  0.3544178  0.3541970 </span></span>
-<span><span class="co">#&gt;   freckles   rainbows  twinkling   sparkles    shining   sunbeams   blossoms </span></span>
-<span><span class="co">#&gt;  0.3531459  0.3530036  0.3519169  0.3514030  0.3513486  0.3499575  0.3496473 </span></span>
-<span><span class="co">#&gt;     shined      lovey    rainbow       hope  buttercup      pinks   blooming </span></span>
-<span><span class="co">#&gt;  0.3483321  0.3481237  0.3468247  0.3437738  0.3434096  0.3433615  0.3429255 </span></span>
-<span><span class="co">#&gt;     lovely     smiley    fuzzies  prettiest blossoming   funhouse  workmates </span></span>
-<span><span class="co">#&gt;  0.3405255  0.3404521  0.3401560  0.3387806  0.3378185  0.3358555  0.3356217 </span></span>
-<span><span class="co">#&gt;  ponyville      aglow      gleam   sweetest    squinty    bloomed    flowers </span></span>
-<span><span class="co">#&gt;  0.3352560  0.3349917  0.3349414  0.3348490  0.3316340  0.3310209  0.3309731 </span></span>
-<span><span class="co">#&gt;    sparkle   sunshiny     elissa  lamplight </span></span>
-<span><span class="co">#&gt;  0.3306320  0.3300678  0.3290812  0.3286637</span></span>
-<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">meta_centroid</span><span class="op">$</span><span class="va">summary</span><span class="op">[</span>, <span class="op">-</span><span class="fl">1</span><span class="op">]</span>, digits <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code></pre></div>
-<table class="table">
-<colgroup>
-<col width="14%">
-<col width="8%">
-<col width="11%">
-<col width="12%">
-<col width="8%">
-<col width="7%">
-<col width="11%">
-<col width="9%">
-<col width="7%">
-<col width="8%">
-</colgroup>
-<thead><tr class="header">
-<th align="left"></th>
-<th align="right">n_terms</th>
-<th align="right">n_expanded</th>
-<th align="left">sim.space</th>
-<th align="right">sim.min</th>
-<th align="right">sim.q1</th>
-<th align="right">sim.median</th>
-<th align="right">sim.mean</th>
-<th align="right">sim.q3</th>
-<th align="right">sim.max</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td align="left">furniture</td>
-<td align="right">5</td>
-<td align="right">34</td>
-<td align="left">glove_crawl</td>
-<td align="right">-0.120</td>
-<td align="right">0.011</td>
-<td align="right">0.084</td>
-<td align="right">0.125</td>
-<td align="right">0.192</td>
-<td align="right">0.622</td>
-</tr>
-<tr class="even">
-<td align="left">well_adjusted</td>
-<td align="right">6</td>
-<td align="right">47</td>
-<td align="left">glove_crawl</td>
-<td align="right">-0.089</td>
-<td align="right">0.056</td>
-<td align="right">0.154</td>
-<td align="right">0.167</td>
-<td align="right">0.270</td>
-<td align="right">0.569</td>
-</tr>
-</tbody>
-</table>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">meta_centroid</span><span class="op">$</span><span class="va">terms</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">15</span>, <span class="op">]</span>, digits <span class="op">=</span> <span class="fl">3</span>, row.names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
 <th align="left">category</th>
@@ -930,57 +636,236 @@ to compare with category centroids:</p>
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">display_network</span><span class="op">(</span><span class="va">meta_centroid</span>, min <span class="op">=</span> <span class="fl">.1</span>, seed <span class="op">=</span> <span class="fl">2562</span><span class="op">)</span></span></code></pre></div>
-<div class="visNetwork html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-52d5b17a1c2e58ab8b77" style="width:864px;height:720px;"></div>
-<script type="application/json" data-for="htmlwidget-52d5b17a1c2e58ab8b77">{"x":{"nodes":{"id":["table","chair","desk-top","desk","desking","deskpro","deskilled","desktop","desktops","desks","deskjet","deskbound","deskins","deskilling","desker","deskside","deskstar","couchdb","couchant","couchsurfing","couche","couchette","couchman","couching","couched","coucher","couches","couch","sofaer","sofabed","sofala","sofas","sofar","sofa","armchairs","chairs","loveseat","recliner","chaise","upholstered","futon","settee","bookcase","armchair"],"label":["table","chair","desk-top","desk","desking","deskpro","deskilled","desktop","desktops","desks","deskjet","deskbound","deskins","deskilling","desker","deskside","deskstar","couchdb","couchant","couchsurfing","couche","couchette","couchman","couching","couched","coucher","couches","couch","sofaer","sofabed","sofala","sofas","sofar","sofa","armchairs","chairs","loveseat","recliner","chaise","upholstered","futon","settee","bookcase","armchair"],"group":["original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","suggested","suggested","suggested","suggested","suggested","suggested","suggested","suggested","suggested","suggested"],"shape":["box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box"],"size":[0.02272727272727273,0.03625512460148921,0.02292694281215085,0.05433122039387259,0.03791846491098146,0.02973440183455517,0.01765379527158755,0.05704399379832003,0.06322709650815966,0.08899322349317398,0.04387429869947199,0.03411635984573163,0.0118826765138885,0.02009102488206741,0.02024652982022445,0.04856305243591499,0.03011152631082269,0.036443257610164,0.01847024218086746,0.03095813981688787,0.01242054684953402,0.03364713417179781,0.03257479474168355,0.02593108242782212,0.02580805984693065,0.05169396442587326,0.08395827213122106,0.09347643800705234,0.004975963125787417,0.07524191676157445,0.02054884576755979,0.1112487880434006,0.003500221156383709,0.1367530272589772,0.1480247300395429,0.1572327811018694,0.1604516499283857,0.1709235459690553,0.1856346619768925,0.2032446257342345,0.2053337871785881,0.2189158199706385,0.1945345998494896,0.2336266024321554]},"edges":{"from":["table","table","table","table","table","table","table","table","table","table","table","table","table","table","table","table","table","table","table","table","table","chair","chair","chair","chair","chair","chair","chair","chair","chair","chair","chair","chair","chair","chair","chair","chair","chair","chair","chair","desk-top","desk-top","desk-top","desk-top","desk-top","desk-top","desk-top","desk-top","desk-top","desk-top","desk-top","desk","desk","desk","desk","desk","desk","desk","desk","desk","desk","desk","desk","desk","desk","desk","desk","desk","desk","desk","desk","desking","desking","desking","desking","desking","desking","desking","desking","desking","desking","desking","desking","desking","desking","desking","desking","desking","desking","desking","deskpro","deskpro","deskpro","deskpro","deskilled","deskilled","deskilled","desktop","desktop","desktop","desktop","desktop","desktop","desktop","desktop","desktop","desktop","desktop","desktop","desktops","desktops","desktops","desktops","desktops","desktops","desktops","desktops","desktops","desktops","desktops","desks","desks","desks","desks","desks","desks","desks","desks","desks","desks","desks","desks","desks","desks","desks","deskjet","deskbound","deskbound","deskbound","deskbound","deskbound","deskbound","deskins","deskins","deskilling","deskilling","deskilling","desker","deskside","deskside","couchdb","couchdb","couchdb","couchdb","couchdb","couchant","couchant","couchant","couchant","couchant","couchant","couchsurfing","couchsurfing","couchsurfing","couche","couche","couche","couche","couche","couche","couche","couche","couchette","couchette","couchette","couchette","couchette","couchette","couchette","couchette","couchette","couchette","couchman","couchman","couchman","couchman","couching","couched","couched","coucher","coucher","coucher","coucher","coucher","coucher","coucher","coucher","coucher","coucher","couches","couches","couches","couches","couches","couches","couches","couches","couches","couches","couches","couches","couches","couches","couch","couch","couch","couch","couch","couch","couch","couch","couch","couch","couch","couch","couch","sofabed","sofabed","sofabed","sofabed","sofabed","sofabed","sofabed","sofabed","sofabed","sofabed","sofabed","sofabed","sofas","sofas","sofas","sofas","sofas","sofas","sofas","sofas","sofas","sofas","sofas","sofa","sofa","sofa","sofa","sofa","sofa","sofa","sofa","sofa","sofa","armchairs","armchairs","armchairs","armchairs","armchairs","armchairs","armchairs","armchairs","armchairs","chairs","chairs","chairs","chairs","chairs","chairs","chairs","chairs","loveseat","loveseat","loveseat","loveseat","loveseat","loveseat","loveseat","recliner","recliner","recliner","recliner","recliner","recliner","chaise","chaise","chaise","chaise","chaise","upholstered","upholstered","upholstered","upholstered","futon","futon","futon","settee","settee","bookcase"],"to":["chair","desk","desktop","desktops","desks","couchdb","couches","couch","sofabed","sofas","sofa","armchairs","chairs","loveseat","recliner","chaise","upholstered","futon","settee","bookcase","armchair","desk","desking","desktop","desks","couches","couch","sofabed","sofas","sofa","armchairs","chairs","loveseat","recliner","chaise","upholstered","futon","settee","bookcase","armchair","desk","desking","deskpro","desktop","desktops","desks","deskjet","deskbound","deskside","bookcase","armchair","desking","desktop","desktops","desks","deskside","couches","couch","sofabed","sofas","sofa","armchairs","chairs","loveseat","recliner","chaise","upholstered","futon","settee","bookcase","armchair","deskpro","desktop","desktops","desks","deskside","couches","sofabed","sofas","sofa","armchairs","chairs","loveseat","recliner","chaise","upholstered","futon","settee","bookcase","armchair","desktop","desktops","desks","deskjet","deskbound","deskilling","desker","desktops","desks","deskjet","deskside","couchdb","couch","sofas","sofa","chairs","recliner","bookcase","armchair","desks","deskjet","deskside","deskstar","couchdb","couches","couch","sofas","sofa","chairs","bookcase","couches","couch","sofabed","sofas","sofa","armchairs","chairs","loveseat","recliner","chaise","upholstered","futon","settee","bookcase","armchair","deskside","deskins","deskilling","desker","deskside","futon","armchair","couchman","couched","couchant","couching","sofaer","couchman","upholstered","armchair","couchant","couchsurfing","sofas","sofar","chaise","couchsurfing","couche","couching","couched","coucher","settee","couching","couches","couch","couchman","coucher","couches","sofabed","sofala","armchairs","chaise","upholstered","couches","couch","sofabed","sofas","sofa","armchairs","loveseat","futon","settee","armchair","coucher","sofala","loveseat","chaise","couched","sofar","upholstered","couches","sofabed","sofa","armchairs","loveseat","recliner","chaise","futon","settee","bookcase","couch","sofabed","sofas","sofa","armchairs","chairs","loveseat","recliner","chaise","upholstered","futon","settee","bookcase","armchair","sofabed","sofas","sofa","armchairs","chairs","loveseat","recliner","chaise","upholstered","futon","settee","bookcase","armchair","sofas","sofa","armchairs","chairs","loveseat","recliner","chaise","upholstered","futon","settee","bookcase","armchair","sofa","armchairs","chairs","loveseat","recliner","chaise","upholstered","futon","settee","bookcase","armchair","armchairs","chairs","loveseat","recliner","chaise","upholstered","futon","settee","bookcase","armchair","chairs","loveseat","recliner","chaise","upholstered","futon","settee","bookcase","armchair","loveseat","recliner","chaise","upholstered","futon","settee","bookcase","armchair","recliner","chaise","upholstered","futon","settee","bookcase","armchair","chaise","upholstered","futon","settee","bookcase","armchair","upholstered","futon","settee","bookcase","armchair","futon","settee","bookcase","armchair","settee","bookcase","armchair","bookcase","armchair","armchair"],"value":[1255.237955521096,1070.249467323296,132.6494415430383,4.200503920071854,268.4782812136871,2.040868733150214,192.0938517502161,525.8504753831592,10.28189643393416,220.4485879808113,732.7830672789802,159.7039404760301,1372.001002992258,140.4559553649837,100.9046421022778,165.7254976406156,152.0905738407185,70.30400284979385,132.7372130209995,250.6822114964258,184.901740476454,1304.809388217511,6.492024483558278,31.4411781344787,422.4750313996708,372.9395928749094,1495.968753582377,27.2139844442906,411.8127024032863,1719.547727265513,278.9446689086949,4754.961931601691,600.1436548291789,1116.676954271675,655.5717795805745,935.2067182800224,327.1985329766509,290.2816087679904,346.6375672340745,944.185735382006,22.41559190967696,10.61152251528506,3.385112589658386,62.55905492758933,38.27833140434907,13.21932595369659,5.888297443991383,1.999371095533181,62.59473552690684,3.856629182812866,1.153373055620307,27.4299491072879,535.919189513717,50.09242086141378,2477.543144136771,1.075468015854346,143.9995748859804,648.3325890351518,78.26075183263144,140.7202967950858,869.4858526805017,156.8026900342471,1058.341050085628,75.5824137636335,269.1005337651566,96.11211256386861,143.5662461111408,116.18987193076,71.79647766994889,533.3611417019306,395.4208949774793,21.16136187782153,1.644415274780267,8.07142030343903,171.260557509245,2.425706724204045,1.796986252274937,1.575318374080377,30.33869105158545,21.19878446577228,49.22906800045188,43.23822948042345,17.87289328208483,12.94746236913873,4.569383603145213,38.72848122511366,20.4792319602433,13.38434310678312,31.0548377041877,9.633311716066229,5.954890694678959,7.230477396749055,2.671122542178636,10.62799420453385,83.68248177598181,124.510322537659,7.652628335136748,2233.051935562612,72.51252870286693,27.39785576663747,5.675576895368747,1.146802801274356,25.59327392447654,1.605352467559332,15.02849853562254,25.93217044795087,2.681698801122916,15.60743929677643,2.651153634981747,142.511087065286,31.24643585311958,1.767467533902148,2.003013096114782,3.182546530768458,8.524834151760373,1.487824120435762,19.75560155527614,2.095037965663348,23.12294790205388,2.12056701877666,635.7497315581497,131.8935696341971,26.47770919816442,836.1660624477261,567.682418526271,672.795177518653,1636.174018118363,84.55726492716062,164.1277507834089,79.05766185149055,354.0873613419509,153.8583732481314,94.98583636797292,546.7371139158747,182.7675834422561,1.24043831148256,1.148790611440694,2.545346400322668,3.294156096665833,5.372293784331529,1.050485651376759,9.330926107133385,15.67340953323289,2.319302374226633,2.011467780637288,28.13066809014613,4.888102475603747,8.478535021610716,1.150016994232935,1.079849075485225,2.187309131554748,21.24169745754815,2.403269577987911,1.450716968862698,1.079833636600851,9.743191985628568,1.605396650622472,3.641634217620657,6.109005988575701,38.67472528415622,2.367147362312949,1.446244963663292,1.332273944819957,1.809453881893741,3.60801520813713,44.77615477594294,13.94846596932936,2.07771061276056,4.419331697589981,2.499438207288526,3.884992004026661,1.044475665102747,37.89571642567274,5.878742623964198,5.653664000283396,5.641715112373308,3.686706528914522,7.998781899877258,1.209159658062708,9.181816565166914,33.68637599414684,2.409803086620737,1.345720240388394,2.548142635500357,1.221122613327837,2.032071744840779,446.9606816666973,4.36267786429007,1.00491051390386,1.793872794874731,1.075851762878742,3.466649446835204,5.334163804087379,5.777652459190079,8.177355716209105,33.09273058895189,7.685217945615991,3.128892098517702,1.064013310231427,1430.538122824629,158.1403729067503,3013.236161804042,1707.024553855374,2764.414023956759,1761.521611073992,534.9179669237724,638.2738621628391,725.3189056019298,643.6750939960945,456.4941835234297,642.1747177334969,60.36664096104681,267.7775733272491,104.6698907796435,678.6126011948909,3659.324902937184,326.9288054380103,776.8354773874609,684.2363974189474,854.9652448733297,438.8478322201917,223.3867229507769,691.6827916254987,540.0258772255405,86.39767570827701,978.2486316082459,212.2810341098322,590.9840883416006,245.067911327339,33.96959995175651,242.1181387695788,163.9563517169006,193.0227190520296,66.01421954199303,416.6838287063567,156.7705515391516,27.24910602554576,58.01449551157745,2961.546566972163,3604.958959313486,1861.349235841131,1472.057865689085,1030.90420368942,1072.824586705531,1675.718032424044,789.0207852821858,1086.599221801795,232.1418119127459,527.6211367906485,1546.081831757549,1652.533918901046,2939.176723049315,2138.395283539493,1746.103297837306,1414.715315886267,2231.499668814858,1685.42458210011,524.3991063222661,1334.260283737032,1650.770551275201,1054.154130144776,881.2762220516138,1136.073003954631,1610.669931652264,350.0726998265271,1804.24175414524,304.731592748115,821.8663034587909,565.828854741177,1095.514609132403,872.8718276887297,1728.82402842387,335.8055440238668,405.5600196579383,420.6829776597751,761.0511411918576,2548.749033988851,2862.231479472781,1621.472131232288,1644.697086231601,1878.099805672423,402.2272067242329,859.9343729208231,2015.605647859857,1031.293224226275,829.7017591037227,813.8287852367079,208.4084950437385,893.9863983107615,1519.814827379866,767.6108667912268,1475.146321714853,192.1149112187609,875.6093467188017,797.1902068047974,1057.353145873322,773.1925756522131,827.4492404264258,490.6009878511276,486.8393058196717,395.7647448154958,419.0641980085032,720.7306624573546,382.7259630173815],"title":[0.5952254824655255,0.571967372012252,0.3393722724346542,0.1431612061074204,0.4047876834796631,0.119523628240216,0.3722874243125917,0.4788677255684218,0.1790681332757079,0.3853246834977493,0.5202880562579144,0.3554912437993472,0.6086093319529751,0.3442587912415149,0.316940534928228,0.358795785393678,0.3511766039072849,0.2895642973187412,0.3394283974686851,0.3979063586448329,0.3687527347296501,0.6010170163886844,0.1596228413869532,0.2367961858482791,0.4533673721785146,0.4394501561191796,0.6219144256332256,0.228401016838297,0.4504793986472864,0.6439520922876963,0.4086763598921399,0.8303988920978761,0.4949528219361464,0.5780719391994547,0.5060052962748921,0.5530022578738399,0.4253072999187442,0.4127669157982533,0.4314881836563646,0.5543248634934406,0.2175893089294575,0.1804863760733587,0.1356417172838155,0.281237057126737,0.2487357729145679,0.1906787638669661,0.1557748834555789,0.1189113616768401,0.2812771494892088,0.140136727259,0.1036316589291986,0.2288528105890292,0.4811437259188353,0.2660375901356611,0.7055134644579819,0.1018355409664552,0.3464099058471449,0.5046025757991576,0.2974308443170322,0.3444206528479052,0.54301975568232,0.3538656254290336,0.5703696529039848,0.2948527545101837,0.4050220241724761,0.313108264376052,0.3461490039119085,0.3283160153469417,0.2910889935915627,0.4805685469168601,0.4459281652624938,0.2144795567837696,0.1132407861132458,0.1685533896578456,0.3617548300130733,0.1247985596541877,0.1157807047186911,0.1120319988512855,0.2346924992751149,0.2145743174942946,0.26488380324392,0.2564289036371681,0.2056121221693146,0.18969075467797,0.1462057337671142,0.2494638476688785,0.2127298413855478,0.1912710602743294,0.2360653883593598,0.1761748471480295,0.1562134588401854,0.1639803251419223,0.127841969637102,0.1805563751368925,0.3024535162702859,0.3340422032707263,0.1663231323259267,0.6874240243727265,0.2918120775764128,0.228785841125494,0.1543485319043394,0.103483756712795,0.2249217538146473,0.1125622070743655,0.1968923753092011,0.2256626671637018,0.1279683291346247,0.1987617965798682,0.1276023650730138,0.3455112264940686,0.2364286604384306,0.1153022710028728,0.1189654761598857,0.1335653143184164,0.1708722289604202,0.1104429246693225,0.2108252211711008,0.1203089604964808,0.2192859467384914,0.1206738032832922,0.5021362170068313,0.3388877774707645,0.226840242041373,0.5377409798586411,0.4881197284758683,0.509296530309403,0.6360003768525146,0.3032408684411532,0.3579278605251466,0.2981851364204259,0.4337880724556666,0.3521926465584094,0.3121869269961995,0.4835536201187576,0.3676840514090556,0.1055343386222157,0.1035285709755995,0.1263097058147405,0.1347212313730091,0.1522439132744509,0.1012389264466853,0.1747757552703005,0.1989714983379986,0.1234068716512629,0.1190908157553574,0.2303005693575535,0.1486911346389876,0.1706397493852294,0.1035561902084588,0.1019390930121157,0.1216123110156155,0.2146828265954207,0.1245089647811294,0.109747761991014,0.1019387286477003,0.1766750874927776,0.1125629815603233,0.138141472272529,0.157214514078503,0.2493772373165341,0.1240384480402932,0.1096630864577651,0.1074356420626215,0.115981008195292,0.1378215373060256,0.2586793129399661,0.193255388365663,0.1200594265122704,0.1449903672191561,0.1257362782035661,0.1403936717262554,0.1010938139676945,0.2481118634203775,0.1557116517851427,0.1541993342443541,0.1541177954116462,0.1385669449608684,0.1681728808350083,0.1048626701953166,0.174073296188779,0.2409148512150167,0.124593500906003,0.1077057021051282,0.1263443814716539,0.1051210810467578,0.1193946204560345,0.4597982671209426,0.1445234387756604,0.1001225374322106,0.1157305217053081,0.1018446239557401,0.1364512384784485,0.1519730526097366,0.1550378915725452,0.1691037437721849,0.2398463705425498,0.1664999268536837,0.1329987767654936,0.1015632910305679,0.6149996363600008,0.3546179293937719,0.7408977786501301,0.6427764282178108,0.725104786347026,0.6478463166467069,0.4809188460112525,0.5026338871626467,0.5189580456352522,0.5036938825140955,0.4622307270471838,0.5034001039288021,0.2787399723757066,0.404523308325382,0.3198566929921007,0.5103939055296265,0.7777683079593072,0.4252196218276955,0.5279371976416778,0.5114480688342951,0.5407382798384154,0.4576974463451602,0.3866022161899911,0.5128339200784463,0.4820628264014582,0.3048775984402421,0.5592581378101107,0.3817049558663803,0.4930533875859663,0.3956595132176935,0.2414196456227233,0.3944635071418899,0.3578343776430195,0.3727366582717966,0.2850423391325603,0.4518056540291006,0.3538474918388483,0.2284746731375258,0.2759841430837793,0.7376997587908815,0.7748632810998047,0.656836028232938,0.6194142902248988,0.5666365409501271,0.5723111136378701,0.6398088392769141,0.5299954131476979,0.5741393951173279,0.3903357619365935,0.4792703324257123,0.6270585865519477,0.6375842724149215,0.7363027540244976,0.6800204870921631,0.6464240162000621,0.6132919494284265,0.6873045305415038,0.6407333521742598,0.478536959341064,0.6043800770448569,0.6374141177179601,0.5698047019579037,0.5448513271832254,0.5805659486418033,0.633507320602647,0.4325532316094339,0.651738958536125,0.4178105195890913,0.5354270321683582,0.4877207946038065,0.5753134712395709,0.5435476459154738,0.6448188096032809,0.4280770700534611,0.4487596326677404,0.4528858323248891,0.5252347605221225,0.7105289351117194,0.7314357587012038,0.6345668376107622,0.6368270183998173,0.6583088096062378,0.4478348230777731,0.5415222769514666,0.6700410208815432,0.5666899896760239,0.5366986498064054,0.5341131391419077,0.3799521045206992,0.5468053156317845,0.6243781107482799,0.5263629091601563,0.6197389259887837,0.3722976274671023,0.5439733170144452,0.5313619948901984,0.5702365039704235,0.5273171774713717,0.5363340138268815,0.4706327059727384,0.469727956546443,0.4460250761454312,0.4524495283384771,0.5181353816194857,0.4423051347217526]},"nodesToDataframe":true,"edgesToDataframe":true,"options":{"width":"100%","height":"100%","nodes":{"shape":"dot"},"manipulation":{"enabled":false},"edges":{"title":"title","color":{"opacity":0.6},"smooth":false},"layout":{"randomSeed":2562},"physics":{"solver":"barnesHut","timestep":0.1},"interaction":{"dragNodes":true,"dragView":true,"hover":true,"hoverConnectedEdges":true,"selectable":true,"tooltipDelay":100,"zoomSpeed":1}},"groups":["original","suggested"],"width":null,"height":null,"idselection":{"enabled":false},"byselection":{"enabled":false},"main":null,"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)","legend":{"width":0.07000000000000001,"useGroups":true,"position":"left","ncol":1,"stepX":100,"stepY":100,"zoom":true},"tooltipStay":100,"tooltipStyle":"position: fixed;visibility:hidden;padding: 5px;white-space: nowrap;font-family: verdana;font-size:14px;font-color:#000000;background-color: #f5f4ed;-moz-border-radius: 3px;-webkit-border-radius: 3px;border-radius: 3px;border: 1px solid #808074;box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2);"},"evals":[],"jsHooks":[]}</script><p>The previous examples looked at terms within a single space, but we
+<p>And we can visualize this together with the most similar suggested
+terms as a network:</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://datastorm-open.github.io/visNetwork/" class="external-link">visNetwork</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">display_network</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">meta</span>, <span class="va">cat</span> <span class="op">=</span> <span class="fl">1</span>, <span class="va">n</span> <span class="op">=</span> <span class="fl">10</span>, <span class="va">min</span> <span class="op">=</span> <span class="fl">.1</span>, <span class="va">seed</span> <span class="op">=</span> <span class="fl">2080</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">cat_name</span> <span class="op">&lt;-</span> <span class="va">meta</span><span class="op">$</span><span class="va">summary</span><span class="op">$</span><span class="va">category</span><span class="op">[[</span><span class="va">cat</span><span class="op">]</span><span class="op">]</span></span>
+<span>  <span class="va">top_suggested</span> <span class="op">&lt;-</span> <span class="va">meta</span><span class="op">$</span><span class="va">suggested</span><span class="op">[[</span><span class="va">cat_name</span><span class="op">]</span><span class="op">]</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">]</span></span>
+<span>  <span class="va">terms</span> <span class="op">&lt;-</span> <span class="va">meta</span><span class="op">$</span><span class="va">expanded</span><span class="op">[[</span><span class="va">cat_name</span><span class="op">]</span><span class="op">]</span></span>
+<span>  <span class="va">nodes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">terms</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">top_suggested</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">terms</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">top_suggested</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"original"</span>, <span class="st">"suggested"</span><span class="op">)</span>,</span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">terms</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">top_suggested</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="op">)</span>,</span>
+<span>    shape <span class="op">=</span> <span class="st">"box"</span></span>
+<span>  <span class="op">)</span></span>
+<span>  <span class="va">suggested_sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lma_simets.html">lma_simets</a></span><span class="op">(</span><span class="fu"><a href="../reference/lma_lspace.html">lma_lspace</a></span><span class="op">(</span></span>
+<span>    <span class="va">nodes</span><span class="op">$</span><span class="va">id</span>,</span>
+<span>    space <span class="op">=</span> <span class="va">meta</span><span class="op">$</span><span class="va">summary</span><span class="op">$</span><span class="va">sim.space</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
+<span>  <span class="op">)</span>, metric <span class="op">=</span> <span class="st">"cosine"</span><span class="op">)</span></span>
+<span>  <span class="va">nodes</span><span class="op">$</span><span class="va">size</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="va">suggested_sim</span><span class="op">)</span></span>
+<span>  <span class="va">edges</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    from <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">suggested_sim</span><span class="op">)</span>, each <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">suggested_sim</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    to <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">suggested_sim</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">suggested_sim</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">suggested_sim</span><span class="op">)</span>,</span>
+<span>    title <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">suggested_sim</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/visNetwork/man/visNetwork.html" class="external-link">visNetwork</a></span><span class="op">(</span></span>
+<span>    <span class="va">nodes</span>, <span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">within</a></span><span class="op">(</span></span>
+<span>      <span class="va">edges</span><span class="op">[</span><span class="va">edges</span><span class="op">$</span><span class="va">value</span> <span class="op">&gt;</span> <span class="va">min</span> <span class="op">&amp;</span> <span class="va">edges</span><span class="op">$</span><span class="va">value</span> <span class="op">&lt;</span> <span class="fl">1</span>, <span class="op">]</span>, <span class="va">value</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="va">value</span> <span class="op">*</span> <span class="fl">10</span><span class="op">)</span><span class="op">^</span><span class="fl">4</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/visNetwork/man/visEdges.html" class="external-link">visEdges</a></span><span class="op">(</span><span class="st">"title"</span>, smooth <span class="op">=</span> <span class="cn">FALSE</span>, color <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>opacity <span class="op">=</span> <span class="fl">.6</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/visNetwork/man/visLegend.html" class="external-link">visLegend</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">.07</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/visNetwork/man/visLayout.html" class="external-link">visLayout</a></span><span class="op">(</span>randomSeed <span class="op">=</span> <span class="va">seed</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/visNetwork/man/visPhysics.html" class="external-link">visPhysics</a></span><span class="op">(</span><span class="st">"barnesHut"</span>, timestep <span class="op">=</span> <span class="fl">.1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/visNetwork/man/visInteraction.html" class="external-link">visInteraction</a></span><span class="op">(</span></span>
+<span>      dragNodes <span class="op">=</span> <span class="cn">TRUE</span>, dragView <span class="op">=</span> <span class="cn">TRUE</span>, hover <span class="op">=</span> <span class="cn">TRUE</span>, hoverConnectedEdges <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>      selectable <span class="op">=</span> <span class="cn">TRUE</span>, tooltipDelay <span class="op">=</span> <span class="fl">100</span>, tooltipStay <span class="op">=</span> <span class="fl">100</span></span>
+<span>    <span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="fu">display_network</span><span class="op">(</span><span class="va">meta</span><span class="op">)</span></span></code></pre></div>
+<div class="visNetwork html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-d2451d685cbb16798734" style="width:864px;height:720px;"></div>
+<script type="application/json" data-for="htmlwidget-d2451d685cbb16798734">{"x":{"nodes":{"id":["table","chair","desk-top","desk","desking","deskpro","deskilled","desktop","desktops","desks","deskjet","deskbound","deskins","deskilling","desker","deskside","deskstar","couchdb","couchant","couchsurfing","couche","couchette","couchman","couching","couched","coucher","couches","couch","sofaer","sofabed","sofala","sofas","sofar","sofa","armchairs","chairs","loveseat","futon","upholstered","recliner","settee","armchair","chaise","workstation"],"label":["table","chair","desk-top","desk","desking","deskpro","deskilled","desktop","desktops","desks","deskjet","deskbound","deskins","deskilling","desker","deskside","deskstar","couchdb","couchant","couchsurfing","couche","couchette","couchman","couching","couched","coucher","couches","couch","sofaer","sofabed","sofala","sofas","sofar","sofa","armchairs","chairs","loveseat","futon","upholstered","recliner","settee","armchair","chaise","workstation"],"group":["original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","suggested","suggested","suggested","suggested","suggested","suggested","suggested","suggested","suggested","suggested"],"shape":["box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box","box"],"size":[0.02272727272727273,0.03625512460148921,0.02292694281215085,0.05433122039387259,0.03791846491098146,0.02973440183455517,0.01765379527158755,0.05704399379832003,0.06322709650815966,0.08899322349317398,0.04387429869947199,0.03411635984573163,0.0118826765138885,0.02009102488206741,0.02024652982022445,0.04856305243591499,0.03011152631082269,0.036443257610164,0.01847024218086746,0.03095813981688787,0.01242054684953402,0.03364713417179781,0.03257479474168355,0.02593108242782212,0.02580805984693065,0.05169396442587326,0.08395827213122106,0.09347643800705234,0.004975963125787417,0.07524191676157445,0.02054884576755979,0.1112487880434006,0.003500221156383709,0.1367530272589772,0.1480247300395429,0.1572327811018694,0.1604516499283857,0.169096888227298,0.1882513051539139,0.1960005605027468,0.2048308443799843,0.2112111830745145,0.2382358724976121,0.1727660606131336]},"edges":{"from":["table","table","table","table","table","table","table","table","table","table","table","table","table","table","table","table","table","table","table","table","table","chair","chair","chair","chair","chair","chair","chair","chair","chair","chair","chair","chair","chair","chair","chair","chair","chair","chair","chair","desk-top","desk-top","desk-top","desk-top","desk-top","desk-top","desk-top","desk-top","desk-top","desk-top","desk-top","desk","desk","desk","desk","desk","desk","desk","desk","desk","desk","desk","desk","desk","desk","desk","desk","desk","desk","desk","desk","desking","desking","desking","desking","desking","desking","desking","desking","desking","desking","desking","desking","desking","desking","desking","desking","desking","desking","desking","deskpro","deskpro","deskpro","deskpro","deskpro","deskilled","deskilled","deskilled","desktop","desktop","desktop","desktop","desktop","desktop","desktop","desktop","desktop","desktop","desktop","desktop","desktops","desktops","desktops","desktops","desktops","desktops","desktops","desktops","desktops","desktops","desktops","desks","desks","desks","desks","desks","desks","desks","desks","desks","desks","desks","desks","desks","desks","desks","deskjet","deskjet","deskbound","deskbound","deskbound","deskbound","deskbound","deskbound","deskins","deskins","deskilling","deskilling","deskilling","desker","deskside","deskside","deskside","couchdb","couchdb","couchdb","couchdb","couchdb","couchant","couchant","couchant","couchant","couchant","couchant","couchsurfing","couchsurfing","couchsurfing","couche","couche","couche","couche","couche","couche","couche","couche","couchette","couchette","couchette","couchette","couchette","couchette","couchette","couchette","couchette","couchette","couchman","couchman","couchman","couchman","couching","couched","couched","coucher","coucher","coucher","coucher","coucher","coucher","coucher","coucher","coucher","couches","couches","couches","couches","couches","couches","couches","couches","couches","couches","couches","couches","couches","couches","couch","couch","couch","couch","couch","couch","couch","couch","couch","couch","couch","couch","couch","sofabed","sofabed","sofabed","sofabed","sofabed","sofabed","sofabed","sofabed","sofabed","sofabed","sofabed","sofas","sofas","sofas","sofas","sofas","sofas","sofas","sofas","sofas","sofas","sofas","sofa","sofa","sofa","sofa","sofa","sofa","sofa","sofa","sofa","sofa","armchairs","armchairs","armchairs","armchairs","armchairs","armchairs","armchairs","armchairs","armchairs","chairs","chairs","chairs","chairs","chairs","chairs","chairs","chairs","loveseat","loveseat","loveseat","loveseat","loveseat","loveseat","loveseat","futon","futon","futon","futon","futon","futon","upholstered","upholstered","upholstered","upholstered","upholstered","recliner","recliner","recliner","recliner","settee","settee","settee","armchair","armchair","chaise"],"to":["chair","desk","desktop","desktops","desks","couchdb","couches","couch","sofabed","sofas","sofa","armchairs","chairs","loveseat","futon","upholstered","recliner","settee","armchair","chaise","workstation","desk","desking","desktop","desks","couches","couch","sofabed","sofas","sofa","armchairs","chairs","loveseat","futon","upholstered","recliner","settee","armchair","chaise","workstation","desk","desking","deskpro","desktop","desktops","desks","deskjet","deskbound","deskside","armchair","workstation","desking","desktop","desktops","desks","deskside","couches","couch","sofabed","sofas","sofa","armchairs","chairs","loveseat","futon","upholstered","recliner","settee","armchair","chaise","workstation","deskpro","desktop","desktops","desks","deskside","couches","sofabed","sofas","sofa","armchairs","chairs","loveseat","futon","upholstered","recliner","settee","armchair","chaise","workstation","desktop","desktops","desks","deskjet","workstation","deskbound","deskilling","desker","desktops","desks","deskjet","deskside","couchdb","couch","sofas","sofa","chairs","recliner","armchair","workstation","desks","deskjet","deskside","deskstar","couchdb","couches","couch","sofas","sofa","chairs","workstation","couches","couch","sofabed","sofas","sofa","armchairs","chairs","loveseat","futon","upholstered","recliner","settee","armchair","chaise","workstation","deskside","workstation","deskins","deskilling","desker","deskside","futon","armchair","couchman","couched","couchant","couching","sofaer","couchman","upholstered","armchair","workstation","couchant","couchsurfing","sofas","sofar","chaise","couchsurfing","couche","couching","couched","coucher","settee","couching","couches","couch","couchman","coucher","couches","sofabed","sofala","armchairs","upholstered","chaise","couches","couch","sofabed","sofas","sofa","armchairs","loveseat","futon","settee","armchair","coucher","sofala","loveseat","chaise","couched","sofar","upholstered","couches","sofabed","sofa","armchairs","loveseat","futon","recliner","settee","chaise","couch","sofabed","sofas","sofa","armchairs","chairs","loveseat","futon","upholstered","recliner","settee","armchair","chaise","workstation","sofabed","sofas","sofa","armchairs","chairs","loveseat","futon","upholstered","recliner","settee","armchair","chaise","workstation","sofas","sofa","armchairs","chairs","loveseat","futon","upholstered","recliner","settee","armchair","chaise","sofa","armchairs","chairs","loveseat","futon","upholstered","recliner","settee","armchair","chaise","workstation","armchairs","chairs","loveseat","futon","upholstered","recliner","settee","armchair","chaise","workstation","chairs","loveseat","futon","upholstered","recliner","settee","armchair","chaise","workstation","loveseat","futon","upholstered","recliner","settee","armchair","chaise","workstation","futon","upholstered","recliner","settee","armchair","chaise","workstation","upholstered","recliner","settee","armchair","chaise","workstation","recliner","settee","armchair","chaise","workstation","settee","armchair","chaise","workstation","armchair","chaise","workstation","chaise","workstation","workstation"],"value":[1255.237955521096,1070.249467323296,132.6494415430383,4.200503920071854,268.4782812136871,2.040868733150214,192.0938517502161,525.8504753831592,10.28189643393416,220.4485879808113,732.7830672789802,159.7039404760301,1372.001002992258,140.4559553649837,70.30400284979385,152.0905738407185,100.9046421022778,132.7372130209995,184.901740476454,165.7254976406156,101.5464971509222,1304.809388217511,6.492024483558278,31.4411781344787,422.4750313996708,372.9395928749094,1495.968753582377,27.2139844442906,411.8127024032863,1719.547727265513,278.9446689086949,4754.961931601691,600.1436548291789,327.1985329766509,935.2067182800224,1116.676954271675,290.2816087679904,944.185735382006,655.5717795805745,100.5296761762018,22.41559190967696,10.61152251528506,3.385112589658386,62.55905492758933,38.27833140434907,13.21932595369659,5.888297443991383,1.999371095533181,62.59473552690684,1.153373055620307,66.53075756000644,27.4299491072879,535.919189513717,50.09242086141378,2477.543144136771,1.075468015854346,143.9995748859804,648.3325890351518,78.26075183263144,140.7202967950858,869.4858526805017,156.8026900342471,1058.341050085628,75.5824137636335,116.18987193076,143.5662461111408,269.1005337651566,71.79647766994889,395.4208949774793,96.11211256386861,450.7810758756331,21.16136187782153,1.644415274780267,8.07142030343903,171.260557509245,2.425706724204045,1.796986252274937,1.575318374080377,30.33869105158545,21.19878446577228,49.22906800045188,43.23822948042345,17.87289328208483,20.4792319602433,38.72848122511366,12.94746236913873,13.38434310678312,9.633311716066229,4.569383603145213,37.86986884803149,5.954890694678959,7.230477396749055,2.671122542178636,10.62799420453385,29.94634035957275,83.68248177598181,124.510322537659,7.652628335136748,2233.051935562612,72.51252870286693,27.39785576663747,5.675576895368747,1.146802801274356,25.59327392447654,1.605352467559332,15.02849853562254,25.93217044795087,2.681698801122916,2.651153634981747,1165.674978817609,142.511087065286,31.24643585311958,1.767467533902148,2.003013096114782,3.182546530768458,8.524834151760373,1.487824120435762,19.75560155527614,2.095037965663348,23.12294790205388,787.6662857526317,635.7497315581497,131.8935696341971,26.47770919816442,836.1660624477261,567.682418526271,672.795177518653,1636.174018118363,84.55726492716062,153.8583732481314,354.0873613419509,164.1277507834089,94.98583636797292,182.7675834422561,79.05766185149055,372.7913240459531,1.24043831148256,19.56261042231249,1.148790611440694,2.545346400322668,3.294156096665833,5.372293784331529,1.050485651376759,9.330926107133385,15.67340953323289,2.319302374226633,2.011467780637288,28.13066809014613,4.888102475603747,8.478535021610716,1.150016994232935,1.079849075485225,9.404505262673039,2.187309131554748,21.24169745754815,2.403269577987911,1.450716968862698,1.079833636600851,9.743191985628568,1.605396650622472,3.641634217620657,6.109005988575701,38.67472528415622,2.367147362312949,1.446244963663292,1.332273944819957,1.809453881893741,3.60801520813713,44.77615477594294,13.94846596932936,2.07771061276056,4.419331697589981,2.499438207288526,1.044475665102747,3.884992004026661,37.89571642567274,5.878742623964198,5.653664000283396,5.641715112373308,3.686706528914522,7.998781899877258,1.209159658062708,9.181816565166914,33.68637599414684,2.409803086620737,1.345720240388394,2.548142635500357,1.221122613327837,2.032071744840779,446.9606816666973,4.36267786429007,1.00491051390386,1.793872794874731,1.075851762878742,3.466649446835204,5.334163804087379,5.777652459190079,7.685217945615991,8.177355716209105,3.128892098517702,33.09273058895189,1430.538122824629,158.1403729067503,3013.236161804042,1707.024553855374,2764.414023956759,1761.521611073992,534.9179669237724,456.4941835234297,643.6750939960945,638.2738621628391,642.1747177334969,267.7775733272491,725.3189056019298,12.92754770221731,104.6698907796435,678.6126011948909,3659.324902937184,326.9288054380103,776.8354773874609,684.2363974189474,691.6827916254987,223.3867229507769,854.9652448733297,540.0258772255405,978.2486316082459,438.8478322201917,14.54852344364615,212.2810341098322,590.9840883416006,245.067911327339,33.96959995175651,242.1181387695788,416.6838287063567,66.01421954199303,163.9563517169006,156.7705515391516,58.01449551157745,193.0227190520296,2961.546566972163,3604.958959313486,1861.349235841131,1472.057865689085,789.0207852821858,1675.718032424044,1030.90420368942,1086.599221801795,527.6211367906485,1072.824586705531,31.68622126210199,1546.081831757549,1652.533918901046,2939.176723049315,2231.499668814858,1414.715315886267,2138.395283539493,1685.42458210011,1334.260283737032,1746.103297837306,50.59020490504228,1650.770551275201,1054.154130144776,350.0726998265271,1610.669931652264,881.2762220516138,1804.24175414524,821.8663034587909,1136.073003954631,29.70681423994766,565.828854741177,335.8055440238668,1728.82402842387,1095.514609132403,405.5600196579383,761.0511411918576,872.8718276887297,131.8926809125931,1644.697086231601,1621.472131232288,2548.749033988851,1878.099805672423,859.9343729208231,2862.231479472781,11.37501726731678,797.190206804797,829.7017591037227,490.6009878511276,395.7647448154958,767.6108667912273,18.55053936753032,1031.293224226275,1057.353145873322,827.4492404264258,1519.814827379866,44.53936182832233,813.8287852367079,893.9863983107615,2015.605647859857,32.57615159807492,720.7306624573546,1475.146321714853,13.22226320462616,875.6093467188011,26.86278791523126,9.021904342492942],"title":[0.5952254824655255,0.571967372012252,0.3393722724346542,0.1431612061074204,0.4047876834796631,0.119523628240216,0.3722874243125917,0.4788677255684218,0.1790681332757079,0.3853246834977493,0.5202880562579144,0.3554912437993472,0.6086093319529751,0.3442587912415149,0.2895642973187412,0.3511766039072849,0.316940534928228,0.3394283974686851,0.3687527347296501,0.358795785393678,0.317443352276276,0.6010170163886844,0.1596228413869532,0.2367961858482791,0.4533673721785146,0.4394501561191796,0.6219144256332256,0.228401016838297,0.4504793986472864,0.6439520922876963,0.4086763598921399,0.8303988920978761,0.4949528219361464,0.4253072999187442,0.5530022578738399,0.5780719391994547,0.4127669157982533,0.5543248634934406,0.5060052962748921,0.316645682613469,0.2175893089294575,0.1804863760733587,0.1356417172838155,0.281237057126737,0.2487357729145679,0.1906787638669661,0.1557748834555789,0.1189113616768401,0.2812771494892088,0.1036316589291986,0.2855982994371719,0.2288528105890292,0.4811437259188353,0.2660375901356611,0.7055134644579819,0.1018355409664552,0.3464099058471449,0.5046025757991576,0.2974308443170322,0.3444206528479052,0.54301975568232,0.3538656254290336,0.5703696529039848,0.2948527545101837,0.3283160153469417,0.3461490039119085,0.4050220241724761,0.2910889935915627,0.4459281652624938,0.313108264376052,0.4607776642670053,0.2144795567837696,0.1132407861132458,0.1685533896578456,0.3617548300130733,0.1247985596541877,0.1157807047186911,0.1120319988512855,0.2346924992751149,0.2145743174942946,0.26488380324392,0.2564289036371681,0.2056121221693146,0.2127298413855478,0.2494638476688785,0.18969075467797,0.1912710602743294,0.1761748471480295,0.1462057337671142,0.2480695451042808,0.1562134588401854,0.1639803251419223,0.127841969637102,0.1805563751368925,0.2339300098343058,0.3024535162702859,0.3340422032707263,0.1663231323259267,0.6874240243727265,0.2918120775764128,0.228785841125494,0.1543485319043394,0.103483756712795,0.2249217538146473,0.1125622070743655,0.1968923753092011,0.2256626671637018,0.1279683291346247,0.1276023650730138,0.5843114122052758,0.3455112264940686,0.2364286604384306,0.1153022710028728,0.1189654761598857,0.1335653143184164,0.1708722289604202,0.1104429246693225,0.2108252211711008,0.1203089604964808,0.2192859467384914,0.529767807882558,0.5021362170068313,0.3388877774707645,0.226840242041373,0.5377409798586411,0.4881197284758683,0.509296530309403,0.6360003768525146,0.3032408684411532,0.3521926465584094,0.4337880724556666,0.3579278605251466,0.3121869269961995,0.3676840514090556,0.2981851364204259,0.4394064717815411,0.1055343386222157,0.2103084398234451,0.1035285709755995,0.1263097058147405,0.1347212313730091,0.1522439132744509,0.1012389264466853,0.1747757552703005,0.1989714983379986,0.1234068716512629,0.1190908157553574,0.2303005693575535,0.1486911346389876,0.1706397493852294,0.1035561902084588,0.1019390930121157,0.1751192902756908,0.1216123110156155,0.2146828265954207,0.1245089647811294,0.109747761991014,0.1019387286477003,0.1766750874927776,0.1125629815603233,0.138141472272529,0.157214514078503,0.2493772373165341,0.1240384480402932,0.1096630864577651,0.1074356420626215,0.115981008195292,0.1378215373060256,0.2586793129399661,0.193255388365663,0.1200594265122704,0.1449903672191561,0.1257362782035661,0.1010938139676945,0.1403936717262554,0.2481118634203775,0.1557116517851427,0.1541993342443541,0.1541177954116462,0.1385669449608684,0.1681728808350083,0.1048626701953166,0.174073296188779,0.2409148512150167,0.124593500906003,0.1077057021051282,0.1263443814716539,0.1051210810467578,0.1193946204560345,0.4597982671209426,0.1445234387756604,0.1001225374322106,0.1157305217053081,0.1018446239557401,0.1364512384784485,0.1519730526097366,0.1550378915725452,0.1664999268536837,0.1691037437721849,0.1329987767654936,0.2398463705425498,0.6149996363600008,0.3546179293937719,0.7408977786501301,0.6427764282178108,0.725104786347026,0.6478463166467069,0.4809188460112525,0.4622307270471838,0.5036938825140955,0.5026338871626467,0.5034001039288021,0.404523308325382,0.5189580456352522,0.1896177710894749,0.3198566929921007,0.5103939055296265,0.7777683079593072,0.4252196218276955,0.5279371976416778,0.5114480688342951,0.5128339200784463,0.3866022161899911,0.5407382798384154,0.4820628264014582,0.5592581378101107,0.4576974463451602,0.1953011180641295,0.3817049558663803,0.4930533875859663,0.3956595132176935,0.2414196456227233,0.3944635071418899,0.4518056540291006,0.2850423391325603,0.3578343776430195,0.3538474918388483,0.2759841430837793,0.3727366582717966,0.7376997587908815,0.7748632810998047,0.656836028232938,0.6194142902248988,0.5299954131476979,0.6398088392769141,0.5666365409501271,0.5741393951173279,0.4792703324257123,0.5723111136378701,0.2372562231420982,0.6270585865519477,0.6375842724149215,0.7363027540244976,0.6873045305415038,0.6132919494284265,0.6800204870921631,0.6407333521742598,0.6043800770448569,0.6464240162000621,0.2666960660575526,0.6374141177179601,0.5698047019579037,0.4325532316094339,0.633507320602647,0.5448513271832254,0.651738958536125,0.5354270321683582,0.5805659486418033,0.2334608272806963,0.4877207946038065,0.4280770700534611,0.6448188096032809,0.5753134712395709,0.4487596326677404,0.5252347605221225,0.5435476459154738,0.338887206598259,0.6368270183998173,0.6345668376107622,0.7105289351117194,0.6583088096062378,0.5415222769514666,0.7314357587012038,0.1836487666902338,0.5313619948901983,0.5366986498064054,0.4706327059727384,0.4460250761454312,0.5263629091601564,0.2075339420109306,0.5666899896760239,0.5702365039704235,0.5363340138268815,0.6243781107482799,0.2583366345237957,0.5341131391419077,0.5468053156317845,0.6700410208815432,0.2389048378466245,0.5181353816194857,0.6197389259887837,0.1906893548894926,0.5439733170144451,0.2276605448129627,0.1733103720251768]},"nodesToDataframe":true,"edgesToDataframe":true,"options":{"width":"100%","height":"100%","nodes":{"shape":"dot"},"manipulation":{"enabled":false},"edges":{"title":"title","color":{"opacity":0.6},"smooth":false},"layout":{"randomSeed":2080},"physics":{"solver":"barnesHut","timestep":0.1},"interaction":{"dragNodes":true,"dragView":true,"hover":true,"hoverConnectedEdges":true,"selectable":true,"tooltipDelay":100,"zoomSpeed":1}},"groups":["original","suggested"],"width":null,"height":null,"idselection":{"enabled":false},"byselection":{"enabled":false},"main":null,"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)","legend":{"width":0.07000000000000001,"useGroups":true,"position":"left","ncol":1,"stepX":100,"stepY":100,"zoom":true},"tooltipStay":100,"tooltipStyle":"position: fixed;visibility:hidden;padding: 5px;white-space: nowrap;font-family: verdana;font-size:14px;font-color:#000000;background-color: #f5f4ed;-moz-border-radius: 3px;-webkit-border-radius: 3px;border-radius: 3px;border: 1px solid #808074;box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2);"},"evals":[],"jsHooks":[]}</script><p>Or we could look at terms across categories within a
+dimensionally-reduced version of the space:</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jlmelville/uwot" class="external-link">uwot</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://plotly-r.com" class="external-link">plotly</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">display_reduced_space</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span></span>
+<span>    <span class="va">meta</span>, <span class="va">space_name</span> <span class="op">=</span> <span class="st">"glove_crawl"</span>,</span>
+<span>    <span class="va">color_seeds</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#30d126"</span>, <span class="st">"#a4e3a0"</span>, <span class="st">"#42b3ff"</span>, <span class="st">"#b4dbf5"</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">suggestions</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="va">meta</span><span class="op">$</span><span class="va">suggested</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">terms</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">meta</span><span class="op">$</span><span class="va">terms</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"category"</span>, <span class="st">"match"</span>, <span class="st">"sim.category"</span><span class="op">)</span><span class="op">]</span>, <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    category <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">meta</span><span class="op">$</span><span class="va">suggested</span><span class="op">)</span>, <span class="st">"_suggested"</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="va">meta</span><span class="op">$</span><span class="va">suggested</span>, <span class="va">length</span>, <span class="fl">0</span><span class="op">)</span></span>
+<span>    <span class="op">)</span>,</span>
+<span>    match <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">suggestions</span><span class="op">)</span>,</span>
+<span>    sim.category <span class="op">=</span> <span class="va">suggestions</span></span>
+<span>  <span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">space</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lma_lspace.html">lma_lspace</a></span><span class="op">(</span><span class="va">terms</span><span class="op">$</span><span class="va">match</span>, <span class="va">space_name</span><span class="op">)</span></span>
+<span>  <span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/uwot/man/umap.html" class="external-link">umap</a></span><span class="op">(</span><span class="va">space</span>, n_components <span class="op">=</span> <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">terms</span>, <span class="va">m</span><span class="op">)</span></span>
+<span>  <span class="va">d</span><span class="op">$</span><span class="va">color</span> <span class="op">&lt;-</span> <span class="va">color_seeds</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">category</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span>
+<span>  <span class="va">ds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/split.html" class="external-link">split</a></span><span class="op">(</span><span class="va">d</span>, <span class="va">d</span><span class="op">$</span><span class="va">category</span><span class="op">)</span></span>
+<span>  <span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/plotly/man/plot_ly.html" class="external-link">plot_ly</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="va">ds</span><span class="op">)</span>,</span>
+<span>    x <span class="op">=</span> <span class="op">~</span><span class="va">V1</span>, y <span class="op">=</span> <span class="op">~</span><span class="va">V2</span>, z <span class="op">=</span> <span class="op">~</span><span class="va">V3</span>, textfont <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">9</span><span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">layout</span><span class="op">(</span></span>
+<span>      showlegend <span class="op">=</span> <span class="cn">TRUE</span>, paper_bgcolor <span class="op">=</span> <span class="st">"#000000"</span>, font <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"#ffffff"</span><span class="op">)</span>,</span>
+<span>      margin <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>r <span class="op">=</span> <span class="fl">0</span>, b <span class="op">=</span> <span class="fl">0</span>, l <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="kw">for</span> <span class="op">(</span><span class="va">cat</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">ds</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">p</span> <span class="op">&lt;-</span> <span class="va">p</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/pkg/plotly/man/add_trace.html" class="external-link">add_text</a></span><span class="op">(</span></span>
+<span>      data <span class="op">=</span> <span class="va">ds</span><span class="op">[[</span><span class="va">cat</span><span class="op">]</span><span class="op">]</span>, text <span class="op">=</span> <span class="op">~</span><span class="va">match</span>, name <span class="op">=</span> <span class="va">cat</span>, textfont <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>color <span class="op">=</span> <span class="op">~</span><span class="va">color</span><span class="op">)</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
+<span>  <span class="va">p</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="fu">display_reduced_space</span><span class="op">(</span><span class="va">meta</span><span class="op">)</span></span></code></pre></div>
+<div class="plotly html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-2eaca0deaced73346da3" style="width:816px;height:672px;"></div>
+<script type="application/json" data-for="htmlwidget-2eaca0deaced73346da3">{"x":{"visdat":{"18fc39e8cf0":["function () ","plotlyVisDat"],"18fc3624652":["function () ","data"],"18fc5a5b58b4":["function () ","data"],"18fc55bee":["function () ","data"],"18fc3fc81bc7":["function () ","data"]},"cur_data":"18fc3fc81bc7","attrs":{"18fc3624652":{"x":{},"y":{},"z":{},"textfont":{"size":9,"color":{}},"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"text":{},"type":"scatter3d","mode":"text","name":"furniture","inherit":true},"18fc5a5b58b4":{"x":{},"y":{},"z":{},"textfont":{"size":9,"color":{}},"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"text":{},"type":"scatter3d","mode":"text","name":"furniture_suggested","inherit":true},"18fc55bee":{"x":{},"y":{},"z":{},"textfont":{"size":9,"color":{}},"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"text":{},"type":"scatter3d","mode":"text","name":"well_adjusted","inherit":true},"18fc3fc81bc7":{"x":{},"y":{},"z":{},"textfont":{"size":9,"color":{}},"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"text":{},"type":"scatter3d","mode":"text","name":"well_adjusted_suggested","inherit":true}},"layout":{"margin":{"b":0,"l":0,"t":25,"r":0},"showlegend":true,"paper_bgcolor":"#000000","font":{"color":"#ffffff"},"scene":{"xaxis":{"title":"V1"},"yaxis":{"title":"V2"},"zaxis":{"title":"V3"}},"hovermode":"closest"},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"x":[-6.7250009415429517,-6.9598661301415845,-0.038427078513471269,-6.4783788559716626,-7.1315360901635572,0.38107833883348308,0.52072832605424724,-5.4199252960961743,-5.4794002411645337,-6.627911174086897,0.01678363105836711,0.27733532211366496,0.062855279656084395,0.32057223341050944,0.37445966026368938,0.018253362389238692,0.52935699245515666,0.63647473475519023,0.17019835731569133,0.86423801502767406,-0.090405070571271562,-0.30096992233213582,0.060042774887712813,0.50496248027864299,0.66553512832704387,0.046390688629778243,-7.3977418778222486,-7.5438667176049634,0.45756659528795085,-7.7109294770043775,0.13455513736787639,-7.5107723114770337,1.0663774065915068,-7.5342059967797681],"y":[-2.7567290856986384,-2.7448197796492915,-0.49624402518561883,-2.8517954766302447,-3.3122207641153674,-0.55712349410346551,-0.76922936435035272,-2.811429735973392,-2.7648552029877047,-2.9942149340658526,-0.67071957583716912,-0.43447644706061883,-1.021044683411632,-1.08618564601234,-0.860297989800487,-0.55540497298530145,-1.3630405187158923,-0.60071809287360711,-1.1974747895746569,-0.40358550544074578,-1.2389578341989855,-1.3115138530283312,-1.1021385907678942,-1.0787926435022692,-1.0079465627222399,-1.3620296239405016,-3.4219526767282824,-3.0307758271246295,-1.1215183257608752,-2.7227734967618327,-1.1030896424799304,-3.0469776808767657,-0.94162125582984491,-2.8209648549108843],"z":[-1.1837592226158089,-1.1486355465541787,1.1548540639986091,-0.84801755367621845,-0.19299941777095264,0.88794553757801586,0.82270265103474194,-0.17057668684825367,-0.13806783675059742,-0.75780799507007068,1.4766321230043464,1.3655302572359138,1.0296185064424568,0.99771214009419018,1.7262926149477058,1.1525073099245124,1.1210670518983894,1.0891740369905525,0.78204298497334057,1.1219868707765632,1.5135648298372322,1.0924046087373787,1.5365073728670173,0.59891140938892895,0.55682206631794506,1.0135452795137458,-0.9725850996266312,-1.2491803419481224,1.2487452077974373,-1.0603094909976429,1.4561836767305427,-0.70370393513545459,1.1352071809877449,-1.1924012106548256],"textfont":{"size":9,"color":["#30d126","#30d126","#30d126","#30d126","#30d126","#30d126","#30d126","#30d126","#30d126","#30d126","#30d126","#30d126","#30d126","#30d126","#30d126","#30d126","#30d126","#30d126","#30d126","#30d126","#30d126","#30d126","#30d126","#30d126","#30d126","#30d126","#30d126","#30d126","#30d126","#30d126","#30d126","#30d126","#30d126","#30d126"]},"text":["table","chair","desk-top","desk","desking","deskpro","deskilled","desktop","desktops","desks","deskjet","deskbound","deskins","deskilling","desker","deskside","deskstar","couchdb","couchant","couchsurfing","couche","couchette","couchman","couching","couched","coucher","couches","couch","sofaer","sofabed","sofala","sofas","sofar","sofa"],"type":"scatter3d","mode":"text","name":"furniture","marker":{"color":"rgba(31,119,180,1)","line":{"color":"rgba(31,119,180,1)"}},"error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"line":{"color":"rgba(31,119,180,1)"},"frame":null},{"x":[-7.399120890883772,-6.9602704880517408,-7.686936938552229,-7.7777753708642408,-7.2809959290307447,-7.3498130677026197,-7.6800723908227368,-7.3705583451074048,-7.5181032059472486,-5.6207795975488111,-5.7784949181359693,-7.562878215102522,-7.4509626267236158,-7.3299165604394361,-7.5343223450463697,-7.3252626297753736,-6.9731012223046704,-7.2038570282739087,-7.6466413376611158,-7.5226379273217603,-7.4768987534326001,-7.3315606949609204,-7.4258561966699048],"y":[-3.0342902957945208,-2.990938824370418,-2.4150314300804476,-2.6852764009981493,-2.8829067021160464,-2.5142915889172892,-2.8490702032595019,-2.6826845079212527,-2.5609904869943003,-2.7671212970762591,-2.929198068335567,-3.3077194809465746,-3.4226416468172411,-3.312310826733623,-2.6409671262390058,-3.3193140148668627,-3.108852130129848,-2.8305539458542208,-2.6470846754982214,-3.3881951689272265,-3.1197476505785326,-3.0880419432669024,-2.6038051142840724],"z":[-0.59883963583812183,-0.96946097805008358,-0.79860491572722858,-1.0224261680788553,-0.92061203985318607,-0.88848530768260425,-0.55783649801120228,-1.031483585823626,-0.74918671964511341,-0.21934848545894092,-0.29903363703593677,-0.86707345663413471,-0.54128434776172107,-0.64246028183803028,-0.73284148691996998,-0.5903553318868584,-0.77998280047282642,-0.73398449539050525,-1.1077723976860947,-0.66077523945674366,-0.5532709014306969,-0.99441802955076164,-0.82718640087947315],"textfont":{"size":9,"color":["#a4e3a0","#a4e3a0","#a4e3a0","#a4e3a0","#a4e3a0","#a4e3a0","#a4e3a0","#a4e3a0","#a4e3a0","#a4e3a0","#a4e3a0","#a4e3a0","#a4e3a0","#a4e3a0","#a4e3a0","#a4e3a0","#a4e3a0","#a4e3a0","#a4e3a0","#a4e3a0","#a4e3a0","#a4e3a0","#a4e3a0"]},"text":["armchairs","chairs","loveseat","futon","upholstered","recliner","settee","armchair","chaise","workstation","workstations","lounging","living-room","overstuffed","armless","banquette","bookcases","recliners","bunk","dinning","settees","cushions","reclining"],"type":"scatter3d","mode":"text","name":"furniture_suggested","marker":{"color":"rgba(255,127,14,1)","line":{"color":"rgba(255,127,14,1)"}},"error_y":{"color":"rgba(255,127,14,1)"},"error_x":{"color":"rgba(255,127,14,1)"},"line":{"color":"rgba(255,127,14,1)"},"frame":null},{"x":[4.6225923659521655,1.0381136225778183,0.36002341529908977,1.1344339313227256,0.27489635965410075,0.61097553989473186,0.2850474478918632,0.81722140929284892,1.0148976357895454,0.18688521406236491,3.68398205062929,4.8493348719793872,0.1680088998991569,3.7173859240728935,0.46549580118242107,3.3332771422583183,1.0830418352279385,3.6024703147131523,3.4463502528387626,3.1719590785223564,3.1963819625097831,0.56652144214692912,1.0477837274092754,0.90882066509309611,0.36908409616533122,3.6660529734808525,3.2069799067694267,3.2890743376928886,0.51406881830278239,1.0930799139905294,5.1457833411413745,3.9282948138434013,1.1011342020947059,0.6566382112223228,3.8876630427557548,1.0615664987135252,4.6208802821356372,4.9247523905951098,3.6852501990515312,3.7689620616156181,0.88179849705282054,4.6739279391485766,0.86992082616868815,0.90528524539056621,5.2156166197973803,5.3152817847448901,5.373189842911394],"y":[3.0414499521703382,-0.66969437594703241,-1.1084200858621935,-1.2792472362070422,-0.88319904799750848,-1.1075098037271838,-1.3960726975946764,-1.4238662242441515,-1.3084933280496935,-1.1736037253885607,2.1699666262120862,2.8029236078710218,-0.93437714572242303,2.119093346640553,-0.9042818069010119,2.2825364351720472,-1.264044475510631,2.0401615381688734,1.9161733866185804,2.152296471640553,2.1870078325719495,-1.1051693677454333,-1.1392817019968371,-0.92808468337348504,-0.92581958766273065,2.1209091425389905,1.9560193300695081,2.2167200327367445,-0.6623161553888659,-1.0162043094187121,3.2050279856176038,2.1736912012548109,-0.41164214606574578,-1.1728128909616808,2.247600483939137,-0.36954362387946649,3.5185198069066663,3.3684968233556409,1.9503330469579359,1.8534240007848402,-0.44252474303535028,3.5143665552587171,-0.23826153273871942,-0.28763754363349481,3.5778254747838636,3.6503514528722425,3.6804560900182386],"z":[-0.37115805863246387,0.64252627373829418,0.86500752450123364,1.4237711477388435,1.0017221021760994,0.6989854621995979,1.2752790498842292,1.1194279241670662,1.0049119043458992,1.6753892946352058,0.4536328363527351,-0.52231674908503956,1.479516272555738,0.54577959061756665,1.3746967363466316,0.24336290837421948,1.0412428426851326,0.66725206853046948,0.51388013840809399,0.37833607674732739,0.33240759850636059,1.5041189241518074,1.1846339750398689,0.8840452480424934,1.6196014928926521,0.61244881631031567,0.62319887162342602,0.3035856533159309,1.4158496904481941,1.2027015733827644,-0.6263355564962334,-0.15463035820826954,1.4380447912324958,1.4053926515687996,-0.086416776169390142,1.413119320880323,-0.39741044758662647,-0.44232838868007129,0.1069902229417854,0.024331932078748286,1.0513353395570808,-0.43311267613276905,1.3858351755250984,1.353588824283033,-0.85996137081489032,-1.0004670981954045,-1.4998585533986992],"textfont":{"size":9,"color":["#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff","#42b3ff"]},"text":["happy","bright-eyed","brightmail","brightcove","brightling","brightnesses","brightwater","brightpoint","brightstar","brightwell","brighter","brighton","brightfield","brightest","brightwork","brighten","brightside","brightly","brightness","brightening","brightened","brightwood","brighthouse","brightman","brightlingsea","bright","brights","brightens","friendz","friendlies","friend","friendly","friendfeed","friendswood","friendliness","friendster","friendship","friends","friendlier","friendliest","friendless","friendships","friended","friending","she","he","they"],"type":"scatter3d","mode":"text","name":"well_adjusted","marker":{"color":"rgba(44,160,44,1)","line":{"color":"rgba(44,160,44,1)"}},"error_y":{"color":"rgba(44,160,44,1)"},"error_x":{"color":"rgba(44,160,44,1)"},"line":{"color":"rgba(44,160,44,1)"},"frame":null},{"x":[3.7229191424566825,4.097634947510393,4.701969778748186,4.5515541197973803,3.9284536006170829,4.6172687174994067,5.0157040717321948,5.3173212172705249,4.8937269808966235,5.317063248367937,5.3331622245031909,5.0140835406500415,4.7933706404882983,5.052058136673601,4.793391144486101,5.3644713523108081,5.4351891638952807,4.6151482226568774,5.0737156035620288,5.1618613364416674,5.3905877234655932,5.3760465743261889,5.2780589225012378,4.8989066245276049,3.5759507777411064,5.2032508017736987,4.7853340270239428],"y":[2.3288120508641859,2.7013186693639417,3.1742762804479261,3.2405261278600355,2.6133026361913343,3.2744836092443128,3.504518437430348,3.0272969484777112,3.1853965998143812,3.5089148760289808,3.5238312960118909,3.317262578055348,2.8710774660558362,3.1085514307469984,2.8669261217565198,3.4824737787694593,3.2964562654943128,3.391633915945973,3.1479868174047132,3.465406823203053,3.1240147829503675,3.5810779810399671,3.1748127222509046,3.317966866538014,2.1803921938390394,3.4131845713109632,3.2485522509069105],"z":[0.029476408969312251,-0.16962712525233692,-0.74677073477611011,-0.59608482836589283,-0.016417379368395268,-0.97244094579324192,-1.2880351197610802,-1.3453749668489403,-1.2213327389846749,-1.4771349084268517,-1.0991268110166497,-1.4065326404462761,-1.0183513028252131,-1.2439714026342339,-1.0920853641520447,-1.5525559139142937,-1.2011111032854027,-0.70317047356471485,-1.1041021969805664,-1.6091228675733513,-1.0559814561794705,-1.5268494439016289,-1.1343155008445687,-1.1419011157642311,0.32408464432850415,-1.1696715158115334,-0.50863772152766651],"textfont":{"size":9,"color":["#b4dbf5","#b4dbf5","#b4dbf5","#b4dbf5","#b4dbf5","#b4dbf5","#b4dbf5","#b4dbf5","#b4dbf5","#b4dbf5","#b4dbf5","#b4dbf5","#b4dbf5","#b4dbf5","#b4dbf5","#b4dbf5","#b4dbf5","#b4dbf5","#b4dbf5","#b4dbf5","#b4dbf5","#b4dbf5","#b4dbf5","#b4dbf5","#b4dbf5","#b4dbf5","#b4dbf5"]},"text":["cheerful","smile","everyone","hope","smiles","always","even","well","so","we","when","way","looking","but","look","our","as","love","just","them","my","all","one","things","cheery","it","fun"],"type":"scatter3d","mode":"text","name":"well_adjusted_suggested","marker":{"color":"rgba(214,39,40,1)","line":{"color":"rgba(214,39,40,1)"}},"error_y":{"color":"rgba(214,39,40,1)"},"error_x":{"color":"rgba(214,39,40,1)"},"line":{"color":"rgba(214,39,40,1)"},"frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script><p>Here it seems the suggested terms strengthen cores of related terms
+within categories, leaving unrelated terms to group together between
+categories.</p>
+<p>Instead of looking at pairwise comparisons, it might also make sense
+to compare with category centroids:</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">meta_centroid</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dictionary_meta.html">dictionary_meta</a></span><span class="op">(</span></span>
+<span>  <span class="va">dict</span><span class="op">[</span><span class="fl">3</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
+<span>  pairwise <span class="op">=</span> <span class="cn">FALSE</span>, suggest <span class="op">=</span> <span class="cn">TRUE</span>, space_dir <span class="op">=</span> <span class="st">"~/Latent Semantic Spaces"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; preparing terms (0)</span></span>
+<span><span class="co">#&gt; expanding terms (0.28)</span></span>
+<span><span class="co">#&gt; loading space (0.69)</span></span>
+<span><span class="co">#&gt; calculating term similarities (18.77)</span></span>
+<span><span class="co">#&gt; identifying potential additions (21.91)</span></span>
+<span><span class="co">#&gt; preparing results (21.98)</span></span>
+<span><span class="co">#&gt; done (22.34)</span></span>
+<span></span>
+<span><span class="va">meta_centroid</span><span class="op">$</span><span class="va">suggested</span></span>
+<span><span class="co">#&gt; $furniture</span></span>
+<span><span class="co">#&gt;       chairs    armchairs     loveseat        futon  upholstered     recliner </span></span>
+<span><span class="co">#&gt;    0.6064326    0.5976049    0.5454905    0.5394462    0.5280202    0.5212545 </span></span>
+<span><span class="co">#&gt;       chaise  workstation     armchair       settee workstations    furniture </span></span>
+<span><span class="co">#&gt;    0.5114332    0.5096846    0.5071825    0.5021504    0.5002925    0.4769077 </span></span>
+<span><span class="co">#&gt;    bookcases         bunk      armless     cushions    recliners     lounging </span></span>
+<span><span class="co">#&gt;    0.4759475    0.4704968    0.4695804    0.4667991    0.4650597    0.4633952 </span></span>
+<span><span class="co">#&gt;     bookcase      sitting  living-room       tables      seating  overstuffed </span></span>
+<span><span class="co">#&gt;    0.4582606    0.4582305    0.4575348    0.4568406    0.4565781    0.4550738 </span></span>
+<span><span class="co">#&gt;       dining      dinning </span></span>
+<span><span class="co">#&gt;    0.4540843    0.4515133 </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $well_adjusted</span></span>
+<span><span class="co">#&gt;     smile  cheerful  everyone    always      hope      even      well        so </span></span>
+<span><span class="co">#&gt; 0.6016819 0.5944638 0.5914658 0.5903040 0.5859899 0.5826068 0.5776247 0.5758240 </span></span>
+<span><span class="co">#&gt;      when        we       but    smiles       way   looking      just      look </span></span>
+<span><span class="co">#&gt; 0.5736260 0.5728515 0.5721024 0.5700290 0.5676014 0.5614292 0.5602401 0.5594655</span></span>
+<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">meta_centroid</span><span class="op">$</span><span class="va">summary</span><span class="op">[</span>, <span class="op">-</span><span class="fl">1</span><span class="op">]</span>, digits <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<colgroup>
+<col width="14%">
+<col width="8%">
+<col width="11%">
+<col width="12%">
+<col width="8%">
+<col width="7%">
+<col width="11%">
+<col width="9%">
+<col width="7%">
+<col width="8%">
+</colgroup>
+<thead><tr class="header">
+<th align="left"></th>
+<th align="right">n_terms</th>
+<th align="right">n_expanded</th>
+<th align="left">sim.space</th>
+<th align="right">sim.min</th>
+<th align="right">sim.q1</th>
+<th align="right">sim.median</th>
+<th align="right">sim.mean</th>
+<th align="right">sim.q3</th>
+<th align="right">sim.max</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">furniture</td>
+<td align="right">5</td>
+<td align="right">34</td>
+<td align="left">glove_crawl</td>
+<td align="right">-0.093</td>
+<td align="right">0.018</td>
+<td align="right">0.096</td>
+<td align="right">0.146</td>
+<td align="right">0.19</td>
+<td align="right">0.675</td>
+</tr>
+<tr class="even">
+<td align="left">well_adjusted</td>
+<td align="right">6</td>
+<td align="right">47</td>
+<td align="left">glove_crawl</td>
+<td align="right">-0.170</td>
+<td align="right">0.018</td>
+<td align="right">0.191</td>
+<td align="right">0.199</td>
+<td align="right">0.36</td>
+<td align="right">0.651</td>
+</tr>
+</tbody>
+</table>
+<p>The previous examples looked at terms within a single space, but we
 can also aggregate across multiple spaces, which might result in more
 reliable comparisons:</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">meta_multi</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dictionary_meta.html">dictionary_meta</a></span><span class="op">(</span></span>
 <span>  <span class="va">dict</span><span class="op">[</span><span class="fl">3</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, <span class="st">"multi"</span>,</span>
-<span>  suggest <span class="op">=</span> <span class="cn">TRUE</span>, dimension_prop <span class="op">=</span> <span class="fl">.7</span>, space_dir <span class="op">=</span> <span class="st">"~/Latent Semantic Spaces"</span></span>
+<span>  suggest <span class="op">=</span> <span class="cn">TRUE</span>, space_dir <span class="op">=</span> <span class="st">"~/Latent Semantic Spaces"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; preparing terms (0)</span></span>
 <span><span class="co">#&gt; expanding terms (0.35)</span></span>
 <span><span class="co">#&gt; loading spaces (0.74)</span></span>
-<span><span class="co">#&gt; calculating term similarities (79.81)</span></span>
-<span><span class="co">#&gt; identifying potential additions (135.21)</span></span>
-<span><span class="co">#&gt; preparing results (135.53)</span></span>
-<span><span class="co">#&gt; done (135.72)</span></span>
+<span><span class="co">#&gt; calculating term similarities (78.61)</span></span>
+<span><span class="co">#&gt; identifying potential additions (170.99)</span></span>
+<span><span class="co">#&gt; preparing results (171.13)</span></span>
+<span><span class="co">#&gt; done (171.24)</span></span>
 <span></span>
 <span><span class="va">meta_multi</span><span class="op">$</span><span class="va">suggested</span></span>
 <span><span class="co">#&gt; $furniture</span></span>
-<span><span class="co">#&gt;         dinette    chandeliered       banquette       staffroom        sawhorse </span></span>
-<span><span class="co">#&gt;       0.3536756       0.3478640       0.3460659       0.3433635       0.3403842 </span></span>
-<span><span class="co">#&gt;         hassock        verandah       open-plan     photocopier essentiellement </span></span>
-<span><span class="co">#&gt;       0.3379683       0.3363053       0.3342363       0.3328435       0.3316379 </span></span>
-<span><span class="co">#&gt;         jointer          peepul        cabriole      banqueting       notetaker </span></span>
-<span><span class="co">#&gt;       0.3309013       0.3303376       0.3299326       0.3292606       0.3290768 </span></span>
-<span><span class="co">#&gt;          divans          chintz         benches    kitchenettes    cross-legged </span></span>
-<span><span class="co">#&gt;       0.3287219       0.3271845       0.3259295       0.3253569       0.3245070 </span></span>
-<span><span class="co">#&gt;      headboards       curtained        hunching   reupholstered    lectureships </span></span>
-<span><span class="co">#&gt;       0.3239410       0.3232719       0.3223975       0.3214974       0.3211921 </span></span>
-<span><span class="co">#&gt;    space-saving        armoires </span></span>
-<span><span class="co">#&gt;       0.3209508       0.3208115 </span></span>
+<span><span class="co">#&gt;      banquette        dinette        cubical       snoozing        hassock </span></span>
+<span><span class="co">#&gt;      0.3926174      0.3755285      0.3742140      0.3742027      0.3725989 </span></span>
+<span><span class="co">#&gt;    living-room airconditioned      curtained      open-plan   cross-legged </span></span>
+<span><span class="co">#&gt;      0.3721557      0.3671342      0.3652230      0.3648263      0.3623970 </span></span>
+<span><span class="co">#&gt;       hunching    semi-circle         chaise       cabriole        chaises </span></span>
+<span><span class="co">#&gt;      0.3621855      0.3605409      0.3602326      0.3600797      0.3571732 </span></span>
+<span><span class="co">#&gt;          plops   kitchenettes        sleekly        settees      armchairs </span></span>
+<span><span class="co">#&gt;      0.3570083      0.3543388      0.3533520      0.3530020      0.3521166 </span></span>
+<span><span class="co">#&gt;      verandahs        longues       anteroom      parquetry  reupholstered </span></span>
+<span><span class="co">#&gt;      0.3515619      0.3515305      0.3512446      0.3503180      0.3501828 </span></span>
+<span><span class="co">#&gt;      cubbyhole      staffroom       waterbed     sideboards      groupware </span></span>
+<span><span class="co">#&gt;      0.3500203      0.3495697      0.3494830      0.3482853      0.3481645 </span></span>
+<span><span class="co">#&gt;         doored      washstand        regally </span></span>
+<span><span class="co">#&gt;      0.3477275      0.3474672      0.3473579 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $well_adjusted</span></span>
-<span><span class="co">#&gt;      sunshiny      lovelies        cheery         aglow    browncoats </span></span>
-<span><span class="co">#&gt;     0.3258394     0.3109676     0.3067942     0.3031040     0.3027539 </span></span>
-<span><span class="co">#&gt;      shinning       everone     firelight       vorlons       babysit </span></span>
-<span><span class="co">#&gt;     0.3017336     0.2993829     0.2992190     0.2966901     0.2961564 </span></span>
-<span><span class="co">#&gt;     gladdened    nightlight         gleam       sunsets timesplitters </span></span>
-<span><span class="co">#&gt;     0.2943748     0.2931816     0.2923646     0.2920676     0.2919174 </span></span>
-<span><span class="co">#&gt;    life-forms       moonlit       enthuse      sunbeams   immortalize </span></span>
-<span><span class="co">#&gt;     0.2916402     0.2915296     0.2894505     0.2891300     0.2890891 </span></span>
-<span><span class="co">#&gt;     twinkling   photo-shoot     wayfarers       hearten    super-cool </span></span>
-<span><span class="co">#&gt;     0.2877792     0.2875784     0.2872230     0.2871627     0.2867981 </span></span>
-<span><span class="co">#&gt;       eveyone     doorsteps     sunnydale     enlighten       bloomed </span></span>
-<span><span class="co">#&gt;     0.2865792     0.2844384     0.2844348     0.2830129     0.2828172 </span></span>
-<span><span class="co">#&gt;      homelike      buddying    particpate      weasleys        ashely </span></span>
-<span><span class="co">#&gt;     0.2827452     0.2825939     0.2825171     0.2824832     0.2820423 </span></span>
-<span><span class="co">#&gt;       starlit </span></span>
-<span><span class="co">#&gt;     0.2815021</span></span>
+<span><span class="co">#&gt;        cheery         aglow     workmates      sunshiny        giggly </span></span>
+<span><span class="co">#&gt;     0.3801433     0.3762835     0.3742287     0.3667182     0.3647983 </span></span>
+<span><span class="co">#&gt;     flickered      sunbeams complimenting       babysit      livelier </span></span>
+<span><span class="co">#&gt;     0.3550112     0.3531647     0.3521553     0.3520434     0.3472921 </span></span>
+<span><span class="co">#&gt;       beaming  cheerfulness   schoolmates        jovial      vivacity </span></span>
+<span><span class="co">#&gt;     0.3471171     0.3470663     0.3462756     0.3446221     0.3444394 </span></span>
+<span><span class="co">#&gt;     soulmates   sweethearts         becks mischievously      flitting </span></span>
+<span><span class="co">#&gt;     0.3425953     0.3412506     0.3407253     0.3398005     0.3397464 </span></span>
+<span><span class="co">#&gt;        perked      shinning     enlivened        gaiety         gleam </span></span>
+<span><span class="co">#&gt;     0.3386063     0.3385910     0.3382409     0.3380319     0.3372517 </span></span>
+<span><span class="co">#&gt;     playmates   fantabulous   crestfallen      freckles         winks </span></span>
+<span><span class="co">#&gt;     0.3362337     0.3362083     0.3356015     0.3354109     0.3352553 </span></span>
+<span><span class="co">#&gt;       enliven       squinty       sunnier      greatful       pitying </span></span>
+<span><span class="co">#&gt;     0.3351089     0.3349024     0.3348174     0.3346780     0.3346716 </span></span>
+<span><span class="co">#&gt;         mousy    blossoming    frolicking    nightlight      to-night </span></span>
+<span><span class="co">#&gt;     0.3344969     0.3338377     0.3338082     0.3337505     0.3335339 </span></span>
+<span><span class="co">#&gt;     next-door       eveyone      cheerily    fun-loving       flighty </span></span>
+<span><span class="co">#&gt;     0.3333128     0.3330416     0.3326816     0.3326738     0.3324997 </span></span>
+<span><span class="co">#&gt;    likeminded      sociable      outshine        glowed   girlfriends </span></span>
+<span><span class="co">#&gt;     0.3323638     0.3320942     0.3320304     0.3320234     0.3312609</span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">meta_multi</span><span class="op">$</span><span class="va">summary</span><span class="op">[</span>, <span class="op">-</span><span class="fl">1</span><span class="op">]</span>, digits <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <colgroup>
@@ -1014,12 +899,12 @@ reliable comparisons:</p>
 <td align="right">33</td>
 <td align="left">glove_crawl, paragram_sl999, paragram_ws353, sensembed,
 CoNLL17_skipgram</td>
-<td align="right">0.102</td>
-<td align="right">0.187</td>
-<td align="right">0.226</td>
-<td align="right">0.226</td>
-<td align="right">0.282</td>
-<td align="right">0.322</td>
+<td align="right">0.138</td>
+<td align="right">0.223</td>
+<td align="right">0.259</td>
+<td align="right">0.259</td>
+<td align="right">0.304</td>
+<td align="right">0.369</td>
 </tr>
 <tr class="even">
 <td align="left">well_adjusted</td>
@@ -1027,130 +912,12 @@ CoNLL17_skipgram</td>
 <td align="right">45</td>
 <td align="left">glove_crawl, paragram_sl999, paragram_ws353, sensembed,
 CoNLL17_skipgram</td>
-<td align="right">0.098</td>
-<td align="right">0.152</td>
-<td align="right">0.184</td>
-<td align="right">0.188</td>
-<td align="right">0.222</td>
-<td align="right">0.311</td>
-</tr>
-</tbody>
-</table>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">meta_multi</span><span class="op">$</span><span class="va">terms</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">15</span>, <span class="op">]</span>, digits <span class="op">=</span> <span class="fl">3</span>, row.names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
-<table class="table">
-<thead><tr class="header">
-<th align="left">category</th>
-<th align="left">term</th>
-<th align="left">match</th>
-<th align="right">sim.term</th>
-<th align="right">sim.category</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td align="left">furniture</td>
-<td align="left">table</td>
-<td align="left">table</td>
-<td align="right">1.000</td>
-<td align="right">0.219</td>
-</tr>
-<tr class="even">
-<td align="left">furniture</td>
-<td align="left">chair</td>
-<td align="left">chair</td>
-<td align="right">1.000</td>
-<td align="right">0.237</td>
-</tr>
-<tr class="odd">
-<td align="left">furniture</td>
-<td align="left">desk*</td>
-<td align="left">desk</td>
-<td align="right">0.297</td>
-<td align="right">0.282</td>
-</tr>
-<tr class="even">
-<td align="left">furniture</td>
-<td align="left">desk*</td>
-<td align="left">desking</td>
-<td align="right">0.367</td>
-<td align="right">0.322</td>
-</tr>
-<tr class="odd">
-<td align="left">furniture</td>
-<td align="left">desk*</td>
-<td align="left">deskpro</td>
-<td align="right">0.378</td>
-<td align="right">0.173</td>
-</tr>
-<tr class="even">
-<td align="left">furniture</td>
-<td align="left">desk*</td>
-<td align="left">deskilled</td>
-<td align="right">0.292</td>
-<td align="right">0.228</td>
-</tr>
-<tr class="odd">
-<td align="left">furniture</td>
-<td align="left">desk*</td>
-<td align="left">desktop</td>
-<td align="right">0.380</td>
-<td align="right">0.240</td>
-</tr>
-<tr class="even">
-<td align="left">furniture</td>
-<td align="left">desk*</td>
-<td align="left">desktops</td>
-<td align="right">0.356</td>
-<td align="right">0.209</td>
-</tr>
-<tr class="odd">
-<td align="left">furniture</td>
-<td align="left">desk*</td>
-<td align="left">desks</td>
-<td align="right">0.350</td>
-<td align="right">0.299</td>
-</tr>
-<tr class="even">
-<td align="left">furniture</td>
-<td align="left">desk*</td>
-<td align="left">deskjet</td>
-<td align="right">0.269</td>
-<td align="right">0.145</td>
-</tr>
-<tr class="odd">
-<td align="left">furniture</td>
-<td align="left">desk*</td>
-<td align="left">deskbound</td>
-<td align="right">0.316</td>
-<td align="right">0.282</td>
-</tr>
-<tr class="even">
-<td align="left">furniture</td>
-<td align="left">desk*</td>
-<td align="left">deskins</td>
-<td align="right">0.149</td>
-<td align="right">0.174</td>
-</tr>
-<tr class="odd">
-<td align="left">furniture</td>
-<td align="left">desk*</td>
-<td align="left">deskilling</td>
-<td align="right">0.204</td>
-<td align="right">0.187</td>
-</tr>
-<tr class="even">
-<td align="left">furniture</td>
-<td align="left">desk*</td>
-<td align="left">desker</td>
-<td align="right">0.245</td>
-<td align="right">0.201</td>
-</tr>
-<tr class="odd">
-<td align="left">furniture</td>
-<td align="left">desk*</td>
-<td align="left">deskside</td>
-<td align="right">0.280</td>
-<td align="right">0.152</td>
+<td align="right">0.141</td>
+<td align="right">0.200</td>
+<td align="right">0.261</td>
+<td align="right">0.249</td>
+<td align="right">0.296</td>
+<td align="right">0.357</td>
 </tr>
 </tbody>
 </table>
@@ -1164,7 +931,7 @@ the category is covered by the text it’s scoring. Low coverage of this
 sort isn’t inherently an issue, but it puts more pressure on the covered
 terms to be unambiguous. For instance, compare the score versus coverage
 in these texts:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">texts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>  furniture <span class="op">=</span> <span class="st">"There is a chair positioned in the intersection of a desk and table."</span>,</span>
 <span>  still_furniture <span class="op">=</span> <span class="st">"I'm selling this chair, since my new chair replaced that chair."</span>,</span>
@@ -1181,7 +948,7 @@ in these texts:</p>
 <span><span class="co">#&gt; [1] 13 11 13 11</span></span>
 <span><span class="co">#&gt; attr(,"time")</span></span>
 <span><span class="co">#&gt;     dtm termcat </span></span>
-<span><span class="co">#&gt;    0.01    0.01 </span></span>
+<span><span class="co">#&gt;       0       0 </span></span>
 <span><span class="co">#&gt; attr(,"type")</span></span>
 <span><span class="co">#&gt; [1] "count"</span></span></code></pre></div>
 <p>These examples illustrate how this sort of coverage could relate to
