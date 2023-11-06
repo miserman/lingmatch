@@ -4,6 +4,9 @@
 * Adds `dictionary_meta` to assess dictionary categories.
 * Adds dictionary category coverage reporting to `lma_termcat` and `lma_process`.
 
+### Bug Fixes
+* Correctly applies category selection in `read.dic` in more cases.
+
 ### Improvements
 * Allows for direct weight discretization from a weighted list dictionary.
 

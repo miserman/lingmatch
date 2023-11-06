@@ -183,7 +183,10 @@ knitr::kable(meta$summary[, -1], digits = 3)
 
 Or look at those similarities within categories and expanded terms:
 ```{r}
-knitr::kable(meta$terms[1:15, ], digits = 3, row.names = FALSE)
+knitr::kable(
+  meta$terms[meta$terms$category == "furniture", ],
+  digits = 3, row.names = FALSE
+)
 ```
 
 And we can visualize this together with the most similar suggested terms as a network:
@@ -235,12 +238,11 @@ display_network(meta)
 
 Or we could look at terms across categories within a dimensionally-reduced version of the space:
 ```{r, fig.height=7, fig.width=8.5}
-library(uwot)
 library(plotly)
 
 display_reduced_space <- function(
-    meta, space_name = "glove_crawl",
-    color_seeds = c("#30d126", "#a4e3a0", "#42b3ff", "#b4dbf5")) {
+    meta, space_name = "glove_crawl", method = "umap", dim_prop = 1,
+    color_seeds = c("#25cb1a", "#c8fd9e", "#1b85ed", "#91b8fb")) {
   suggestions <- unlist(unname(meta$suggested))
   terms <- rbind(meta$terms[, c("category", "match", "sim.category")], data.frame(
     category = rep(
@@ -250,7 +252,33 @@ display_reduced_space <- function(
     sim.category = suggestions
   ))
   space <- lma_lspace(terms$match, space_name)
-  m <- as.data.frame(umap(space, n_components = 3))
+  space <- space[, Reduce(unique, lapply(meta$expanded, function(l) {
+    order(-colMeans(space[l, ]))[seq_len(min(ncol(space), ncol(space) * dim_prop))]
+  }))]
+  st <- proc.time()[[3]]
+  m <- as.data.frame(if (method == "umap") {
+    uwot::umap(space, 15, 3, metric = "cosine")
+  } else if (method == "taffy") {
+    m <- lusilab::taffyInf(lma_simets(space, metric = "cosine"), 3)
+    colnames(m) <- c("V1", "V2", "V3")
+    m
+  } else if (method == "kmeans") {
+    m <- t(kmeans(lma_simets(space, metric = "cosine"), 3)$centers)
+    colnames(m) <- c("V1", "V2", "V3")
+    m
+  } else if (method == "svd") {
+    m <- svd(lma_simets(space, metric = "cosine"), 3)$u
+    rownames(m) <- rownames(space)
+    m
+  } else {
+    m <- prcomp(lma_simets(space, metric = "cosine"))$rotation[, 1:3]
+    dimnames(m) <- list(rownames(space), paste0("V", 1:3))
+    m
+  })
+  message(
+    "reduced space via ", method, " method in ",
+    round(proc.time()[[3]] - st, 4), " seconds"
+  )
   d <- cbind(terms, m)
   d$color <- color_seeds[as.numeric(as.factor(d$category))]
   ds <- split(d, d$category)
@@ -320,3 +348,4 @@ These examples illustrate how this sort of coverage could relate to score validi
 (i.e., how much the category is actually reflected in the text), but also how
 it is not a perfect indicator. Generally, a smaller variety of term hits within a
 category should make us less confident in the category score.
+

@@ -7,9 +7,8 @@
 report_term_matches(dict, text = NULL, space = NULL, glob = TRUE,
   parse_phrases = TRUE, tolower = TRUE, punct = TRUE, special = TRUE,
   as_terms = FALSE, bysentence = FALSE, as_string = TRUE,
-  suggestion_terms = 10, term_map_freq = 0.98, term_map_spaces = 10,
-  outFile = NULL, space_dir = getOption("lingmatch.lspace.dir"),
-  verbose = TRUE)
+  term_map_freq = 0.98, term_map_spaces = 10, outFile = NULL,
+  space_dir = getOption("lingmatch.lspace.dir"), verbose = TRUE)
 }
 \arguments{
 \item{dict}{A vector of terms, list of such vectors, or a matrix-like object to be

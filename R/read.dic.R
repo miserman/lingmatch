@@ -30,7 +30,7 @@
 #' @importFrom utils read.table write.table
 #' @export
 
-read.dic <- function(path, cats, type = "asis", as.weighted = FALSE, dir = getOption("lingmatch.dict.dir"), ...,
+read.dic <- function(path, cats = NULL, type = "asis", as.weighted = FALSE, dir = getOption("lingmatch.dict.dir"), ...,
                      term.name = "term", category.name = "category", raw = FALSE) {
   if (ckd <- dir == "") dir <- "~/Dictionaries"
   if (!is.logical(raw)) {
@@ -80,19 +80,19 @@ read.dic <- function(path, cats, type = "asis", as.weighted = FALSE, dir = getOp
   }
   if (!is.null(dim(path))) {
     if (anyNA(path)) path[is.na(path)] <- 0
-    cats <- colnames(path)
-    if (term.name %in% cats) {
+    cols <- colnames(path)
+    if (term.name %in% cols) {
       terms <- path[, term.name]
-      cats <- cats[cats != term.name]
+      cols <- cols[cols != term.name]
     } else if (!is.null(rownames(path)) && any(grepl("[a-z]", rownames(path), TRUE))) {
       terms <- rownames(path)
     } else {
-      su <- which(vapply(cats, function(cat) !is.numeric(path[, cat]), TRUE))
+      su <- which(vapply(cols, function(cat) !is.numeric(path[, cols]), TRUE))
       if (!length(su)) {
         if (!is.null(colnames(path))) {
           path <- data.frame(term = colnames(path), t(path), stringsAsFactors = FALSE)
           terms <- path$term
-          cats <- colnames(path)[-1]
+          cols <- colnames(path)[-1]
           if (missing(as.weighted)) as.weighted <- TRUE
         } else {
           stop("no non-numeric columns found in path")
@@ -109,12 +109,12 @@ read.dic <- function(path, cats, type = "asis", as.weighted = FALSE, dir = getOp
               term = unlist(path[, su], use.names = FALSE),
               category = rep(colnames(path), each = nrow(path))
             )
-            category.name <- cats <- "category"
+            category.name <- cols <- "category"
             su <- 1
           } else {
             if (any(ssu == 2)) {
-              cats <- colnames(path)[su[which(ssu == 2)]]
-              if (length(cats) > 1 && length(su) != ncol(path)) cats <- cats[1]
+              cols <- colnames(path)[su[which(ssu == 2)]]
+              if (length(cols) > 1 && length(su) != ncol(path)) cols <- cols[1]
             }
             su <- if (any(ssu == 1)) su[which(ssu == 1)[[1]]] else su[[1]]
           }
@@ -123,23 +123,23 @@ read.dic <- function(path, cats, type = "asis", as.weighted = FALSE, dir = getOp
       }
     }
     if (category.name %in% colnames(path)) {
-      su <- which(vapply(cats, function(cat) is.numeric(path[, cat]), TRUE))
-      cats <- path[, category.name]
+      su <- which(vapply(cols, function(cat) is.numeric(path[, cat]), TRUE))
+      cols <- path[, category.name]
       if (length(su) == 1) {
         weights <- path[, names(su)]
         wl <- data.frame(term = terms)
         v <- numeric(nrow(path))
-        for (cat in unique(cats)) {
-          su <- cats == cat
+        for (cat in unique(cols)) {
+          su <- cols == cat
           v[su] <- weights[su]
-          wl[, cat] <- v
+          wl[, cols] <- v
           v[] <- 0
         }
       } else {
-        wl <- split(terms, cats)
+        wl <- split(terms, cols)
       }
     } else {
-      su <- vapply(cats, function(col) {
+      su <- vapply(cols, function(col) {
         if (is.numeric(path[, col])) {
           1
         } else if (anyDuplicated(path[, col])) {
@@ -149,30 +149,30 @@ read.dic <- function(path, cats, type = "asis", as.weighted = FALSE, dir = getOp
         }
       }, 0)
       wl <- if (!1 %in% su && any(su == 2) && any(su != 2)) {
-        cats <- cats[su == 2]
-        wl <- lapply(cats, function(cat) split(terms, path[, cat]))
-        names(wl) <- cats
+        cols <- cols[su == 2]
+        wl <- lapply(cols, function(cat) split(terms, path[, cat]))
+        names(wl) <- cols
         wl
       } else {
         if (!any(su == 1)) {
           if (any(su > 1)) {
-            cats <- cats[su > 1]
-            if (length(cats) == 1) {
-              split(terms, path[, cats])
+            cols <- cols[su > 1]
+            if (length(cols) == 1) {
+              split(terms, path[, cols])
             } else {
-              wl <- lapply(cats, function(cat) split(terms, path[, cat]))
-              names(wl) <- cats
+              wl <- lapply(cols, function(cat) split(terms, path[, cat]))
+              names(wl) <- cols
               unlist(wl, FALSE)
             }
           } else {
             stop("no numeric columns found in path")
           }
         } else if (as.weighted) {
-          cbind(term = terms, path[, cats[su == 1], drop = FALSE])
+          cbind(term = terms, path[, cols[su == 1], drop = FALSE])
         } else {
-          cats <- cats[su == 1]
-          if (length(cats) == 1) {
-            weights <- path[, cats]
+          cols <- cols[su == 1]
+          if (length(cols) == 1) {
+            weights <- path[, cols]
             if (any(weights < 0) && any(weights > 0)) {
               Filter(length, list(
                 positive = terms[weights > 0],
@@ -181,20 +181,20 @@ read.dic <- function(path, cats, type = "asis", as.weighted = FALSE, dir = getOp
               ))
             } else if (anyDuplicated(weights)) split(terms, weights) else list(category = terms)
           } else {
-            weights <- as.data.frame(path[, cats], stringsAsFactors = FALSE)
+            weights <- as.data.frame(path[, cols], stringsAsFactors = FALSE)
             if (any(weights > 0) && any(weights < 0)) {
-              for (cat in cats) {
+              for (cat in cols) {
                 if (any(weights[, cat] > 0)) weights[, paste0(cat, ".positive")] <- as.integer(weights[, cat] > 0)
                 if (any(weights[, cat] == 0)) weights[, paste0(cat, ".neutral")] <- as.integer(weights[, cat] == 0)
                 if (any(weights[, cat] < 0)) weights[, paste0(cat, ".negative")] <- as.integer(weights[, cat] < 0)
                 weights <- weights[, colnames(weights) != cat]
               }
-              cats <- sort(colnames(weights))
+              cols <- sort(colnames(weights))
             }
             lvs <- sort(unique(unlist(weights)))
             if (length(lvs) == 2 && all(lvs == c(0, 1))) {
-              wl <- lapply(cats, function(cat) terms[weights[, cat] == 1])
-              names(wl) <- cats
+              wl <- lapply(cols, function(cat) terms[weights[, cat] == 1])
+              names(wl) <- cols
               wl <- Filter(length, wl)
             } else {
               wl <- split(terms, colnames(weights)[max.col(weights, "first")])
@@ -209,7 +209,7 @@ read.dic <- function(path, cats, type = "asis", as.weighted = FALSE, dir = getOp
     if (all(vapply(path, function(d) is.character(d) || is.factor(d), TRUE))) {
       wl <- path
       if (is.null(names(wl))) names(wl) <- paste0("cat", seq_along(wl))
-      if (!missing(cats)) {
+      if (!is.null(cats)) {
         wl <- wl[names(wl) %in% cats]
         if (!length(wl)) stop("no cats were found in path")
       }
@@ -217,30 +217,30 @@ read.dic <- function(path, cats, type = "asis", as.weighted = FALSE, dir = getOp
       if (is.null(names(path))) names(path) <- paste0("dict", seq_along(path))
       wl <- if (any(vapply(path, function(d) !is.null(dim(d)), TRUE))) {
         terms <- NULL
-        cats <- NULL
+        cols <- NULL
         for (d in names(path)) {
           path[[d]] <- read.dic(path[[d]], as.weighted = as.weighted)
           if (as.weighted) {
             terms <- unique(c(terms, path[[d]]$term))
-            cats <- c(cats, paste0(d, ".", colnames(path[[d]])[-1]))
+            cols <- c(cols, paste0(d, ".", colnames(path[[d]])[-1]))
           }
         }
         if (as.weighted) {
           wl <- as.data.frame(
-            matrix(0, length(terms), length(cats), dimnames = list(terms, cats)),
+            matrix(0, length(terms), length(cols), dimnames = list(terms, cols)),
             stringsAsFactors = FALSE
           )
           for (d in names(path)) {
-            cats <- colnames(path[[d]])[-1] <- paste0(d, ".", colnames(path[[d]])[-1])
+            cols <- colnames(path[[d]])[-1] <- paste0(d, ".", colnames(path[[d]])[-1])
             su <- duplicated(path[[d]]$term)
             if (any(su)) {
               su <- path[[d]]$term %in% path[[d]]$term[su]
               td <- path[[d]][su, , drop = FALSE]
-              for (term in unique(td$term)) wl[term, cats] <- colMeans(td[td$term == term, cats])
+              for (term in unique(td$term)) wl[term, cols] <- colMeans(td[td$term == term, cols])
             }
             if (any(!su)) path[[d]] <- path[[d]][!su, ]
             rownames(path[[d]]) <- path[[d]]$term
-            wl[path[[d]]$term, cats] <- path[[d]][, cats]
+            wl[path[[d]]$term, cols] <- path[[d]][, cols]
           }
           data.frame(term = rownames(wl), wl, stringsAsFactors = FALSE)
         } else {
@@ -285,7 +285,7 @@ read.dic <- function(path, cats, type = "asis", as.weighted = FALSE, dir = getOp
       h <- grep("^\\d", gsub("^\\s+|\\s*%+\\s*|\\s+$", "", di[seq_len(lst)]), value = TRUE)
       ci <- character()
       for (cat in h) ci[sub("\\s.*$", "", cat)] <- sub("^[^\\s]+\\s+", "", cat, perl = TRUE)
-      if (missing(cats)) cats <- ci
+      if (is.null(cats)) cats <- ci
       sep <- if (grepl("\t", di[lst + 1], fixed = TRUE)) "\t" else "\\s"
       cb <- paste0("(?:", sep, "+(?:", paste(names(ci), collapse = "|"), ")(?=", sep, "|$))*$")
       di <- di[-seq_len(lst - 1)]
@@ -317,13 +317,17 @@ read.dic <- function(path, cats, type = "asis", as.weighted = FALSE, dir = getOp
     }
   }
   if (!missing(type) && !grepl("^[Aa]", type)) wl <- to_regex(wl, grepl("^[poi]", type, TRUE))
+  if (is.null(dim(wl)) && !is.null(cats)) {
+    su <- names(wl) %in% cats
+    if (any(su)) wl <- wl[su]
+  }
   if (as.weighted && is.null(dim(wl))) {
     op <- data.frame(term = unique(unlist(wl)), stringsAsFactors = FALSE)
     for (cat in names(wl)) op[, cat] <- as.integer(op$term %in% wl[[cat]])
     op
   } else {
     if (is.data.frame(wl) && !as.weighted) {
-      read.dic(wl, as.weighted = FALSE)
+      read.dic(wl, cats = cats, as.weighted = FALSE)
     } else {
       wl
     }

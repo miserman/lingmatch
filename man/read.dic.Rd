@@ -5,7 +5,7 @@
 \alias{write.dic}
 \title{Read/Write Dictionary Files}
 \usage{
-read.dic(path, cats, type = "asis", as.weighted = FALSE,
+read.dic(path, cats = NULL, type = "asis", as.weighted = FALSE,
   dir = getOption("lingmatch.dict.dir"), ..., term.name = "term",
   category.name = "category", raw = FALSE)
 

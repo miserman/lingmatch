@@ -5,7 +5,8 @@
 \title{Assess Dictionary Categories Within a Latent Semantic Space}
 \usage{
 dictionary_meta(dict, space = "auto", n_spaces = 5, suggest = FALSE,
-  suggestion_terms = 10, suggest_stopwords = TRUE, pretrim_space = FALSE,
+  suggestion_terms = 10, suggest_stopwords = FALSE,
+  suggest_discriminate = TRUE, pretrim_space = FALSE,
   expand_cutoff_freq = 0.98, expand_cutoff_spaces = 10,
   dimension_prop = 1, pairwise = TRUE, glob = TRUE,
   space_dir = getOption("lingmatch.lspace.dir"), verbose = TRUE)
@@ -26,7 +27,10 @@ in \code{space}.}
 
 \item{suggestion_terms}{Number of terms to use when selecting suggested additions.}
 
-\item{suggest_stopwords}{Logical; if \code{FALSE}, will not suggest function words.}
+\item{suggest_stopwords}{Logical; if \code{TRUE}, will suggest function words.}
+
+\item{suggest_discriminate}{Logical; if \code{TRUE}, will adjust for similarity to other
+categories when finding suggestions.}
 
 \item{pretrim_space}{Logical; if \code{TRUE} and \code{pairwise} is \code{TRUE},
 will remove terms with a similarity of 0 or less with all category centroids,
@@ -52,8 +56,23 @@ averaged category vector rather than all category terms separately.}
 \item{verbose}{Logical; if \code{FALSE}, will not show status messages.}
 }
 \value{
-A list
+A list:
+\itemize{
+  \item \strong{\code{expanded}}: A version of \code{dict} with fuzzy terms expanded.
+  \item \strong{\code{summary}}: A summary of each dictionary category.
+  \item \strong{\code{terms}}: Match (expanded term) similarities within terms and categories.
+  \item \strong{\code{suggested}}: If \code{suggest} is \code{TRUE}, a list with suggested
+  additions for each dictionary category. Each entry is a named numeric vector with
+  similarities for each suggested term.
+}
 }
 \description{
 Assess Dictionary Categories Within a Latent Semantic Space
+}
+\examples{
+dict <- list(
+  furniture = c("table", "chair", "desk*", "couch*", "sofa*"),
+  well_adjusted = c("happy", "bright*", "friend*", "she", "he", "they")
+)
+dictionary_meta(dict)
 }

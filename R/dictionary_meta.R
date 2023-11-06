@@ -11,7 +11,9 @@
 #' @param suggest Logical; if \code{TRUE}, will search for other terms for possible inclusion
 #' in \code{space}.
 #' @param suggestion_terms Number of terms to use when selecting suggested additions.
-#' @param suggest_stopwords Logical; if \code{FALSE}, will not suggest function words.
+#' @param suggest_stopwords Logical; if \code{TRUE}, will suggest function words.
+#' @param suggest_discriminate Logical; if \code{TRUE}, will adjust for similarity to other
+#' categories when finding suggestions.
 #' @param pretrim_space Logical; if \code{TRUE} and \code{pairwise} is \code{TRUE},
 #' will remove terms with a similarity of 0 or less with all category centroids,
 #' prior to calculating similarities for suggestions.
@@ -27,13 +29,27 @@
 #' @param glob Logical; if \code{TRUE}, converts globs (asterisk wildcards) to regular expressions.
 #' @param space_dir Directory from which \code{space} should be loaded.
 #' @param verbose Logical; if \code{FALSE}, will not show status messages.
-#' @returns A list
+#' @returns A list:
+#' \itemize{
+#'   \item \strong{\code{expanded}}: A version of \code{dict} with fuzzy terms expanded.
+#'   \item \strong{\code{summary}}: A summary of each dictionary category.
+#'   \item \strong{\code{terms}}: Match (expanded term) similarities within terms and categories.
+#'   \item \strong{\code{suggested}}: If \code{suggest} is \code{TRUE}, a list with suggested
+#'   additions for each dictionary category. Each entry is a named numeric vector with
+#'   similarities for each suggested term.
+#' }
+#' @examples
+#' dict <- list(
+#'   furniture = c("table", "chair", "desk*", "couch*", "sofa*"),
+#'   well_adjusted = c("happy", "bright*", "friend*", "she", "he", "they")
+#' )
+#' dictionary_meta(dict)
 #' @export
 
 dictionary_meta <- function(
-    dict, space = "auto", n_spaces = 5, suggest = FALSE, suggestion_terms = 10, suggest_stopwords = TRUE,
-    pretrim_space = FALSE, expand_cutoff_freq = .98, expand_cutoff_spaces = 10, dimension_prop = 1,
-    pairwise = TRUE, glob = TRUE, space_dir = getOption("lingmatch.lspace.dir"), verbose = TRUE) {
+    dict, space = "auto", n_spaces = 5, suggest = FALSE, suggestion_terms = 10, suggest_stopwords = FALSE,
+    suggest_discriminate = TRUE, pretrim_space = FALSE, expand_cutoff_freq = .98, expand_cutoff_spaces = 10,
+    dimension_prop = 1, pairwise = TRUE, glob = TRUE, space_dir = getOption("lingmatch.lspace.dir"), verbose = TRUE) {
   if (missing(dict)) stop("dict must be specified", call. = FALSE)
   if (!is.list(dict)) dict <- list(dict)
   if (is.null(names(dict))) names(dict) <- paste0("cat", seq_along(dict))
@@ -85,10 +101,6 @@ dictionary_meta <- function(
       }
       term_map <- term_map[, space, drop = FALSE]
       space_terms <- matched_terms <- rownames(term_map)[rowSums(term_map != 0) == length(space)]
-      if (!suggest_stopwords) {
-        if (verbose) cat("removing stopwords (", round(proc.time()[[3]] - st, 4), ")\n", sep = "")
-        space_terms <- space_terms[!lma_dict(as.function = TRUE)(space_terms)]
-      }
       space_name <- paste(space, collapse = ", ")
       if (verbose) cat("loading spaces (", round(proc.time()[[3]] - st, 4), ")\n", sep = "")
       space <- lapply(space, function(s) {
@@ -107,10 +119,6 @@ dictionary_meta <- function(
       }
       space_name <- space
       space_terms <- rownames(term_map)[term_map[, space] != 0]
-      if (!suggest_stopwords) {
-        if (verbose) cat("removing stopwords (", round(proc.time()[[3]] - st, 4), ")\n", sep = "")
-        space_terms <- space_terms[!lma_dict(as.function = TRUE)(space_terms)]
-      }
       if (verbose) cat("loading space (", round(proc.time()[[3]] - st, 4), ")\n", sep = "")
       space <- lma_lspace(
         if (suggest) space_terms else matched_terms[matched_terms %in% space_terms], space,
@@ -128,6 +136,7 @@ dictionary_meta <- function(
   })
   if (multi) {
     space <- lapply(space, function(s) as(s, "CsparseMatrix"))
+    if (!suggest) space_terms <- rownames(space[[1]])
     if (pretrim_space && pairwise) {
       if (verbose) cat("trimming the spaces (", round(proc.time()[[3]] - st, 4), ")\n", sep = "")
       space_terms <- names(which(Reduce("+", lapply(cat_names, function(cat) {
@@ -165,6 +174,7 @@ dictionary_meta <- function(
     })
   } else {
     space <- as(space, "CsparseMatrix")
+    if (!suggest) space_terms <- rownames(space)
     if (pretrim_space && pairwise) {
       if (verbose) cat("trimming the space (", round(proc.time()[[3]] - st, 4), ")\n", sep = "")
       space_terms <- names(which(Reduce("+", lapply(cat_names, function(cat) {
@@ -192,18 +202,28 @@ dictionary_meta <- function(
       sim
     })
   }
-  suggested <- if (suggest) {
+  if (suggest) {
     if (verbose) cat("identifying potential additions (", round(proc.time()[[3]] - st, 4), ")\n", sep = "")
-    lapply(cat_names, function(cat) {
+    if (!suggest_stopwords) is_stop <- lma_dict(as.function = TRUE)
+    full_loadings <- do.call(cbind, lapply(sims, rowMeans))
+    loading_cat <- names(cat_names)[max.col(full_loadings)]
+    suggested <- lapply(cat_names, function(cat) {
       s <- sims[[cat]]
       if (length(s)) {
-        loadings <- sort(rowMeans(s[!rownames(s) %in% dict_exp[[cat]], , drop = FALSE]), TRUE)
+        su <- !rownames(s) %in% dict_exp[[cat]] & loading_cat == cat
+        loadings <- sort(if (suggest_discriminate) {
+          nl <- full_loadings[su, colnames(full_loadings) != cat, drop = FALSE]
+          (rowMeans(s[su, , drop = FALSE]) - nl[
+            rep(seq_len(ncol(nl)), each = nrow(nl)) == max.col(nl)
+          ]) / 2
+        } else {
+          rowMeans(s[su, , drop = FALSE])
+        }, TRUE)
+        if (!suggest_stopwords) loadings <- loadings[!is_stop(names(loadings))]
         co <- min(length(loadings), max(which(loadings > 0)), suggestion_terms)
         loadings[loadings > loadings[co] + Reduce("-", range(loadings[seq(1, co)])) / 2]
       }
     })
-  } else {
-    NULL
   }
   if (verbose) cat("preparing results (", round(proc.time()[[3]] - st, 4), ")\n", sep = "")
   match_counts <- vapply(matches, length, 0)
@@ -212,7 +232,11 @@ dictionary_meta <- function(
     match = unlist(lapply(matches, names))
   )
   term_summary <- cbind(term_summary, do.call(rbind, lapply(
-    split(term_summary[, c("category", "match", "term")], term_summary$category), function(cl) {
+    split(
+      term_summary[, c("category", "match", "term")],
+      term_summary$category
+    )[unique(term_summary$category)],
+    function(cl) {
       cat <- cl$category[[1]]
       if (pairwise) {
         s <- sims[[cat]]
@@ -233,17 +257,11 @@ dictionary_meta <- function(
         }
         if (is.null(dim(s))) s <- t(t(s))
       }
-      term_sims <- unlist(lapply(split(cl$match, cl$term), function(l) {
-        sl <- l[l %in% colnames(s)]
-        m <- if (length(l) == 1) 1 else (colSums(s[l, l]) - 1) / (length(l) - 1)
-        if (is.null(names(m))) names(m) <- sl
-        m <- m[l]
-        names(m) <- l
-        m
+      term_sims <- unlist(lapply(unname(split(cl$match, cl$term)[unique(cl$term)]), function(l) {
+        if (length(l) == 1) structure(1, names = l) else s[l, l[which.min(nchar(l))]]
       }))
-      names(term_sims) <- sub("^[^.]*\\.", "", names(term_sims))
-      cat_sims <- (colSums(s[colnames(s), , drop = FALSE]) - 1) / (ncol(s) - 1)
-      cbind(sim.term = term_sims[cl$match], sim.category = cat_sims[cl$match])
+      cat_sims <- s[cl$match, which.max(colMeans(s[colnames(s), , drop = FALSE]))]
+      cbind(sim.term = term_sims, sim.category = cat_sims)
     }
   )))
   summary <- cbind(data.frame(
@@ -263,5 +281,5 @@ dictionary_meta <- function(
     structure(summary(m), names = c("min", "q1", "median", "mean", "q3", "max"))
   })))
   if (verbose) cat("done (", round(proc.time()[[3]] - st, 4), ")\n", sep = "")
-  list(expanded = dict_exp, summary = summary, terms = term_summary, suggested = suggested, sims = sims)
+  list(expanded = dict_exp, summary = summary, terms = term_summary, suggested = if (suggest) suggested)
 }
