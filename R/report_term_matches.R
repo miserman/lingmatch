@@ -73,6 +73,7 @@ report_term_matches <- function(dict, text = NULL, space = NULL, glob = TRUE,
                                 term_map_freq = .98, term_map_spaces = 10, outFile = NULL,
                                 space_dir = getOption("lingmatch.lspace.dir"), verbose = TRUE) {
   if (missing(dict)) stop("dict must be specified", call. = FALSE)
+  collapsed_terms <- FALSE
   if (is.null(text)) {
     term_map <- select.lspace(dir = space_dir, get.map = TRUE)$term_map
     if (is.null(term_map)) {
@@ -87,8 +88,8 @@ report_term_matches <- function(dict, text = NULL, space = NULL, glob = TRUE,
     if (term_map_spaces > 0 && term_map_spaces < ncol(term_map)) {
       term_map <- term_map[rowSums(term_map != 0) >= term_map_spaces, ]
     }
-    text <- rownames(term_map)
-    as_terms <- TRUE
+    collapsed_terms <- as_terms <- TRUE
+    text <- paste(rownames(term_map), collapse = "  ")
   }
   if (is.null(text) && is.null(space)) stop("either text or space must be specified", call. = FALSE)
   st <- proc.time()[[3]]
@@ -117,9 +118,10 @@ report_term_matches <- function(dict, text = NULL, space = NULL, glob = TRUE,
       if (verbose) cat("preloading space (", round(proc.time()[[3]] - st, 4), ")\n", sep = "")
       space <- lma_lspace(space, dir = space_dir)
     }
-    text <- rownames(space)
+    collapsed_terms <- as_terms <- TRUE
+    text <- paste(rownames(space), collapse = "  ")
   }
-  rawtext <- is.null(space_name) && !as_terms
+  rawtext <- is.null(space_name) && (!as_terms || collapsed_terms)
   terms$regex <- to_regex(list(terms$term), TRUE, glob)[[1]]
   terms <- terms[!is.na(terms$regex) & terms$regex != "", ]
   terms$regex <- if (rawtext) paste0("\\b", terms$regex, "\\b") else paste0("^", terms$regex, "$")
@@ -191,6 +193,7 @@ report_term_matches <- function(dict, text = NULL, space = NULL, glob = TRUE,
   if (verbose) cat("preparing results (", round(proc.time()[[3]] - st, 4), ")\n", sep = "")
   terms <- cbind(terms, do.call(rbind, lapply(matches, function(m) {
     hits <- if (length(m)) {
+      if (collapsed_terms) m[!is.na(m) & m != 0] <- 1L
       if (has_space) {
         msim <- m
         if (length(m) == 1) {
@@ -206,7 +209,7 @@ report_term_matches <- function(dict, text = NULL, space = NULL, glob = TRUE,
             msim[su] <- as.numeric(sims[, which.max(colMeans(sims))])
           }
         }
-        o <- order(msim, decreasing = TRUE)
+        o <- order(msim, -nchar(names(m)), decreasing = TRUE)
         m <- m[o]
         if (as_string) {
           paste(paste0(names(m), " (", if (!as_terms) paste0(m, ", "), round(msim[o], 2), ")"), collapse = ", ")
@@ -214,7 +217,7 @@ report_term_matches <- function(dict, text = NULL, space = NULL, glob = TRUE,
           list(as.data.frame(rbind(m, msim[o])))
         }
       } else {
-        m <- sort(m, TRUE)
+        m <- m[order(m, -nchar(names(m)), decreasing = TRUE)]
         if (as_string) {
           paste(paste0(names(m), if (!as_terms) paste0(" (", m, ")")), collapse = ", ")
         } else {
@@ -226,11 +229,19 @@ report_term_matches <- function(dict, text = NULL, space = NULL, glob = TRUE,
       if (as_string) "" else list(data.frame())
     }
     if (!as_string) rownames(hits[[1]]) <- NULL
-    res <- data.frame(
-      count = sum(m),
-      max_count = if (all(is.na(m))) 0L else max(m, na.rm = TRUE),
-      variants = length(m)
-    )
+    res <- if (collapsed_terms) {
+      data.frame(
+        count = length(m),
+        max_count = if (all(is.na(m))) 0L else 1L,
+        variants = length(m)
+      )
+    } else {
+      data.frame(
+        count = sum(m),
+        max_count = if (all(is.na(m))) 0L else max(m, na.rm = TRUE),
+        variants = length(m)
+      )
+    }
     if (has_space) {
       res$space <- space_name
       if (all(is.na(msim))) {

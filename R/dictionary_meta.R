@@ -57,7 +57,7 @@ dictionary_meta <- function(
   if (verbose) cat("preparing terms (", round(proc.time()[[3]] - st, 4), ")\n", sep = "")
   terms <- data.frame(category = rep(names(dict), vapply(dict, length, 0)), term = unlist(dict))
   rownames(terms) <- NULL
-  terms$regex <- paste0("^", to_regex(list(terms$term), TRUE, glob)[[1]], "$")
+  terms$regex <- paste0("\\b", to_regex(list(terms$term), TRUE, glob)[[1]], "\\b")
   if (is.character(space)) {
     term_map <- select.lspace(dir = space_dir, get.map = TRUE)$term_map
     if (is.null(term_map)) {
@@ -84,7 +84,7 @@ dictionary_meta <- function(
     }
   }
   if (verbose) cat("expanding terms (", round(proc.time()[[3]] - st, 4), ")\n", sep = "")
-  matches <- extract_matches(terms$regex, space_terms, FALSE)
+  matches <- extract_matches(terms$regex, paste(space_terms, collapse = "  "), TRUE)
   matched_terms <- unique(unlist(lapply(matches, names), use.names = FALSE))
   multi <- FALSE
   if (is.character(space)) {
