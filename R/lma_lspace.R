@@ -108,8 +108,8 @@
 lma_lspace <- function(dtm = "", space, map.space = TRUE, fill.missing = FALSE, term.map = NULL,
                        dim.cutoff = .5, keep.dim = FALSE, use.scan = FALSE, dir = getOption("lingmatch.lspace.dir")) {
   if (ckd <- dir == "") dir <- "~/Latent Semantic Spaces"
-  if (is.character(dtm) || is.factor(dtm)) {
-    if (length(dtm) > 1 && missing(space) && any(grepl(" ", dtm, fixed = TRUE))) {
+  if ((is.character(dtm) || is.factor(dtm)) && missing(space)) {
+    if (length(dtm) > 1 && any(grepl(" ", dtm, fixed = TRUE))) {
       dtm <- lma_dtm(dtm)
     } else if (length(dtm) == 1 && dtm != "") {
       if (missing(use.scan)) use.scan <- TRUE

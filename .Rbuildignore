@@ -7,3 +7,4 @@ docs$
 ^vignettes
 ^pkgdown
 ^build\.R$
+.DS_Store

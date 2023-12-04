@@ -31,3 +31,4 @@ debug*
 cran-comments.md
 ^pkgdown$
 inst/doc
+.DS_Store

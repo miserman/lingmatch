@@ -18,7 +18,7 @@ test_that("base example works", {
 })
 
 test_that("regex terms work", {
-  expect_identical(report_term_matches("ha[^i]+in.*?", text)$matches, "happenings (1), happiness (1)")
+  expect_identical(report_term_matches("ha[^i]+in.*?", text)$matches, "happiness (1), happenings (1)")
 })
 
 test_that("text as terms works", {

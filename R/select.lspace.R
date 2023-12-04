@@ -72,7 +72,8 @@ select.lspace <- function(query = NULL, dir = getOption("lingmatch.lspace.dir"),
   map_path <- normalizePath(paste0(dir, "/lma_term_map.rda"), "/", FALSE)
   if (missing(get.map) && (file.exists(map_path) || length(terms) > 1)) get.map <- TRUE
   if (!exists("lma_term_map")) lma_term_map <- NULL
-  if (get.map && !ckd && !(file.exists(map_path) || !is.null(lma_term_map))) {
+  if (get.map && ckd && !dir.exists(dir)) stop("specify `dir` or use `lma_initdirs()` to download the term map")
+  if (get.map && !(file.exists(map_path) || !is.null(lma_term_map))) {
     fi <- tryCatch(
       strsplit(readLines("https://api.osf.io/v2/files/xr7jv", 1, TRUE, FALSE, "utf-8"), '[:,{}"]+')[[1]],
       error = function(e) NULL

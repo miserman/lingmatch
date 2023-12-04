@@ -44,7 +44,7 @@ download.resource <- function(
       "specify a directory (dir), or set the ", type,
       " directory option\n(e.g., options(lingmatch.", type, ".dir = ",
       '"~/', if (type == "dict") "Dictionaries" else "Latent Semantic Space",
-      '")) or initialize it with lma_initdirs'
+      '"))\nor initialize it with lma_initdirs()'
     ), call. = FALSE)
   }
   all_resources <- rownames(if (type == "dict") dict_info else lss_info)
