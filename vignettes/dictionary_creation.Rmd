@@ -155,7 +155,7 @@ but are in danger of over-extending. We can use the `report_term_matches` functi
 ```{r}
 report <- report_term_matches(dict[3:4], space_dir = "~/Latent Semantic Spaces")
 
-knitr::kable(report[, -c(4, 5)])
+knitr::kable(report[, c("term", "categories", "variants", "matches")])
 ```
 By default, this searches for matches in a large set of common words found across
 latent semantic spaces (embeddings), but it can also be run on sets of text.
@@ -349,3 +349,28 @@ These examples illustrate how this sort of coverage could relate to score validi
 it is not a perfect indicator. Generally, a smaller variety of term hits within a
 category should make us less confident in the category score.
 
+# Applied Example
+
+For a more realistic example, we might look at the Agency and Communion dictionary
+(<a href='https://doi.org/10.1002/ejsp.2561' target='_blank' rel='noreferrer'>Pietraszkiewicz et al., 2019</a>; <a href='https://osf.io/p7fzb' target='_blank' rel='noreferrer'>osf.io/p7fzb</a>), which has been rather thoroughly developed, but
+from a different perspective than presented here.
+
+Our first step will be to read in the dictionary:
+```{r}
+original <- read.dic("https://osf.io/download/62txv")
+```
+
+To start assessing this dictionary, we'll need to unpack the fuzzy terms.
+Often, this is done manually, based on a reasonable set of target terms
+(such as the root work with common variants added). This would be valid if
+the terms were pre-expanded to such a limited set, but when kept fuzzy,
+we should be considering a broader set of terms, which is where the
+`report_term_matches` function comes in:
+
+```{r}
+matches <- report_term_matches(original)
+knitr::kable(matches[2:10, c("term", "categories", "variants", "matches")])
+```
+
+Right away, this highlights some terms that are likely over-matching,
+which makes it difficult to take the next steps in assessing the dictionary.

@@ -70,7 +70,7 @@
 report_term_matches <- function(dict, text = NULL, space = NULL, glob = TRUE,
                                 parse_phrases = TRUE, tolower = TRUE, punct = TRUE, special = TRUE,
                                 as_terms = FALSE, bysentence = FALSE, as_string = TRUE,
-                                term_map_freq = .98, term_map_spaces = 10, outFile = NULL,
+                                term_map_freq = 1, term_map_spaces = 1, outFile = NULL,
                                 space_dir = getOption("lingmatch.lspace.dir"), verbose = TRUE) {
   if (missing(dict)) stop("dict must be specified", call. = FALSE)
   collapsed_terms <- FALSE
