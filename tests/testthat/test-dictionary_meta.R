@@ -18,7 +18,18 @@ dict <- list(
   self = c("i *", "my *")
 )
 
-test_that("space works", {
+test_that("term match report works", {
+  report <- report_term_matches(dict)
+  expect_true(any(report$count > 100))
+  expect_identical(report$count, report$variants)
+  expect_true(all(report$max_count < 2))
+
   report <- report_term_matches(dict, text, space = TRUE)
   expect_identical(report$space, rep("100k", nrow(report)))
+})
+
+test_that("dicitonary meta works", {
+  meta <- dictionary_meta(dict)
+  expect_identical(meta$summary$category, names(dict))
+  expect_identical(meta$summary$n_terms, vapply(unname(dict), length, 0))
 })

@@ -205,7 +205,13 @@ dictionary_meta <- function(
   if (suggest) {
     if (verbose) cat("identifying potential additions (", round(proc.time()[[3]] - st, 4), ")\n", sep = "")
     if (!suggest_stopwords) is_stop <- lma_dict(as.function = TRUE)
-    full_loadings <- do.call(cbind, lapply(sims, rowMeans))
+    full_loadings <- do.call(cbind, lapply(sims, function(x) {
+      if (length(x)) {
+        rowMeans(x)
+      } else {
+        structure(numeric(length(space_terms)), names = space_terms)
+      }
+    }))
     loading_cat <- names(cat_names)[max.col(full_loadings)]
     suggested <- lapply(cat_names, function(cat) {
       s <- sims[[cat]]
@@ -270,7 +276,7 @@ dictionary_meta <- function(
     n_expanded = tapply(match_counts, terms$category, sum)[cat_names],
     sim.space = space_name
   ), sim = do.call(rbind, lapply(sims, function(s) {
-    if (!is.null(ncol(s)) && ncol(s) == 1) {
+    if (length(s) && !is.null(ncol(s)) && ncol(s) == 1) {
       m <- s[matched_terms, 1]
     } else if (length(s)) {
       s <- s[colnames(s), , drop = FALSE]

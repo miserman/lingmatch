@@ -19,13 +19,15 @@ Walks through the process of creating and assessing a dictionary.
 *Built with R 
 `r getRversion()`*
 
+See the <a href='https://miserman.github.io/dictionary_builder/' target='_blank' rel='noreferrer'>dictionary builder</a> for a way to make dictionaries interactively.
+
 ***
 
 # Background
 
 **Dictionaries** in this context are sets of term lists that each represent a category.
 **Categories** could range from concepts or topics (e.g., "furniture" or "shopping") to more
-abstract aspects of the text (e.g., "emotionality"). **Terms** may be single literal words
+abstract aspects of a text (e.g., "emotionality"). **Terms** may be single literal words
 (e.g., "term", "terms"), glob-like or fuzzy words (e.g., "term*", where the asterisk matches
 any number of additional letters), or arbitrary patterns (literal or regular expressions,
 e.g., "a phrase" or "an? (?:person|object)").
@@ -92,6 +94,10 @@ cat(jsonlite::toJSON(dict_unweighted, pretty = TRUE))
 `.dic` or `JSON` dictionaries can be used in the
 <a href='https://miserman.github.io/adicat/highlight' target='_blank' rel='noreferrer'>adicat highlighter</a>
 (from the menu: Dictionary > load/create/edit > load), which can be used to see word matches, or process files.
+
+Any format can also be read into the
+<a href='https://miserman.github.io/dictionary_builder/' target='_blank' rel='noreferrer'>dictionary builder</a>
+(from the left-side menu: New > File), which can be used to assess and edit the dictionary.
 
 # Assessment
 
@@ -348,29 +354,3 @@ These examples illustrate how this sort of coverage could relate to score validi
 (i.e., how much the category is actually reflected in the text), but also how
 it is not a perfect indicator. Generally, a smaller variety of term hits within a
 category should make us less confident in the category score.
-
-# Applied Example
-
-For a more realistic example, we might look at the Agency and Communion dictionary
-(<a href='https://doi.org/10.1002/ejsp.2561' target='_blank' rel='noreferrer'>Pietraszkiewicz et al., 2019</a>; <a href='https://osf.io/p7fzb' target='_blank' rel='noreferrer'>osf.io/p7fzb</a>), which has been rather thoroughly developed, but
-from a different perspective than presented here.
-
-Our first step will be to read in the dictionary:
-```{r}
-original <- read.dic("https://osf.io/download/62txv")
-```
-
-To start assessing this dictionary, we'll need to unpack the fuzzy terms.
-Often, this is done manually, based on a reasonable set of target terms
-(such as the root work with common variants added). This would be valid if
-the terms were pre-expanded to such a limited set, but when kept fuzzy,
-we should be considering a broader set of terms, which is where the
-`report_term_matches` function comes in:
-
-```{r}
-matches <- report_term_matches(original)
-knitr::kable(matches[2:10, c("term", "categories", "variants", "matches")])
-```
-
-Right away, this highlights some terms that are likely over-matching,
-which makes it difficult to take the next steps in assessing the dictionary.
