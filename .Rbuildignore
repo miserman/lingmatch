@@ -8,3 +8,4 @@ docs$
 ^pkgdown
 ^build\.R$
 .DS_Store
+.vscode

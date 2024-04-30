@@ -204,7 +204,7 @@ lma_dtm <- function(text, exclude = NULL, context = NULL, replace.special = FALS
   }
   if (tokens.only) {
     m <- match_terms(
-      text, words, !grepl("^[[:punct:]]$|^repellipsis$", words),
+      text, words, !grepl("^(?:[[:punct:]]|repellipsis)$", words),
       c(length(text), length(words)), is.null(exclude), TRUE
     )
     names(m) <- c("tokens", "frequencies", "WC", "indices")
@@ -246,7 +246,7 @@ lma_dtm <- function(text, exclude = NULL, context = NULL, replace.special = FALS
     names(m$frequencies) <- names(m$tokens)
   } else {
     msu <- match_terms(
-      text, words, !grepl("^[[:punct:]]$|^repellipsis$", words),
+      text, words, !grepl("^(?:[[:punct:]]|repellipsis)$", words),
       c(length(text), length(words)), is.null(exclude), FALSE
     )
     m <- if (sparse) as(msu[[1]], "CsparseMatrix") else as.matrix(msu[[1]])

@@ -30,10 +30,9 @@
 #'   \item If a \strong{character vector}, this will be processed in the same way as \code{input}.
 #'   \item If a \strong{vector}, either (a) logical or factor-like (having n levels < length) and of the same length as
 #'     \code{nrow(input)}, or (b) numeric or logical of length less than \code{nrow(input)}, this will be used to
-#'     select a subset of \code{input} (e.g., \code{comp = 1:10} would treat the first 10 rows of \code{input} as the
-#'     comparison; \code{comp = type == 'prompt'} would make a logical vector identifying prompts, assuming "type" was
-#'     the name of a column in \code{data}, or a variable in the global environment, and the value "prompt" marked the
-#'     prompts).
+#'     select a subset of \code{input} (e.g., \code{1:10} would treat the first 10 rows of \code{input} as the
+#'     comparison; \code{lingmatch(text, type == 'prompt', data)} would use the texts in the \code{text} column
+#'     identified by the \code{type} column as the comparison).
 #'   \item If a \strong{matrix-like object} (having multiple rows and columns), or a named vector, this will
 #'     be treated as a sort of dtm, assuming there are common (column) names between \code{input} and
 #'     \code{comp} (e.g., if you had prompt and response texts that were already processed separately).

@@ -10,33 +10,6 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// vector_similarity
-NumericVector vector_similarity(NumericVector& a, NumericVector& b, const IntegerVector& metrics);
-RcppExport SEXP _lingmatch_vector_similarity(SEXP aSEXP, SEXP bSEXP, SEXP metricsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector& >::type a(aSEXP);
-    Rcpp::traits::input_parameter< NumericVector& >::type b(bSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector& >::type metrics(metricsSEXP);
-    rcpp_result_gen = Rcpp::wrap(vector_similarity(a, b, metrics));
-    return rcpp_result_gen;
-END_RCPP
-}
-// calculate_similarities
-List calculate_similarities(const S4& m, const RObject& comp, int& type, const IntegerVector& metrics);
-RcppExport SEXP _lingmatch_calculate_similarities(SEXP mSEXP, SEXP compSEXP, SEXP typeSEXP, SEXP metricsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const S4& >::type m(mSEXP);
-    Rcpp::traits::input_parameter< const RObject& >::type comp(compSEXP);
-    Rcpp::traits::input_parameter< int& >::type type(typeSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector& >::type metrics(metricsSEXP);
-    rcpp_result_gen = Rcpp::wrap(calculate_similarities(m, comp, type, metrics));
-    return rcpp_result_gen;
-END_RCPP
-}
 // match_terms
 List match_terms(const List& tokens, const CharacterVector& terms, const LogicalVector& isword, const IntegerVector& dim, const bool& complete, const bool& tokensonly);
 RcppExport SEXP _lingmatch_match_terms(SEXP tokensSEXP, SEXP termsSEXP, SEXP iswordSEXP, SEXP dimSEXP, SEXP completeSEXP, SEXP tokensonlySEXP) {
@@ -82,6 +55,33 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// vector_similarity
+NumericVector vector_similarity(NumericVector& a, NumericVector& b, const IntegerVector& metrics);
+RcppExport SEXP _lingmatch_vector_similarity(SEXP aSEXP, SEXP bSEXP, SEXP metricsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector& >::type a(aSEXP);
+    Rcpp::traits::input_parameter< NumericVector& >::type b(bSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type metrics(metricsSEXP);
+    rcpp_result_gen = Rcpp::wrap(vector_similarity(a, b, metrics));
+    return rcpp_result_gen;
+END_RCPP
+}
+// calculate_similarities
+List calculate_similarities(const S4& m, const RObject& comp, int& type, const IntegerVector& metrics);
+RcppExport SEXP _lingmatch_calculate_similarities(SEXP mSEXP, SEXP compSEXP, SEXP typeSEXP, SEXP metricsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const S4& >::type m(mSEXP);
+    Rcpp::traits::input_parameter< const RObject& >::type comp(compSEXP);
+    Rcpp::traits::input_parameter< int& >::type type(typeSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type metrics(metricsSEXP);
+    rcpp_result_gen = Rcpp::wrap(calculate_similarities(m, comp, type, metrics));
+    return rcpp_result_gen;
+END_RCPP
+}
 // pattern_search
 List pattern_search(const CharacterVector& texts, const CharacterVector& patterns, const IntegerVector& terms, const bool& fixed, const bool& exclusive);
 RcppExport SEXP _lingmatch_pattern_search(SEXP textsSEXP, SEXP patternsSEXP, SEXP termsSEXP, SEXP fixedSEXP, SEXP exclusiveSEXP) {
@@ -112,11 +112,11 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_lingmatch_vector_similarity", (DL_FUNC) &_lingmatch_vector_similarity, 3},
-    {"_lingmatch_calculate_similarities", (DL_FUNC) &_lingmatch_calculate_similarities, 4},
     {"_lingmatch_match_terms", (DL_FUNC) &_lingmatch_match_terms, 6},
     {"_lingmatch_reformat_embedding", (DL_FUNC) &_lingmatch_reformat_embedding, 7},
     {"_lingmatch_extract_indices", (DL_FUNC) &_lingmatch_extract_indices, 3},
+    {"_lingmatch_vector_similarity", (DL_FUNC) &_lingmatch_vector_similarity, 3},
+    {"_lingmatch_calculate_similarities", (DL_FUNC) &_lingmatch_calculate_similarities, 4},
     {"_lingmatch_pattern_search", (DL_FUNC) &_lingmatch_pattern_search, 5},
     {"_lingmatch_extract_matches", (DL_FUNC) &_lingmatch_extract_matches, 3},
     {NULL, NULL, 0}

@@ -46,8 +46,8 @@ dir <- path.expand("~/Latent Semantic Spaces")
 map <- paste0(dir, "/lma_term_map.rda")
 files <- list.files(dir, "\\.dat$", full.names = TRUE)
 skip_if(
-  is.null(dir) || !dir.exists(dir) || !file.exists(map) ||
-    !length(files), "embeddings files not downloaded"
+  !dir.exists(dir) || !file.exists(map) || !length(files),
+  "embeddings files not downloaded"
 )
 
 found <- unlist(lapply(report$matches, colnames))

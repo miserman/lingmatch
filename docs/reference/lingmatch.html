@@ -99,10 +99,9 @@ or path to a file (.txt or .csv, with texts separated by one or more lines/rows)
 <li><p>If a <strong>character vector</strong>, this will be processed in the same way as <code>input</code>.</p></li>
 <li><p>If a <strong>vector</strong>, either (a) logical or factor-like (having n levels &lt; length) and of the same length as
     <code>nrow(input)</code>, or (b) numeric or logical of length less than <code>nrow(input)</code>, this will be used to
-    select a subset of <code>input</code> (e.g., <code>comp = 1:10</code> would treat the first 10 rows of <code>input</code> as the
-    comparison; <code>comp = type == 'prompt'</code> would make a logical vector identifying prompts, assuming "type" was
-    the name of a column in <code>data</code>, or a variable in the global environment, and the value "prompt" marked the
-    prompts).</p></li>
+    select a subset of <code>input</code> (e.g., <code>1:10</code> would treat the first 10 rows of <code>input</code> as the
+    comparison; <code>lingmatch(text, type == 'prompt', data)</code> would use the texts in the <code>text</code> column
+    identified by the <code>type</code> column as the comparison).</p></li>
 <li><p>If a <strong>matrix-like object</strong> (having multiple rows and columns), or a named vector, this will
     be treated as a sort of dtm, assuming there are common (column) names between <code>input</code> and
     <code>comp</code> (e.g., if you had prompt and response texts that were already processed separately).</p></li>
@@ -534,7 +533,7 @@ specific knowledge, so it can't always (readily) be done automatically. Variable
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.8341107 0.6844995 0.7757765</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"time")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> simets </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.01 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      0 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

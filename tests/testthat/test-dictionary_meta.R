@@ -12,6 +12,7 @@ dict <- list(
 )
 
 test_that("dicitonary meta works", {
+  RcppParallel::setThreadOptions(1)
   meta <- dictionary_meta(dict, suggest = TRUE)
   expect_identical(meta$summary$category, names(dict))
   expect_identical(meta$summary$n_terms, vapply(unname(dict), length, 0))
