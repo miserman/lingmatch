@@ -89,7 +89,7 @@
 
     
     
-<p><em>Built with R 4.3.3 on April 20 2024</em></p>
+<p><em>Built with R 4.4.0 on April 28 2024</em></p>
 <hr>
 <p>These examples assume the lingmatch package is loaded:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
@@ -291,7 +291,7 @@ metrics:</p>
 <p>Or between each text and the average across texts, with all available
 metrics:</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sims_to_mean</span> <span class="op">=</span> <span class="fu"><a href="../reference/lma_simets.html">lma_simets</a></span><span class="op">(</span><span class="va">function_cats</span>, <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">function_cats</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">sims_to_mean</span> <span class="op">=</span> <span class="fu"><a href="../reference/lma_simets.html">lma_simets</a></span><span class="op">(</span><span class="va">function_cats</span>, <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums-methods.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">function_cats</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Or just between the first and second text:</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/lma_simets.html">lma_simets</a></span><span class="op">(</span><span class="va">function_cats</span><span class="op">[</span><span class="fl">1</span>,<span class="op">]</span>, <span class="va">function_cats</span><span class="op">[</span><span class="fl">2</span>,<span class="op">]</span><span class="op">)</span></span></code></pre></div>

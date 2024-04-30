@@ -4,7 +4,7 @@
 #' @param dict A vector of terms, list of such vectors, or a matrix-like object to be
 #' categorized by \code{\link{read.dic}}.
 #' @param space A vector space used to calculate similarities between terms.
-#' Name of a the space (see \code{\link{select.lspace}}), a matrix with terms as row names, or
+#' Names of spaces (see \code{\link{select.lspace}}), a matrix with terms as row names, or
 #' \code{"auto"} to auto-select a space based on matched terms. This can also be \code{multi}
 #' to use multiple spaces, which are combined after similarities are calculated.
 #' @param n_spaces Number of spaces to draw from if \code{space} is \code{multi}.

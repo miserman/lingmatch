@@ -2,6 +2,9 @@
 title: "Introduction to Dictionary Creation"
 editor_options: 
   chunk_output_type: console
+output:
+  html_document:
+    toc_depth: 4
 ---
 
 ```{r, include = FALSE}
@@ -59,7 +62,7 @@ As data.frames, terms are stored in a single column, and categories are defined 
 ))
 ```
 
-Lists can also store weights in named character vectors:
+Lists can also store weights in named numeric vectors:
 ```{r}
 (dict_list <- list(
   a = c("aa" = 1, "ab" = .9, "ac" = .8),
@@ -107,7 +110,7 @@ Constructs can range from being well defined by the text itself, to being more s
 Some question we might ask when assessing a dictionary category are:
 
 1. How well will each term capture the word or words we have in mind?
-   - That is, are there unaccounted for variants, or unintended wildcard matches?
+   - That is, are there unaccounted for target word variants, or unintended wildcard matches?
 2. How well does this set of terms cover the possible instances of the construct?
    - That is, might the construct appear in a way that isn't covered?
 3. How confident would we be that the resulting score reflects the construct?
@@ -128,8 +131,8 @@ dict <- list(
 The `a_words` category is only defined by characters, so it is perfect in that
 its scores can be expected to perfectly align with any other reliable means of scoring
 (such as a human counter). The only threat to this category (assuming texts are lowercased)
-is special characters that should count as `a`s, but converting such characters could be
-a part of pre-processing:
+is special characters that should count as `a`s but aren't initially.
+This can be avoided by converting special characters as part of pre-processing:
 ```{r}
 clean <- lma_dict("special", as.function = gsub)
 lma_process(clean("Àn apple and à potato ærosol."), dict = dict[1], meta = FALSE)
@@ -153,9 +156,10 @@ lma_process(
 
 ## Coverage
 
+The `furniture` and `well_adjusted` categories introduces two main additional considerations:
+
 ### Term Variants
 
-The `furniture` and `well_adjusted` categories introduces two main additional considerations:
 First, they uses broader wildcards, which are probably intended to simply catch plural forms,
 but are in danger of over-extending. We can use the `report_term_matches` function to check this:
 ```{r}
@@ -164,7 +168,8 @@ report <- report_term_matches(dict[3:4], space_dir = "~/Latent Semantic Spaces")
 knitr::kable(report[, c("term", "categories", "variants", "matches")])
 ```
 By default, this searches for matches in a large set of common words found across
-latent semantic spaces (embeddings), but it can also be run on sets of text.
+latent semantic spaces (embeddings), but it can also be run on sets of text to see
+matches within narrower contexts.
 
 ### Category Coverage
 

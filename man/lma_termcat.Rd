@@ -66,6 +66,13 @@ and a \code{WC} attribute with original word counts.
 Reduces the dimensions of a document-term matrix by dictionary-based categorization.
 }
 \examples{
+dict <- list(category = c("cat", "dog", "pet*"))
+lma_termcat(c(
+  "cat, cat, cat, cat, cat, cat, cat, cat",
+  "a cat, dog, or anything petlike, really",
+  "petite petrochemical petitioned petty peter for petrified petunia petals"
+), dict, coverage = TRUE)
+
 \dontrun{
 
 # Score texts with the NRC Affect Intensity Lexicon

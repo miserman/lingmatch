@@ -21,6 +21,14 @@ test_that("regex terms work", {
   expect_identical(report_term_matches("ha[^i]+in.*?", text)$matches, "happiness (1), happenings (1)")
 })
 
+test_that("mixed terms work", {
+  cols <- c("count", "max_count", "variants")
+  expect_identical(
+    report_term_matches(c("ha[^i]+in.*?", "depress*"), text)[, cols],
+    as.data.frame(matrix(c(2L, 2L, 1L, 1L, 2L, 2L), 2, dimnames = list(NULL, cols)))
+  )
+})
+
 test_that("text as terms works", {
   expect_identical(as.numeric(report_term_matches(
     dict, c("hopeless", "helpless", "fearless"),
@@ -47,5 +55,15 @@ spaces <- select.lspace(terms = found)
 space <- rownames(spaces$selected)[1]
 
 test_that("space works", {
-  expect_identical(report_term_matches(dict, text, space = TRUE)$space, rep(space, nrow(report)))
+  report <- report_term_matches(dict, text, space = TRUE)
+  expect_true(all(c("space", "mean_sim", "min_sim") %in% colnames(report)))
+  expect_identical(report$space[[1]], space)
+  expect_true(grepl("\\w \\(1, 1\\)", report$matches[[1]]))
+})
+
+test_that("space preload works", {
+  report <- report_term_matches(dict, space = space)
+  expect_true(all(c("space", "mean_sim", "min_sim") %in% colnames(report)))
+  expect_identical(report$space[[1]], space)
+  expect_true(grepl("\\w \\(1\\)", report$matches[[1]]))
 })

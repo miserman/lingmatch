@@ -16,7 +16,7 @@ dictionary_meta(dict, space = "auto", n_spaces = 5, suggest = FALSE,
 categorized by \code{\link{read.dic}}.}
 
 \item{space}{A vector space used to calculate similarities between terms.
-Name of a the space (see \code{\link{select.lspace}}), a matrix with terms as row names, or
+Names of spaces (see \code{\link{select.lspace}}), a matrix with terms as row names, or
 \code{"auto"} to auto-select a space based on matched terms. This can also be \code{multi}
 to use multiple spaces, which are combined after similarities are calculated.}
 

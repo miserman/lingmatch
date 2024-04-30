@@ -91,7 +91,7 @@
     
 <p>This introduction uses lingmatch to illustrate a few of the many
 branching paths of text analysis.</p>
-<p><em>Built with R 4.3.3 on April 20 2024</em></p>
+<p><em>Built with R 4.4.0 on April 28 2024</em></p>
 <hr>
 <div class="section level2">
 <h2 id="setup">Setup<a class="anchor" aria-label="anchor" href="#setup"></a>
@@ -226,12 +226,12 @@ of processing we just walked through.</p>
 information:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># a count of words across documents (total/global term count; collection frequency)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums.html" class="external-link">colSums</a></span><span class="op">(</span><span class="va">dtm</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums-methods.html" class="external-link">colSums</a></span><span class="op">(</span><span class="va">dtm</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span>
 <span><span class="co">#&gt;    about      all      and anything      are </span></span>
 <span><span class="co">#&gt;        2        2        1        1        1</span></span>
 <span></span>
 <span><span class="co"># a count of words in each document (word counts; document length)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">dtm</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums-methods.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">dtm</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 17 19 20 27</span></span>
 <span></span>
 <span><span class="co"># correlation between words (word vector similarity)</span></span>

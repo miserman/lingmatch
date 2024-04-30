@@ -166,7 +166,25 @@ and a <code>WC</code> attribute with original word counts.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">dict</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>category <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cat"</span>, <span class="st">"dog"</span>, <span class="st">"pet*"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">lma_termcat</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="st">"cat, cat, cat, cat, cat, cat, cat, cat"</span>,</span></span>
+<span class="r-in"><span>  <span class="st">"a cat, dog, or anything petlike, really"</span>,</span></span>
+<span class="r-in"><span>  <span class="st">"petite petrochemical petitioned petty peter for petrified petunia petals"</span></span></span>
+<span class="r-in"><span><span class="op">)</span>, <span class="va">dict</span>, coverage <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      category coverage_category</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]        8                 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,]        3                 3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]        8                 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"WC")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 8 7 9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"time")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     dtm termcat </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    0.02    0.02 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"type")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "count"</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Score texts with the NRC Affect Intensity Lexicon</span></span></span>
 <span class="r-in"><span></span></span>

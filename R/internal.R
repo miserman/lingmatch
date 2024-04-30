@@ -26,10 +26,11 @@ to_regex <- function(dict, intext = FALSE, isGlob = TRUE) {
   lapply(dict, function(l) {
     l <- gsub("([+*])[+*]+", "\\\\\\1+", sub("(?<=[^\\\\])\\\\$", "\\\\\\\\", l, perl = TRUE))
     if (isGlob) {
-      l <- gsub("([.^$?(){}[-]|\\])", "\\\\\\1", l, perl = TRUE)
-      if (!intext) l <- gsub("\\^\\*|\\*\\$", "", paste0("^", l, "$"))
-      l <- gsub("\\*", "[^\\\\s]*", l)
-    } else if (any(ck <- grepl("[[({]", l) + grepl("[})]|\\]", l) == 1)) {
+      if (any(ck <- grepl("(?:^|\\s+)\\*|(?<=\\w)\\*(?:$|\\s+)", l, perl = TRUE))) {
+        l[ck] <- gsub("\\*", "[^\\\\s]*", gsub("([.^$?(){}[-]|\\])", "\\\\\\1", l[ck], perl = TRUE))
+      }
+    }
+    if (any(ck <- grepl("[[({]", l) + grepl("[})]|\\]", l) == 1)) {
       l[ck] <- gsub("([([{}\\])])", "\\\\\\1", l[ck], perl = TRUE)
     }
     l
