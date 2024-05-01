@@ -7,14 +7,36 @@ skip_if(
 )
 
 dict <- list(
-  furniture = c("table", "chair", "desk*", "couch*", "sofa*"),
-  well_adjusted = c("happy", "bright*", "friend*", "she", "he", "they")
+  animal = c("ant", "frog", "aardvark*"),
+  machine = c("car", "turbine", "housing*")
 )
 
-test_that("dicitonary meta works", {
-  RcppParallel::setThreadOptions(1)
+test_that("dictionary meta works", {
   meta <- dictionary_meta(dict, suggest = TRUE)
   expect_identical(meta$summary$category, names(dict))
   expect_identical(meta$summary$n_terms, vapply(unname(dict), length, 0))
   expect_false(is.null(meta$suggested))
+
+  meta <- dictionary_meta(
+    dict, lma_lspace("100k"),
+    suggest = TRUE, dimension_prop = .5
+  )
+  expect_identical(meta$summary$category, names(dict))
+  expect_identical(meta$summary$n_terms, vapply(unname(dict), length, 0))
+  expect_false(is.null(meta$suggested))
+})
+
+test_that("multiple spaces work", {
+  meta <- dictionary_meta(
+    dict, "multi",
+    n_spaces = 2, suggest = TRUE,
+    dimension_prop = .5, pairwise = FALSE
+  )
+  expect_identical(meta$summary$category, names(dict))
+  expect_identical(meta$summary$n_terms, vapply(unname(dict), length, 0))
+  expect_false(is.null(meta$suggested))
+
+  meta <- dictionary_meta(dict, "multi", n_spaces = 2)
+  expect_identical(meta$summary$category, names(dict))
+  expect_identical(meta$summary$n_terms, vapply(unname(dict), length, 0))
 })

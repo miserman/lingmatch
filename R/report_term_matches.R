@@ -28,6 +28,10 @@
 #' @param outFile File path to write results to, always ending in \code{.csv}.
 #' @param space_dir Directory from which \code{space} should be loaded.
 #' @param verbose Logical; if \code{FALSE}, will not display status messages.
+#' @family Dictionary functions
+#' @seealso For a more complete assessment of dictionaries, see \code{\link{dictionary_meta}()}.
+#'
+#' Similar information is provided in the \href{https://miserman.github.io/dictionary_builder/}{dictionary builder} web tool.
 #' @note
 #' Matches are extracted for each term independently, so they may not align with some implementations
 #' of dictionaries. For instance, by default \code{\link{lma_patcat}} matches destructively, and sorts
@@ -111,17 +115,7 @@ report_term_matches <- function(dict, text = NULL, space = NULL, glob = TRUE,
       if (glob) glob <- !any(grepl("(?:\\\\\\w|[].})])\\*$", terms$term))
     }
   }
-  space_name <- NULL
-  if (is.null(text)) {
-    if (is.character(space)) {
-      space_name <- space
-      if (verbose) cat("preloading space (", round(proc.time()[[3]] - st, 4), ")\n", sep = "")
-      space <- lma_lspace(space, dir = space_dir)
-    }
-    collapsed_terms <- as_terms <- TRUE
-    text <- paste(rownames(space), collapse = "  ")
-  }
-  rawtext <- is.null(space_name) && (!as_terms || collapsed_terms)
+  rawtext <- !as_terms || collapsed_terms
   terms$regex <- to_regex(list(terms$term), TRUE, glob)[[1]]
   terms <- terms[!is.na(terms$regex) & terms$regex != "", ]
   terms$regex <- if (rawtext) paste0("\\b", terms$regex, "\\b") else paste0("^", terms$regex, "$")
@@ -141,18 +135,17 @@ report_term_matches <- function(dict, text = NULL, space = NULL, glob = TRUE,
   if (verbose) cat("extracting matches (", round(proc.time()[[3]] - st, 4), ")\n", sep = "")
   matches <- extract_matches(terms$regex, text, rawtext)
   has_space <- FALSE
+  space_name <- NULL
   if (!is.null(space)) {
     obs <- unique(unlist(lapply(matches, names), use.names = FALSE))
-    if (is.null(space_name)) {
-      if (is.logical(space) && space) {
-        space <- select.lspace(terms = obs)$selected
-        space <- if (nrow(space)) rownames(space)[1] else NULL
-      }
-      if (is.character(space)) {
-        if (verbose) cat("loading space (", round(proc.time()[[3]] - st, 4), ")\n", sep = "")
-        space_name <- space
-        space <- lma_lspace(obs, space, dir = space_dir)
-      }
+    if (is.logical(space) && space) {
+      space <- select.lspace(terms = obs)$selected
+      space <- if (nrow(space)) rownames(space)[1] else NULL
+    }
+    if (is.character(space)) {
+      if (verbose) cat("loading space (", round(proc.time()[[3]] - st, 4), ")\n", sep = "")
+      space_name <- space
+      space <- lma_lspace(obs, space, dir = space_dir)
     }
     if (!nrow(space) || !any(obs %in% rownames(space))) space <- NULL
     if (is.null(space)) {
@@ -165,10 +158,10 @@ report_term_matches <- function(dict, text = NULL, space = NULL, glob = TRUE,
           if (verbose) cat("parsing phrases (", round(proc.time()[[3]] - st, 4), ")\n", sep = "")
           split_parts <- strsplit(obs[phrase], "[ _/-]")
           parts <- unique(unlist(split_parts, use.names = FALSE))
-          part_vectors <- if (!is.null(space_name)) {
-            lma_lspace(parts, space_name)
-          } else {
+          part_vectors <- if (is.null(space_name)) {
             if (any(parts %in% rownames(space))) space[parts[parts %in% rownames(space)]] else space[0, ]
+          } else {
+            lma_lspace(parts, space_name)
           }
           if (nrow(part_vectors)) {
             space_terms <- rownames(part_vectors)

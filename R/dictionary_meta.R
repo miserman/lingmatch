@@ -14,9 +14,6 @@
 #' @param suggest_stopwords Logical; if \code{TRUE}, will suggest function words.
 #' @param suggest_discriminate Logical; if \code{TRUE}, will adjust for similarity to other
 #' categories when finding suggestions.
-#' @param pretrim_space Logical; if \code{TRUE} and \code{pairwise} is \code{TRUE},
-#' will remove terms with a similarity of 0 or less with all category centroids,
-#' prior to calculating similarities for suggestions.
 #' @param expand_cutoff_freq Proportion of mapped terms to include when expanding dictionary terms.
 #' Applies when \code{space} is a character (referring to a space to be loaded).
 #' @param expand_cutoff_spaces Number of spaces in which a term has to appear to be considered
@@ -29,6 +26,11 @@
 #' @param glob Logical; if \code{TRUE}, converts globs (asterisk wildcards) to regular expressions.
 #' @param space_dir Directory from which \code{space} should be loaded.
 #' @param verbose Logical; if \code{FALSE}, will not show status messages.
+#' @family Dictionary functions
+#' @seealso
+#' To just expand fuzzy terms, see \code{\link{report_term_matches}()}.
+#'
+#' Similar information is provided in the \href{https://miserman.github.io/dictionary_builder/}{dictionary builder} web tool.
 #' @returns A list:
 #' \itemize{
 #'   \item \strong{\code{expanded}}: A version of \code{dict} with fuzzy terms expanded.
@@ -48,7 +50,7 @@
 
 dictionary_meta <- function(
     dict, space = "auto", n_spaces = 5, suggest = FALSE, suggestion_terms = 10, suggest_stopwords = FALSE,
-    suggest_discriminate = TRUE, pretrim_space = FALSE, expand_cutoff_freq = .98, expand_cutoff_spaces = 10,
+    suggest_discriminate = TRUE, expand_cutoff_freq = .98, expand_cutoff_spaces = 10,
     dimension_prop = 1, pairwise = TRUE, glob = TRUE, space_dir = getOption("lingmatch.lspace.dir"), verbose = TRUE) {
   if (missing(dict)) stop("dict must be specified", call. = FALSE)
   if (!is.list(dict)) dict <- list(dict)
@@ -137,54 +139,34 @@ dictionary_meta <- function(
   if (multi) {
     space <- lapply(space, function(s) as(s, "CsparseMatrix"))
     if (!suggest) space_terms <- rownames(space[[1]])
-    if (pretrim_space && pairwise) {
-      if (verbose) cat("trimming the spaces (", round(proc.time()[[3]] - st, 4), ")\n", sep = "")
-      space_terms <- names(which(Reduce("+", lapply(cat_names, function(cat) {
-        su <- space_terms %in% dict_exp[[cat]]
-        Reduce("+", lapply(space, function(s) {
-          lma_simets(s, colMeans(s[su, , drop = FALSE]), metric = "cosine") > 0
-        })) == length(space)
-      })) == length(cat_names)))
-      space <- lapply(space, function(s) s[space_terms, , drop = FALSE])
-    }
     if (verbose) cat("calculating term similarities (", round(proc.time()[[3]] - st, 4), ")\n", sep = "")
     sims <- lapply(cat_names, function(cat) {
       su <- space_terms %in% dict_exp[[cat]]
-      if (dimension_prop < 1) {
-        space <- lapply(space, function(s) {
-          loadings <- colMeans(s[su, , drop = FALSE])
-          dsu <- order(-loadings)[seq(1, max(1, ceiling(ncol(s) * dimension_prop)))]
-          s[, dsu, drop = FALSE]
-        })
+      if (any(su)) {
+        Reduce("+", lapply(space, function(s) {
+          if (dimension_prop < 1) {
+            loadings <- colMeans(s[su, , drop = FALSE])
+            dsu <- order(-loadings)[seq(1, max(1, ceiling(ncol(s) * dimension_prop)))]
+            s <- s[, dsu, drop = FALSE]
+          }
+          if (pairwise) {
+            sim <- lma_simets(s, s[su, ], metric = "cosine", pairwise = TRUE, symmetrical = TRUE)
+            if (is.null(dim(sim))) sim <- t(t(sim))
+            diag(sim[su, ]) <- 0
+            ms <- min(sim)
+            sim <- (sim - ms) / (max(sim) - ms) * sign(sim)
+            diag(sim[su, ]) <- 1
+          } else {
+            sim <- lma_simets(s, colMeans(s[su, , drop = FALSE]), metric = "cosine", pairwise = TRUE, symmetrical = TRUE)
+            if (is.null(dim(sim))) sim <- t(t(sim))
+          }
+          sim
+        })) / length(space)
       }
-      Reduce("+", lapply(space, function(s) {
-        if (pairwise) {
-          sim <- lma_simets(s, s[su, ], metric = "cosine", pairwise = TRUE, symmetrical = TRUE)
-          if (is.null(dim(sim))) sim <- t(t(sim))
-          diag(sim[su, ]) <- 0
-          ms <- min(sim)
-          sim <- (sim - ms) / (max(sim) - ms) * sign(sim)
-          diag(sim[su, ]) <- 1
-        } else {
-          sim <- lma_simets(s, colMeans(s[su, , drop = FALSE]), metric = "cosine", pairwise = TRUE, symmetrical = TRUE)
-          if (is.null(dim(sim))) sim <- t(t(sim))
-        }
-        sim
-      })) / length(space)
     })
   } else {
     space <- as(space, "CsparseMatrix")
     if (!suggest) space_terms <- rownames(space)
-    if (pretrim_space && pairwise) {
-      if (verbose) cat("trimming the space (", round(proc.time()[[3]] - st, 4), ")\n", sep = "")
-      space_terms <- names(which(Reduce("+", lapply(cat_names, function(cat) {
-        lma_simets(
-          space, colMeans(space[space_terms %in% dict_exp[[cat]], , drop = FALSE]),
-          metric = "cosine"
-        ) > 0
-      })) == length(cat_names)))
-      space <- space[space_terms, , drop = FALSE]
-    }
     if (verbose) cat("calculating term similarities (", round(proc.time()[[3]] - st, 4), ")\n", sep = "")
     sims <- lapply(cat_names, function(cat) {
       su <- space_terms %in% dict_exp[[cat]]
@@ -263,11 +245,22 @@ dictionary_meta <- function(
         }
         if (is.null(dim(s))) s <- t(t(s))
       }
-      term_sims <- unlist(lapply(unname(split(cl$match, cl$term)[unique(cl$term)]), function(l) {
-        if (length(l) == 1) structure(1, names = l) else s[l, l[which.min(nchar(l))]]
-      }))
-      cat_sims <- s[cl$match, which.max(colMeans(s[colnames(s), , drop = FALSE]))]
-      cbind(sim.term = term_sims, sim.category = cat_sims)
+      if (is.null(s)) {
+        cbind(sim.term = cl$match, sim.category = 0)
+      } else {
+        su <- !(cl$match %in% rownames(s))
+        if (any(su)) s <- rbind(s, Matrix(0, sum(su), ncol(s), dimnames = list(cl$match[su], colnames(s))))
+        term_sims <- unlist(lapply(unname(split(cl$match, cl$term)[unique(cl$term)]), function(l) {
+          if (length(l) == 1) {
+            structure(1, names = l)
+          } else {
+            cols <- l[l %in% colnames(s)]
+            s[l, cols[which.min(nchar(cols))]]
+          }
+        }))
+        cat_sims <- s[cl$match, which.max(if (is.null(dim(s))) s else colMeans(s[colnames(s), , drop = FALSE]))]
+        cbind(sim.term = term_sims, sim.category = if (is.null(cat_sims)) 0 else cat_sims)
+      }
     }
   )))
   summary <- cbind(data.frame(

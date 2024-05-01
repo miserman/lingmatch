@@ -67,10 +67,10 @@
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">dictionary_meta</span><span class="op">(</span><span class="va">dict</span>, space <span class="op">=</span> <span class="st">"auto"</span>, n_spaces <span class="op">=</span> <span class="fl">5</span>, suggest <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  suggestion_terms <span class="op">=</span> <span class="fl">10</span>, suggest_stopwords <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  suggest_discriminate <span class="op">=</span> <span class="cn">TRUE</span>, pretrim_space <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  expand_cutoff_freq <span class="op">=</span> <span class="fl">0.98</span>, expand_cutoff_spaces <span class="op">=</span> <span class="fl">10</span>,</span>
-<span>  dimension_prop <span class="op">=</span> <span class="fl">1</span>, pairwise <span class="op">=</span> <span class="cn">TRUE</span>, glob <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  space_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"lingmatch.lspace.dir"</span><span class="op">)</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<span>  suggest_discriminate <span class="op">=</span> <span class="cn">TRUE</span>, expand_cutoff_freq <span class="op">=</span> <span class="fl">0.98</span>,</span>
+<span>  expand_cutoff_spaces <span class="op">=</span> <span class="fl">10</span>, dimension_prop <span class="op">=</span> <span class="fl">1</span>, pairwise <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  glob <span class="op">=</span> <span class="cn">TRUE</span>, space_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"lingmatch.lspace.dir"</span><span class="op">)</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -107,12 +107,6 @@ in <code>space</code>.</p></dd>
 <dt>suggest_discriminate</dt>
 <dd><p>Logical; if <code>TRUE</code>, will adjust for similarity to other
 categories when finding suggestions.</p></dd>
-
-
-<dt>pretrim_space</dt>
-<dd><p>Logical; if <code>TRUE</code> and <code>pairwise</code> is <code>TRUE</code>,
-will remove terms with a similarity of 0 or less with all category centroids,
-prior to calculating similarities for suggestions.</p></dd>
 
 
 <dt>expand_cutoff_freq</dt>
@@ -159,6 +153,18 @@ averaged category vector rather than all category terms separately.</p></dd>
   additions for each dictionary category. Each entry is a named numeric vector with
   similarities for each suggested term.</p></li>
 </ul></div>
+    <div class="section level2">
+    <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
+    <div class="dont-index"><p>To just expand fuzzy terms, see <code><a href="report_term_matches.html">report_term_matches</a>()</code>.</p>
+<p>Similar information is provided in the <a href="https://miserman.github.io/dictionary_builder/" class="external-link">dictionary builder</a> web tool.</p>
+<p>Other Dictionary functions: 
+<code><a href="download.dict.html">download.dict</a>()</code>,
+<code><a href="lma_patcat.html">lma_patcat</a>()</code>,
+<code><a href="lma_termcat.html">lma_termcat</a>()</code>,
+<code><a href="read.dic.html">read.dic</a>()</code>,
+<code><a href="report_term_matches.html">report_term_matches</a>()</code>,
+<code><a href="select.dict.html">select.dict</a>()</code></p></div>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
@@ -168,11 +174,11 @@ averaged category vector rather than all category terms separately.</p></dd>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">dictionary_meta</span><span class="op">(</span><span class="va">dict</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> preparing terms (0)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> expanding terms (1.09)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> loading space (1.25)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> calculating term similarities (2.78)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> preparing results (2.8)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> done (2.8)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> expanding terms (1.14)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> loading space (1.31)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> calculating term similarities (2.83)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> preparing results (2.83)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> done (2.84)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $expanded</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $expanded$furniture</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "table"        "chair"        "desk-top"     "desk"         "desking"     </span>

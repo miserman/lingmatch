@@ -54,14 +54,14 @@ found <- unlist(lapply(report$matches, colnames))
 spaces <- select.lspace(terms = found)
 space <- rownames(spaces$selected)[1]
 
-test_that("space works", {
+test_that("space works with text", {
   report <- report_term_matches(dict, text, space = TRUE)
   expect_true(all(c("space", "mean_sim", "min_sim") %in% colnames(report)))
   expect_identical(report$space[[1]], space)
   expect_true(grepl("\\w \\(1, 1\\)", report$matches[[1]]))
 })
 
-test_that("space preload works", {
+test_that("space works without text", {
   report <- report_term_matches(dict, space = space)
   expect_true(all(c("space", "mean_sim", "min_sim") %in% colnames(report)))
   expect_identical(report$space[[1]], space)

@@ -98,9 +98,11 @@ inquirer <- read.dic("inquirer", dir = "~/Dictionaries")
 }
 \seealso{
 Other Dictionary functions: 
+\code{\link{dictionary_meta}()},
 \code{\link{download.dict}()},
 \code{\link{lma_patcat}()},
 \code{\link{lma_termcat}()},
+\code{\link{report_term_matches}()},
 \code{\link{select.dict}()}
 }
 \concept{Dictionary functions}

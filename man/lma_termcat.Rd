@@ -113,9 +113,11 @@ if (require("splot")) splot(emotion_scores ~ names(text), leg = "out")
 For applying pattern-based dictionaries (to raw text) see \code{\link{lma_patcat}}.
 
 Other Dictionary functions: 
+\code{\link{dictionary_meta}()},
 \code{\link{download.dict}()},
 \code{\link{lma_patcat}()},
 \code{\link{read.dic}()},
+\code{\link{report_term_matches}()},
 \code{\link{select.dict}()}
 }
 \concept{Dictionary functions}

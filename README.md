@@ -10,13 +10,15 @@ An all-in-one R package for the assessment of linguistic matching and/or accommo
 
 ## resources
 * Documentation and guides: [miserman.github.io/lingmatch](https://miserman.github.io/lingmatch/)
-  * [Quick start](https://miserman.github.io/lingmatch/articles/quickstart.html)
-  * [Comparisons](https://miserman.github.io/lingmatch/articles/groups.html)
-  * [Introduction to text analysis](https://miserman.github.io/lingmatch/articles/introduction.html)
-  * [Word vectors](https://miserman.github.io/lingmatch/articles/word_vectors.html)
+  * [Quick Start](https://miserman.github.io/lingmatch/articles/quickstart.html)
+  * [Comparison Specification](https://miserman.github.io/lingmatch/articles/groups.html)
+  * [Introduction to Text Analysis](https://miserman.github.io/lingmatch/articles/introduction.html)
+  * [Word Vectors](https://miserman.github.io/lingmatch/articles/word_vectors.html)
   * [Text Classification](https://miserman.github.io/lingmatch/articles/text_classification.html)
+  * [Dictionary Creation](https://miserman.github.io/lingmatch/articles/dictionary_creation.html)
 * Dictionary repository: [osf.io/y6g5b](https://osf.io/y6g5b/wiki/home/)
 * Latent semantic space repository: [osf.io/489he](https://osf.io/489he/wiki/home/)
+* Dictionary builder: [miserman.github.io/dictionary_builder](https://miserman.github.io/dictionary_builder/)
 
 ## installation
 Download R from [r-project.org](https://www.r-project.org/), then install the package from an R console:

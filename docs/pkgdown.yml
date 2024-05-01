@@ -1,4 +1,4 @@
-pandoc: 3.1.1
+pandoc: 3.1.11
 pkgdown: 2.0.9
 pkgdown_sha: ~
 articles:
@@ -8,7 +8,7 @@ articles:
   quickstart: quickstart.html
   text_classification: text_classification.html
   word_vectors: word_vectors.html
-last_built: 2024-04-30T23:42Z
+last_built: 2024-05-01T16:40Z
 urls:
   reference: https://miserman.github.io/lingmatch/reference
   article: https://miserman.github.io/lingmatch/articles

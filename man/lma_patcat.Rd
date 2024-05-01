@@ -129,9 +129,11 @@ lma_patcat(text, tempori_std)[, unique(tempori$category)]
 For applying term-based dictionaries (to a document-term matrix) see \code{\link{lma_termcat}}.
 
 Other Dictionary functions: 
+\code{\link{dictionary_meta}()},
 \code{\link{download.dict}()},
 \code{\link{lma_termcat}()},
 \code{\link{read.dic}()},
+\code{\link{report_term_matches}()},
 \code{\link{select.dict}()}
 }
 \concept{Dictionary functions}

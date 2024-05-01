@@ -36,9 +36,11 @@ download.dict("lusi", dir = "~/Dictionaries")
 }
 \seealso{
 Other Dictionary functions: 
+\code{\link{dictionary_meta}()},
 \code{\link{lma_patcat}()},
 \code{\link{lma_termcat}()},
 \code{\link{read.dic}()},
+\code{\link{report_term_matches}()},
 \code{\link{select.dict}()}
 }
 \concept{Dictionary functions}

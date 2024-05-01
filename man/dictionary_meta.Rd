@@ -6,10 +6,10 @@
 \usage{
 dictionary_meta(dict, space = "auto", n_spaces = 5, suggest = FALSE,
   suggestion_terms = 10, suggest_stopwords = FALSE,
-  suggest_discriminate = TRUE, pretrim_space = FALSE,
-  expand_cutoff_freq = 0.98, expand_cutoff_spaces = 10,
-  dimension_prop = 1, pairwise = TRUE, glob = TRUE,
-  space_dir = getOption("lingmatch.lspace.dir"), verbose = TRUE)
+  suggest_discriminate = TRUE, expand_cutoff_freq = 0.98,
+  expand_cutoff_spaces = 10, dimension_prop = 1, pairwise = TRUE,
+  glob = TRUE, space_dir = getOption("lingmatch.lspace.dir"),
+  verbose = TRUE)
 }
 \arguments{
 \item{dict}{A vector of terms, list of such vectors, or a matrix-like object to be
@@ -31,10 +31,6 @@ in \code{space}.}
 
 \item{suggest_discriminate}{Logical; if \code{TRUE}, will adjust for similarity to other
 categories when finding suggestions.}
-
-\item{pretrim_space}{Logical; if \code{TRUE} and \code{pairwise} is \code{TRUE},
-will remove terms with a similarity of 0 or less with all category centroids,
-prior to calculating similarities for suggestions.}
 
 \item{expand_cutoff_freq}{Proportion of mapped terms to include when expanding dictionary terms.
 Applies when \code{space} is a character (referring to a space to be loaded).}
@@ -76,3 +72,17 @@ dict <- list(
 )
 dictionary_meta(dict)
 }
+\seealso{
+To just expand fuzzy terms, see \code{\link{report_term_matches}()}.
+
+Similar information is provided in the \href{https://miserman.github.io/dictionary_builder/}{dictionary builder} web tool.
+
+Other Dictionary functions: 
+\code{\link{download.dict}()},
+\code{\link{lma_patcat}()},
+\code{\link{lma_termcat}()},
+\code{\link{read.dic}()},
+\code{\link{report_term_matches}()},
+\code{\link{select.dict}()}
+}
+\concept{Dictionary functions}
