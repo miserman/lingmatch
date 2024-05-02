@@ -108,7 +108,7 @@
 #'
 #' Niederhoffer, K. G., & Pennebaker, J. W. (2002). Linguistic style matching in social interaction.
 #'   \emph{Journal of Language and Social Psychology, 21}, 337-360.
-#' @seealso For a general text processing function, see \code{\link{lma_process}}.
+#' @seealso For a general text processing function, see \code{\link{lma_process}()}.
 #' @return A list with processed components of the input, information about the comparison, and results of
 #' the comparison:
 #' \itemize{
@@ -264,7 +264,6 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
   input <- if (is.character(input) && all(input %in% colnames(data))) data[, input] else gd(opt$input, data)
   if (!missing(group) && is.data.frame(input)) input <- as.matrix(input[, vapply(input, is.numeric, TRUE)])
   rx <- NROW(input)
-  cx <- NCOL(input)
   # comp
   if (!missing(comp)) {
     comp <- gd(opt$comp, if (missing(comp.data)) if (is.call(opt$comp)) NULL else data else comp.data)
@@ -303,7 +302,6 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
     if (sum(ck) / length(ck) > .75) {
       inp$dict <- NULL
       if (any(!ck)) dn <- dn[ck]
-      cx <- length(dn)
       input <- input[, dn]
       do.wmc <- FALSE
       if (!missing(comp) && any(class(comp) %in% c("matrix", "data.frame")) && all(dn %in% colnames(comp))) {

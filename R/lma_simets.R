@@ -80,7 +80,6 @@
 
 lma_simets <- function(a, b = NULL, metric = NULL, group = NULL, lag = 0, agg = TRUE, agg.mean = TRUE,
                        pairwise = TRUE, symmetrical = FALSE, mean = FALSE, return.list = FALSE) {
-  cf <- NULL
   mets <- c("jaccard", "euclidean", "canberra", "cosine", "pearson")
   if (missing(metric) && length(b) == 1 && !grepl(" ", b) &&
     any(grepl(tolower(substr(b, 1, 3)), mets, fixed = TRUE))) {

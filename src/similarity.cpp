@@ -181,7 +181,7 @@ struct Compare : public Worker {
 };
 
 /**
- * @brief Calculate similarities between vectors within two matrixes.
+ * @brief Calculate similarities between vectors within two matrices.
  *
  * @param m Primary sparse matrix.
  * @param comp The second sparse matrix, or NULL if pairwise comparisons within

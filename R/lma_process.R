@@ -14,7 +14,7 @@
 #' @return A matrix with texts represented by rows, and features in columns, unless there are multiple rows per output
 #'  (e.g., when a latent semantic space is applied without terms being mapped) in which case only the special output
 #'  is returned (e.g., a matrix with terms as rows and latent dimensions in columns).
-#' @seealso If you just want to compare texts, see the \code{\link{lingmatch}} function.
+#' @seealso If you just want to compare texts, see the \code{\link{lingmatch}()} function.
 #' @examples
 #' # starting with some texts in a vector
 #' texts <- c(

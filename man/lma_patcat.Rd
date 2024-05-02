@@ -107,9 +107,10 @@ lma_patcat(
 \dontrun{
 
 # read in the temporal orientation lexicon from the World Well-Being Project
-tempori <- read.csv(
-  "https://wwbp.org/downloads/public_data/temporalOrientationLexicon.csv"
-)
+tempori <- read.csv(paste0(
+  "https://raw.githubusercontent.com/wwbp/lexica/master/",
+  "temporal_orientation/temporal_orientation_lexicon.csv"
+))
 
 lma_patcat(text, tempori)
 
@@ -126,7 +127,7 @@ lma_patcat(text, tempori_std)[, unique(tempori$category)]
 }
 }
 \seealso{
-For applying term-based dictionaries (to a document-term matrix) see \code{\link{lma_termcat}}.
+For applying term-based dictionaries (to a document-term matrix) see \code{\link{lma_termcat}()}.
 
 Other Dictionary functions: 
 \code{\link{dictionary_meta}()},

@@ -34,7 +34,7 @@
 #'   Set a session default with \code{options(lingmatch.dict.dir = 'desired/path')}.
 #' @param coverage Logical; if \code{TRUE}, will calculate coverage
 #'   (number of unique term matches) for each category.
-#' @seealso For applying pattern-based dictionaries (to raw text) see \code{\link{lma_patcat}}.
+#' @seealso For applying pattern-based dictionaries (to raw text) see \code{\link{lma_patcat}()}.
 #' @family Dictionary functions
 #' @return A matrix with a row per \code{dtm} row and columns per dictionary category
 #' (with added \code{coverage_} versions if \code{coverage} is \code{TRUE}),

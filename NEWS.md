@@ -8,6 +8,8 @@
 * Correctly applies category selection in `read.dic` in more cases.
 
 ### Improvements
+* Removes option to download embeddings without terms files; works toward
+  independence between spaces and term map.
 * Allows for direct weight discretization from a weighted list dictionary.
 
 # version 1.0.6

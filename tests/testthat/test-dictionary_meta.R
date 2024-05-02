@@ -17,10 +17,8 @@ test_that("dictionary meta works", {
   expect_identical(meta$summary$n_terms, vapply(unname(dict), length, 0))
   expect_false(is.null(meta$suggested))
 
-  meta <- dictionary_meta(
-    dict, lma_lspace("100k"),
-    suggest = TRUE, dimension_prop = .5
-  )
+  space <- lma_lspace("100k")
+  meta <- dictionary_meta(dict, space, suggest = TRUE, dimension_prop = .5)
   expect_identical(meta$summary$category, names(dict))
   expect_identical(meta$summary$n_terms, vapply(unname(dict), length, 0))
   expect_false(is.null(meta$suggested))

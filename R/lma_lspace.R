@@ -21,7 +21,7 @@
 #'   for every requested term.
 #' @param term.map A matrix with \code{space} as a column name, terms as row names, and indices of
 #'   the terms in the given space as values, or a numeric vector of indices with terms as names, or
-#'   a character vector or terms corresponding to rows of the space. This is used instead of reading
+#'   a character vector of terms corresponding to rows of the space. This is used instead of reading
 #'   in an "_terms.txt" file corresponding to a \code{space} entered as a character (the name of a
 #'   space file).
 #' @param dim.cutoff If a \code{space} is calculated, this will be used to decide on the number of
@@ -121,8 +121,6 @@ lma_lspace <- function(dtm = "", space, map.space = TRUE, fill.missing = FALSE, 
   if (missing(space)) {
     nr <- nrow(dtm)
     if (is.null(nr)) stop("enter a matrix for dtm, or specify a space")
-    nc <- ncol(dtm)
-    md <- min(nr, nc)
     s <- svd(dtm)
     s$v <- t(s$v)
     k <- cumsum(s$d) / sum(s$d)
@@ -196,35 +194,10 @@ lma_lspace <- function(dtm = "", space, map.space = TRUE, fill.missing = FALSE, 
         }
         r
       }
-      if (!is.null(term.map)) {
-        if (is.character(term.map)) term.map <- structure(seq_along(term.map), names = term.map)
-        su <- which(names(term.map) %in% terms)
-        inds <- as.numeric(sort(if (length(terms) == 1 && terms == "") term.map else term.map[su]))
-        if (length(inds)) {
-          space <- if (use.scan) rex(inds, space_path) else t(extract_indices(inds, space_path))
-          rownames(space) <- ts <- names(term.map)[inds]
-        } else {
-          stop("no matching terms in space ", space)
-        }
-      } else {
-        if (!file.exists(normalizePath(paste0(dir, "/", name, "_terms.txt"), "/", FALSE))) {
-          if (file.exists(normalizePath(paste0(dir, "/lma_term_map.rda")))) {
-            lma_term_map <- NULL
-            load(normalizePath(paste0(dir, "/lma_term_map.rda"), "/", FALSE))
-            if (!is.null(lma_term_map) && !is.null(colnames(lma_term_map)) && name %in% colnames(lma_term_map)) {
-              space_terms <- names(lma_term_map[lma_term_map[, name] != 0, name])
-            } else {
-              stop(
-                "could not find terms file (", space, "_terms.txt) in dir (", dir, "),",
-                " nor retrieve terms from them term map (lma_term_map.rda)."
-              )
-            }
-          } else {
-            stop("terms file (", space, "_terms.txt) not found in dir (", dir, ").")
-          }
-        } else {
-          space_terms <- readLines(normalizePath(paste0(dir, "/", name, "_terms.txt"), "/", FALSE))
-        }
+      if (is.null(term.map)) {
+        terms_file <- paste0(dir, "/", name, "_terms.txt")
+        if (!file.exists(terms_file)) stop("terms file (", space, "_terms.txt) not found in dir (", dir, ").")
+        space_terms <- readLines(terms_file)
         su <- if (length(terms) == 1 && terms == "") {
           terms <- space_terms
           !logical(length(space_terms))
@@ -244,6 +217,16 @@ lma_lspace <- function(dtm = "", space, map.space = TRUE, fill.missing = FALSE, 
           rownames(space) <- space_terms[su]
           ts <- terms[terms %in% rownames(space)]
           space <- space[ts, , drop = FALSE]
+        } else {
+          stop("no matching terms in space ", space)
+        }
+      } else {
+        if (is.character(term.map)) term.map <- structure(seq_along(term.map), names = term.map)
+        su <- which(names(term.map) %in% terms)
+        inds <- as.numeric(sort(if (length(terms) == 1 && terms == "") term.map else term.map[su]))
+        if (length(inds)) {
+          space <- if (use.scan) rex(inds, space_path) else t(extract_indices(inds, space_path))
+          rownames(space) <- ts <- names(term.map)[inds]
         } else {
           stop("no matching terms in space ", space)
         }

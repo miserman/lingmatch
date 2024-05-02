@@ -182,5 +182,5 @@ Niederhoffer, K. G., & Pennebaker, J. W. (2002). Linguistic style matching in so
   \emph{Journal of Language and Social Psychology, 21}, 337-360.
 }
 \seealso{
-For a general text processing function, see \code{\link{lma_process}}.
+For a general text processing function, see \code{\link{lma_process}()}.
 }

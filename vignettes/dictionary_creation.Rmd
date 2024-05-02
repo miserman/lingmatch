@@ -4,7 +4,7 @@ editor_options:
   chunk_output_type: console
 output:
   html_document:
-    toc_depth: 4
+    toc_depth: 3
 ---
 
 ```{r, include = FALSE}
@@ -329,9 +329,14 @@ knitr::kable(meta_centroid$summary[, -1], digits = 3)
 The previous examples looked at terms within a single space, but we can also
 aggregate across multiple spaces, which might result in more reliable comparisons:
 ```{r}
+# by default, suggestions are sensitive to categories
+# (trying to maximize difference between categories),
+# but in this case, it seems to make suggestions worse
+# so we set `suggest_discriminate` to `FALSE`
 meta_multi <- dictionary_meta(
   dict[3:4], "multi",
-  suggest = TRUE, space_dir = "~/Latent Semantic Spaces"
+  suggest_discriminate = FALSE, suggest = TRUE,
+  space_dir = "~/Latent Semantic Spaces"
 )
 
 meta_multi$suggested

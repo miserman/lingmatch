@@ -66,11 +66,13 @@ A list:
 Assess Dictionary Categories Within a Latent Semantic Space
 }
 \examples{
-dict <- list(
-  furniture = c("table", "chair", "desk*", "couch*", "sofa*"),
-  well_adjusted = c("happy", "bright*", "friend*", "she", "he", "they")
-)
-dictionary_meta(dict)
+if (dir.exists("~/Latent Semantic Spaces")) {
+  dict <- list(
+    furniture = c("table", "chair", "desk*", "couch*", "sofa*"),
+    well_adjusted = c("happy", "bright*", "friend*", "she", "he", "they")
+  )
+  dictionary_meta(dict, space_dir = "~/Latent Semantic Spaces")
+}
 }
 \seealso{
 To just expand fuzzy terms, see \code{\link{report_term_matches}()}.

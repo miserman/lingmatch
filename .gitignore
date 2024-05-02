@@ -28,7 +28,6 @@ debug*
 *.o
 *.so
 *.dll
-cran-comments.md
 ^pkgdown$
 inst/doc
 .DS_Store

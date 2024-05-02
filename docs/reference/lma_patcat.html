@@ -158,7 +158,7 @@ word counts, and a <code>categories</code> attribute with row indices associated
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p>For applying term-based dictionaries (to a document-term matrix) see <code><a href="lma_termcat.html">lma_termcat</a></code>.</p>
+    <div class="dont-index"><p>For applying term-based dictionaries (to a document-term matrix) see <code><a href="lma_termcat.html">lma_termcat</a>()</code>.</p>
 <p>Other Dictionary functions: 
 <code><a href="dictionary_meta.html">dictionary_meta</a>()</code>,
 <code><a href="download.dict.html">download.dict</a>()</code>,
@@ -245,9 +245,10 @@ word counts, and a <code>categories</code> attribute with row indices associated
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># read in the temporal orientation lexicon from the World Well-Being Project</span></span></span>
-<span class="r-in"><span><span class="va">tempori</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="st">"https://wwbp.org/downloads/public_data/temporalOrientationLexicon.csv"</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">tempori</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="st">"https://raw.githubusercontent.com/wwbp/lexica/master/"</span>,</span></span>
+<span class="r-in"><span>  <span class="st">"temporal_orientation/temporal_orientation_lexicon.csv"</span></span></span>
+<span class="r-in"><span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">lma_patcat</span><span class="op">(</span><span class="va">text</span>, <span class="va">tempori</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>

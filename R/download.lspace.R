@@ -6,8 +6,6 @@
 #'  \code{'100k_lsa'} is the default, and some other common options might be \code{'google'}, \code{'facebook'},
 #'  or \code{'glove'}. See \href{https://osf.io/489he/wiki/home}{osf.io/489he/wiki} for more information,
 #'  and a full list of spaces.
-#' @param include.terms Logical; if \code{FALSE}, only the \code{.dat.bz2} file is downloaded
-#'  (which only has numeric vectors).
 #' @param decompress Logical; if \code{TRUE} (default), decompresses the downloaded file
 #'  with the \code{bunzip2} system command assuming it is available \cr (as indicated by
 #'  \code{Sys.which('bunzip2')}).
@@ -30,12 +28,11 @@
 #' @importFrom utils download.file
 #' @importFrom tools md5sum
 
-download.lspace <- function(space = "100k_lsa", include.terms = TRUE, decompress = TRUE,
+download.lspace <- function(space = "100k_lsa", decompress = TRUE,
                             check.md5 = TRUE, mode = "wb", dir = getOption("lingmatch.lspace.dir"),
                             overwrite = FALSE) {
   download.resource(
     "lspace", space,
-    include.terms = include.terms, decompress = decompress,
-    check.md5 = check.md5, mode = mode, dir = dir, overwrite = overwrite
+    decompress = decompress, check.md5 = check.md5, mode = mode, dir = dir, overwrite = overwrite
   )
 }

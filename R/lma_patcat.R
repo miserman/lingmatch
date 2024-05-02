@@ -35,7 +35,7 @@
 #'   or only some can be specified by name (e.g., \code{c(term =} \code{'patterns')}), leaving the rest default.
 #' @param dir Path to a folder in which to look for \code{dict} if it is the name of a file to be passed to
 #'   \code{\link{read.dic}}.
-#' @seealso For applying term-based dictionaries (to a document-term matrix) see \code{\link{lma_termcat}}.
+#' @seealso For applying term-based dictionaries (to a document-term matrix) see \code{\link{lma_termcat}()}.
 #' @family Dictionary functions
 #' @return A matrix with a row per \code{text} and columns per dictionary category, or (when \code{return.dtm = TRUE})
 #' a sparse matrix with a row per \code{text} and column per term. Includes a \code{WC} attribute with original
@@ -80,9 +80,10 @@
 #' \dontrun{
 #'
 #' # read in the temporal orientation lexicon from the World Well-Being Project
-#' tempori <- read.csv(
-#'   "https://wwbp.org/downloads/public_data/temporalOrientationLexicon.csv"
-#' )
+#' tempori <- read.csv(paste0(
+#'   "https://raw.githubusercontent.com/wwbp/lexica/master/",
+#'   "temporal_orientation/temporal_orientation_lexicon.csv"
+#' ))
 #'
 #' lma_patcat(text, tempori)
 #'

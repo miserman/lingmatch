@@ -370,7 +370,7 @@ read.dic <- function(path, cats = NULL, type = "asis", as.weighted = FALSE, dir 
 #'
 #' # read in the Moral Foundations or LUSI dictionaries from urls
 #' moral_dict <- read.dic("https://osf.io/download/whjt2")
-#' lusi_dict <- read.dic("https://www.depts.ttu.edu/psy/lusi/files/lusi_dict.txt")
+#' lusi_dict <- read.dic("https://osf.io/download/29ayf")
 #'
 #' # save and read in a version of the General Inquirer dictionary
 #' inquirer <- read.dic("inquirer", dir = "~/Dictionaries")

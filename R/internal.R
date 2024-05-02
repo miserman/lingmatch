@@ -38,7 +38,7 @@ to_regex <- function(dict, intext = FALSE, isGlob = TRUE) {
 }
 
 download.resource <- function(
-    type, resource, include.terms = TRUE, decompress = TRUE,
+    type, resource, decompress = TRUE,
     check.md5 = TRUE, mode = "wb", dir = "", overwrite = FALSE) {
   if (dir == "") {
     stop(paste0(
@@ -54,7 +54,7 @@ download.resource <- function(
     return(lapply(structure(resource, names = resource), function(d) {
       tryCatch(
         download.resource(
-          type = type, resource = d, include.terms = include.terms, decompress = decompress,
+          type = type, resource = d, decompress = decompress,
           check.md5 = check.md5, mode = mode, dir = dir
         ),
         error = function(e) e$message
@@ -111,7 +111,7 @@ download.resource <- function(
     status
   }
   if (type == "lspace") {
-    status <- if (include.terms) dl(lss_info[name, "osf_terms"], "_terms.txt") else 0
+    status <- dl(lss_info[name, "osf_terms"], "_terms.txt")
     if (status < 1) status <- dl(lss_info[name, "osf_dat"], ".dat.bz2")
     if (status < 1 && decompress) {
       if (Sys.which("bunzip2") == "") {

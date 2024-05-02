@@ -41,11 +41,13 @@
 #'   similarities for each suggested term.
 #' }
 #' @examples
-#' dict <- list(
-#'   furniture = c("table", "chair", "desk*", "couch*", "sofa*"),
-#'   well_adjusted = c("happy", "bright*", "friend*", "she", "he", "they")
-#' )
-#' dictionary_meta(dict)
+#' if (dir.exists("~/Latent Semantic Spaces")) {
+#'   dict <- list(
+#'     furniture = c("table", "chair", "desk*", "couch*", "sofa*"),
+#'     well_adjusted = c("happy", "bright*", "friend*", "she", "he", "they")
+#'   )
+#'   dictionary_meta(dict, space_dir = "~/Latent Semantic Spaces")
+#' }
 #' @export
 
 dictionary_meta <- function(

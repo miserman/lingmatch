@@ -47,5 +47,5 @@ lma_process(texts, dict = lma_dict(), percent = TRUE)
 lma_process(texts, space = lma_lspace(texts), weight = "tfidf")
 }
 \seealso{
-If you just want to compare texts, see the \code{\link{lingmatch}} function.
+If you just want to compare texts, see the \code{\link{lingmatch}()} function.
 }

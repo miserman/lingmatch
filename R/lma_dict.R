@@ -21,7 +21,7 @@
 #' and emojis are treated as different -- as ellipses and emojis rather than as periods and parens and colons and such).
 #' When categorizing a dtm, the input dictionary is passed by the special lists to be sure the terms in the dtm match up
 #' with the dictionary (so, for example, ": (" would be replaced with "repfrown" in both the text and dictionary).
-#' @seealso To score texts with these categories, use \code{\link{lma_termcat}}.
+#' @seealso To score texts with these categories, use \code{\link{lma_termcat}()}.
 #' @return A list with a vector of terms for each category, or (when \code{as.function = TRUE}) a function which
 #' accepts an initial "terms" argument (a character vector), and any additional arguments determined by function
 #' entered as \code{as.function} (\code{\link{grepl}} by default).

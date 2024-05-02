@@ -30,7 +30,7 @@ for every requested term.}
 
 \item{term.map}{A matrix with \code{space} as a column name, terms as row names, and indices of
 the terms in the given space as values, or a numeric vector of indices with terms as names, or
-a character vector or terms corresponding to rows of the space. This is used instead of reading
+a character vector of terms corresponding to rows of the space. This is used instead of reading
 in an "_terms.txt" file corresponding to a \code{space} entered as a character (the name of a
 space file).}
 

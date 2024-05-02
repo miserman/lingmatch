@@ -4,18 +4,15 @@
 \alias{download.lspace}
 \title{Download Latent Semantic Spaces}
 \usage{
-download.lspace(space = "100k_lsa", include.terms = TRUE,
-  decompress = TRUE, check.md5 = TRUE, mode = "wb",
-  dir = getOption("lingmatch.lspace.dir"), overwrite = FALSE)
+download.lspace(space = "100k_lsa", decompress = TRUE, check.md5 = TRUE,
+  mode = "wb", dir = getOption("lingmatch.lspace.dir"),
+  overwrite = FALSE)
 }
 \arguments{
 \item{space}{Name of one or more spaces you want to download, or \code{'all'} for all available.
 \code{'100k_lsa'} is the default, and some other common options might be \code{'google'}, \code{'facebook'},
 or \code{'glove'}. See \href{https://osf.io/489he/wiki/home}{osf.io/489he/wiki} for more information,
 and a full list of spaces.}
-
-\item{include.terms}{Logical; if \code{FALSE}, only the \code{.dat.bz2} file is downloaded
-(which only has numeric vectors).}
 
 \item{decompress}{Logical; if \code{TRUE} (default), decompresses the downloaded file
 with the \code{bunzip2} system command assuming it is available \cr (as indicated by

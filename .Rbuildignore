@@ -9,3 +9,4 @@ docs$
 ^build\.R$
 .DS_Store
 .vscode
+.lintr

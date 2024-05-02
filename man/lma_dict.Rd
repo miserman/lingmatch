@@ -72,5 +72,5 @@ clean(c(
 ))
 }
 \seealso{
-To score texts with these categories, use \code{\link{lma_termcat}}.
+To score texts with these categories, use \code{\link{lma_termcat}()}.
 }
