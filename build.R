@@ -31,7 +31,6 @@ save(lsm_profiles, lss_info, dict_info, file = "r/sysdata.rda", compress = "bzip
 
 # runs checks
 devtools::check_win_devel()
-devtools::check_rhub(interactive = FALSE)
 
 # releases
 devtools::release()

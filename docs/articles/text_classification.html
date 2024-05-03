@@ -27,7 +27,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">lingmatch</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.8</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -90,7 +90,7 @@
     
     
 <p>Works through a text classification example.</p>
-<p><em>Built with R 4.4.0 on April 28 2024</em></p>
+<p><em>Built with R 4.4.0 on May 03 2024</em></p>
 <hr>
 <div class="section level2">
 <h2 id="data">Data<a class="anchor" aria-label="anchor" href="#data"></a>
@@ -161,7 +161,7 @@ function words, which are high-frequency but often less meaningful
 words, and a document-count minimum excludes words that are sufficiently
 rare in the given set.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/miserman/lingmatch" class="external-link">lingmatch</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://miserman.github.io/lingmatch/">lingmatch</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># lma_dict() in the second position excludes function words</span></span>
 <span><span class="co"># dc.min excludes terms with document-frequencies less than or equal to the set value</span></span>
@@ -418,9 +418,9 @@ classifiers (or calculate predictions manually), then measure accuracy
 <span><span class="co">#&gt; bayes        0.8000000</span></span>
 <span><span class="co">#&gt; dtree        0.8461538</span></span>
 <span><span class="co">#&gt; svm          0.7692308</span></span>
-<span><span class="co">#&gt; neural       0.6923077</span></span>
-<span><span class="co">#&gt; neural_glove 0.7692308</span></span>
-<span><span class="co">#&gt; ensemble     0.8153846</span></span></code></pre></div>
+<span><span class="co">#&gt; neural       0.7692308</span></span>
+<span><span class="co">#&gt; neural_glove 0.8307692</span></span>
+<span><span class="co">#&gt; ensemble     0.8000000</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="testing-decisions">Testing decisions<a class="anchor" aria-label="anchor" href="#testing-decisions"></a>
@@ -516,7 +516,7 @@ parallelize it:</p>
 <span></span>
 <span><span class="va">Model_Accuracies</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="fu"><a href="https://rdrr.io/r/parallel/clusterApply.html" class="external-link">parLapply</a></span><span class="op">(</span><span class="va">cl</span>, <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">i</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="co"># reload packages each time</span></span>
-<span>  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/miserman/lingmatch" class="external-link">lingmatch</a></span><span class="op">)</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://miserman.github.io/lingmatch/">lingmatch</a></span><span class="op">)</span></span>
 <span>  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/majkamichal/naivebayes" class="external-link">naivebayes</a></span><span class="op">)</span></span>
 <span>  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/bethatkinson/rpart" class="external-link">rpart</a></span><span class="op">)</span></span>
 <span>  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/topepo/caret/" class="external-link">caret</a></span><span class="op">)</span></span>
@@ -554,9 +554,9 @@ parallelize it:</p>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>Average <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums-methods.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">Model_Accuracies</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;         Average</span></span>
-<span><span class="co">#&gt; terms 0.6776923</span></span>
-<span><span class="co">#&gt; bayes 0.7212308</span></span>
-<span><span class="co">#&gt; dtree 0.7312308</span></span>
+<span><span class="co">#&gt; terms 0.6858462</span></span>
+<span><span class="co">#&gt; bayes 0.7301538</span></span>
+<span><span class="co">#&gt; dtree 0.7301538</span></span>
 <span><span class="co">#&gt; svm   0.7146154</span></span>
 <span><span class="fu"><a href="https://miserman.github.io/splot/reference/splot.html" class="external-link">splot</a></span><span class="op">(</span><span class="va">Model_Accuracies</span>, title <span class="op">=</span> <span class="cn">FALSE</span>, leg.title <span class="op">=</span> <span class="st">"Model"</span>, dark <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="text_classification_files/figure-html/unnamed-chunk-14-1.svg" width="864"></p>

@@ -27,7 +27,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">lingmatch</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.8</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -91,7 +91,7 @@
     
 <p>This introduction uses lingmatch to illustrate a few of the many
 branching paths of text analysis.</p>
-<p><em>Built with R 4.4.0 on April 28 2024</em></p>
+<p><em>Built with R 4.4.0 on May 03 2024</em></p>
 <hr>
 <div class="section level2">
 <h2 id="setup">Setup<a class="anchor" aria-label="anchor" href="#setup"></a>
@@ -213,7 +213,7 @@ through texts:</p>
 of processing we just walked through.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># load in the lingmatch package</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/miserman/lingmatch" class="external-link">lingmatch</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://miserman.github.io/lingmatch/">lingmatch</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">dtm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lma_dtm.html">lma_dtm</a></span><span class="op">(</span><span class="va">text</span>, sparse <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">dtm</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span></span>

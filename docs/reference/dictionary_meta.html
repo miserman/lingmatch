@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">lingmatch</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.8</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -176,11 +176,131 @@ averaged category vector rather than all category terms separately.</p></dd>
 <span class="r-in"><span>  <span class="fu">dictionary_meta</span><span class="op">(</span><span class="va">dict</span>, space_dir <span class="op">=</span> <span class="st">"~/Latent Semantic Spaces"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> preparing terms (0)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> expanding terms (1.09)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> loading space (1.26)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> calculating term similarities (2.78)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> preparing results (2.78)</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in FUN(X[[i]], ...):</span> object 'pairwise' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> expanding terms (1.2)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> loading space (1.37)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> calculating term similarities (2.92)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> preparing results (2.94)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> done (2.94)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $expanded</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $expanded$furniture</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "table"        "chair"        "desk-top"     "desk"         "desking"     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [6] "deskpro"      "deskilled"    "desktop"      "desktops"     "desks"       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [11] "deskjet"      "deskbound"    "deskins"      "deskilling"   "desker"      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [16] "deskside"     "deskstar"     "couchdb"      "couchant"     "couchsurfing"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [21] "couche"       "couchette"    "couchman"     "couching"     "couched"     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [26] "coucher"      "couches"      "couch"        "sofaer"       "sofabed"     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [31] "sofala"       "sofas"        "sofar"        "sofa"        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $expanded$well_adjusted</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "happy"         "bright-eyed"   "brightmail"    "brightcove"   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5] "brightling"    "brightnesses"  "brightwater"   "brightpoint"  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9] "brightstar"    "brightwell"    "brighter"      "brighton"     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [13] "brightfield"   "brightest"     "brightwork"    "brighten"     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [17] "brightside"    "brightly"      "brightness"    "brightening"  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [21] "brightened"    "brightwood"    "brighthouse"   "brightman"    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [25] "brightlingsea" "bright"        "brights"       "brightens"    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [29] "friendz"       "friendlies"    "friend"        "friendly"     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [33] "friendfeed"    "friendswood"   "friendliness"  "friendster"   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [37] "friendship"    "friends"       "friendlier"    "friendliest"  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [41] "friendless"    "friendships"   "friended"      "friending"    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [45] "she"           "he"            "they"         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $summary</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                    category n_terms n_expanded   sim.space     sim.min</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> furniture         furniture       5         34 glove_crawl -0.03352657</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> well_adjusted well_adjusted       6         47 glove_crawl -0.01389545</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   sim.q1 sim.median   sim.mean     sim.q3   sim.max</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> furniture     0.01484553 0.03518088 0.05212709 0.08518134 0.1520343</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> well_adjusted 0.01743533 0.07671837 0.08098433 0.13679356 0.1828150</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $terms</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           category    term         match      sim.term sim.category</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1        furniture   table         table  1.000000e+00  0.520288056</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2        furniture   chair         chair  1.000000e+00  0.643952092</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3        furniture   desk*      desk-top  2.175893e-01  0.019619600</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3.1      furniture   desk*          desk  1.000000e+00  0.543019756</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3.2      furniture   desk*       desking  2.288528e-01  0.214574317</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3.3      furniture   desk*       deskpro  6.674267e-02 -0.029996732</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3.4      furniture   desk*     deskilled -4.967378e-02 -0.139120978</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3.5      furniture   desk*       desktop  4.811437e-01  0.196892375</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3.6      furniture   desk*      desktops  2.660376e-01  0.120308960</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3.7      furniture   desk*         desks  7.055135e-01  0.488119728</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3.8      furniture   desk*       deskjet  6.666372e-02  0.014096537</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3.9      furniture   desk*     deskbound -3.295457e-02  0.040480064</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3.10     furniture   desk*       deskins -7.416633e-02 -0.093441679</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3.11     furniture   desk*    deskilling -1.111884e-01 -0.127046688</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3.12     furniture   desk*        desker -8.782659e-02 -0.101063485</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3.13     furniture   desk*      deskside  1.018355e-01 -0.018340077</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3.14     furniture   desk*      deskstar  3.228949e-02 -0.077787116</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4        furniture  couch*       couchdb  8.856923e-02  0.047978957</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4.1      furniture  couch*      couchant  4.002281e-02  0.002155885</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4.2      furniture  couch*  couchsurfing  1.159810e-01  0.046172189</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4.3      furniture  couch*        couche  5.873038e-02  0.043086733</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4.4      furniture  couch*     couchette  1.557117e-01  0.138566945</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4.5      furniture  couch*      couchman  3.607044e-03  0.020909713</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4.6      furniture  couch*      couching  9.778941e-02  0.025603836</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4.7      furniture  couch*       couched  8.911655e-03 -0.023141308</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4.8      furniture  couch*       coucher  5.448386e-02  0.136451238</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4.9      furniture  couch*       couches  6.149996e-01  0.642776428</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4.10     furniture  couch*         couch  1.000000e+00  0.777768308</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5        furniture   sofa*        sofaer -1.746807e-01 -0.174680728</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5.1      furniture   sofa*       sofabed  4.930534e-01  0.493053388</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5.2      furniture   sofa*        sofala -1.683102e-02 -0.016831021</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5.3      furniture   sofa*         sofas  7.376998e-01  0.737699759</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5.4      furniture   sofa*         sofar -9.499185e-02 -0.094991854</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5.5      furniture   sofa*          sofa  1.000000e+00  1.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6    well_adjusted   happy         happy  1.000000e+00  0.668987316</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7    well_adjusted bright*   bright-eyed  2.423866e-01  0.007577284</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7.1  well_adjusted bright*    brightmail -7.953414e-02 -0.103623466</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7.2  well_adjusted bright*    brightcove -2.638364e-02 -0.020390810</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7.3  well_adjusted bright*    brightling -4.155437e-02 -0.049855680</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7.4  well_adjusted bright*  brightnesses  9.780009e-02 -0.107159578</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7.5  well_adjusted bright*   brightwater -1.177716e-01 -0.073448621</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7.6  well_adjusted bright*   brightpoint -1.143870e-01 -0.124154393</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7.7  well_adjusted bright*    brightstar  4.630735e-02 -0.071935486</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7.8  well_adjusted bright*    brightwell -3.234350e-03 -0.043479127</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7.9  well_adjusted bright*      brighter  6.335578e-01  0.203012712</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7.10 well_adjusted bright*      brighton  2.579316e-01  0.319441300</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7.11 well_adjusted bright*   brightfield  4.749668e-02 -0.059751944</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7.12 well_adjusted bright*     brightest  5.378596e-01  0.223565471</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7.13 well_adjusted bright*    brightwork -2.986911e-02 -0.020519883</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7.14 well_adjusted bright*      brighten  4.917114e-01  0.258820016</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7.15 well_adjusted bright*    brightside  8.110498e-02  0.011232105</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7.16 well_adjusted bright*      brightly  7.098957e-01  0.173942116</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7.17 well_adjusted bright*    brightness  5.076152e-01  0.113206864</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7.18 well_adjusted bright*   brightening  2.915817e-01  0.048249708</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7.19 well_adjusted bright*    brightened  3.989190e-01  0.144605826</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7.20 well_adjusted bright*    brightwood -5.574753e-02 -0.023598381</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7.21 well_adjusted bright*   brighthouse  1.314844e-02  0.001678741</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7.22 well_adjusted bright*     brightman -7.511471e-03  0.064558972</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7.23 well_adjusted bright* brightlingsea -9.688023e-02 -0.031468955</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7.24 well_adjusted bright*        bright  1.000000e+00  0.357651252</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7.25 well_adjusted bright*       brights  3.541581e-01  0.092125277</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7.26 well_adjusted bright*     brightens  3.503756e-01  0.066159802</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8    well_adjusted friend*       friendz  1.395804e-01  0.224113174</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8.1  well_adjusted friend*    friendlies -5.471498e-05  0.135094430</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8.2  well_adjusted friend*        friend  1.000000e+00  0.815147799</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8.3  well_adjusted friend*      friendly  4.840347e-01  0.518355797</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8.4  well_adjusted friend*    friendfeed  1.858389e-01  0.252301316</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8.5  well_adjusted friend*   friendswood  4.390444e-04  0.043916231</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8.6  well_adjusted friend*  friendliness  1.435103e-01  0.207111231</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8.7  well_adjusted friend*    friendster  2.560383e-01  0.302085908</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8.8  well_adjusted friend*    friendship  5.350424e-01  0.613310672</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8.9  well_adjusted friend*       friends  8.151478e-01  1.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8.10 well_adjusted friend*    friendlier  1.157377e-01  0.184342733</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8.11 well_adjusted friend*   friendliest  1.380033e-01  0.215251090</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8.12 well_adjusted friend*    friendless  1.296303e-01  0.162746245</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8.13 well_adjusted friend*   friendships  3.297935e-01  0.518973621</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8.14 well_adjusted friend*      friended  1.958729e-01  0.259071536</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8.15 well_adjusted friend*     friending  1.462934e-01  0.225425703</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9    well_adjusted     she           she  1.000000e+00  0.565640744</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10   well_adjusted      he            he  1.000000e+00  0.534147512</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11   well_adjusted    they          they  1.000000e+00  0.607023614</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $suggested</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
