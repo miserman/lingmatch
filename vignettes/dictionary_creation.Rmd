@@ -2,9 +2,6 @@
 title: "Introduction to Dictionary Creation"
 editor_options: 
   chunk_output_type: console
-output:
-  html_document:
-    toc_depth: 3
 ---
 
 ```{r, include = FALSE}

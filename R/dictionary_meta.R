@@ -59,7 +59,9 @@ dictionary_meta <- function(
   if (is.null(names(dict))) names(dict) <- paste0("cat", seq_along(dict))
   st <- proc.time()[[3]]
   if (verbose) cat("preparing terms (", round(proc.time()[[3]] - st, 4), ")\n", sep = "")
-  terms <- data.frame(category = rep(names(dict), vapply(dict, length, 0)), term = unlist(dict))
+  terms <- data.frame(
+    category = rep(names(dict), vapply(dict, length, 0)), term = unlist(dict), stringsAsFactors = FALSE
+  )
   rownames(terms) <- NULL
   terms$regex <- paste0("\\b", to_regex(list(terms$term), TRUE, glob)[[1]], "\\b")
   if (is.character(space)) {
@@ -76,7 +78,11 @@ dictionary_meta <- function(
     if (expand_cutoff_spaces > 0 && expand_cutoff_spaces < ncol(term_map)) {
       term_map <- term_map[rowSums(term_map != 0) >= expand_cutoff_spaces, , drop = FALSE]
     }
-    if (space[[1]] %in% colnames(term_map)) term_map <- term_map[term_map[, space[[1]]] != 0, drop = FALSE]
+    if (!grepl("^(?:auto|multi)", space[[1]], TRUE)) {
+      space <- space[space %in% colnames(term_map)]
+      if (!length(space)) stop("`space` not found in `term_map` colnames", call. = FALSE)
+      term_map <- term_map[rowSums(term_map[, space, drop = FALSE] != 0) != 0, , drop = FALSE]
+    }
     space_terms <- rownames(term_map)
   } else {
     space_terms <- rownames(space)
@@ -90,6 +96,7 @@ dictionary_meta <- function(
   if (verbose) cat("expanding terms (", round(proc.time()[[3]] - st, 4), ")\n", sep = "")
   matches <- extract_matches(terms$regex, paste(space_terms, collapse = "  "), TRUE)
   matched_terms <- unique(unlist(lapply(matches, names), use.names = FALSE))
+  if (!length(matched_terms)) stop("no `dict` terms matched any space terms", call. = FALSE)
   multi <- FALSE
   if (is.character(space)) {
     if (length(space) == 1 && !missing(n_spaces) && n_spaces > 1) space <- "multi"
@@ -103,8 +110,9 @@ dictionary_meta <- function(
           seq_len(max(1, min(nrow(term_map), n_spaces)))
         ]
       }
+      multi <- TRUE
       term_map <- term_map[, space, drop = FALSE]
-      space_terms <- matched_terms <- rownames(term_map)[rowSums(term_map != 0) == length(space)]
+      space_terms <- rownames(term_map)[rowSums(term_map != 0) == length(space)]
       space_name <- paste(space, collapse = ", ")
       if (verbose) cat("loading spaces (", round(proc.time()[[3]] - st, 4), ")\n", sep = "")
       space <- lapply(space, function(s) {
@@ -132,6 +140,7 @@ dictionary_meta <- function(
       matched_terms <- unique(unlist(lapply(matches, names), use.names = FALSE))
     }
   } else {
+    if (is.data.frame(space)) space <- as.matrix(space)
     space_name <- "custom"
   }
   cat_names <- structure(names(dict), names = names(dict))
@@ -139,13 +148,14 @@ dictionary_meta <- function(
     unique(names(unlist(matches[terms$category == cat])))
   })
   if (multi) {
-    space <- lapply(space, function(s) as(s, "CsparseMatrix"))
     if (!suggest) space_terms <- rownames(space[[1]])
     if (verbose) cat("calculating term similarities (", round(proc.time()[[3]] - st, 4), ")\n", sep = "")
     sims <- lapply(cat_names, function(cat) {
       su <- space_terms %in% dict_exp[[cat]]
       if (any(su)) {
-        Reduce("+", lapply(space, function(s) {
+        aggsim <- NULL
+        for (i in seq_along(space)) {
+          s <- space[[i]]
           if (dimension_prop < 1) {
             loadings <- colMeans(s[su, , drop = FALSE])
             dsu <- order(-loadings)[seq(1, max(1, ceiling(ncol(s) * dimension_prop)))]
@@ -153,17 +163,22 @@ dictionary_meta <- function(
           }
           if (pairwise) {
             sim <- lma_simets(s, s[su, ], metric = "cosine", pairwise = TRUE, symmetrical = TRUE)
-            if (is.null(dim(sim))) sim <- t(t(sim))
-            diag(sim[su, ]) <- 0
+            if (is.null(dim(sim))) sim <- as(t(t(sim)), "CsparseMatrix")
+            diag(sim[su, , drop = FALSE]) <- 0
             ms <- min(sim)
             sim <- (sim - ms) / (max(sim) - ms) * sign(sim)
-            diag(sim[su, ]) <- 1
+            diag(sim[su, , drop = FALSE]) <- 1
           } else {
             sim <- lma_simets(s, colMeans(s[su, , drop = FALSE]), metric = "cosine", pairwise = TRUE, symmetrical = TRUE)
-            if (is.null(dim(sim))) sim <- t(t(sim))
           }
-          sim
-        })) / length(space)
+          if (i == 1) {
+            aggsim <- sim
+          } else {
+            aggsim <- aggsim + sim
+          }
+        }
+        if (is.null(dim(aggsim))) aggsim <- as(t(t(aggsim)), "CsparseMatrix")
+        aggsim / length(space)
       }
     })
   } else {
@@ -172,18 +187,19 @@ dictionary_meta <- function(
     if (verbose) cat("calculating term similarities (", round(proc.time()[[3]] - st, 4), ")\n", sep = "")
     sims <- lapply(cat_names, function(cat) {
       su <- space_terms %in% dict_exp[[cat]]
-      if (dimension_prop < 1) {
-        loadings <- colSums(space[su, , drop = FALSE])
-        dsu <- order(loadings, decreasing = TRUE)[seq(1, max(1, ceiling(ncol(space) * dimension_prop)))]
-        space <- space[, dsu, drop = FALSE]
+      if (any(su)) {
+        if (dimension_prop < 1) {
+          loadings <- colSums(space[su, , drop = FALSE])
+          dsu <- order(loadings, decreasing = TRUE)[seq(1, max(1, ceiling(ncol(space) * dimension_prop)))]
+          space <- space[, dsu, drop = FALSE]
+        }
+        sim <- lma_simets(
+          space, if (pairwise) space[su, , drop = FALSE] else colMeans(space[su, , drop = FALSE]),
+          metric = "cosine", pairwise = TRUE, symmetrical = TRUE
+        )
+        if (is.null(dim(sim))) sim <- as(t(t(sim)), "CsparseMatrix")
+        sim
       }
-      sim <- lma_simets(space, if (pairwise) {
-        space[su, , drop = FALSE]
-      } else {
-        colMeans(space[su, , drop = FALSE])
-      }, metric = "cosine", pairwise = TRUE, symmetrical = TRUE)
-      if (is.null(dim(sim))) sim <- t(t(sim))
-      sim
     })
   }
   if (suggest) {
@@ -191,7 +207,9 @@ dictionary_meta <- function(
     if (!suggest_stopwords) is_stop <- lma_dict(as.function = TRUE)
     full_loadings <- do.call(cbind, lapply(sims, function(x) {
       if (length(x)) {
-        rowMeans(x)
+        agg <- rowMeans(x)
+        agg[agg < 0] <- 0
+        agg
       } else {
         structure(numeric(length(space_terms)), names = space_terms)
       }
@@ -201,7 +219,7 @@ dictionary_meta <- function(
       s <- sims[[cat]]
       if (length(s)) {
         su <- !rownames(s) %in% dict_exp[[cat]] & loading_cat == cat
-        loadings <- sort(if (suggest_discriminate) {
+        loadings <- sort(if (suggest_discriminate && ncol(full_loadings) > 1) {
           nl <- full_loadings[su, colnames(full_loadings) != cat, drop = FALSE]
           (rowMeans(s[su, , drop = FALSE]) - nl[
             rep(seq_len(ncol(nl)), each = nrow(nl)) == max.col(nl)
@@ -209,9 +227,11 @@ dictionary_meta <- function(
         } else {
           rowMeans(s[su, , drop = FALSE])
         }, TRUE)
-        if (!suggest_stopwords) loadings <- loadings[!is_stop(names(loadings))]
-        co <- min(length(loadings), max(which(loadings > 0)), suggestion_terms)
-        loadings[loadings > loadings[co] + Reduce("-", range(loadings[seq(1, co)])) / 2]
+        if (length(loadings)) {
+          if (!suggest_stopwords) loadings <- loadings[!is_stop(names(loadings))]
+          co <- min(length(loadings), max(which(loadings > 0)), suggestion_terms)
+          loadings[loadings > loadings[co] + Reduce("-", range(loadings[seq(1, co)])) / 2]
+        }
       }
     })
   }
@@ -219,7 +239,8 @@ dictionary_meta <- function(
   match_counts <- vapply(matches, length, 0)
   term_summary <- data.frame(
     terms[rep(seq_len(nrow(terms)), match_counts), c("category", "term")],
-    match = unlist(lapply(matches, names))
+    match = unlist(lapply(matches, names)),
+    stringsAsFactors = FALSE
   )
   term_summary <- cbind(term_summary, do.call(rbind, lapply(
     split(
@@ -233,25 +254,40 @@ dictionary_meta <- function(
       } else {
         su <- space_terms %in% dict_exp[[cat]]
         if (multi) {
-          s <- Reduce("+", lapply(space, function(s) {
-            sim <- lma_simets(s[su, , drop = FALSE], metric = "cosine", pairwise = TRUE, symmetrical = TRUE)
-            if (is.null(dim(sim))) sim <- t(t(sim))
-            diag(sim) <- 0
-            ms <- min(sim)
-            sim <- (sim - ms) / (max(sim) - ms) * sign(sim)
-            diag(sim) <- 1
-            sim
-          })) / length(space)
+          aggsim <- NULL
+          for (i in seq_along(space)) {
+            s <- space[[i]]
+            if (sum(su) == 1) {
+              sim <- Matrix(1, 1, dimnames = as.list(rep(rownames(s)[su], 2)), sparse = TRUE)
+            } else {
+              sim <- lma_simets(s[su, , drop = FALSE], metric = "cosine", pairwise = TRUE, symmetrical = TRUE)
+              if (is.null(dim(sim))) sim <- as(t(t(sim)), "CsparseMatrix")
+              diag(sim) <- 0
+              ms <- min(sim)
+              sim <- (sim - ms) / (max(sim) - ms) * sign(sim)
+              diag(sim) <- 1
+            }
+            if (i == 1) {
+              aggsim <- sim
+            } else {
+              aggsim <- aggsim + sim
+            }
+          }
+          s <- aggsim / length(space)
         } else {
           s <- lma_simets(space[su, , drop = FALSE], metric = "cosine", pairwise = TRUE, symmetrical = TRUE)
         }
-        if (is.null(dim(s))) s <- t(t(s))
       }
       if (is.null(s)) {
         cbind(sim.term = cl$match, sim.category = 0)
       } else {
         su <- !(cl$match %in% rownames(s))
-        if (any(su)) s <- rbind(s, Matrix(0, sum(su), ncol(s), dimnames = list(cl$match[su], colnames(s))))
+        if (any(su)) {
+          s <- rbind(s, Matrix(
+            0, sum(su), ncol(s),
+            dimnames = list(cl$match[su], colnames(s)), sparse = TRUE
+          ))
+        }
         term_sims <- unlist(lapply(unname(split(cl$match, cl$term)[unique(cl$term)]), function(l) {
           if (length(l) == 1) {
             structure(1, names = l)
@@ -260,7 +296,13 @@ dictionary_meta <- function(
             s[l, cols[which.min(nchar(cols))]]
           }
         }))
-        cat_sims <- s[cl$match, which.max(if (is.null(dim(s))) s else colMeans(s[colnames(s), , drop = FALSE]))]
+        cat_sims <- s[cl$match, which.max(if (is.null(dim(s))) {
+          s
+        } else if (ncol(s) == 1) {
+          1
+        } else {
+          colMeans(s[colnames(s), , drop = FALSE])
+        })]
         cbind(sim.term = term_sims, sim.category = if (is.null(cat_sims)) 0 else cat_sims)
       }
     }
@@ -269,7 +311,8 @@ dictionary_meta <- function(
     category = cat_names,
     n_terms = vapply(dict, length, 0),
     n_expanded = tapply(match_counts, terms$category, sum)[cat_names],
-    sim.space = space_name
+    sim.space = space_name,
+    stringsAsFactors = FALSE
   ), sim = do.call(rbind, lapply(sims, function(s) {
     if (length(s) && !is.null(ncol(s)) && ncol(s) == 1) {
       m <- s[matched_terms, 1]
