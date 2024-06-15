@@ -6,7 +6,10 @@ texts <- vapply(seq_len(50), function(d) {
   paste0(sample(words, sample(100, 1), TRUE), collapse = " ")
 }, "")
 textsfile <- tempfile(fileext = ".csv")
-write(do.call(paste, list(c("id", seq_along(texts)), c("text", texts), sep = ",")), textsfile, sep = ",")
+write.csv(data.frame(
+  id = seq_along(texts),
+  text = texts
+), textsfile, row.names = FALSE)
 txtfile <- tempfile(fileext = ".txt")
 writeLines(texts, txtfile)
 dtm <- lma_dtm(texts)
@@ -53,7 +56,7 @@ test_that("different input formats have the same results (comp)", {
   )$sim), manual)
   expect_equal(
     as.numeric(lingmatch(dtm[-(1:10), -1], dtm[1:10, ])$sim),
-    as.numeric(lma_simets(cbind(0, dtm[-(1:10), -1]), dtm[1:10, ], metric = "cosine"))
+    as.numeric(lma_simets(dtm[-(1:10), -1], dtm[1:10, ], metric = "cosine"))
   )
 })
 
@@ -146,6 +149,24 @@ test_that("index/logical comparisons work", {
   )
 })
 
+test_that("comp is handled as expected", {
+  data <- data.frame(
+    group = rep(letters[1:3], each = 3),
+    x1 = rnorm(9),
+    x2 = rnorm(9)
+  )
+  expect_error(lingmatch(data[, -1], comp = "group"), "`comp` not recognized")
+  all_groups <- lingmatch(
+    data[, -1], do.call(rbind, tapply(data[, -1], data$group, colMeans)),
+    metric = "canberra"
+  )
+  within_groups <- lingmatch(
+    data[, -1],
+    group = "group", data = data, metric = "canberra"
+  )
+  expect_identical(diag(all_groups$sim[, data$group]), within_groups$sim$canberra)
+})
+
 test_that("group comparisons work", {
   wdtm <- lma_weight(dtm, percent = TRUE)
   cdtm <- lma_termcat(wdtm)
@@ -184,7 +205,7 @@ test_that("group comparisons work", {
     dtm,
     group = group_data, type = "lsm", all.levels = TRUE
   )$sim$g1_canberra), g1)
-  # debugonce(lingmatch)
+
   g1_2p <- lingmatch(dtm, "pair", group = cbind(groups, subgroups), type = "lsm", mean = FALSE)$sim
   for (s in names(g1_2p)) {
     expect_identical(

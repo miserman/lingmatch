@@ -189,6 +189,7 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
   })
   names(dsp) <- c("p", "w", "m", "c", "s")
   # fetches input from data or environment
+  parent_frame <- parent.frame(1)
   gv <- function(a, data = NULL) {
     ta <- a
     if (is.character(a)) {
@@ -196,9 +197,9 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
         return(unlist(data[, a]))
       } else if (length(ta) == 1 || !any(grepl(" ", a, fixed = TRUE))) ta <- parse(text = a)
     }
-    ta <- tryCatch(eval(ta, parent.frame(2)), error = function(e) NULL)
+    ta <- tryCatch(eval(ta, parent_frame), error = function(e) NULL)
     if (!length(ta) || (!is.null(dim(ta)) && !dim(ta)[1])) {
-      ta <- tryCatch(eval(a, data, parent.frame(2)), error = function(e) NULL)
+      ta <- tryCatch(eval(a, data, parent_frame), error = function(e) NULL)
       if (!length(ta) || (!is.null(dim(ta)) && !dim(ta)[1])) {
         ta <- tryCatch(eval(a, globalenv()), error = function(e) NULL)
         if (is.null(ta)) {
@@ -237,9 +238,9 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
   # weight, categorize, and/or map
   wmc <- function(a) {
     if (!is.null(colnames(a)) || (length(dsp$c) == 0 && length(dsp$m) == 0)) {
-      if (length(dsp$w) != 0) a <- do.call(lma_weight, c(list(a), lapply(dsp$w, eval, parent.frame(2))))
-      if (length(dsp$c) != 0) a <- do.call(lma_termcat, c(list(a), lapply(dsp$c, eval, parent.frame(2))))
-      if (length(dsp$m) != 0) a <- do.call(lma_lspace, c(list(a), lapply(dsp$m, eval, parent.frame(2))))
+      if (length(dsp$w) != 0) a <- do.call(lma_weight, c(list(a), lapply(dsp$w, eval, parent_frame)))
+      if (length(dsp$c) != 0) a <- do.call(lma_termcat, c(list(a), lapply(dsp$c, eval, parent_frame)))
+      if (length(dsp$m) != 0) a <- do.call(lma_lspace, c(list(a), lapply(dsp$m, eval, parent_frame)))
     }
     a
   }
@@ -260,18 +261,23 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
       call. = FALSE
     )
   }
-  if (missing(data)) data <- input
-  input <- if (is.character(input) && all(input %in% colnames(data))) data[, input] else gd(opt$input, data)
+  if (missing(data)) {
+    data <- input
+    if (is.character(input)) input <- gd(opt$input)
+  } else {
+    input <- if (is.character(input) && all(input %in% colnames(data))) data[, input] else gd(opt$input, data)
+  }
   if (!missing(group) && is.data.frame(input)) input <- as.matrix(input[, vapply(input, is.numeric, TRUE)])
   rx <- NROW(input)
   # comp
-  if (!missing(comp)) {
+  comp_missing <- missing(comp)
+  if (!comp_missing) {
     comp <- gd(opt$comp, if (missing(comp.data)) if (is.call(opt$comp)) NULL else data else comp.data)
     if (!missing(comp.data) && is.character(comp) && all(comp %in% colnames(comp.data))) comp <- comp.data[, comp]
     if (!missing(data) && is.character(comp) && all(comp %in% colnames(data))) comp <- data[, comp]
     if (is.logical(comp)) comp <- which(comp)
     if (missing(comp.data) && !is.null(colnames(comp))) comp.data <- comp
-  } else if (missing(comp) && missing(group) && missing(comp.data) && missing(comp.group)) {
+  } else if (comp_missing && missing(group) && missing(comp.data) && missing(comp.group)) {
     opt$comp <- comp <- "pairwise"
   } else {
     opt$comp <- "mean"
@@ -304,7 +310,7 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
       if (any(!ck)) dn <- dn[ck]
       input <- input[, dn]
       do.wmc <- FALSE
-      if (!missing(comp) && any(class(comp) %in% c("matrix", "data.frame")) && all(dn %in% colnames(comp))) {
+      if (!comp_missing && any(class(comp) %in% c("matrix", "data.frame")) && all(dn %in% colnames(comp))) {
         comp <- comp[, dn]
       }
     }
@@ -442,16 +448,8 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
   cr <- nrow(comp)
   cn <- colnames(comp)
   if (!is.null(cn)) {
-    cc <- 1
-    nn <- cn[!cn %in% colnames(input)]
-    if (length(nn) != 0) {
-      input <- cbind(
-        input, matrix(0, nrow(input), length(nn), dimnames = list(NULL, nn))
-      )
-    }
-    input <- rbind(matrix(0, cr, ncol(input), dimnames = list(NULL, colnames(input))), input)
-    input[seq_len(cr), cn] <- as.matrix(comp[seq_len(cr), ])
-    comp <- seq_len(cr)
+    cc <- 0
+    comp.data <- comp
   }
   if (drop) {
     if (sum(su <- colSums(input, na.rm = TRUE) != 0) != 0) {
@@ -488,8 +486,8 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
       opt$comp <- paste("auto:", names(p))
       ckp <- TRUE
       comp.data <- lsm_profiles[p, , drop = FALSE]
-    } else {
-      opt$comp <- substitute(comp)
+    } else if (!comp_missing) {
+      stop("`comp` not recognized", call. = FALSE)
     }
     if (ckp) {
       if (any(ckp <- !(cn <- colnames(input)) %in% (bn <- colnames(comp.data)))) {

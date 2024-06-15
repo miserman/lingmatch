@@ -153,7 +153,7 @@ lma_process(
 
 ## Coverage
 
-The `furniture` and `well_adjusted` categories introduces two main additional considerations:
+The `furniture` and `well_adjusted` categories introduce two main additional considerations:
 
 ### Term Variants
 

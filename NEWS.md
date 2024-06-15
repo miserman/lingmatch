@@ -1,3 +1,8 @@
+# version 1.0.8
+
+### Improvements
+* Improves input resolution.
+
 # version 1.0.7
 
 ### Features
@@ -51,7 +56,7 @@
 
 # version 1.0.2
 
-## Features
+### Features
 * Adds options to specify term and category names in `read.dic`.
 * Adds an option to remove unmatched categories or terms in `lma_patcat`.
 

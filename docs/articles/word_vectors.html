@@ -91,7 +91,7 @@
     
 <p>Introduces the concept of word vectors and their use in measures of
 text similarity.</p>
-<p><em>Built with R 4.4.0 on May 03 2024</em></p>
+<p><em>Built with R 4.4.1 on June 15 2024</em></p>
 <hr>
 <p>A vector in this context is any set of values that represent one
 thing, so word vectors are fundamental to a bag-of-words framework.
@@ -160,8 +160,9 @@ we can see which animals co-occur with different attributes:</p>
 <span><span class="co">#&gt; frogs     0.75 0.25</span></span>
 <span><span class="co">#&gt; horses    0.25 0.75</span></span>
 <span><span class="co">#&gt; small     1.00 0.00</span></span>
-<span><span class="co">#&gt; whales    0.25 0.75</span></span>
-<span></span>
+<span><span class="co">#&gt; whales    0.25 0.75</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
 <span><span class="co"># note that dark = TRUE makes the text white, so you might need to remove it</span></span>
 <span><span class="fu"><a href="https://miserman.github.io/splot/reference/splot.html" class="external-link">splot</a></span><span class="op">(</span></span>
 <span>  <span class="va">attribute_loadings</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span> <span class="op">~</span> <span class="va">attribute_loadings</span><span class="op">[</span>, <span class="fl">2</span><span class="op">]</span>,</span>
@@ -177,7 +178,7 @@ we can see which animals co-occur with different attributes:</p>
 collapsed vectors—instead of corresponding to documents, columns in this
 new space represent attributes. These new vectors can then be used to
 make document comparisons more flexible.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># documents are already similar as expected</span></span>
 <span><span class="co"># (with 1 &lt;-&gt; 2 and 3 &lt;-&gt; 4 being more, the rest less similar)</span></span>
 <span><span class="co"># due to their overlap in the attribute words</span></span>
@@ -187,8 +188,9 @@ make document comparisons more flexible.</p>
 <span><span class="co">#&gt; [1,] I         .         .         .</span></span>
 <span><span class="co">#&gt; [2,] 0.7142857 I         .         .</span></span>
 <span><span class="co">#&gt; [3,] 0.4285714 0.4285714 I         .</span></span>
-<span><span class="co">#&gt; [4,] 0.4285714 0.4285714 0.7142857 I</span></span>
-<span></span>
+<span><span class="co">#&gt; [4,] 0.4285714 0.4285714 0.7142857 I</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
 <span><span class="co"># but mapping them to the attribute space</span></span>
 <span><span class="co"># (dtm %*% space, forming a Document-Dimension Matrix)</span></span>
 <span><span class="op">(</span><span class="va">ddm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lma_lspace.html">lma_lspace</a></span><span class="op">(</span><span class="va">dtm</span>, space <span class="op">=</span> <span class="va">attribute_loadings</span><span class="op">)</span><span class="op">)</span></span>
@@ -197,8 +199,9 @@ make document comparisons more flexible.</p>
 <span><span class="co">#&gt; [1,]  2.25 0.75</span></span>
 <span><span class="co">#&gt; [2,]  2.25 0.75</span></span>
 <span><span class="co">#&gt; [3,]  0.75 2.25</span></span>
-<span><span class="co">#&gt; [4,]  0.75 2.25</span></span>
-<span></span>
+<span><span class="co">#&gt; [4,]  0.75 2.25</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
 <span><span class="co"># the similarity between animal words can also contribute</span></span>
 <span><span class="fu"><a href="../reference/lma_simets.html">lma_simets</a></span><span class="op">(</span><span class="va">ddm</span>, <span class="st">"canberra"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; 4 x 4 sparse Matrix of class "dtCMatrix" (unitriangular)</span></span>
@@ -240,7 +243,7 @@ Pointwise Mutual Information schemes), and has stop words removed
 documents), then mapped to a Singular Value Decomposition space, and
 similarity is measured by cosine similarity. These settings are default
 for the <code>'lsa'</code> type (using the “100k_lsa” space):</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/lingmatch.html">lingmatch</a></span><span class="op">(</span><span class="va">texts</span>, type <span class="op">=</span> <span class="st">"lsa"</span><span class="op">)</span><span class="op">$</span><span class="va">sim</span></span>
 <span><span class="co">#&gt; 4 x 4 sparse Matrix of class "dtCMatrix" (unitriangular)</span></span>
 <span><span class="co">#&gt;                                    </span></span>
@@ -252,7 +255,7 @@ for the <code>'lsa'</code> type (using the “100k_lsa” space):</p>
 removed, but might then be frequency weighted (normalized), mapped to a
 word2vec space, and have distances measured by Euclidean distance (which
 is inverted here for similarity):</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/lingmatch.html">lingmatch</a></span><span class="op">(</span></span>
 <span>  <span class="va">texts</span>,</span>
 <span>  exclude <span class="op">=</span> <span class="st">"function"</span>, weight <span class="op">=</span> <span class="st">"freq"</span>,</span>
@@ -282,7 +285,7 @@ the terms that appear in your set of texts. You can do this without
 downloading all spaces by looking at the <a href="https://osf.io/yauzm" class="external-link">common term map</a>, which is what the
 <code>select.lspace</code> function does when terms are entered as the
 first argument:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># some relatively rare terms for their formatting or narrow uses</span></span>
 <span><span class="va">terms</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"part-time"</span>, <span class="st">"i/o"</span>, <span class="st">"'cause"</span>, <span class="st">"brexit"</span>, <span class="st">"debuffs"</span><span class="op">)</span></span>
 <span></span>
@@ -307,7 +310,7 @@ similarities between words of particular interest. In our initial set of
 texts, for example, we were looking at animals in relation to
 attributes, so we might look at those relationships in whatever spaces
 you’ve downloaded:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># retrieve names of downloaded spaces</span></span>
 <span><span class="va">space_names</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span><span class="st">"\\..*$"</span>, <span class="st">""</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="st">"~/Latent Semantic Spaces"</span>, <span class="st">"dat"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -344,8 +347,9 @@ you’ve downloaded:</p>
 <span><span class="co">#&gt; horses &lt;-&gt; big     0.2848507</span></span>
 <span><span class="co">#&gt; whales &lt;-&gt; big     0.2696833</span></span>
 <span><span class="co">#&gt; crickets &lt;-&gt; frogs 0.4812112</span></span>
-<span><span class="co">#&gt; whales &lt;-&gt; horses  0.3230661</span></span>
-<span></span>
+<span><span class="co">#&gt; whales &lt;-&gt; horses  0.3230661</span></span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
 <span><span class="co"># retrieve the attribute similarities in the best space</span></span>
 <span><span class="va">sims_best</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span></span>
 <span>  smallness <span class="op">=</span> <span class="va">similarities</span><span class="op">[</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">"small"</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">similarities</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="op">-</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>,</span>
@@ -368,7 +372,7 @@ single terms—there may be many terms that are strictly different but
 have similar meanings. With that in mind, it might also make sense to
 fuzzify target dimensions in the above example with something like
 synonym centroids or concept vectors:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># now our attributes will be sets of terms</span></span>
 <span><span class="va">concepts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  small <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"small"</span>, <span class="st">"little"</span>, <span class="st">"tiny"</span>, <span class="st">"miniscule"</span>, <span class="st">"diminutive"</span><span class="op">)</span>,</span>
@@ -414,13 +418,14 @@ something like a dictionary—sets of topics or categories containing
 associated terms. By loading in a full space (as opposed to just a
 selection of vectors, as we’ve been doing), we can look at the same
 thing in pretrained embeddings:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># load in the full "100k" space</span></span>
 <span><span class="va">lss</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lma_lspace.html">lma_lspace</a></span><span class="op">(</span><span class="st">"100k"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/structure.html" class="external-link">structure</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">lss</span><span class="op">)</span>, names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"terms"</span>, <span class="st">"dimensions"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      terms dimensions </span></span>
-<span><span class="co">#&gt;      99188        300</span></span>
-<span></span>
+<span><span class="co">#&gt;      99188        300</span></span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
 <span><span class="co"># make a function to more easily retrieve terms</span></span>
 <span><span class="va">top_terms</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">dims</span>, <span class="va">space</span>, <span class="va">nterms</span> <span class="op">=</span> <span class="fl">30</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">terms</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums-methods.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="va">space</span><span class="op">[</span>, <span class="va">dims</span>, drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span><span class="op">)</span>, <span class="cn">TRUE</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">nterms</span><span class="op">)</span><span class="op">]</span></span>
@@ -440,17 +445,17 @@ thing in pretrained embeddings:</p>
 <span><span class="co"># now we can see the top-loading terms on single dimensions</span></span>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">d</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span> <span class="fu">top_terms</span><span class="op">(</span><span class="va">d</span>, <span class="va">lss</span><span class="op">)</span></span></code></pre></div>
 <p><img src="word_vectors_files/figure-html/unnamed-chunk-10-1.svg" width="960"><img src="word_vectors_files/figure-html/unnamed-chunk-10-2.svg" width="960"><img src="word_vectors_files/figure-html/unnamed-chunk-10-3.svg" width="960"></p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># or top-loading terms on aggregated dimensions</span></span>
 <span><span class="fu">top_terms</span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="va">lss</span><span class="op">)</span></span></code></pre></div>
 <p><img src="word_vectors_files/figure-html/unnamed-chunk-10-4.svg" width="960"></p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># even across all dimensions</span></span>
 <span><span class="fu">top_terms</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">lss</span><span class="op">)</span><span class="op">)</span>, <span class="va">lss</span><span class="op">)</span></span></code></pre></div>
 <p><img src="word_vectors_files/figure-html/unnamed-chunk-10-5.svg" width="960"></p>
 <p>It can also be interesting to use a term to select dimensions to look
 at:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># this selects the 10 dimensions on which "whales" loads most</span></span>
 <span><span class="fu">top_terms</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="op">-</span><span class="va">lss</span><span class="op">[</span><span class="st">"whales"</span>, <span class="op">]</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span>, <span class="va">lss</span><span class="op">)</span></span></code></pre></div>
 <p><img src="word_vectors_files/figure-html/unnamed-chunk-11-1.svg" width="960"></p>
@@ -461,7 +466,7 @@ at:</p>
 <p>It can also be kind of interesting to think of dictionaries as forms
 of embeddings, either as binary or with weighted regions and sharp
 drop-offs:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># take a small, weighted, sexed family dictionary</span></span>
 <span><span class="va">family</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  female <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>mother <span class="op">=</span> <span class="fl">1</span>, wife <span class="op">=</span> <span class="fl">.9</span>, sister <span class="op">=</span> <span class="fl">.8</span>, grandma <span class="op">=</span> <span class="fl">.7</span>, aunt <span class="op">=</span> <span class="fl">.6</span><span class="op">)</span>,</span>
@@ -488,7 +493,7 @@ drop-offs:</p>
 <span><span class="co">#&gt; uncle      0.6      0    1</span></span></code></pre></div>
 <p>In this simple space, you can solve analogies like you can in
 pretrained spaces <span class="citation">(as in <a href="#ref-mikolov:2013">Mikolov et al., 2013</a>)</span>:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># function to abstract the process</span></span>
 <span><span class="va">guess_analog</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">asx</span>, <span class="va">space</span>, <span class="va">metric</span> <span class="op">=</span> <span class="st">"canberra"</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="../reference/lma_simets.html">lma_simets</a></span><span class="op">(</span></span>
@@ -499,8 +504,9 @@ pretrained spaces <span class="citation">(as in <a href="#ref-mikolov:2013">Miko
 <span><span class="co">## i.e., sister is to brother as aunt is to _____.</span></span>
 <span><span class="fu">guess_analog</span><span class="op">(</span><span class="st">"sister"</span>, <span class="st">"brother"</span>, <span class="st">"aunt"</span>, <span class="va">family_space</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span>
 <span><span class="co">#&gt;    uncle  grandpa  brother </span></span>
-<span><span class="co">#&gt; 1.000000 0.974359 0.952381</span></span>
-<span></span>
+<span><span class="co">#&gt; 1.000000 0.974359 0.952381</span></span></code></pre></div>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
 <span><span class="co"># compare with a pretrained space in the same restricted term set</span></span>
 <span><span class="fu">guess_analog</span><span class="op">(</span></span>
 <span>  <span class="st">"sister"</span>, <span class="st">"brother"</span>, <span class="st">"aunt"</span>,</span>

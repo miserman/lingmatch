@@ -90,7 +90,7 @@
     
     
 <p>Works through a text classification example.</p>
-<p><em>Built with R 4.4.0 on May 03 2024</em></p>
+<p><em>Built with R 4.4.1 on June 15 2024</em></p>
 <hr>
 <div class="section level2">
 <h2 id="data">Data<a class="anchor" aria-label="anchor" href="#data"></a>
@@ -129,8 +129,9 @@ performance.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">Recall</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Feminine Masculine </span></span>
-<span><span class="co">#&gt;  0.495283  0.504717</span></span>
-<span></span>
+<span><span class="co">#&gt;  0.495283  0.504717</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
 <span><span class="co"># define a train sample by drawing 70% of each class</span></span>
 <span><span class="va">classes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">Recall</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">train_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">classes</span>, <span class="kw">function</span><span class="op">(</span><span class="va">class</span><span class="op">)</span> <span class="op">{</span></span>
@@ -160,7 +161,7 @@ exclusion heuristics to help address this: Stop word removal excludes
 function words, which are high-frequency but often less meaningful
 words, and a document-count minimum excludes words that are sufficiently
 rare in the given set.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://miserman.github.io/lingmatch/">lingmatch</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># lma_dict() in the second position excludes function words</span></span>
@@ -187,7 +188,7 @@ simple as calculating differences.</p>
 frequencies) between classes to associate terms with each class. What
 results from this training is a dictionary with a category for each
 class, containing class-related terms.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># calculate differences in binary document counts (probabilities) between classes</span></span>
 <span><span class="va">feminine_texts</span> <span class="op">&lt;-</span> <span class="va">data</span><span class="op">[</span><span class="va">train_ids</span>, <span class="st">"Recall"</span><span class="op">]</span> <span class="op">==</span> <span class="st">"Feminine"</span></span>
 <span><span class="va">term_diffs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums-methods.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">dtm</span><span class="op">[</span><span class="va">feminine_texts</span>, <span class="op">]</span> <span class="op">!=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">-</span></span>
@@ -201,7 +202,7 @@ class, containing class-related terms.</p>
 <p>The dictionary contains the learned word-associations which will be
 used later to classify texts. We can inspect these for a sense of which
 terms are most important.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># words sized by frequency, colored by associated gender,</span></span>
 <span><span class="co"># and shaded by absolute difference</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://blog.fellstat.com/?cat=11" class="external-link">wordcloud</a></span><span class="op">)</span></span>
@@ -230,7 +231,7 @@ terms are most important.</p>
 </h3>
 <p>The Bernoulli Naïve Bayes classifier uses the same information, but
 will often smooth the probabilities.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/majkamichal/naivebayes" class="external-link">naivebayes</a></span><span class="op">)</span></span>
 <span><span class="va">weights_nb</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://majkamichal.github.io/naivebayes/reference/bernoulli_naive_bayes.html" class="external-link">bernoulli_naive_bayes</a></span><span class="op">(</span></span>
 <span>  <span class="op">(</span><span class="va">dtm</span> <span class="op">!=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">*</span> <span class="fl">1</span>, <span class="va">data</span><span class="op">[</span><span class="va">train_ids</span>, <span class="st">"Recall"</span><span class="op">]</span>,</span>
@@ -255,7 +256,7 @@ will often smooth the probabilities.</p>
 <p>Decision trees (learned by a recursive partitioning algorithm) are
 similar to the previous methods, but consider conditional differences in
 terms.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/bethatkinson/rpart" class="external-link">rpart</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://www.milbo.org/rpart-plot/index.html" class="external-link">rpart.plot</a></span><span class="op">)</span></span>
 <span></span>
@@ -283,7 +284,7 @@ also adds some parameter tuning.</p>
 <p>Many models also have regularizing versions available (that
 effectively select features), which is particularly useful when there
 are many features, as is often the case with text.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/topepo/caret/" class="external-link">caret</a></span><span class="op">)</span></span>
 <span><span class="va">weights_svm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/caret/man/train.html" class="external-link">train</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">dtm</span><span class="op">)</span>, <span class="va">data</span><span class="op">[</span><span class="va">train_ids</span>, <span class="st">"Recall"</span><span class="op">]</span>, <span class="st">"svmLinear3"</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -300,7 +301,7 @@ required on your system, though it should be handled automatically (see
 <div class="section level4">
 <h4 id="basic-model">Basic model<a class="anchor" aria-label="anchor" href="#basic-model"></a>
 </h4>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tensorflow.rstudio.com/" class="external-link">keras</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># process texts in the same way, but add tokens.only = TRUE to preserve sequence</span></span>
@@ -345,7 +346,7 @@ required on your system, though it should be handled automatically (see
 <p>We can also use pre-trained embeddings, and instead of simply
 averaging over all words, we can first use a convolution layer to
 calculated weighted sums over word windows:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># load a set of pre-trained embeddings, with unrecognized terms added with</span></span>
 <span><span class="co"># weights of 0</span></span>
 <span><span class="va">space</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lma_lspace.html">lma_lspace</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">tokenized</span><span class="op">$</span><span class="va">tokens</span><span class="op">)</span>, <span class="st">"glove"</span>, fill.missing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
@@ -389,7 +390,7 @@ calculated weighted sums over word windows:</p>
 <p>Now, we can feed the previously trained weights into their
 classifiers (or calculate predictions manually), then measure accuracy
 (percent of real test labels guessed correctly).</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># prepare the testset index sequences for the neural predictions</span></span>
 <span><span class="va">test_sequences</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/keras/man/pad_sequences.html" class="external-link">pad_sequences</a></span><span class="op">(</span><span class="va">tokenized</span><span class="op">$</span><span class="va">indices</span><span class="op">[</span><span class="op">-</span><span class="va">train_ids</span><span class="op">]</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">tokenized</span><span class="op">$</span><span class="va">WC</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -418,8 +419,8 @@ classifiers (or calculate predictions manually), then measure accuracy
 <span><span class="co">#&gt; bayes        0.8000000</span></span>
 <span><span class="co">#&gt; dtree        0.8461538</span></span>
 <span><span class="co">#&gt; svm          0.7692308</span></span>
-<span><span class="co">#&gt; neural       0.7692308</span></span>
-<span><span class="co">#&gt; neural_glove 0.8307692</span></span>
+<span><span class="co">#&gt; neural       0.7538462</span></span>
+<span><span class="co">#&gt; neural_glove 0.8153846</span></span>
 <span><span class="co">#&gt; ensemble     0.8000000</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -435,7 +436,7 @@ within sample.</p>
 </h3>
 <p>For example, we might see if keeping or excluding stop words is best
 with different weighting schemes in the term-based model:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># list every combination of term and document weights</span></span>
 <span><span class="va">weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pmi"</span>, <span class="st">"ppmi"</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/outer.html" class="external-link">outer</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"binary"</span>, <span class="st">"log"</span>, <span class="st">"sqrt"</span>, <span class="st">"count"</span>, <span class="st">"amplify"</span><span class="op">)</span>,</span>
@@ -502,7 +503,7 @@ may not be reliably different.</p>
 <p>For example, we might compare the performance of the simpler models.
 Depending on the data and model, this can be slow, so we’ll also
 parallelize it:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">parallel</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># make a full dtm</span></span>
@@ -554,11 +555,12 @@ parallelize it:</p>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>Average <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums-methods.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">Model_Accuracies</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;         Average</span></span>
-<span><span class="co">#&gt; terms 0.6858462</span></span>
-<span><span class="co">#&gt; bayes 0.7301538</span></span>
-<span><span class="co">#&gt; dtree 0.7301538</span></span>
-<span><span class="co">#&gt; svm   0.7146154</span></span>
-<span><span class="fu"><a href="https://miserman.github.io/splot/reference/splot.html" class="external-link">splot</a></span><span class="op">(</span><span class="va">Model_Accuracies</span>, title <span class="op">=</span> <span class="cn">FALSE</span>, leg.title <span class="op">=</span> <span class="st">"Model"</span>, dark <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co">#&gt; terms 0.6816923</span></span>
+<span><span class="co">#&gt; bayes 0.7290769</span></span>
+<span><span class="co">#&gt; dtree 0.7256923</span></span>
+<span><span class="co">#&gt; svm   0.7129231</span></span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://miserman.github.io/splot/reference/splot.html" class="external-link">splot</a></span><span class="op">(</span><span class="va">Model_Accuracies</span>, title <span class="op">=</span> <span class="cn">FALSE</span>, leg.title <span class="op">=</span> <span class="st">"Model"</span>, dark <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="text_classification_files/figure-html/unnamed-chunk-14-1.svg" width="864"></p>
 </div>
 </div>
