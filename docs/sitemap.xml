@@ -1,102 +1,36 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://miserman.github.io/lingmatch/404.html</loc>
-  </url>
-  <url>
-    <loc>https://miserman.github.io/lingmatch/articles/dictionary_creation.html</loc>
-  </url>
-  <url>
-    <loc>https://miserman.github.io/lingmatch/articles/groups.html</loc>
-  </url>
-  <url>
-    <loc>https://miserman.github.io/lingmatch/articles/index.html</loc>
-  </url>
-  <url>
-    <loc>https://miserman.github.io/lingmatch/articles/introduction.html</loc>
-  </url>
-  <url>
-    <loc>https://miserman.github.io/lingmatch/articles/quickstart.html</loc>
-  </url>
-  <url>
-    <loc>https://miserman.github.io/lingmatch/articles/text_classification.html</loc>
-  </url>
-  <url>
-    <loc>https://miserman.github.io/lingmatch/articles/word_vectors.html</loc>
-  </url>
-  <url>
-    <loc>https://miserman.github.io/lingmatch/authors.html</loc>
-  </url>
-  <url>
-    <loc>https://miserman.github.io/lingmatch/coverage.html</loc>
-  </url>
-  <url>
-    <loc>https://miserman.github.io/lingmatch/index.html</loc>
-  </url>
-  <url>
-    <loc>https://miserman.github.io/lingmatch/news/index.html</loc>
-  </url>
-  <url>
-    <loc>https://miserman.github.io/lingmatch/reference/dictionary_meta.html</loc>
-  </url>
-  <url>
-    <loc>https://miserman.github.io/lingmatch/reference/download.dict.html</loc>
-  </url>
-  <url>
-    <loc>https://miserman.github.io/lingmatch/reference/download.lspace.html</loc>
-  </url>
-  <url>
-    <loc>https://miserman.github.io/lingmatch/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>https://miserman.github.io/lingmatch/reference/lingmatch.html</loc>
-  </url>
-  <url>
-    <loc>https://miserman.github.io/lingmatch/reference/lma_dict.html</loc>
-  </url>
-  <url>
-    <loc>https://miserman.github.io/lingmatch/reference/lma_dtm.html</loc>
-  </url>
-  <url>
-    <loc>https://miserman.github.io/lingmatch/reference/lma_initdirs.html</loc>
-  </url>
-  <url>
-    <loc>https://miserman.github.io/lingmatch/reference/lma_lspace.html</loc>
-  </url>
-  <url>
-    <loc>https://miserman.github.io/lingmatch/reference/lma_meta.html</loc>
-  </url>
-  <url>
-    <loc>https://miserman.github.io/lingmatch/reference/lma_patcat.html</loc>
-  </url>
-  <url>
-    <loc>https://miserman.github.io/lingmatch/reference/lma_process.html</loc>
-  </url>
-  <url>
-    <loc>https://miserman.github.io/lingmatch/reference/lma_simets.html</loc>
-  </url>
-  <url>
-    <loc>https://miserman.github.io/lingmatch/reference/lma_termcat.html</loc>
-  </url>
-  <url>
-    <loc>https://miserman.github.io/lingmatch/reference/lma_weight.html</loc>
-  </url>
-  <url>
-    <loc>https://miserman.github.io/lingmatch/reference/read.dic.html</loc>
-  </url>
-  <url>
-    <loc>https://miserman.github.io/lingmatch/reference/read.segments.html</loc>
-  </url>
-  <url>
-    <loc>https://miserman.github.io/lingmatch/reference/report_term_matches.html</loc>
-  </url>
-  <url>
-    <loc>https://miserman.github.io/lingmatch/reference/select.dict.html</loc>
-  </url>
-  <url>
-    <loc>https://miserman.github.io/lingmatch/reference/select.lspace.html</loc>
-  </url>
-  <url>
-    <loc>https://miserman.github.io/lingmatch/reference/standardize.lspace.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>https://miserman.github.io/lingmatch/404.html</loc></url>
+<url><loc>https://miserman.github.io/lingmatch/articles/dictionary_creation.html</loc></url>
+<url><loc>https://miserman.github.io/lingmatch/articles/groups.html</loc></url>
+<url><loc>https://miserman.github.io/lingmatch/articles/index.html</loc></url>
+<url><loc>https://miserman.github.io/lingmatch/articles/introduction.html</loc></url>
+<url><loc>https://miserman.github.io/lingmatch/articles/quickstart.html</loc></url>
+<url><loc>https://miserman.github.io/lingmatch/articles/text_classification.html</loc></url>
+<url><loc>https://miserman.github.io/lingmatch/articles/word_vectors.html</loc></url>
+<url><loc>https://miserman.github.io/lingmatch/authors.html</loc></url>
+<url><loc>https://miserman.github.io/lingmatch/coverage.html</loc></url>
+<url><loc>https://miserman.github.io/lingmatch/index.html</loc></url>
+<url><loc>https://miserman.github.io/lingmatch/news/index.html</loc></url>
+<url><loc>https://miserman.github.io/lingmatch/reference/dictionary_meta.html</loc></url>
+<url><loc>https://miserman.github.io/lingmatch/reference/download.dict.html</loc></url>
+<url><loc>https://miserman.github.io/lingmatch/reference/download.lspace.html</loc></url>
+<url><loc>https://miserman.github.io/lingmatch/reference/index.html</loc></url>
+<url><loc>https://miserman.github.io/lingmatch/reference/lingmatch.html</loc></url>
+<url><loc>https://miserman.github.io/lingmatch/reference/lma_dict.html</loc></url>
+<url><loc>https://miserman.github.io/lingmatch/reference/lma_dtm.html</loc></url>
+<url><loc>https://miserman.github.io/lingmatch/reference/lma_initdirs.html</loc></url>
+<url><loc>https://miserman.github.io/lingmatch/reference/lma_lspace.html</loc></url>
+<url><loc>https://miserman.github.io/lingmatch/reference/lma_meta.html</loc></url>
+<url><loc>https://miserman.github.io/lingmatch/reference/lma_patcat.html</loc></url>
+<url><loc>https://miserman.github.io/lingmatch/reference/lma_process.html</loc></url>
+<url><loc>https://miserman.github.io/lingmatch/reference/lma_simets.html</loc></url>
+<url><loc>https://miserman.github.io/lingmatch/reference/lma_termcat.html</loc></url>
+<url><loc>https://miserman.github.io/lingmatch/reference/lma_weight.html</loc></url>
+<url><loc>https://miserman.github.io/lingmatch/reference/read.dic.html</loc></url>
+<url><loc>https://miserman.github.io/lingmatch/reference/read.segments.html</loc></url>
+<url><loc>https://miserman.github.io/lingmatch/reference/report_term_matches.html</loc></url>
+<url><loc>https://miserman.github.io/lingmatch/reference/select.dict.html</loc></url>
+<url><loc>https://miserman.github.io/lingmatch/reference/select.lspace.html</loc></url>
+<url><loc>https://miserman.github.io/lingmatch/reference/standardize.lspace.html</loc></url>
 </urlset>
+

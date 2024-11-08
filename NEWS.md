@@ -1,6 +1,7 @@
 # version 1.0.8
 
 ### Improvements
+* Accommodates single-category dictionaries.
 * Improves input resolution.
 
 # version 1.0.7

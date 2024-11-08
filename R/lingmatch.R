@@ -438,7 +438,9 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
   }
   dtm <- Matrix(if (is.data.frame(input)) as.matrix(input) else input, sparse = TRUE)
   if (do.wmc) input <- wmc(input)
-  if (is.null(dim(input))) input <- t(as.matrix(input))
+  if (is.null(dim(input))) {
+    input <- as.matrix(input)
+  }
   if (cc == 2 && (length(comp) > 1 || any(grepl(" ", comp, fixed = TRUE)))) {
     comp <- do.call(lma_dtm, c(list(comp), dsp$p))
     cc <- 1
@@ -627,7 +629,7 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
             if (ckc) {
               sal$b <- comp.data[if (!is.null(comp.group)) comp.group == g else g, , drop = FALSE]
             } else {
-              sal$b <- input[su, ]
+              sal$b <- input[su, , drop = FALSE]
             }
             if (ckf && !is.null(dim(sal$b))) {
               sal$b <- if (compmeanck) colMeans(sal$b, na.rm = TRUE) else apply_comp(sal$b)
@@ -653,13 +655,19 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
           colnames(sim) <- c(opt$group, sal$metric)
           for (g in ug) {
             su <- group[[1]] == g
-            sim[su, -1] <- if (sum(su) == 1) 1 else do.call(lma_simets, c(list(input[su, ]), sal))
+            sim[su, -1] <- if (sum(su) == 1) {
+              1
+            } else {
+              do.call(
+                lma_simets, c(list(input[su, , drop = FALSE]), sal)
+              )
+            }
           }
         } else {
           sim <- lapply(structure(ug, names = ug), function(g) {
             su <- group[[1]] == g
             if (sum(su) != 1) {
-              do.call(lma_simets, c(list(input[su, ]), sal))
+              do.call(lma_simets, c(list(input[su, , drop = FALSE]), sal))
             } else {
               rep(NA, length(sal$metric))
             }
