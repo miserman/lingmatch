@@ -38,7 +38,7 @@ or path to a file (.txt or .csv, with texts separated by one or more lines/rows)
 
 \item{data}{A matrix-like object as a reference for column names, if variables are referred to in
 other arguments (e.g., \code{lingmatch(text, data = data)} would be the same as
-\code{lingmatch(data$text)}.}
+\code{lingmatch(data$text)}).}
 
 \item{group}{A logical or factor-like vector the same length as \code{NROW(input)}, used to defined
 groups.}

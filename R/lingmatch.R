@@ -39,7 +39,7 @@
 #' }
 #' @param data A matrix-like object as a reference for column names, if variables are referred to in
 #'   other arguments (e.g., \code{lingmatch(text, data = data)} would be the same as
-#'   \code{lingmatch(data$text)}.
+#'   \code{lingmatch(data$text)}).
 #' @param group A logical or factor-like vector the same length as \code{NROW(input)}, used to defined
 #'   groups.
 #' @param ... Passes arguments to \code{\link{lma_dtm}}, \code{\link{lma_weight}},
@@ -300,7 +300,7 @@ lingmatch <- function(input = NULL, comp = mean, data = NULL, group = NULL, ...,
         colnames(lsm_profiles), "personal_pronouns", "impersonal_pronouns", "articles", "auxiliary_verbs",
         "adverbs", "prepositions", "conjunctions", "negations", "quantifiers", "articles", "preps"
       ))
-      cn <- sub("^liwc[ .:_-]+", "", tolower(cn))
+      cn <- sub("^liwc[0-9 .:_-]+", "", tolower(cn))
       tr <- cn %in% names(cat_map)
       if (any(tr)) colnames(input)[tr] <- cat_map[cn[tr]]
       ck <- dn %in% colnames(input)

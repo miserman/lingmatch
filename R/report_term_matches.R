@@ -35,7 +35,7 @@
 #' @note
 #' Matches are extracted for each term independently, so they may not align with some implementations
 #' of dictionaries. For instance, by default \code{\link{lma_patcat}} matches destructively, and sorts
-#' terms by length such that shorter terms will not match the same text and longer terms that overlap.
+#' terms by length such that shorter terms will not match the same text as longer terms that overlap.
 #' Here, the match would show up for both terms.
 #' @returns A \code{data.frame} of results, with a row for each unique term, and the following columns:
 #' \itemize{
