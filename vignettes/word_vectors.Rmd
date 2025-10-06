@@ -50,7 +50,7 @@ Here, columns represent words in terms of their occurrence in 4 contexts (here, 
 
 ## Similarity-based latent dimensions
 Comparing word vectors can provide semantic information. For example, we can see which animals co-occur with different attributes:
-```{r, fig.height=4, fig.width=10}
+```{r, fig.height=4, fig.width=10, fig.alt="a plot of terms within an example smallness-bigness space"}
 # the t function transposes the document-term matrix
 # such that terms are in rows and documents in columns
 tdm <- t(dtm)
@@ -126,7 +126,7 @@ spaces$selected[, c("terms", "coverage")]
 
 ### Term similarity
 Another possible, though more intensive thing to look at might be similarities between words of particular interest. In our initial set of texts, for example, we were looking at animals in relation to attributes, so we might look at those relationships in whatever spaces you've downloaded:
-```{r, fig.height=4, fig.width=10}
+```{r, fig.height=4, fig.width=10, fig.alt="a plot of terms within a real smallness-bigness space"}
 # retrieve names of downloaded spaces
 space_names <- unique(sub("\\..*$", "", list.files("~/Latent Semantic Spaces", "dat")))
 
@@ -174,7 +174,7 @@ splot(
 
 ### Concept capture
 One of the problems embeddings try to solve is the crispiness of single terms---there may be many terms that are strictly different but have similar meanings. With that in mind, it might also make sense to fuzzify target dimensions in the above example with something like synonym centroids or concept vectors:
-```{r, fig.height=4, fig.width=10}
+```{r, fig.height=4, fig.width=10, fig.alt="a plot of terms within a real smallness-bigness space, with fuzzy similarities"}
 # now our attributes will be sets of terms
 concepts <- list(
   small = c("small", "little", "tiny", "miniscule", "diminutive"),
@@ -206,7 +206,7 @@ The best way to learn animal attributes in general would probably come down to t
 
 # Dimensions as topics
 Topic extraction tends to use models fit within a sample, and considers fewer dimensions. Its goal is often to interpret dimensions directly by inspecting the highest loading terms, which can result in something like a dictionary---sets of topics or categories containing associated terms. By loading in a full space (as opposed to just a selection of vectors, as we've been doing), we can look at the same thing in pretrained embeddings:
-```{r, fig.height=2, fig.width=10}
+```{r}
 # load in the full "100k" space
 lss <- lma_lspace("100k")
 structure(dim(lss), names = c("terms", "dimensions"))
@@ -227,16 +227,33 @@ top_terms <- function(dims, space, nterms = 30) {
     )
   )
 }
+```
+
+```{r, fig.height=2, fig.width=10, fig.alt="a plot showing the top terms within the first"}
 # now we can see the top-loading terms on single dimensions
-for (d in 1:3) top_terms(d, lss)
+top_terms(1, lss)
+```
+
+```{r, fig.height=2, fig.width=10, fig.alt="a plot showing the top terms within the second"}
+top_terms(2, lss)
+```
+
+```{r, fig.height=2, fig.width=10, fig.alt="a plot showing the top terms within the third"}
+top_terms(3, lss)
+```
+
+```{r, fig.height=2, fig.width=10, fig.alt="a plot showing the top terms across the first 5 dimensions"}
 # or top-loading terms on aggregated dimensions
 top_terms(1:5, lss)
+```
+
+```{r, fig.height=2, fig.width=10, fig.alt="a plot showing the top terms across all dimensions"}
 # even across all dimensions
 top_terms(seq_len(ncol(lss)), lss)
 ```
 
 It can also be interesting to use a term to select dimensions to look at:
-```{r, fig.height=2.5, fig.width=10}
+```{r, fig.height=2.5, fig.width=10, fig.alt="a plot showing the top terms across the 10 most whales like dimensions"}
 # this selects the 10 dimensions on which "whales" loads most
 top_terms(order(-lss["whales", ])[1:10], lss)
 ```

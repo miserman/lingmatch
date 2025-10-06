@@ -2,8 +2,7 @@ Package: lingmatch
 Type: Package
 Title: Linguistic Matching and Accommodation
 Version: 1.0.8
-Author: Micah Iserman
-Maintainer: Micah Iserman <micah.iserman@gmail.com>
+Authors@R: person("Micah", "Iserman", role = c("cre", "aut"), email = "micah.iserman@gmail.com")
 Description: Measure similarity between texts. Offers a variety of processing
   tools and similarity metrics to facilitate flexible representation of texts and matching.
   Implements forms of Language Style Matching (Ireland & Pennebaker, 2010) <doi:10.1037/a0020386>
@@ -15,7 +14,7 @@ Imports:
   Rcpp,
   RcppParallel
 License: GPL (>= 2)
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Roxygen: list(old_usage = TRUE)
 Suggests: 
   knitr,

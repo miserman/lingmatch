@@ -8,8 +8,8 @@
 <title>Introduction to Text Analysis • lingmatch</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
 <meta property="og:title" content="Introduction to Text Analysis">
 </head>
@@ -73,7 +73,7 @@
     
 <p>This introduction uses lingmatch to illustrate a few of the many
 branching paths of text analysis.</p>
-<p><em>Built with R 4.4.2 on November 08 2024</em></p>
+<p><em>Built with R 4.5.1 on October 06 2025</em></p>
 <hr>
 <div class="section level2">
 <h2 id="setup">Setup<a class="anchor" aria-label="anchor" href="#setup"></a>
@@ -278,7 +278,7 @@ frequencies:</p>
 <span><span class="co"># plot weighted ~ raw term frequencies</span></span>
 <span><span class="co">## note that dark = TRUE makes the text white, so you might need to remove it</span></span>
 <span><span class="fu"><a href="https://miserman.github.io/splot/reference/splot.html" class="external-link">splot</a></span><span class="op">(</span><span class="va">Weighted</span> <span class="op">~</span> <span class="fl">1</span><span class="op">:</span><span class="fl">20</span>, labx <span class="op">=</span> <span class="st">"Raw Count"</span>, lines <span class="op">=</span> <span class="st">"connected"</span>, dark <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="introduction_files/figure-html/unnamed-chunk-11-1.svg" width="960"></p>
+<p><img src="introduction_files/figure-html/unnamed-chunk-11-1.svg" alt="a plot comparing weighted and raw work counts" width="960"></p>
 <p>And plot weighted by a range of variants of raw document frequencies.
 The y-axis shows relative values (z-scores), with positive being higher
 than the weight’s mean. From this, you can see what types of terms the
@@ -319,7 +319,7 @@ scheme gives more weight:</p>
 <span>  options <span class="op">=</span> <span class="va">op</span>, title <span class="op">=</span> <span class="st">"Same Term, Varying Document Frequencies"</span>,</span>
 <span>  sud <span class="op">=</span> <span class="st">"All term frequencies are 1."</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="introduction_files/figure-html/unnamed-chunk-12-1.svg" width="960"></p>
+<p><img src="introduction_files/figure-html/unnamed-chunk-12-1.svg" alt="a plot comparing different weighting methods, holding term constant" width="960"></p>
 <p>Some document weight types are sensitive to term frequency, so it can
 be interesting to see two extremes:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
@@ -330,7 +330,7 @@ be interesting to see two extremes:</p>
 <span>  options <span class="op">=</span> <span class="va">op</span>, title <span class="op">=</span> <span class="st">"Term as Document Frequencies"</span>,</span>
 <span>  sud <span class="op">=</span> <span class="st">"Non-zero terms are the number of non-zero terms."</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="introduction_files/figure-html/unnamed-chunk-13-1.svg" width="960"></p>
+<p><img src="introduction_files/figure-html/unnamed-chunk-13-1.svg" alt="a plot comparing different weighting methods when term and document frequencies are the same" width="960"></p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># here, counts decrease from 20 to 1, while appearing in 1 to 20 documents,</span></span>
 <span><span class="co"># so less common terms have higher term frequencies</span></span>
@@ -339,10 +339,19 @@ be interesting to see two extremes:</p>
 <span>  options <span class="op">=</span> <span class="va">op</span>, title <span class="op">=</span> <span class="st">"Term Opposite of Document Frequencies"</span>,</span>
 <span>  sud <span class="op">=</span> <span class="st">"Non-zero terms are the number of zero terms + 1."</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="introduction_files/figure-html/unnamed-chunk-13-2.svg" width="960"></p>
+<p><img src="introduction_files/figure-html/unnamed-chunk-13-2.svg" alt="a plot comparing different weighting methods when term and document frequencies are the same" width="960"></p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># here, counts decrease from 20 to 1, while appearing in 1 to 20 documents,</span></span>
+<span><span class="co"># so less common terms have higher term frequencies</span></span>
+<span><span class="fu"><a href="https://miserman.github.io/splot/reference/splot.html" class="external-link">splot</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">doc_weights</span>, <span class="va">weight_range</span>, value <span class="op">=</span> <span class="st">"inverted"</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span><span class="op">:</span><span class="fl">20</span>,</span>
+<span>  options <span class="op">=</span> <span class="va">op</span>, title <span class="op">=</span> <span class="st">"Term Opposite of Document Frequencies"</span>,</span>
+<span>  sud <span class="op">=</span> <span class="st">"Non-zero terms are the number of zero terms + 1."</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><img src="introduction_files/figure-html/unnamed-chunk-14-1.svg" alt="a plot comparing different weighting methods when term and document frequencies are different" width="960"></p>
 <p>We can weight our example dtm and see how it affects the correlation
 between documents:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># idf dampens common words</span></span>
 <span><span class="fu"><a href="../reference/lma_simets.html">lma_simets</a></span><span class="op">(</span><span class="fu"><a href="../reference/lma_weight.html">lma_weight</a></span><span class="op">(</span><span class="va">dtm</span>, <span class="st">"idf"</span><span class="op">)</span>, <span class="st">"pearson"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; 4 x 4 sparse Matrix of class "dtCMatrix" (unitriangular)</span></span>
@@ -362,7 +371,7 @@ between documents:</p>
 <span><span class="co">#&gt; [4,] -0.05282330 -0.04472950 0.9891512 I</span></span></code></pre></div>
 <p>For now, we’ll just apply standard word count (frequency) weighting,
 sometimes called normalization:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">wdtm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lma_weight.html">lma_weight</a></span><span class="op">(</span><span class="va">dtm</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -374,7 +383,7 @@ approach) does – reducing the number of terms by combining them into
 categories.</p>
 <p>The default, internal dictionary (<code><a href="../reference/lma_dict.html">?lma_dict</a></code>) contains
 function word categories:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rwdtm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lma_termcat.html">lma_termcat</a></span><span class="op">(</span><span class="va">wdtm</span><span class="op">)</span></span>
 <span><span class="va">rwdtm</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">]</span></span>
 <span><span class="co">#&gt;          ppron      ipron    article     adverb       conj       prep</span></span>
@@ -388,7 +397,7 @@ function word categories:</p>
 </h2>
 <p>The way we’ve set things up allows us to look at the standard
 Language Style Matching calculation:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/lma_simets.html">lma_simets</a></span><span class="op">(</span><span class="va">rwdtm</span>, <span class="st">"canberra"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; 4 x 4 sparse Matrix of class "dtCMatrix" (unitriangular)</span></span>
 <span><span class="co">#&gt;                                     </span></span>
@@ -415,7 +424,7 @@ choice of weighting, dimension reduction, and similarity metric.</p>
 frequency - inverse document frequency, use a latent semantic space to
 reduce dimensions, and cosine similarity to measure matching, it would
 be “latent semantic similarity”:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dtm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lma_dtm.html">lma_dtm</a></span><span class="op">(</span><span class="va">text</span>, <span class="st">"function"</span><span class="op">)</span></span>
 <span><span class="va">wdtm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lma_weight.html">lma_weight</a></span><span class="op">(</span><span class="va">dtm</span>, <span class="st">"tf-idf"</span><span class="op">)</span></span>
 <span><span class="va">rwdtm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lma_lspace.html">lma_lspace</a></span><span class="op">(</span><span class="va">wdtm</span>, space <span class="op">=</span> <span class="st">"100k"</span>, dir <span class="op">=</span> <span class="st">"~/Latent Semantic Spaces"</span><span class="op">)</span></span>

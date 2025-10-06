@@ -166,7 +166,7 @@ Another source of weighting can come from matrix-wide information, such as docum
 Different weighting schemes work to either amplify or dampen difference in values or in document or term frequencies. See `?lma_weight` for more about available schemes.
 
 To get a better sense of the effects each scheme component might have, we can plot weighted by raw word counts across a range of document frequencies:
-```{r, fig.height=5, fig.width=10}
+```{r, fig.height=5, fig.width=10, fig.alt="a plot comparing weighted and raw work counts"}
 # load in the splot package
 library(splot)
 
@@ -182,7 +182,7 @@ splot(Weighted ~ 1:20, labx = "Raw Count", lines = "connected", dark = TRUE)
 ```
 
 And plot weighted by a range of variants of raw document frequencies. The y-axis shows relative values (z-scores), with positive being higher than the weight's mean. From this, you can see what types of terms the scheme gives more weight:
-```{r, fig.height=5, fig.width=10}
+```{r, fig.height=5, fig.width=10, fig.alt="a plot comparing different weighting methods, holding term constant"}
 # available document weight types
 doc_weights <- c(
   "df", "dflog", "dfmax", "dfmlog", "normal",
@@ -221,7 +221,7 @@ splot(
 ```
 
 Some document weight types are sensitive to term frequency, so it can be interesting to see two extremes:
-```{r, fig.height=5, fig.width=10}
+```{r, fig.height=5, fig.width=10, fig.alt="a plot comparing different weighting methods when term and document frequencies are the same"}
 # here, counts increase from 1 to 20, and appear in 1 to 20 documents,
 # so less common terms also have lower term frequencies
 splot(
@@ -229,6 +229,16 @@ splot(
   options = op, title = "Term as Document Frequencies",
   sud = "Non-zero terms are the number of non-zero terms."
 )
+# here, counts decrease from 20 to 1, while appearing in 1 to 20 documents,
+# so less common terms have higher term frequencies
+splot(
+  sapply(doc_weights, weight_range, value = "inverted") ~ 1:20,
+  options = op, title = "Term Opposite of Document Frequencies",
+  sud = "Non-zero terms are the number of zero terms + 1."
+)
+```
+
+```{r, fig.height=5, fig.width=10, fig.alt="a plot comparing different weighting methods when term and document frequencies are different"}
 # here, counts decrease from 20 to 1, while appearing in 1 to 20 documents,
 # so less common terms have higher term frequencies
 splot(

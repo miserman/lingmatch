@@ -8,8 +8,8 @@
 <title>Introduction to Text Classification • lingmatch</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
 <meta property="og:title" content="Introduction to Text Classification">
 </head>
@@ -72,7 +72,7 @@
     
     
 <p>Works through a text classification example.</p>
-<p><em>Built with R 4.4.2 on November 08 2024</em></p>
+<p><em>Built with R 4.5.1 on October 06 2025</em></p>
 <hr>
 <div class="section level2">
 <h2 id="data">Data<a class="anchor" aria-label="anchor" href="#data"></a>
@@ -205,7 +205,7 @@ terms are most important.</p>
 <span>  legend <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">dict</span><span class="op">)</span>, text.col <span class="op">=</span> <span class="fu"><a href="https://miserman.github.io/splot/reference/splot.color.html" class="external-link">splot.color</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  text.font <span class="op">=</span> <span class="fl">2</span>, bty <span class="op">=</span> <span class="st">"n"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="text_classification_files/figure-html/unnamed-chunk-6-1.svg" width="864"></p>
+<p><img src="text_classification_files/figure-html/unnamed-chunk-6-1.svg" alt="a wordcloud showing the most feminine- and masculine-associated terms" width="864"></p>
 </div>
 <div class="section level3">
 <h3 id="naïve-bayes-classifier">Naïve Bayes classifier<a class="anchor" aria-label="anchor" href="#na%C3%AFve-bayes-classifier"></a>
@@ -251,7 +251,7 @@ terms.</p>
 <span>  branch.col <span class="op">=</span> <span class="st">"white"</span>, split.box.col <span class="op">=</span> <span class="st">"black"</span>, split.col <span class="op">=</span> <span class="st">"white"</span>,</span>
 <span>  nn.box.col <span class="op">=</span> <span class="st">"black"</span>, nn.col <span class="op">=</span> <span class="st">"white"</span>, space <span class="op">=</span> <span class="fl">2</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="text_classification_files/figure-html/unnamed-chunk-8-1.svg" width="864"></p>
+<p><img src="text_classification_files/figure-html/unnamed-chunk-8-1.svg" alt="a decision tree that splits on terms to predict feminine or masculine text" width="864"></p>
 </div>
 <div class="section level3">
 <h3 id="support-vector-machine-classifier">Support Vector Machine classifier<a class="anchor" aria-label="anchor" href="#support-vector-machine-classifier"></a>
@@ -278,32 +278,32 @@ bag-of-words approach).</p>
 <p><code>Keras</code> is a framework for setting up neural models. The
 package is an interface to Python, so some additional setup may be
 required on your system, though it should be handled automatically (see
-<a href="https://keras.rstudio.com" class="external-link">keras.rstudio.com</a>).</p>
+<a href="https://keras3.posit.co/" class="external-link">keras3.posit.co</a>).</p>
 <div class="section level4">
 <h4 id="basic-model">Basic model<a class="anchor" aria-label="anchor" href="#basic-model"></a>
 </h4>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tensorflow.rstudio.com/" class="external-link">keras</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://keras3.posit.co/" class="external-link">keras3</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># process texts in the same way, but add tokens.only = TRUE to preserve sequence</span></span>
 <span><span class="co"># information</span></span>
 <span><span class="va">tokenized</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lma_dtm.html">lma_dtm</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">Recall_Text</span>, <span class="fu"><a href="../reference/lma_dict.html">lma_dict</a></span><span class="op">(</span><span class="op">)</span>, dc.min <span class="op">=</span> <span class="fl">5</span>, tokens.only <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># specify your layers</span></span>
-<span><span class="va">weights_neural</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/keras/man/keras_model_sequential.html" class="external-link">keras_model_sequential</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span><span class="va">weights_neural</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://keras3.posit.co/reference/keras_model_sequential.html" class="external-link">keras_model_sequential</a></span><span class="op">(</span>layers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  <span class="co"># this set of layers translates input sequences of word indices to</span></span>
 <span>  <span class="co"># small embeddings, which are learned on the fly,</span></span>
 <span>  <span class="co"># then averages over the set of embeddings for a single text-centroid vector</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/keras/man/layer_embedding.html" class="external-link">layer_embedding</a></span><span class="op">(</span>input_dim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">tokenized</span><span class="op">$</span><span class="va">tokens</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1</span>, output_dim <span class="op">=</span> <span class="fl">16</span><span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/keras/man/layer_global_average_pooling_1d.html" class="external-link">layer_global_average_pooling_1d</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://keras3.posit.co/reference/layer_embedding.html" class="external-link">layer_embedding</a></span><span class="op">(</span>input_dim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">tokenized</span><span class="op">$</span><span class="va">tokens</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1</span>, output_dim <span class="op">=</span> <span class="fl">16</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://keras3.posit.co/reference/layer_global_average_pooling_1d.html" class="external-link">layer_global_average_pooling_1d</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span></span>
 <span>  <span class="co"># these are more or less arbitrary layers that can be played with more freely</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/keras/man/layer_dense.html" class="external-link">layer_dense</a></span><span class="op">(</span>units <span class="op">=</span> <span class="fl">16</span>, activation <span class="op">=</span> <span class="st">"relu"</span><span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/keras/man/layer_dropout.html" class="external-link">layer_dropout</a></span><span class="op">(</span>rate <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://keras3.posit.co/reference/layer_dense.html" class="external-link">layer_dense</a></span><span class="op">(</span>units <span class="op">=</span> <span class="fl">16</span>, activation <span class="op">=</span> <span class="st">"relu"</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://keras3.posit.co/reference/layer_dropout.html" class="external-link">layer_dropout</a></span><span class="op">(</span>rate <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span>,</span>
 <span></span>
 <span>  <span class="co"># this is the final prediction layer, which converts the previous arbitrary layers</span></span>
 <span>  <span class="co"># to a binary classification</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/keras/man/layer_dense.html" class="external-link">layer_dense</a></span><span class="op">(</span>units <span class="op">=</span> <span class="fl">1</span>, activation <span class="op">=</span> <span class="st">"sigmoid"</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://keras3.posit.co/reference/layer_dense.html" class="external-link">layer_dense</a></span><span class="op">(</span>units <span class="op">=</span> <span class="fl">1</span>, activation <span class="op">=</span> <span class="st">"sigmoid"</span><span class="op">)</span></span>
 <span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># then compile the model (this changes the weights_neural object)</span></span>
@@ -316,7 +316,7 @@ required on your system, though it should be handled automatically (see
 <span><span class="co"># and train the model on the training sample</span></span>
 <span><span class="fu"><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit</a></span><span class="op">(</span></span>
 <span>  <span class="va">weights_neural</span>,</span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/keras/man/pad_sequences.html" class="external-link">pad_sequences</a></span><span class="op">(</span><span class="va">tokenized</span><span class="op">$</span><span class="va">indices</span><span class="op">[</span><span class="va">train_ids</span><span class="op">]</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">tokenized</span><span class="op">$</span><span class="va">WC</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://keras3.posit.co/reference/pad_sequences.html" class="external-link">pad_sequences</a></span><span class="op">(</span><span class="va">tokenized</span><span class="op">$</span><span class="va">indices</span><span class="op">[</span><span class="va">train_ids</span><span class="op">]</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">tokenized</span><span class="op">$</span><span class="va">WC</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">feminine_texts</span><span class="op">)</span>,</span>
 <span>  epochs <span class="op">=</span> <span class="fl">40</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -332,24 +332,23 @@ calculated weighted sums over word windows:</p>
 <span><span class="co"># weights of 0</span></span>
 <span><span class="va">space</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lma_lspace.html">lma_lspace</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">tokenized</span><span class="op">$</span><span class="va">tokens</span><span class="op">)</span>, <span class="st">"glove"</span>, fill.missing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">weights_neural_glove</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/keras/man/keras_model_sequential.html" class="external-link">keras_model_sequential</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span><span class="va">weights_neural_glove</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://keras3.posit.co/reference/keras_model_sequential.html" class="external-link">keras_model_sequential</a></span><span class="op">(</span>layers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  <span class="co"># this layer contains the loaded embeddings, which will not be adjusted</span></span>
 <span>  <span class="co"># during training</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/keras/man/layer_embedding.html" class="external-link">layer_embedding</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://keras3.posit.co/reference/layer_embedding.html" class="external-link">layer_embedding</a></span><span class="op">(</span></span>
 <span>    input_dim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">space</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1</span>, output_dim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">space</span><span class="op">)</span>,</span>
-<span>    input_length <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">tokenized</span><span class="op">$</span><span class="va">WC</span><span class="op">)</span>, trainable <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>    weights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">space</span><span class="op">)</span><span class="op">)</span>, <span class="va">space</span><span class="op">)</span><span class="op">)</span></span>
+<span>    trainable <span class="op">=</span> <span class="cn">FALSE</span>, weights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">space</span><span class="op">)</span><span class="op">)</span>, <span class="va">space</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="op">)</span>,</span>
 <span></span>
 <span>  <span class="co"># this layer convolves (calculates weighted sums) over the</span></span>
 <span>  <span class="co"># embeddings vectors within a window (set by kernel_size)</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/keras/man/layer_conv_1d.html" class="external-link">layer_conv_1d</a></span><span class="op">(</span>filters <span class="op">=</span> <span class="fl">16</span>, kernel_size <span class="op">=</span> <span class="fl">5</span>, activation <span class="op">=</span> <span class="st">"relu"</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://keras3.posit.co/reference/layer_conv_1d.html" class="external-link">layer_conv_1d</a></span><span class="op">(</span>filters <span class="op">=</span> <span class="fl">16</span>, kernel_size <span class="op">=</span> <span class="fl">5</span>, activation <span class="op">=</span> <span class="st">"relu"</span><span class="op">)</span>,</span>
 <span></span>
 <span>  <span class="co"># same final layers as the initial model</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/keras/man/layer_global_average_pooling_1d.html" class="external-link">layer_global_average_pooling_1d</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/keras/man/layer_dense.html" class="external-link">layer_dense</a></span><span class="op">(</span>units <span class="op">=</span> <span class="fl">16</span>, activation <span class="op">=</span> <span class="st">"relu"</span><span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/keras/man/layer_dropout.html" class="external-link">layer_dropout</a></span><span class="op">(</span>rate <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/keras/man/layer_dense.html" class="external-link">layer_dense</a></span><span class="op">(</span>units <span class="op">=</span> <span class="fl">1</span>, activation <span class="op">=</span> <span class="st">"sigmoid"</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://keras3.posit.co/reference/layer_global_average_pooling_1d.html" class="external-link">layer_global_average_pooling_1d</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://keras3.posit.co/reference/layer_dense.html" class="external-link">layer_dense</a></span><span class="op">(</span>units <span class="op">=</span> <span class="fl">16</span>, activation <span class="op">=</span> <span class="st">"relu"</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://keras3.posit.co/reference/layer_dropout.html" class="external-link">layer_dropout</a></span><span class="op">(</span>rate <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://keras3.posit.co/reference/layer_dense.html" class="external-link">layer_dense</a></span><span class="op">(</span>units <span class="op">=</span> <span class="fl">1</span>, activation <span class="op">=</span> <span class="st">"sigmoid"</span><span class="op">)</span></span>
 <span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://generics.r-lib.org/reference/compile.html" class="external-link">compile</a></span><span class="op">(</span></span>
 <span>  <span class="va">weights_neural_glove</span>,</span>
@@ -358,7 +357,7 @@ calculated weighted sums over word windows:</p>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit</a></span><span class="op">(</span></span>
 <span>  <span class="va">weights_neural_glove</span>,</span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/keras/man/pad_sequences.html" class="external-link">pad_sequences</a></span><span class="op">(</span><span class="va">tokenized</span><span class="op">$</span><span class="va">indices</span><span class="op">[</span><span class="va">train_ids</span><span class="op">]</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">tokenized</span><span class="op">$</span><span class="va">WC</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://keras3.posit.co/reference/pad_sequences.html" class="external-link">pad_sequences</a></span><span class="op">(</span><span class="va">tokenized</span><span class="op">$</span><span class="va">indices</span><span class="op">[</span><span class="va">train_ids</span><span class="op">]</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">tokenized</span><span class="op">$</span><span class="va">WC</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">feminine_texts</span><span class="op">)</span>,</span>
 <span>  epochs <span class="op">=</span> <span class="fl">40</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -373,7 +372,7 @@ classifiers (or calculate predictions manually), then measure accuracy
 (percent of real test labels guessed correctly).</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># prepare the testset index sequences for the neural predictions</span></span>
-<span><span class="va">test_sequences</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/keras/man/pad_sequences.html" class="external-link">pad_sequences</a></span><span class="op">(</span><span class="va">tokenized</span><span class="op">$</span><span class="va">indices</span><span class="op">[</span><span class="op">-</span><span class="va">train_ids</span><span class="op">]</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">tokenized</span><span class="op">$</span><span class="va">WC</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">test_sequences</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://keras3.posit.co/reference/pad_sequences.html" class="external-link">pad_sequences</a></span><span class="op">(</span><span class="va">tokenized</span><span class="op">$</span><span class="va">indices</span><span class="op">[</span><span class="op">-</span><span class="va">train_ids</span><span class="op">]</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">tokenized</span><span class="op">$</span><span class="va">WC</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># get predicted labels from each model</span></span>
 <span><span class="va">predictions</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
@@ -400,9 +399,9 @@ classifiers (or calculate predictions manually), then measure accuracy
 <span><span class="co">#&gt; bayes        0.8000000</span></span>
 <span><span class="co">#&gt; dtree        0.8461538</span></span>
 <span><span class="co">#&gt; svm          0.7692308</span></span>
-<span><span class="co">#&gt; neural       0.7538462</span></span>
-<span><span class="co">#&gt; neural_glove 0.8615385</span></span>
-<span><span class="co">#&gt; ensemble     0.7846154</span></span></code></pre></div>
+<span><span class="co">#&gt; neural       0.8307692</span></span>
+<span><span class="co">#&gt; neural_glove 0.7692308</span></span>
+<span><span class="co">#&gt; ensemble     0.8307692</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="testing-decisions">Testing decisions<a class="anchor" aria-label="anchor" href="#testing-decisions"></a>
@@ -473,7 +472,7 @@ with different weighting schemes in the term-based model:</p>
 <span>  leg.title <span class="op">=</span> <span class="st">"Stop words"</span>, laby <span class="op">=</span> <span class="st">"Overall Accuracy"</span>, labx <span class="op">=</span> <span class="st">"Weight Scheme"</span>,</span>
 <span>  lpos <span class="op">=</span> <span class="st">"bottomleft"</span>, note <span class="op">=</span> <span class="cn">FALSE</span>, sort <span class="op">=</span> <span class="cn">TRUE</span>, mai <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.7</span>, <span class="fl">.5</span>, <span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span>, dark <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="text_classification_files/figure-html/unnamed-chunk-13-1.svg" width="864"></p>
+<p><img src="text_classification_files/figure-html/unnamed-chunk-13-1.svg" alt="a plot comparing accuracy with different weighting schemes, and keeping vs excluding function words" width="864"></p>
 </div>
 <div class="section level3">
 <h3 id="train-test-splits">Train-test splits<a class="anchor" aria-label="anchor" href="#train-test-splits"></a>
@@ -536,12 +535,12 @@ parallelize it:</p>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>Average <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums-methods.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">Model_Accuracies</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;         Average</span></span>
-<span><span class="co">#&gt; terms 0.6886154</span></span>
-<span><span class="co">#&gt; bayes 0.7284615</span></span>
-<span><span class="co">#&gt; dtree 0.7324615</span></span>
+<span><span class="co">#&gt; terms 0.6855385</span></span>
+<span><span class="co">#&gt; bayes 0.7263077</span></span>
+<span><span class="co">#&gt; dtree 0.7276923</span></span>
 <span><span class="co">#&gt; svm   0.7164615</span></span>
 <span><span class="fu"><a href="https://miserman.github.io/splot/reference/splot.html" class="external-link">splot</a></span><span class="op">(</span><span class="va">Model_Accuracies</span>, title <span class="op">=</span> <span class="cn">FALSE</span>, leg.title <span class="op">=</span> <span class="st">"Model"</span>, dark <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="text_classification_files/figure-html/unnamed-chunk-14-1.svg" width="864"></p>
+<p><img src="text_classification_files/figure-html/unnamed-chunk-14-1.svg" alt="a plot showing the accuracy distribution of different models with different train-test splits" width="864"></p>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

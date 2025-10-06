@@ -6,13 +6,13 @@
 <link href="lib/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet" />
 <script src="lib/htmlwidgets-1.6.4/htmlwidgets.js"></script>
 <link href="lib/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet" />
-<script src="lib/datatables-binding-0.33/datatables.js"></script>
+<script src="lib/datatables-binding-0.34.0/datatables.js"></script>
 <script src="lib/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <link href="lib/dt-core-1.13.6/css/jquery.dataTables.min.css" rel="stylesheet" />
 <link href="lib/dt-core-1.13.6/css/jquery.dataTables.extra.css" rel="stylesheet" />
 <script src="lib/dt-core-1.13.6/js/jquery.dataTables.min.js"></script>
-<link href="lib/crosstalk-1.2.1/css/crosstalk.min.css" rel="stylesheet" />
-<script src="lib/crosstalk-1.2.1/js/crosstalk.min.js"></script>
+<link href="lib/crosstalk-1.2.2/css/crosstalk.min.css" rel="stylesheet" />
+<script src="lib/crosstalk-1.2.2/js/crosstalk.min.js"></script>
 <link href="lib/highlight.js-6.2/rstudio.css" rel="stylesheet" />
 <script src="lib/highlight.js-6.2/highlight.pack.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -95,7 +95,7 @@ table.table-condensed {
   font-size: 11px;
 }</style>
   <div class="col-md-8 col-md-offset-2">
-    <h2>lingmatch coverage - 88.81%</h2>
+    <h2>lingmatch coverage - 88.90%</h2>
     <div class="tabbable">
       <ul class="nav nav-tabs" data-tabsetid="covr">
         <li class="active">
@@ -107,8 +107,8 @@ table.table-condensed {
       </ul>
       <div class="tab-content" data-tabsetid="covr">
         <div class="tab-pane active" title="Files" data-value="Files" id="tab-covr-1">
-          <div class="datatables html-widget html-fill-item" id="htmlwidget-006c56f781fd26e8980e" style="width:100%;height:500px;"></div>
-          <script type="application/json" data-for="htmlwidget-006c56f781fd26e8980e">{"x":{"filter":"none","vertical":false,"fillContainer":false,"data":[["<a href=\"#\">R/lma_initdirs.R<\/a>","<a href=\"#\">R/standardize.lspace.R<\/a>","<a href=\"#\">R/internal.R<\/a>","<a href=\"#\">R/lma_lspace.R<\/a>","<a href=\"#\">R/lma_patcat.R<\/a>","<a href=\"#\">R/lingmatch.R<\/a>","<a href=\"#\">R/select.lspace.R<\/a>","<a href=\"#\">R/read.segments.R<\/a>","<a href=\"#\">R/read.dic.R<\/a>","<a href=\"#\">R/report_term_matches.R<\/a>","<a href=\"#\">R/lma_termcat.R<\/a>","<a href=\"#\">R/lma_dtm.R<\/a>","<a href=\"#\">src/dtm.cpp<\/a>","<a href=\"#\">R/dictionary_meta.R<\/a>","<a href=\"#\">R/lma_weight.R<\/a>","<a href=\"#\">R/lma_simets.R<\/a>","<a href=\"#\">src/embeddings.cpp<\/a>","<a href=\"#\">src/text_search.cpp<\/a>","<a href=\"#\">src/similarity.cpp<\/a>","<a href=\"#\">R/lma_dict.R<\/a>","<a href=\"#\">R/lma_process.R<\/a>","<a href=\"#\">R/lma_meta.R<\/a>","<a href=\"#\">R/select.dict.R<\/a>","<a href=\"#\">R/download.dict.R<\/a>","<a href=\"#\">R/download.lspace.R<\/a>"],[72,92,146,272,371,777,143,168,416,259,508,278,77,329,270,214,130,143,279,341,156,96,122,30,38],[28,39,97,124,198,446,58,81,244,137,295,152,44,204,82,100,64,82,170,237,92,39,17,3,3],[13,28,72,95,166,380,50,70,211,119,259,136,40,186,75,93,61,79,165,231,92,39,17,3,3],[15,11,25,29,32,66,8,11,33,18,36,16,4,18,7,7,3,3,5,6,0,0,0,0,0],["1","1","44","75","25","24","6","18","8","10","60","26","14810","6","26","139","17741064","2697","31694379","79","15","11","5","1","1"],["46.43%","71.79%","74.23%","76.61%","83.84%","85.20%","86.21%","86.42%","86.48%","86.86%","87.80%","89.47%","90.91%","91.18%","91.46%","93.00%","95.31%","96.34%","97.06%","97.47%","100.00%","100.00%","100.00%","100.00%","100.00%"]],"container":"<table class=\"row-border\">\n  <thead>\n    <tr>\n      <th>File<\/th>\n      <th>Lines<\/th>\n      <th>Relevant<\/th>\n      <th>Covered<\/th>\n      <th>Missed<\/th>\n      <th>Hits / Line<\/th>\n      <th>Coverage<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"searching":false,"dom":"t","paging":false,"columnDefs":[{"targets":6,"createdCell":"function(td, cellData, rowData, row, col) {\n  var percent = cellData.replace(\"%\", \"\");\n  if (percent > 90) {\n    var grad = \"linear-gradient(90deg, #edfde7 \" + cellData + \", white \" + cellData + \")\";\n  } else if (percent > 75) {\n    var grad = \"linear-gradient(90deg, #f9ffe5 \" + cellData + \", white \" + cellData + \")\";\n  } else {\n    var grad = \"linear-gradient(90deg, #fcece9 \" + cellData + \", white \" + cellData + \")\";\n  }\n  $(td).css(\"background\", grad);\n}\n"},{"className":"dt-right","targets":[1,2,3,4]},{"name":"File","targets":0},{"name":"Lines","targets":1},{"name":"Relevant","targets":2},{"name":"Covered","targets":3},{"name":"Missed","targets":4},{"name":"Hits / Line","targets":5},{"name":"Coverage","targets":6}],"order":[],"autoWidth":false,"orderClasses":false},"callback":"function(table) {\ntable.on('click.dt', 'a', function() {\n  files = $('div#files div');\n  files.not('div.hidden').addClass('hidden');\n  id = $(this).text();\n  files.filter('div[id=\\'' + id + '\\']').removeClass('hidden');\n  $('ul.nav a[data-value=Source]').text(id).tab('show');\n});\n}"},"evals":["options.columnDefs.0.createdCell","callback"],"jsHooks":[]}</script>
+          <div class="datatables html-widget html-fill-item" id="htmlwidget-890e38ead2caa79fc0f8" style="width:100%;height:500px;"></div>
+          <script type="application/json" data-for="htmlwidget-890e38ead2caa79fc0f8">{"x":{"filter":"none","vertical":false,"fillContainer":false,"data":[["<a href=\"#\">R/lma_initdirs.R<\/a>","<a href=\"#\">R/standardize.lspace.R<\/a>","<a href=\"#\">R/internal.R<\/a>","<a href=\"#\">R/lma_lspace.R<\/a>","<a href=\"#\">R/lma_patcat.R<\/a>","<a href=\"#\">R/lingmatch.R<\/a>","<a href=\"#\">R/select.lspace.R<\/a>","<a href=\"#\">R/read.segments.R<\/a>","<a href=\"#\">R/read.dic.R<\/a>","<a href=\"#\">R/report_term_matches.R<\/a>","<a href=\"#\">R/lma_termcat.R<\/a>","<a href=\"#\">R/lma_dtm.R<\/a>","<a href=\"#\">src/dtm.cpp<\/a>","<a href=\"#\">R/dictionary_meta.R<\/a>","<a href=\"#\">R/lma_weight.R<\/a>","<a href=\"#\">R/lma_simets.R<\/a>","<a href=\"#\">src/embeddings.cpp<\/a>","<a href=\"#\">src/text_search.cpp<\/a>","<a href=\"#\">src/similarity.cpp<\/a>","<a href=\"#\">R/lma_dict.R<\/a>","<a href=\"#\">R/lma_process.R<\/a>","<a href=\"#\">R/lma_meta.R<\/a>","<a href=\"#\">R/select.dict.R<\/a>","<a href=\"#\">R/download.dict.R<\/a>","<a href=\"#\">R/download.lspace.R<\/a>"],[72,92,146,272,371,777,143,168,416,259,508,278,77,329,270,214,130,143,279,341,156,96,122,30,38],[28,39,97,124,198,446,58,81,244,137,295,152,44,204,82,100,64,82,171,237,92,39,17,3,3],[13,28,72,95,166,383,50,70,211,119,259,136,40,186,75,93,61,79,166,231,92,39,17,3,3],[15,11,25,29,32,63,8,11,33,18,36,16,4,18,7,7,3,3,5,6,0,0,0,0,0],["1","1","42","76","25","24","6","18","8","10","60","26","17508","6","26","133","17740759","2674","32315360","79","15","11","5","1","1"],["46.43%","71.79%","74.23%","76.61%","83.84%","85.87%","86.21%","86.42%","86.48%","86.86%","87.80%","89.47%","90.91%","91.18%","91.46%","93.00%","95.31%","96.34%","97.08%","97.47%","100.00%","100.00%","100.00%","100.00%","100.00%"]],"container":"<table class=\"row-border\">\n  <thead>\n    <tr>\n      <th>File<\/th>\n      <th>Lines<\/th>\n      <th>Relevant<\/th>\n      <th>Covered<\/th>\n      <th>Missed<\/th>\n      <th>Hits / Line<\/th>\n      <th>Coverage<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"searching":false,"dom":"t","paging":false,"columnDefs":[{"targets":6,"createdCell":"function(td, cellData, rowData, row, col) {\n  var percent = cellData.replace(\"%\", \"\");\n  if (percent > 90) {\n    var grad = \"linear-gradient(90deg, #edfde7 \" + cellData + \", white \" + cellData + \")\";\n  } else if (percent > 75) {\n    var grad = \"linear-gradient(90deg, #f9ffe5 \" + cellData + \", white \" + cellData + \")\";\n  } else {\n    var grad = \"linear-gradient(90deg, #fcece9 \" + cellData + \", white \" + cellData + \")\";\n  }\n  $(td).css(\"background\", grad);\n}\n"},{"className":"dt-right","targets":[1,2,3,4]},{"name":"File","targets":0},{"name":"Lines","targets":1},{"name":"Relevant","targets":2},{"name":"Covered","targets":3},{"name":"Missed","targets":4},{"name":"Hits / Line","targets":5},{"name":"Coverage","targets":6}],"order":[],"autoWidth":false,"orderClasses":false},"callback":"function(table) {\ntable.on('click.dt', 'a', function() {\n  files = $('div#files div');\n  files.not('div.hidden').addClass('hidden');\n  id = $(this).text();\n  files.filter('div[id=\\'' + id + '\\']').removeClass('hidden');\n  $('ul.nav a[data-value=Source]').text(id).tab('show');\n});\n}"},"evals":["options.columnDefs.0.createdCell","callback"],"jsHooks":[]}</script>
         </div>
         <div class="tab-pane" title="Source" data-value="Source" id="tab-covr-2">
           <div id="files">
@@ -3232,7 +3232,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">446</td>
-                    <td class="coverage">706<em>x</em></td>
+                    <td class="coverage">682<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">              structure(rep(l[[p]], length(termmap[[p]])), names = termmap[[p]])</pre>
                     </td>
@@ -3603,7 +3603,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">499</td>
-                    <td class="coverage">3413<em>x</em></td>
+                    <td class="coverage">3501<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    is.numeric(dtm[, i]) || is.integer(dtm[, i])</pre>
                     </td>
@@ -6858,7 +6858,7 @@ table.table-condensed {
                     <td class="num">38</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
-                      <pre class="language-r">#' terms by length such that shorter terms will not match the same text and longer terms that overlap.</pre>
+                      <pre class="language-r">#' terms by length such that shorter terms will not match the same text as longer terms that overlap.</pre>
                     </td>
                   </tr>
                   <tr class="never">
@@ -11277,14 +11277,14 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">7</td>
-                    <td class="coverage">559<em>x</em></td>
+                    <td class="coverage">537<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  mets &lt;- c("jaccard", "euclidean", "canberra", "cosine", "pearson")</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">8</td>
-                    <td class="coverage">559<em>x</em></td>
+                    <td class="coverage">537<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  sel &lt;- if (is.null(x) || (length(x) == 1 &amp;&amp; grepl(tolower(substr(x, 1, 1)), "a", fixed = TRUE))) {</pre>
                     </td>
@@ -11298,7 +11298,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">10</td>
-                    <td class="coverage">559<em>x</em></td>
+                    <td class="coverage">537<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  } else if (is.function(x)) {</pre>
                     </td>
@@ -11319,7 +11319,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">13</td>
-                    <td class="coverage">538<em>x</em></td>
+                    <td class="coverage">516<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    if (is.numeric(x)) {</pre>
                     </td>
@@ -11347,7 +11347,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">17</td>
-                    <td class="coverage">537<em>x</em></td>
+                    <td class="coverage">515<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      su &lt;- grepl("^(?:cor|r)", x, TRUE)</pre>
                     </td>
@@ -11361,7 +11361,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">19</td>
-                    <td class="coverage">537<em>x</em></td>
+                    <td class="coverage">515<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      unique(unlist(lapply(substr(x, 1, 3), grep, mets, fixed = TRUE, value = TRUE)))</pre>
                     </td>
@@ -11382,7 +11382,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">22</td>
-                    <td class="coverage">559<em>x</em></td>
+                    <td class="coverage">537<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  list(all = mets, selected = sel, dummy = as.integer(mets %in% sel))</pre>
                     </td>
@@ -12552,7 +12552,7 @@ table.table-condensed {
                     <td class="num">42</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
-                      <pre class="language-r">#'   \code{lingmatch(data$text)}.</pre>
+                      <pre class="language-r">#'   \code{lingmatch(data$text)}).</pre>
                     </td>
                   </tr>
                   <tr class="never">
@@ -14379,7 +14379,7 @@ table.table-condensed {
                     <td class="num">303</td>
                     <td class="coverage">2<em>x</em></td>
                     <td class="col-sm-12">
-                      <pre class="language-r">      cn &lt;- sub("^liwc[ .:_-]+", "", tolower(cn))</pre>
+                      <pre class="language-r">      cn &lt;- sub("^liwc[0-9 .:_-]+", "", tolower(cn))</pre>
                     </td>
                   </tr>
                   <tr class="covered">
@@ -16447,23 +16447,23 @@ table.table-condensed {
                       <pre class="language-r">            r &lt;- if (length(su) &lt; 2 || length(unique(s)) &lt; 2) {</pre>
                     </td>
                   </tr>
-                  <tr class="missed">
+                  <tr class="covered">
                     <td class="num">599</td>
-                    <td class="coverage">!</td>
+                    <td class="coverage">6<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">              data.frame(group = g, structure(as.list(numeric(length(mets)) + 1),</pre>
                     </td>
                   </tr>
-                  <tr class="missed">
+                  <tr class="covered">
                     <td class="num">600</td>
-                    <td class="coverage">!</td>
+                    <td class="coverage">6<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">                names = inp$metric</pre>
                     </td>
                   </tr>
-                  <tr class="missed">
+                  <tr class="covered">
                     <td class="num">601</td>
-                    <td class="coverage">!</td>
+                    <td class="coverage">6<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">              ), row.names = paste(su, collapse = ", "), stringsAsFactors = FALSE)</pre>
                     </td>
@@ -16477,49 +16477,49 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">603</td>
-                    <td class="coverage">32<em>x</em></td>
+                    <td class="coverage">26<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">              sal$group &lt;- s</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">604</td>
-                    <td class="coverage">32<em>x</em></td>
+                    <td class="coverage">26<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">              r &lt;- do.call(lma_simets, c(list(input[su, , drop = FALSE]), sal))</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">605</td>
-                    <td class="coverage">32<em>x</em></td>
+                    <td class="coverage">26<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">              rs &lt;- as.integer(unlist(strsplit(rownames(r), "[^0-9]+")))</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">606</td>
-                    <td class="coverage">32<em>x</em></td>
+                    <td class="coverage">26<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">              rownames(r) &lt;- strsplit(do.call(sprintf, c(</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">607</td>
-                    <td class="coverage">32<em>x</em></td>
+                    <td class="coverage">26<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">                paste(gsub("[0-9]+", "%i", rownames(r)), collapse = "|"), as.list(rs - 1 + su[1])</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">608</td>
-                    <td class="coverage">32<em>x</em></td>
+                    <td class="coverage">26<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">              )), "|", fixed = TRUE)[[1]]</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">609</td>
-                    <td class="coverage">32<em>x</em></td>
+                    <td class="coverage">26<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">              data.frame(group = g, r, stringsAsFactors = FALSE)</pre>
                     </td>
@@ -25019,7 +25019,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">179</td>
-                    <td class="coverage">821<em>x</em></td>
+                    <td class="coverage">823<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">          if (all) {</pre>
                     </td>
@@ -25040,14 +25040,14 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">182</td>
-                    <td class="coverage">819<em>x</em></td>
+                    <td class="coverage">821<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">            n &lt;- 1</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">183</td>
-                    <td class="coverage">819<em>x</em></td>
+                    <td class="coverage">821<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">            while (i + n &lt; l &amp;&amp; inds[i + n - 1] == inds[i + n] - 1) n &lt;- n + 1</pre>
                     </td>
@@ -25061,21 +25061,21 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">185</td>
-                    <td class="coverage">821<em>x</em></td>
+                    <td class="coverage">823<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">          r[seq_len(n) + i - 1, ] &lt;- matrix(scan(</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">186</td>
-                    <td class="coverage">821<em>x</em></td>
+                    <td class="coverage">823<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">            con,</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">187</td>
-                    <td class="coverage">821<em>x</em></td>
+                    <td class="coverage">823<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">            n = n * nc, quiet = TRUE, skip = (if (i == 1) {</pre>
                     </td>
@@ -25096,28 +25096,28 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">190</td>
-                    <td class="coverage">817<em>x</em></td>
+                    <td class="coverage">819<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">              inds[i] - inds[i - 1]</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">191</td>
-                    <td class="coverage">821<em>x</em></td>
+                    <td class="coverage">823<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">            }) - 1, quote = "", comment.char = "", na.strings = ""</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">192</td>
-                    <td class="coverage">821<em>x</em></td>
+                    <td class="coverage">823<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">          ), n, nc, byrow = TRUE)</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">193</td>
-                    <td class="coverage">821<em>x</em></td>
+                    <td class="coverage">823<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">          i &lt;- i + n</pre>
                     </td>
@@ -32860,21 +32860,21 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">83</td>
-                    <td class="coverage">515<em>x</em></td>
+                    <td class="coverage">493<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  mets &lt;- c("jaccard", "euclidean", "canberra", "cosine", "pearson")</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">84</td>
-                    <td class="coverage">515<em>x</em></td>
+                    <td class="coverage">493<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (missing(metric) &amp;&amp; length(b) == 1 &amp;&amp; !grepl(" ", b) &amp;&amp;</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">85</td>
-                    <td class="coverage">515<em>x</em></td>
+                    <td class="coverage">493<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    any(grepl(tolower(substr(b, 1, 3)), mets, fixed = TRUE))) {</pre>
                     </td>
@@ -32902,14 +32902,14 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">89</td>
-                    <td class="coverage">515<em>x</em></td>
+                    <td class="coverage">493<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  met &lt;- match_metric(metric)</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">90</td>
-                    <td class="coverage">515<em>x</em></td>
+                    <td class="coverage">493<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (!length(met$selected)) {</pre>
                     </td>
@@ -32951,21 +32951,21 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">96</td>
-                    <td class="coverage">515<em>x</em></td>
+                    <td class="coverage">493<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  st &lt;- proc.time()[[3]]</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">97</td>
-                    <td class="coverage">515<em>x</em></td>
+                    <td class="coverage">493<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  slots &lt;- c("i", "p", "x", "Dim")</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">98</td>
-                    <td class="coverage">515<em>x</em></td>
+                    <td class="coverage">493<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if ((is.character(a) || is.factor(a)) &amp;&amp; any(grepl("[a-zA-Z]", a))) {</pre>
                     </td>
@@ -32993,14 +32993,14 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">102</td>
-                    <td class="coverage">515<em>x</em></td>
+                    <td class="coverage">493<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (is.null(b)) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">103</td>
-                    <td class="coverage">114<em>x</em></td>
+                    <td class="coverage">108<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    n &lt;- dim(a)[1]</pre>
                     </td>
@@ -33014,7 +33014,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">105</td>
-                    <td class="coverage">114<em>x</em></td>
+                    <td class="coverage">108<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    if (is.null(group)) {</pre>
                     </td>
@@ -33056,70 +33056,70 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">111</td>
-                    <td class="coverage">37<em>x</em></td>
+                    <td class="coverage">31<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      ager &lt;- if (agg.mean) colMeans else colSums</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">112</td>
-                    <td class="coverage">37<em>x</em></td>
+                    <td class="coverage">31<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      l &lt;- length(group)</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">113</td>
-                    <td class="coverage">37<em>x</em></td>
+                    <td class="coverage">31<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      chunks &lt;- NULL</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">114</td>
-                    <td class="coverage">37<em>x</em></td>
+                    <td class="coverage">31<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      i &lt;- 1</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">115</td>
-                    <td class="coverage">37<em>x</em></td>
+                    <td class="coverage">31<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      while (i &lt; l) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">116</td>
-                    <td class="coverage">193<em>x</em></td>
+                    <td class="coverage">175<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        st &lt;- i</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">117</td>
-                    <td class="coverage">193<em>x</em></td>
+                    <td class="coverage">175<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        g &lt;- group[i]</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">118</td>
-                    <td class="coverage">193<em>x</em></td>
+                    <td class="coverage">175<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        while (i &lt; l &amp;&amp; g == group[i + 1]) i &lt;- i + 1</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">119</td>
-                    <td class="coverage">193<em>x</em></td>
+                    <td class="coverage">175<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        chunks &lt;- c(chunks, list(seq(st, i)))</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">120</td>
-                    <td class="coverage">193<em>x</em></td>
+                    <td class="coverage">175<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        i &lt;- i + 1</pre>
                     </td>
@@ -33133,84 +33133,84 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">122</td>
-                    <td class="coverage">25<em>x</em></td>
+                    <td class="coverage">19<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      if (!any(chunks[[length(chunks)]] == l)) chunks &lt;- c(chunks, list(l))</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">123</td>
-                    <td class="coverage">37<em>x</em></td>
+                    <td class="coverage">31<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      rows &lt;- character(length(chunks) - 1)</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">124</td>
-                    <td class="coverage">37<em>x</em></td>
+                    <td class="coverage">31<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      res &lt;- as.data.frame(matrix(0, length(chunks) - 1, sum(met$dummy), dimnames = list(NULL, met$selected)))</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">125</td>
-                    <td class="coverage">37<em>x</em></td>
+                    <td class="coverage">31<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      for (i in seq_len(length(chunks) - 1)) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">126</td>
-                    <td class="coverage">181<em>x</em></td>
+                    <td class="coverage">163<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        s &lt;- chunks[[i]]</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">127</td>
-                    <td class="coverage">181<em>x</em></td>
+                    <td class="coverage">163<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        sa &lt;- if (agg) s else s[length(s)]</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">128</td>
-                    <td class="coverage">181<em>x</em></td>
+                    <td class="coverage">163<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        ta &lt;- ager(a[sa, , drop = FALSE])</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">129</td>
-                    <td class="coverage">181<em>x</em></td>
+                    <td class="coverage">163<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        s &lt;- chunks[[i + 1]]</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">130</td>
-                    <td class="coverage">181<em>x</em></td>
+                    <td class="coverage">163<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        sb &lt;- if (agg) s else s[1]</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">131</td>
-                    <td class="coverage">181<em>x</em></td>
+                    <td class="coverage">163<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        tb &lt;- ager(a[sb, , drop = FALSE])</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">132</td>
-                    <td class="coverage">181<em>x</em></td>
+                    <td class="coverage">163<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        res[i, ] &lt;- vector_similarity(ta, tb, met$dummy)</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">133</td>
-                    <td class="coverage">181<em>x</em></td>
+                    <td class="coverage">163<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        rows[i] &lt;- paste(paste(sa, collapse = ", "), "&lt;-&gt;", paste(sb, collapse = ", "))</pre>
                     </td>
@@ -33224,7 +33224,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">135</td>
-                    <td class="coverage">37<em>x</em></td>
+                    <td class="coverage">31<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      rownames(res) &lt;- rows</pre>
                     </td>
@@ -33245,7 +33245,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">138</td>
-                    <td class="coverage">401<em>x</em></td>
+                    <td class="coverage">385<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    if ((is.character(b) || is.factor(b)) &amp;&amp; any(grepl("[a-zA-Z]", b))) {</pre>
                     </td>
@@ -33266,7 +33266,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">141</td>
-                    <td class="coverage">401<em>x</em></td>
+                    <td class="coverage">385<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    bn &lt;- if (is.null(dim(b))) length(b) else dim(b)[1]</pre>
                     </td>
@@ -33280,14 +33280,14 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">143</td>
-                    <td class="coverage">401<em>x</em></td>
+                    <td class="coverage">385<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    res &lt;- if (is.null(dim(b)) &amp;&amp; length(a) == bn &amp;&amp; (is.null(dim(a)) || any(dim(a) == 1))) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">144</td>
-                    <td class="coverage">247<em>x</em></td>
+                    <td class="coverage">231<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      b &lt;- as.numeric(b)</pre>
                     </td>
@@ -33301,7 +33301,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">146</td>
-                    <td class="coverage">247<em>x</em></td>
+                    <td class="coverage">231<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      vector_similarity(as.numeric(a), b, met$dummy)</pre>
                     </td>
@@ -33511,7 +33511,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">176</td>
-                    <td class="coverage">105<em>x</em></td>
+                    <td class="coverage">104<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        1</pre>
                     </td>
@@ -33525,7 +33525,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">178</td>
-                    <td class="coverage">49<em>x</em></td>
+                    <td class="coverage">50<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        3</pre>
                     </td>
@@ -33560,7 +33560,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">183</td>
-                    <td class="coverage">515<em>x</em></td>
+                    <td class="coverage">493<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if ("list" %in% class(res) &amp;&amp; length(res)) {</pre>
                     </td>
@@ -33665,14 +33665,14 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">198</td>
-                    <td class="coverage">111<em>x</em></td>
+                    <td class="coverage">110<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      rn &lt;- if (!is.na(nd &lt;- which(c(dim(a), dim(b)) == length(res[[1]]))[1]) &amp;&amp; !is.null(rownames(if (nd == 1) a else b))) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">199</td>
-                    <td class="coverage">37<em>x</em></td>
+                    <td class="coverage">36<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        rownames(if (nd == 1) a else b)</pre>
                     </td>
@@ -33700,14 +33700,14 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">203</td>
-                    <td class="coverage">111<em>x</em></td>
+                    <td class="coverage">110<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      if (length(met$selected) == 1) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">204</td>
-                    <td class="coverage">37<em>x</em></td>
+                    <td class="coverage">36<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        if (length(rn) == length(res[[1]])) names(res[[1]]) &lt;- rn</pre>
                     </td>
@@ -33763,14 +33763,14 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">212</td>
-                    <td class="coverage">515<em>x</em></td>
+                    <td class="coverage">493<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  attr(res, "time") &lt;- c(simets = proc.time()[[3]] - st)</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">213</td>
-                    <td class="coverage">515<em>x</em></td>
+                    <td class="coverage">493<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  res</pre>
                     </td>
@@ -36139,7 +36139,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">31</td>
-                    <td class="coverage">15081<em>x</em></td>
+                    <td class="coverage">15412<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  for (; i--;) dict.insert({terms[i], i});</pre>
                     </td>
@@ -36167,42 +36167,42 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">35</td>
-                    <td class="coverage">1230<em>x</em></td>
+                    <td class="coverage">1372<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      for (un = uses.length(), p = 0; p &lt; un; p++)</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">36</td>
-                    <td class="coverage">1200<em>x</em></td>
+                    <td class="coverage">1342<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        if (complete || dict.find(uses[p]) != dict.end()) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">37</td>
-                    <td class="coverage">1178<em>x</em></td>
+                    <td class="coverage">1330<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">          colindex = dict.at(uses[p]);</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">38</td>
-                    <td class="coverage">1178<em>x</em></td>
+                    <td class="coverage">1330<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">          rows.push_back(colindex);</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">39</td>
-                    <td class="coverage">1178<em>x</em></td>
+                    <td class="coverage">1330<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">          colsums[colindex]++;</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">40</td>
-                    <td class="coverage">1178<em>x</em></td>
+                    <td class="coverage">1330<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">          rowsums[s]++;</pre>
                     </td>
@@ -36279,70 +36279,70 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">51</td>
-                    <td class="coverage">63612<em>x</em></td>
+                    <td class="coverage">75356<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      for (un = uses.length(), p = 0; p &lt; un; p++)</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">52</td>
-                    <td class="coverage">62386<em>x</em></td>
+                    <td class="coverage">74130<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        if (complete || dict.find(uses[p]) != dict.end()) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">53</td>
-                    <td class="coverage">62355<em>x</em></td>
+                    <td class="coverage">74109<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">          colindex = dict.at(uses[p]);</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">54</td>
-                    <td class="coverage">62355<em>x</em></td>
+                    <td class="coverage">74109<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">          colsums[colindex]++;</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">55</td>
-                    <td class="coverage">62355<em>x</em></td>
+                    <td class="coverage">74109<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">          if (isword[colindex]) rowsums[s]++;</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">56</td>
-                    <td class="coverage">62355<em>x</em></td>
+                    <td class="coverage">74109<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">          if (p == 0 || uses[p] != uses[p - 1]) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">57</td>
-                    <td class="coverage">62021<em>x</em></td>
+                    <td class="coverage">73766<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">            rows.push_back(s);</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">58</td>
-                    <td class="coverage">62021<em>x</em></td>
+                    <td class="coverage">73766<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">            columns.push_back(colindex);</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">59</td>
-                    <td class="coverage">62021<em>x</em></td>
+                    <td class="coverage">73766<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">            counts.push_back(1);</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">60</td>
-                    <td class="coverage">62021<em>x</em></td>
+                    <td class="coverage">73766<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">            i++;</pre>
                     </td>
@@ -36356,7 +36356,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">62</td>
-                    <td class="coverage">334<em>x</em></td>
+                    <td class="coverage">343<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">            counts[i]++;</pre>
                     </td>
@@ -37230,49 +37230,49 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">109</td>
-                    <td class="coverage">1238496<em>x</em></td>
+                    <td class="coverage">1238387<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  for (t = 0; t &lt; nr;) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">110</td>
-                    <td class="coverage">1238478<em>x</em></td>
+                    <td class="coverage">1238369<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    if (++p == indices[t]) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">111</td>
-                    <td class="coverage">310764<em>x</em></td>
+                    <td class="coverage">310762<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      getline(d, line);</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">112</td>
-                    <td class="coverage">363189637<em>x</em></td>
+                    <td class="coverage">363183487<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      for (value = "", ln = line.length(), c = 0, i = 0; i &lt; ln; i++) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">113</td>
-                    <td class="coverage">362878873<em>x</em></td>
+                    <td class="coverage">362872725<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        if (line[i] == sep) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">114</td>
-                    <td class="coverage">37437236<em>x</em></td>
+                    <td class="coverage">37436638<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">          r[t * nc + c++] = atof(value.c_str());</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">115</td>
-                    <td class="coverage">37437236<em>x</em></td>
+                    <td class="coverage">37436638<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">          value = "";</pre>
                     </td>
@@ -37286,7 +37286,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">117</td>
-                    <td class="coverage">325441637<em>x</em></td>
+                    <td class="coverage">325436087<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">          value.push_back(line[i]);</pre>
                     </td>
@@ -37300,7 +37300,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">119</td>
-                    <td class="coverage">310764<em>x</em></td>
+                    <td class="coverage">310762<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      r[t++ * nc + c] = atof(value.c_str());</pre>
                     </td>
@@ -37314,14 +37314,14 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">121</td>
-                    <td class="coverage">927714<em>x</em></td>
+                    <td class="coverage">927607<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      d.ignore(numeric_limits&lt;streamsize&gt;::max(), '\n');</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">122</td>
-                    <td class="coverage">1238478<em>x</em></td>
+                    <td class="coverage">1238369<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    if (!--ck) {</pre>
                     </td>
@@ -37370,7 +37370,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">129</td>
-                    <td class="coverage">36<em>x</em></td>
+                    <td class="coverage">18<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  return r;</pre>
                     </td>
@@ -37516,7 +37516,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">19</td>
-                    <td class="coverage">428<em>x</em></td>
+                    <td class="coverage">394<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">NumericVector vector_similarity(NumericVector &amp;a, NumericVector &amp;b,</pre>
                     </td>
@@ -37530,35 +37530,35 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">21</td>
-                    <td class="coverage">428<em>x</em></td>
+                    <td class="coverage">394<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  const int n = a.length();</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">22</td>
-                    <td class="coverage">428<em>x</em></td>
+                    <td class="coverage">394<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  bool ck = true;</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">23</td>
-                    <td class="coverage">428<em>x</em></td>
+                    <td class="coverage">394<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  NumericVector op;</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">24</td>
-                    <td class="coverage">428<em>x</em></td>
+                    <td class="coverage">394<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  LogicalVector su = is_na(a) | is_na(b) | ((a == 0) &amp; (b == 0));</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">25</td>
-                    <td class="coverage">428<em>x</em></td>
+                    <td class="coverage">394<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (is_true(all(su)))</pre>
                     </td>
@@ -37572,21 +37572,21 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">27</td>
-                    <td class="coverage">428<em>x</em></td>
+                    <td class="coverage">394<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  else if (is_true(any(su))) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">28</td>
-                    <td class="coverage">145<em>x</em></td>
+                    <td class="coverage">172<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    a = a[!su];</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">29</td>
-                    <td class="coverage">145<em>x</em></td>
+                    <td class="coverage">172<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    b = b[!su];</pre>
                     </td>
@@ -37600,7 +37600,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">31</td>
-                    <td class="coverage">428<em>x</em></td>
+                    <td class="coverage">394<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (metrics[0]) {</pre>
                     </td>
@@ -37635,7 +37635,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">36</td>
-                    <td class="coverage">428<em>x</em></td>
+                    <td class="coverage">394<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (metrics[1])</pre>
                     </td>
@@ -37649,7 +37649,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">38</td>
-                    <td class="coverage">428<em>x</em></td>
+                    <td class="coverage">394<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (metrics[2])</pre>
                     </td>
@@ -37670,14 +37670,14 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">41</td>
-                    <td class="coverage">428<em>x</em></td>
+                    <td class="coverage">394<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (metrics[3]) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">42</td>
-                    <td class="coverage">606<em>x</em></td>
+                    <td class="coverage">538<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    op.push_back(</pre>
                     </td>
@@ -37698,7 +37698,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">45</td>
-                    <td class="coverage">610<em>x</em></td>
+                    <td class="coverage">542<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    if (isnan((float)op["cosine"])) op["cosine"] = NA_REAL;</pre>
                     </td>
@@ -37712,7 +37712,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">47</td>
-                    <td class="coverage">428<em>x</em></td>
+                    <td class="coverage">394<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (metrics[4]) {</pre>
                     </td>
@@ -37775,7 +37775,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">56</td>
-                    <td class="coverage">856<em>x</em></td>
+                    <td class="coverage">394<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  return op;</pre>
                     </td>
@@ -37845,7 +37845,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">66</td>
-                    <td class="coverage">1155<em>x</em></td>
+                    <td class="coverage">770<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      : values(m.slot("x")),</pre>
                     </td>
@@ -37866,7 +37866,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">69</td>
-                    <td class="coverage">385<em>x</em></td>
+                    <td class="coverage">770<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        p(m.slot("p")),</pre>
                     </td>
@@ -37922,35 +37922,35 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">77</td>
-                    <td class="coverage">132229890<em>x</em></td>
+                    <td class="coverage">132248524<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    for (; index &lt; n; index++) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">78</td>
-                    <td class="coverage">132229505<em>x</em></td>
+                    <td class="coverage">132248139<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      r = i[index];</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">79</td>
-                    <td class="coverage">132229505<em>x</em></td>
+                    <td class="coverage">132248139<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      if (row_starts[r] == -1) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">80</td>
-                    <td class="coverage">1040651<em>x</em></td>
+                    <td class="coverage">1040587<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        row_starts[r] = index;</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">81</td>
-                    <td class="coverage">1040651<em>x</em></td>
+                    <td class="coverage">1040587<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        row_steps.insert({r, index});</pre>
                     </td>
@@ -37964,14 +37964,14 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">83</td>
-                    <td class="coverage">131188854<em>x</em></td>
+                    <td class="coverage">131207552<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        row_maps[row_steps.at(r)] = index;</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">84</td>
-                    <td class="coverage">131188854<em>x</em></td>
+                    <td class="coverage">131207552<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        row_steps.at(r) = index;</pre>
                     </td>
@@ -37985,21 +37985,21 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">86</td>
-                    <td class="coverage">132229505<em>x</em></td>
+                    <td class="coverage">132248139<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      if (c + 1 &lt; ncol &amp;&amp; index == p[c + 1]) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">87</td>
-                    <td class="coverage">49383<em>x</em></td>
+                    <td class="coverage">50192<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        c++;</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">88</td>
-                    <td class="coverage">55472<em>x</em></td>
+                    <td class="coverage">56522<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        while (c + 1 &lt; ncol &amp;&amp; p[c] == p[c + 1]) c++;</pre>
                     </td>
@@ -38013,7 +38013,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">90</td>
-                    <td class="coverage">132229505<em>x</em></td>
+                    <td class="coverage">132248139<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      columns[index] = c;</pre>
                     </td>
@@ -38202,7 +38202,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">117</td>
-                    <td class="coverage">137626<em>x</em></td>
+                    <td class="coverage">145158<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  void operator()(size_t p, size_t final) {</pre>
                     </td>
@@ -38230,56 +38230,56 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">121</td>
-                    <td class="coverage">2936314<em>x</em></td>
+                    <td class="coverage">2945188<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    for (; p &lt; final; p++) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">122</td>
-                    <td class="coverage">2799259<em>x</em></td>
+                    <td class="coverage">2800264<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      r = aind[p];</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">123</td>
-                    <td class="coverage">2795707<em>x</em></td>
+                    <td class="coverage">2798527<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      comp = bind[p];</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">124</td>
-                    <td class="coverage">2796901<em>x</em></td>
+                    <td class="coverage">2798833<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      i = a.row_starts[r];</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">125</td>
-                    <td class="coverage">2779528<em>x</em></td>
+                    <td class="coverage">2781363<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      c = i == -1 ? -1 : a.columns[i];</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">126</td>
-                    <td class="coverage">2774633<em>x</em></td>
+                    <td class="coverage">2776070<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      bi = b.row_starts[comp];</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">127</td>
-                    <td class="coverage">2771176<em>x</em></td>
+                    <td class="coverage">2773271<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      bc = bi == -1 ? -1 : b.columns[bi];</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">128</td>
-                    <td class="coverage">2767589<em>x</em></td>
+                    <td class="coverage">2769888<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      x = bx = sa = sb = sdif = sadif = sse = sne = cp = asq = bsq = sj = si =</pre>
                     </td>
@@ -38293,35 +38293,35 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">130</td>
-                    <td class="coverage">234284358<em>x</em></td>
+                    <td class="coverage">241315572<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      for (l = ncol; l--;) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">131</td>
-                    <td class="coverage">263110273<em>x</em></td>
+                    <td class="coverage">266999328<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        col = c;</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">132</td>
-                    <td class="coverage">263110273<em>x</em></td>
+                    <td class="coverage">266999328<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        if (i == -1 || (bc != -1 &amp;&amp; c &gt; bc)) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">133</td>
-                    <td class="coverage">754610<em>x</em></td>
+                    <td class="coverage">985743<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">          x = 0;</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">134</td>
-                    <td class="coverage">754610<em>x</em></td>
+                    <td class="coverage">985743<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">          if (i == -1) c = -1;</pre>
                     </td>
@@ -38335,21 +38335,21 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">136</td>
-                    <td class="coverage">262355663<em>x</em></td>
+                    <td class="coverage">266013585<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">          x = a.values[i];</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">137</td>
-                    <td class="coverage">163406580<em>x</em></td>
+                    <td class="coverage">158916312<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">          i = a.row_maps[i];</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">138</td>
-                    <td class="coverage">135819982<em>x</em></td>
+                    <td class="coverage">138714438<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">          c = i == -1 ? -1 : a.columns[i];</pre>
                     </td>
@@ -38370,21 +38370,21 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">141</td>
-                    <td class="coverage">118446667<em>x</em></td>
+                    <td class="coverage">131471610<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        if (bi == -1 || (col != -1 &amp;&amp; bc &gt; col)) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">142</td>
-                    <td class="coverage">578863<em>x</em></td>
+                    <td class="coverage">747676<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">          bx = 0;</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">143</td>
-                    <td class="coverage">578863<em>x</em></td>
+                    <td class="coverage">747676<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">          if (bi == -1) bc = -1;</pre>
                     </td>
@@ -38398,28 +38398,28 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">145</td>
-                    <td class="coverage">117867804<em>x</em></td>
+                    <td class="coverage">130723934<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">          bx = b.values[bi];</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">146</td>
-                    <td class="coverage">123909872<em>x</em></td>
+                    <td class="coverage">143058108<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">          bi = b.row_maps[bi];</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">147</td>
-                    <td class="coverage">120818819<em>x</em></td>
+                    <td class="coverage">133697190<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">          bc = bi == -1 ? -1 : b.columns[bi];</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">148</td>
-                    <td class="coverage">108430728<em>x</em></td>
+                    <td class="coverage">119772192<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">          if (NumericVector::is_na(bx) || bx + x == 0) continue;</pre>
                     </td>
@@ -38433,91 +38433,91 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">150</td>
-                    <td class="coverage">116228658<em>x</em></td>
+                    <td class="coverage">128545539<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        sa += x;</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">151</td>
-                    <td class="coverage">116228658<em>x</em></td>
+                    <td class="coverage">128545539<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        sb += bx;</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">152</td>
-                    <td class="coverage">116228658<em>x</em></td>
+                    <td class="coverage">128545539<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        dif = x - bx;</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">153</td>
-                    <td class="coverage">116228658<em>x</em></td>
+                    <td class="coverage">128545539<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        sse += pow(dif, 2);</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">154</td>
-                    <td class="coverage">212765449<em>x</em></td>
+                    <td class="coverage">203537542<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        dif = abs(dif);</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">155</td>
-                    <td class="coverage">226389827<em>x</em></td>
+                    <td class="coverage">219554132<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        sdif += dif;</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">156</td>
-                    <td class="coverage">226389827<em>x</em></td>
+                    <td class="coverage">219554132<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        if (x || bx) sne += dif / (abs(x) + abs(bx));</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">157</td>
-                    <td class="coverage">222475667<em>x</em></td>
+                    <td class="coverage">218189578<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        cp += x * bx;</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">158</td>
-                    <td class="coverage">222475667<em>x</em></td>
+                    <td class="coverage">218189578<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        asq += pow(x, 2);</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">159</td>
-                    <td class="coverage">223499606<em>x</em></td>
+                    <td class="coverage">235402838<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        bsq += pow(bx, 2);</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">160</td>
-                    <td class="coverage">234315438<em>x</em></td>
+                    <td class="coverage">241347109<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        sj += x &amp;&amp; bx;</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">161</td>
-                    <td class="coverage">234315438<em>x</em></td>
+                    <td class="coverage">241347109<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        si += x || bx;</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">162</td>
-                    <td class="coverage">234315438<em>x</em></td>
+                    <td class="coverage">241347109<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        if (i == -1 &amp;&amp; bi == -1) break;</pre>
                     </td>
@@ -38552,14 +38552,14 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">167</td>
-                    <td class="coverage">2802775<em>x</em></td>
+                    <td class="coverage">2803335<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        if (metrics[0]) jaccard[p] = sj / si;</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">168</td>
-                    <td class="coverage">2796600<em>x</em></td>
+                    <td class="coverage">2797139<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        if (metrics[2]) canberra[p] = 1 - sne / ncol;</pre>
                     </td>
@@ -38580,35 +38580,35 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">171</td>
-                    <td class="coverage">2797431<em>x</em></td>
+                    <td class="coverage">2798684<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      if (sa &amp;&amp; sb) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">172</td>
-                    <td class="coverage">2797713<em>x</em></td>
+                    <td class="coverage">2798331<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        if (metrics[3] &amp;&amp; asq &amp;&amp; bsq) cosine[p] = cp / sqrt(asq) / sqrt(bsq);</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">173</td>
-                    <td class="coverage">2800478<em>x</em></td>
+                    <td class="coverage">2803675<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        if (metrics[4]) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">174</td>
-                    <td class="coverage">20398<em>x</em></td>
+                    <td class="coverage">19442<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">          x = (cp / ncol - ma * mb) / sqrt(asq / ncol - pow(ma, 2)) /</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">175</td>
-                    <td class="coverage">19960<em>x</em></td>
+                    <td class="coverage">19957<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">              sqrt(bsq / ncol - pow(mb, 2));</pre>
                     </td>
@@ -38811,14 +38811,14 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">204</td>
-                    <td class="coverage">357<em>x</em></td>
+                    <td class="coverage">358<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  const size_t arow = a.dims[0], n = type == 1   ? a.dims[0]</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">205</td>
-                    <td class="coverage">126<em>x</em></td>
+                    <td class="coverage">127<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">                                     : type == 2 ? arow * (arow - 1) / 2</pre>
                     </td>
@@ -38902,28 +38902,28 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">217</td>
-                    <td class="coverage">105<em>x</em></td>
+                    <td class="coverage">104<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    case 1:  // each a row to a single b row or paired b rows</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">218</td>
-                    <td class="coverage">105<em>x</em></td>
+                    <td class="coverage">104<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      aind = seq_len(n) - 1;</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">219</td>
-                    <td class="coverage">105<em>x</em></td>
+                    <td class="coverage">104<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      if (nrow == n) bind = aind;</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">220</td>
-                    <td class="coverage">105<em>x</em></td>
+                    <td class="coverage">104<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      break;</pre>
                     </td>
@@ -38937,28 +38937,28 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">222</td>
-                    <td class="coverage">60002<em>x</em></td>
+                    <td class="coverage">59998<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      for (index = 0; index &lt; n; index++) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">223</td>
-                    <td class="coverage">59925<em>x</em></td>
+                    <td class="coverage">59921<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        aind[index] = ai;</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">224</td>
-                    <td class="coverage">59925<em>x</em></td>
+                    <td class="coverage">59921<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        bind[index] = bi;</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">225</td>
-                    <td class="coverage">59925<em>x</em></td>
+                    <td class="coverage">59921<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        if (++ai == nrow) {</pre>
                     </td>
@@ -39000,56 +39000,56 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">231</td>
-                    <td class="coverage">49<em>x</em></td>
+                    <td class="coverage">50<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    case 3:  // each a row with each b row</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">232</td>
-                    <td class="coverage">49<em>x</em></td>
+                    <td class="coverage">50<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      ai = 0, nrow = a.dims[0], index = 0;</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">233</td>
-                    <td class="coverage">2343945<em>x</em></td>
+                    <td class="coverage">2344197<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      for (; index &lt; n; index++) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">234</td>
-                    <td class="coverage">2343896<em>x</em></td>
+                    <td class="coverage">2344147<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        aind[index] = ai;</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">235</td>
-                    <td class="coverage">2343896<em>x</em></td>
+                    <td class="coverage">2344147<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        bind[index] = bi;</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">236</td>
-                    <td class="coverage">2343896<em>x</em></td>
+                    <td class="coverage">2344147<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        if (++ai == nrow) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">237</td>
-                    <td class="coverage">447<em>x</em></td>
+                    <td class="coverage">478<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">          column_starts[++bi] = index + 1;</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">238</td>
-                    <td class="coverage">447<em>x</em></td>
+                    <td class="coverage">478<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">          ai = 0;</pre>
                     </td>
@@ -39070,7 +39070,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">241</td>
-                    <td class="coverage">49<em>x</em></td>
+                    <td class="coverage">50<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      break;</pre>
                     </td>
@@ -39133,7 +39133,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">250</td>
-                    <td class="coverage">462<em>x</em></td>
+                    <td class="coverage">231<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  NumericVector sim;</pre>
                     </td>
@@ -39168,7 +39168,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">255</td>
-                    <td class="coverage">176<em>x</em></td>
+                    <td class="coverage">175<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        op.push_back(sim, met);</pre>
                     </td>
@@ -39182,56 +39182,56 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">257</td>
-                    <td class="coverage">262<em>x</em></td>
+                    <td class="coverage">264<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        S4 simsm(type == 2 ? "dtCMatrix" : "dgCMatrix");</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">258</td>
-                    <td class="coverage">262<em>x</em></td>
+                    <td class="coverage">264<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        simsm.slot("Dim") = dim;</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">259</td>
-                    <td class="coverage">131<em>x</em></td>
+                    <td class="coverage">132<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        List dimnames(m.slot("Dimnames")),</pre>
                     </td>
                   </tr>
-                  <tr class="never">
+                  <tr class="covered">
                     <td class="num">260</td>
-                    <td class="coverage"></td>
+                    <td class="coverage">132<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">            newdimnames{dimnames[0],</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">261</td>
-                    <td class="coverage">131<em>x</em></td>
+                    <td class="coverage">132<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">                        dim[1] == dim[0] ? dimnames[0] : R_NilValue};</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">262</td>
-                    <td class="coverage">131<em>x</em></td>
+                    <td class="coverage">132<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        if (procb) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">263</td>
-                    <td class="coverage">46<em>x</em></td>
+                    <td class="coverage">47<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">          List dimnames2(comp.slot("Dimnames"));</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">264</td>
-                    <td class="coverage">46<em>x</em></td>
+                    <td class="coverage">47<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">          newdimnames[1] = dimnames2[0];</pre>
                     </td>
@@ -39245,35 +39245,35 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">266</td>
-                    <td class="coverage">262<em>x</em></td>
+                    <td class="coverage">264<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        simsm.slot("Dimnames") = newdimnames;</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">267</td>
-                    <td class="coverage">262<em>x</em></td>
+                    <td class="coverage">264<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        simsm.slot("i") = aind;</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">268</td>
-                    <td class="coverage">262<em>x</em></td>
+                    <td class="coverage">264<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        simsm.slot("p") = column_starts;</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">269</td>
-                    <td class="coverage">131<em>x</em></td>
+                    <td class="coverage">132<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        simsm.slot("x") = sim;</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">270</td>
-                    <td class="coverage">131<em>x</em></td>
+                    <td class="coverage">132<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        if (type == 2) {</pre>
                     </td>
@@ -39301,7 +39301,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">274</td>
-                    <td class="coverage">131<em>x</em></td>
+                    <td class="coverage">132<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        op.push_back(simsm, met);</pre>
                     </td>
@@ -39594,56 +39594,56 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">36</td>
-                    <td class="coverage">16827<em>x</em></td>
+                    <td class="coverage">16487<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      for (i = 0, n = patterns.length(); i &lt; n; i++) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">37</td>
-                    <td class="coverage">16622<em>x</em></td>
+                    <td class="coverage">16282<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        l = patterns[i].size(), cx = 0;</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">38</td>
-                    <td class="coverage">16622<em>x</em></td>
+                    <td class="coverage">16282<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        if (l)</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">39</td>
-                    <td class="coverage">16622<em>x</em></td>
+                    <td class="coverage">16282<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">          for (std::string::size_type r, p = 0;</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">40</td>
-                    <td class="coverage">24241<em>x</em></td>
+                    <td class="coverage">23946<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">               (r = txt.find(patterns[i], p)) != std::string::npos;) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">41</td>
-                    <td class="coverage">7619<em>x</em></td>
+                    <td class="coverage">7664<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">            if (exclusive) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">42</td>
-                    <td class="coverage">7581<em>x</em></td>
+                    <td class="coverage">7626<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">              txt.replace(r, l, " ");</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">43</td>
-                    <td class="coverage">7581<em>x</em></td>
+                    <td class="coverage">7626<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">              p = r + 1;</pre>
                     </td>
@@ -39664,7 +39664,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">46</td>
-                    <td class="coverage">7619<em>x</em></td>
+                    <td class="coverage">7664<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">            cx += 1;</pre>
                     </td>
@@ -39678,35 +39678,35 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">48</td>
-                    <td class="coverage">16622<em>x</em></td>
+                    <td class="coverage">16282<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        if (cx) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">49</td>
-                    <td class="coverage">3860<em>x</em></td>
+                    <td class="coverage">3866<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">          rows.push_back(r);</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">50</td>
-                    <td class="coverage">3860<em>x</em></td>
+                    <td class="coverage">3866<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">          columns.push_back(terms[i]);</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">51</td>
-                    <td class="coverage">3860<em>x</em></td>
+                    <td class="coverage">3866<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">          values.push_back(cx);</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">52</td>
-                    <td class="coverage">3860<em>x</em></td>
+                    <td class="coverage">3866<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">          rowsums[r] += cx;</pre>
                     </td>
@@ -39923,28 +39923,28 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">83</td>
-                    <td class="coverage">536<em>x</em></td>
+                    <td class="coverage">526<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">          rows.push_back(r);</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">84</td>
-                    <td class="coverage">536<em>x</em></td>
+                    <td class="coverage">526<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">          columns.push_back(terms[i]);</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">85</td>
-                    <td class="coverage">536<em>x</em></td>
+                    <td class="coverage">526<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">          values.push_back(cx);</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">86</td>
-                    <td class="coverage">536<em>x</em></td>
+                    <td class="coverage">526<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">          rowsums[r] += cx;</pre>
                     </td>
@@ -40336,7 +40336,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">142</td>
-                    <td class="coverage">26<em>x</em></td>
+                    <td class="coverage">13<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  return res;</pre>
                     </td>

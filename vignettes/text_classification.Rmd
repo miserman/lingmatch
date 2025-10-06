@@ -127,7 +127,7 @@ dict <- list(
 The dictionary contains the learned word-associations which will be used later to classify texts. We can inspect
 these for a sense of which terms are most important.
 
-```{r, fig.height=5}
+```{r, fig.height=5, fig.alt="a wordcloud showing the most feminine- and masculine-associated terms"}
 # words sized by frequency, colored by associated gender,
 # and shaded by absolute difference
 library(wordcloud)
@@ -177,7 +177,7 @@ rbind(
 Decision trees (learned by a recursive partitioning algorithm) are similar to the previous methods,
 but consider conditional differences in terms.
 
-```{r, fig.height=4.5}
+```{r, fig.height=4.5, fig.alt="a decision tree that splits on terms to predict feminine or masculine text"}
 library(rpart)
 library(rpart.plot)
 
@@ -216,19 +216,19 @@ information (getting away from a bag-of-words approach).
 
 `Keras` is a framework for setting up neural models. The package is an interface to Python,
 so some additional setup may be required on your system, though it should be handled automatically
-(see [keras.rstudio.com](https://keras.rstudio.com)).
+(see [keras3.posit.co](https://keras3.posit.co/)).
 
 ### Basic model
 
 ```{r}
-library(keras)
+library(keras3)
 
 # process texts in the same way, but add tokens.only = TRUE to preserve sequence
 # information
 tokenized <- lma_dtm(data$Recall_Text, lma_dict(), dc.min = 5, tokens.only = TRUE)
 
 # specify your layers
-weights_neural <- keras_model_sequential(list(
+weights_neural <- keras_model_sequential(layers = list(
   # this set of layers translates input sequences of word indices to
   # small embeddings, which are learned on the fly,
   # then averages over the set of embeddings for a single text-centroid vector
@@ -270,13 +270,12 @@ we can first use a convolution layer to calculated weighted sums over word windo
 # weights of 0
 space <- lma_lspace(names(tokenized$tokens), "glove", fill.missing = TRUE)
 
-weights_neural_glove <- keras_model_sequential(list(
+weights_neural_glove <- keras_model_sequential(layers = list(
   # this layer contains the loaded embeddings, which will not be adjusted
   # during training
   layer_embedding(
     input_dim = nrow(space) + 1, output_dim = ncol(space),
-    input_length = max(tokenized$WC), trainable = FALSE,
-    weights = list(rbind(numeric(ncol(space)), space))
+    trainable = FALSE, weights = list(rbind(numeric(ncol(space)), space))
   ),
 
   # this layer convolves (calculates weighted sums) over the
@@ -344,7 +343,7 @@ by trying each option and measuring accuracy of the model within sample.
 For example, we might see if keeping or excluding stop words is best with
 different weighting schemes in the term-based model:
 
-```{r, fig.height=5}
+```{r, fig.height=5, fig.alt="a plot comparing accuracy with different weighting schemes, and keeping vs excluding function words"}
 # list every combination of term and document weights
 weights <- c("pmi", "ppmi", as.character(outer(
   c("binary", "log", "sqrt", "count", "amplify"),
@@ -410,7 +409,7 @@ resplits, so close results may not be reliably different.
 For example, we might compare the performance of the simpler models.
 Depending on the data and model, this can be slow, so we'll also parallelize it:
 
-```{r, fig.height=4}
+```{r, fig.height=4, fig.alt="a plot showing the accuracy distribution of different models with different train-test splits"}
 library(parallel)
 
 # make a full dtm
