@@ -78,9 +78,9 @@ select.lspace(terms = c(
 }
 }
 \seealso{
-Other Latent Semantic Space functions: 
-\code{\link{download.lspace}()},
-\code{\link{lma_lspace}()},
-\code{\link{standardize.lspace}()}
+Other Latent Semantic Space functions:
+\code{\link[=download.lspace]{download.lspace()}},
+\code{\link[=lma_lspace]{lma_lspace()}},
+\code{\link[=standardize.lspace]{standardize.lspace()}}
 }
 \concept{Latent Semantic Space functions}

@@ -110,12 +110,12 @@ sentiment_dicts <- select.dict("sentiment emotion")$selected
 sentiment_dicts[1:10, 4:9]
 }
 \seealso{
-Other Dictionary functions: 
-\code{\link{dictionary_meta}()},
-\code{\link{download.dict}()},
-\code{\link{lma_patcat}()},
-\code{\link{lma_termcat}()},
-\code{\link{read.dic}()},
-\code{\link{report_term_matches}()}
+Other Dictionary functions:
+\code{\link[=dictionary_meta]{dictionary_meta()}},
+\code{\link[=download.dict]{download.dict()}},
+\code{\link[=lma_patcat]{lma_patcat()}},
+\code{\link[=lma_termcat]{lma_termcat()}},
+\code{\link[=read.dic]{read.dic()}},
+\code{\link[=report_term_matches]{report_term_matches()}}
 }
 \concept{Dictionary functions}

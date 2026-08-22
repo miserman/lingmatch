@@ -99,7 +99,7 @@ mean(lsm_prmed$sim)
 ## Group means
 You can also compare to means within groups. Here, studies might be considered groups:
 ```{r}
-lsm_topics <- lingmatch(data, group = study, type = "lsm")
+lsm_topics <- lingmatch(data, group = "study", type = "lsm")
 lsm_topics[c("comp.type", "comp")]
 tapply(lsm_topics$sim[, 2], lsm_topics$sim[, 1], mean)
 ```
@@ -143,7 +143,3 @@ lingmatch(
   group = c("pair", "speaker"), type = "lsm", agg = FALSE
 )$sim[1:10, ]
 ```
-***
-<div style='text-align:center'>
-![Brought to you by the <a href="https://www.depts.ttu.edu/psy/lusi/resources.php" target="_blank">Language Use and Social Interaction</a> lab at Texas Tech University](https://www.depts.ttu.edu/psy/lusi/files/lusi_transp.png)
-</div>

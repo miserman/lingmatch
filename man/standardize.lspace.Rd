@@ -59,9 +59,9 @@ standardize.lspace("crawl-300d-2M.vec", "facebook_crawl")
 }
 }
 \seealso{
-Other Latent Semantic Space functions: 
-\code{\link{download.lspace}()},
-\code{\link{lma_lspace}()},
-\code{\link{select.lspace}()}
+Other Latent Semantic Space functions:
+\code{\link[=download.lspace]{download.lspace()}},
+\code{\link[=lma_lspace]{lma_lspace()}},
+\code{\link[=select.lspace]{select.lspace()}}
 }
 \concept{Latent Semantic Space functions}

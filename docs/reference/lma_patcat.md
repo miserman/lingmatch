@@ -1,0 +1,221 @@
+# Categorize Texts
+
+Categorize raw texts using a pattern-based dictionary.
+
+## Usage
+
+``` r
+lma_patcat(text, dict = NULL, pattern.weights = "weight",
+  pattern.categories = "category", bias = NULL, to.lower = TRUE,
+  return.dtm = FALSE, drop.zeros = FALSE, exclusive = TRUE,
+  boundary = NULL, fixed = TRUE, globtoregex = FALSE,
+  name.map = c(intname = "_intercept", term = "term"),
+  dir = getOption("lingmatch.dict.dir"))
+```
+
+## Arguments
+
+- text:
+
+  A vector of text to be categorized. Texts are padded by 2 spaces, and
+  potentially lowercased.
+
+- dict:
+
+  At least a vector of terms (patterns), usually a matrix-like object
+  with columns for terms, categories, and weights.
+
+- pattern.weights:
+
+  A vector of weights corresponding to terms in `dict`, or the column
+  name of weights found in `dict`.
+
+- pattern.categories:
+
+  A vector of category names corresponding to terms in `dict`, or the
+  column name of category names found in `dict`.
+
+- bias:
+
+  A constant to add to each category after weighting and summing. Can be
+  a vector with names corresponding to the unique values in
+  `dict[, category]`, but is usually extracted from dict based on the
+  intercept included in each category (defined by
+  `name.map['intname']`).
+
+- to.lower:
+
+  Logical indicating whether `text` should be converted to lowercase
+  before processing.
+
+- return.dtm:
+
+  Logical; if `TRUE`, only a document-term matrix will be returned,
+  rather than the weighted, summed, and biased category values.
+
+- drop.zeros:
+
+  logical; if `TRUE`, categories or terms with no matches will be
+  removed.
+
+- exclusive:
+
+  Logical; if `FALSE`, each dictionary term is searched for in the
+  original text. Otherwise (by default), terms are sorted by length
+  (with longer terms being searched for first), and matches are removed
+  from the text (avoiding subsequent matches to matched patterns).
+
+- boundary:
+
+  A string to add to the beginning and end of each dictionary term. If
+  `TRUE`, `boundary` will be set to `' '`, avoiding pattern matches
+  within words. By default, dictionary terms are left as entered.
+
+- fixed:
+
+  Logical; if `FALSE`, patterns are treated as regular expressions.
+
+- globtoregex:
+
+  Logical; if `TRUE`, initial and terminal asterisks are replaced with
+  `\\b\\w*` and `\\w*\\b` respectively. This will also set `fixed` to
+  `FALSE` unless fixed is specified.
+
+- name.map:
+
+  A named character vector:
+
+  - **`intname`**: term identifying category biases within the term
+    list; defaults to `'_intercept'`
+
+  - **`term`**: name of the column containing terms in `dict`; defaults
+    to `'term'`
+
+  Missing names are added, so names can be specified positional (e.g.,
+  `c('_int',` `'terms')`), or only some can be specified by name (e.g.,
+  `c(term =` `'patterns')`), leaving the rest default.
+
+- dir:
+
+  Path to a folder in which to look for `dict` if it is the name of a
+  file to be passed to
+  [`read.dic`](https://miserman.github.io/lingmatch/reference/read.dic.md).
+
+## Value
+
+A matrix with a row per `text` and columns per dictionary category, or
+(when `return.dtm = TRUE`) a sparse matrix with a row per `text` and
+column per term. Includes a `WC` attribute with original word counts,
+and a `categories` attribute with row indices associated with each
+category if `return.dtm = TRUE`.
+
+## See also
+
+For applying term-based dictionaries (to a document-term matrix) see
+[`lma_termcat()`](https://miserman.github.io/lingmatch/reference/lma_termcat.md).
+
+Other Dictionary functions:
+[`dictionary_meta()`](https://miserman.github.io/lingmatch/reference/dictionary_meta.md),
+[`download.dict()`](https://miserman.github.io/lingmatch/reference/download.dict.md),
+[`lma_termcat()`](https://miserman.github.io/lingmatch/reference/lma_termcat.md),
+[`read.dic()`](https://miserman.github.io/lingmatch/reference/read.dic.md),
+[`report_term_matches()`](https://miserman.github.io/lingmatch/reference/report_term_matches.md),
+[`select.dict()`](https://miserman.github.io/lingmatch/reference/select.dict.md)
+
+## Examples
+
+``` r
+# example text
+text <- c(
+  paste(
+    "Oh, what youth was! What I had and gave away.",
+    "What I took and spent and saw. What I lost. And now? Ruin."
+  ),
+  paste(
+    "God, are you so bored?! You just want what's gone from us all?",
+    "I miss the you that was too. I love that you."
+  ),
+  paste(
+    "Tomorrow! Tomorrow--nay, even tonight--you wait, as I am about to change.",
+    "Soon I will off to revert. Please wait."
+  )
+)
+
+# make a document-term matrix with pre-specified terms only
+lma_patcat(text, c("bored?!", "i lo", ". "), return.dtm = TRUE)
+#> 3 x 3 sparse Matrix of class "dgTMatrix"
+#>      bored?! i lo . 
+#> [1,]       .    1  4
+#> [2,]       1    1  2
+#> [3,]       .    .  3
+
+# get counts of sets of letter
+lma_patcat(text, list(c("a", "b", "c"), c("d", "e", "f")))
+#>      cat1 cat2
+#> [1,]   14    7
+#> [2,]    8    8
+#> [3,]   10    9
+#> attr(,"WC")
+#> [1] 21 16 19
+#> attr(,"time")
+#> patcat 
+#>      0 
+
+# same thing with regular expressions
+lma_patcat(text, list("[abc]", "[def]"), fixed = FALSE)
+#>      cat1 cat2
+#> [1,]   14    7
+#> [2,]    8    8
+#> [3,]   10    9
+#> attr(,"WC")
+#> [1] 21 16 19
+#> attr(,"time")
+#> patcat 
+#>      0 
+
+# match only words
+lma_patcat(text, list("i"), boundary = TRUE)
+#>      category
+#> [1,]        3
+#> [2,]        2
+#> [3,]        2
+#> attr(,"WC")
+#> [1] 3 2 2
+#> attr(,"time")
+#> patcat 
+#>      0 
+
+# match only words, ignoring punctuation
+lma_patcat(
+  text, c("you", "tomorrow", "was"),
+  fixed = FALSE,
+  boundary = "\\b", return.dtm = TRUE
+)
+#> 3 x 3 sparse Matrix of class "dgTMatrix"
+#>      tomorrow you was
+#> [1,]        .   .   1
+#> [2,]        .   4   1
+#> [3,]        2   1   .
+
+if (FALSE) { # \dontrun{
+
+# read in the temporal orientation lexicon from the World Well-Being Project
+tempori <- read.csv(paste0(
+  "https://raw.githubusercontent.com/wwbp/lexica/master/",
+  "temporal_orientation/temporal_orientation_lexicon.csv"
+))
+
+lma_patcat(text, tempori)
+
+# or use the standardized version
+tempori_std <- read.dic("wwbp_prospection", dir = "~/Dictionaries")
+
+lma_patcat(text, tempori_std)
+
+## get scores on the same scale by adjusting the standardized values
+tempori_std[, -1] <- tempori_std[, -1] / 100 *
+  select.dict("wwbp_prospection")$selected[, "original_max"]
+
+lma_patcat(text, tempori_std)[, unique(tempori$category)]
+} # }
+```

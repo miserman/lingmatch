@@ -25,11 +25,15 @@ import(Matrix)
 import(methods)
 importFrom(Rcpp,sourceCpp)
 importFrom(RcppParallel,RcppParallelLibs)
-importFrom(stats,dpois)
-importFrom(stats,na.omit)
-importFrom(stats,ppois)
+importFrom(stats,
+  dpois,
+  na.omit,
+  ppois
+)
 importFrom(tools,md5sum)
-importFrom(utils,download.file)
-importFrom(utils,read.table)
-importFrom(utils,write.table)
+importFrom(utils,
+  download.file,
+  read.table,
+  write.table
+)
 useDynLib(lingmatch, .registration = TRUE)

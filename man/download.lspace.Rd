@@ -43,9 +43,9 @@ download.lspace("glove_crawl", dir = "~/Latent Semantic Spaces")
 }
 }
 \seealso{
-Other Latent Semantic Space functions: 
-\code{\link{lma_lspace}()},
-\code{\link{select.lspace}()},
-\code{\link{standardize.lspace}()}
+Other Latent Semantic Space functions:
+\code{\link[=lma_lspace]{lma_lspace()}},
+\code{\link[=select.lspace]{select.lspace()}},
+\code{\link[=standardize.lspace]{standardize.lspace()}}
 }
 \concept{Latent Semantic Space functions}

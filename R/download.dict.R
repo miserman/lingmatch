@@ -21,8 +21,9 @@
 #' @export
 
 download.dict <- function(
-    dict = "lusi", check.md5 = TRUE, mode = "wb", dir = getOption("lingmatch.dict.dir"),
-    overwrite = FALSE) {
+  dict = "lusi", check.md5 = TRUE, mode = "wb", dir = getOption("lingmatch.dict.dir"),
+  overwrite = FALSE
+) {
   download.resource(
     "dict", dict,
     check.md5 = check.md5, mode = mode, dir = dir, overwrite = overwrite

@@ -112,12 +112,12 @@ if (require("splot")) splot(emotion_scores ~ names(text), leg = "out")
 \seealso{
 For applying pattern-based dictionaries (to raw text) see \code{\link{lma_patcat}()}.
 
-Other Dictionary functions: 
-\code{\link{dictionary_meta}()},
-\code{\link{download.dict}()},
-\code{\link{lma_patcat}()},
-\code{\link{read.dic}()},
-\code{\link{report_term_matches}()},
-\code{\link{select.dict}()}
+Other Dictionary functions:
+\code{\link[=dictionary_meta]{dictionary_meta()}},
+\code{\link[=download.dict]{download.dict()}},
+\code{\link[=lma_patcat]{lma_patcat()}},
+\code{\link[=read.dic]{read.dic()}},
+\code{\link[=report_term_matches]{report_term_matches()}},
+\code{\link[=select.dict]{select.dict()}}
 }
 \concept{Dictionary functions}

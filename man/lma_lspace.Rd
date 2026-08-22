@@ -127,9 +127,9 @@ lss_100k <- lma_lspace(space = "100k", dir = space_dir)
 }
 }
 \seealso{
-Other Latent Semantic Space functions: 
-\code{\link{download.lspace}()},
-\code{\link{select.lspace}()},
-\code{\link{standardize.lspace}()}
+Other Latent Semantic Space functions:
+\code{\link[=download.lspace]{download.lspace()}},
+\code{\link[=select.lspace]{select.lspace()}},
+\code{\link[=standardize.lspace]{standardize.lspace()}}
 }
 \concept{Latent Semantic Space functions}

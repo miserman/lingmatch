@@ -292,8 +292,3 @@ wdtm <- lma_weight(dtm, "tf-idf")
 rwdtm <- lma_lspace(wdtm, space = "100k", dir = "~/Latent Semantic Spaces")
 lma_simets(rwdtm, "cosine")
 ```
-
-***
-<div style='text-align:center'>
-![Brought to you by the <a href="https://www.depts.ttu.edu/psy/lusi/resources.php" target="_blank">Language Use and Social Interaction</a> lab at Texas Tech University](https://www.depts.ttu.edu/psy/lusi/files/lusi_transp.png)
-</div>

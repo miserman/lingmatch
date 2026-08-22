@@ -14,7 +14,6 @@ Imports:
   Rcpp,
   RcppParallel
 License: GPL (>= 2)
-RoxygenNote: 7.3.3
 Roxygen: list(old_usage = TRUE)
 Suggests: 
   knitr,
@@ -23,3 +22,5 @@ Suggests:
   testthat (>= 2.1.0)
 LinkingTo: Rcpp, RcppParallel, BH
 Encoding: UTF-8
+Language: en-US
+Config/roxygen2/version: 8.1.0

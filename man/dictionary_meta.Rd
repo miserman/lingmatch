@@ -79,12 +79,12 @@ To just expand fuzzy terms, see \code{\link{report_term_matches}()}.
 
 Similar information is provided in the \href{https://miserman.github.io/dictionary_builder/}{dictionary builder} web tool.
 
-Other Dictionary functions: 
-\code{\link{download.dict}()},
-\code{\link{lma_patcat}()},
-\code{\link{lma_termcat}()},
-\code{\link{read.dic}()},
-\code{\link{report_term_matches}()},
-\code{\link{select.dict}()}
+Other Dictionary functions:
+\code{\link[=download.dict]{download.dict()}},
+\code{\link[=lma_patcat]{lma_patcat()}},
+\code{\link[=lma_termcat]{lma_termcat()}},
+\code{\link[=read.dic]{read.dic()}},
+\code{\link[=report_term_matches]{report_term_matches()}},
+\code{\link[=select.dict]{select.dict()}}
 }
 \concept{Dictionary functions}

@@ -51,9 +51,10 @@
 #' @export
 
 dictionary_meta <- function(
-    dict, space = "auto", n_spaces = 5, suggest = FALSE, suggestion_terms = 10, suggest_stopwords = FALSE,
-    suggest_discriminate = TRUE, expand_cutoff_freq = .98, expand_cutoff_spaces = 10,
-    dimension_prop = 1, pairwise = TRUE, glob = TRUE, space_dir = getOption("lingmatch.lspace.dir"), verbose = TRUE) {
+  dict, space = "auto", n_spaces = 5, suggest = FALSE, suggestion_terms = 10, suggest_stopwords = FALSE,
+  suggest_discriminate = TRUE, expand_cutoff_freq = .98, expand_cutoff_spaces = 10,
+  dimension_prop = 1, pairwise = TRUE, glob = TRUE, space_dir = getOption("lingmatch.lspace.dir"), verbose = TRUE
+) {
   if (missing(dict)) stop("dict must be specified", call. = FALSE)
   if (!is.list(dict)) dict <- list(dict)
   if (is.null(names(dict))) names(dict) <- paste0("cat", seq_along(dict))

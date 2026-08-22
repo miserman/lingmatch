@@ -249,8 +249,9 @@ Or we could look at terms across categories within a dimensionally-reduced versi
 library(plotly)
 
 display_reduced_space <- function(
-    meta, space_name = "glove_crawl", method = "umap", dim_prop = 1,
-    color_seeds = c("#25cb1a", "#c8fd9e", "#1b85ed", "#91b8fb")) {
+  meta, space_name = "glove_crawl", method = "umap", dim_prop = 1,
+  color_seeds = c("#25cb1a", "#c8fd9e", "#1b85ed", "#91b8fb")
+) {
   suggestions <- unlist(unname(meta$suggested))
   terms <- rbind(meta$terms[, c("category", "match", "sim.category")], data.frame(
     category = rep(

@@ -1,6 +1,7 @@
 # version 1.0.8
 
 ### Improvements
+* Improves support for tibble inputs.
 * Accommodates single-category dictionaries.
 * Improves input resolution.
 

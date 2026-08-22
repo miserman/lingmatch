@@ -38,8 +38,9 @@ to_regex <- function(dict, intext = FALSE, isGlob = TRUE) {
 }
 
 download.resource <- function(
-    type, resource, decompress = TRUE,
-    check.md5 = TRUE, mode = "wb", dir = "", overwrite = FALSE) {
+  type, resource, decompress = TRUE,
+  check.md5 = TRUE, mode = "wb", dir = "", overwrite = FALSE
+) {
   if (dir == "") {
     stop(paste0(
       "specify a directory (dir), or set the ", type,

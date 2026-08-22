@@ -103,12 +103,12 @@ For a more complete assessment of dictionaries, see \code{\link{dictionary_meta}
 
 Similar information is provided in the \href{https://miserman.github.io/dictionary_builder/}{dictionary builder} web tool.
 
-Other Dictionary functions: 
-\code{\link{dictionary_meta}()},
-\code{\link{download.dict}()},
-\code{\link{lma_patcat}()},
-\code{\link{lma_termcat}()},
-\code{\link{read.dic}()},
-\code{\link{select.dict}()}
+Other Dictionary functions:
+\code{\link[=dictionary_meta]{dictionary_meta()}},
+\code{\link[=download.dict]{download.dict()}},
+\code{\link[=lma_patcat]{lma_patcat()}},
+\code{\link[=lma_termcat]{lma_termcat()}},
+\code{\link[=read.dic]{read.dic()}},
+\code{\link[=select.dict]{select.dict()}}
 }
 \concept{Dictionary functions}
